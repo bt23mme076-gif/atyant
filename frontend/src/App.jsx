@@ -48,7 +48,7 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/signup" element={<Signup />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/mentors" element={<MentorListPage />} /> {/* This is the new route */}
