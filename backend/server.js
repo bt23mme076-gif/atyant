@@ -1,6 +1,8 @@
 // backend/server.js (Fully Updated for Private Chat)
 import express from 'express';
 import cors from 'cors';
+const cors = require('cors');
+
 
 const app = express();
 
@@ -10,12 +12,8 @@ app.use(cors({
 }));
 
 // baki routes...
-
-
-
 const http = require('http'); // Required for Socket.IO
 const { Server } = require("socket.io"); // Required for Socket.IO
-const cors = require('cors');
 const mongoose = require('mongoose');
 
 // Import your route files
