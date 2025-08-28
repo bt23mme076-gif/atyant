@@ -1,34 +1,28 @@
-// backend/server.js (Fully Updated for Private Chat)
+// backend/server.js (Fully Updated for Render & Private Chat)
+// ES Module style
+
 import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
 import cors from 'cors';
-const cors = require('cors');
-
-
-const app = express();
-
-app.use(cors({
-  origin: 'https://atyant-43hmatjrd-nitins-projects-a657b35d.vercel.app', // tera Vercel frontend
-  credentials: true
-}));
-
-// baki routes...
-const http = require('http'); // Required for Socket.IO
-const { Server } = require("socket.io"); // Required for Socket.IO
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 // Import your route files
-const authRoutes = require('./routes/auth');
-const chatRoutes = require('./routes/chatRoutes');
+import authRoutes from './routes/auth.js';
+import chatRoutes from './routes/chatRoutes.js';
 
 // Import your model files
-const Contact = require('./models/Contact'); // Assuming you create this file
-const Message = require('./models/Message');
+import Contact from './models/Contact.js';
+import Message from './models/Message.js';
 
 const app = express();
-const server = http.createServer(app); // Create an HTTP server from the Express app
-const io = new Server(server, { // Initialize Socket.IO with the server
+const server = http.createServer(app); // Create HTTP server for Socket.IO
+const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // Allow your frontend to connect
+    origin: [
+      "https://atyant-43hmatjrd-nitins-projects-a657b35d.vercel.app", // Frontend URL
+      "http://localhost:5173"
+    ],
     methods: ["GET", "POST"]
   }
 });
@@ -36,22 +30,27 @@ const io = new Server(server, { // Initialize Socket.IO with the server
 const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
-app.use(cors());
+app.use(cors({
+  origin: [
+    "https://atyant-43hmatjrd-nitins-projects-a657b35d.vercel.app", 
+    "http://localhost:5173"
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 // --- Database Connection ---
-const MONGO_URI = 'mongodb+srv://atyantuser:qf5CWLbdoKKzQlpL@cluster0.vutlgpa.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://atyantuser:qf5CWLbdoKKzQlpL@cluster0.vutlgpa.mongodb.net/?retryWrites=true&w=majority';
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log('✅ MongoDB connected successfully!'))
-  .catch((err) => console.error('MongoDB connection error:', err));
-
+  .catch(err => console.error('MongoDB connection error:', err));
 
 // --- API Routes ---
 app.use('/api/auth', authRoutes);
-app.use('/api', chatRoutes); // Use the new chat routes
+app.use('/api', chatRoutes);
 
-// Contact form route (kept from before)
+// --- Contact form route ---
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, message } = req.body;
@@ -65,22 +64,19 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
-
-// --- Socket.IO Connection Logic for Private Chat ---
+// --- Socket.IO Private Chat ---
 io.on('connection', (socket) => {
   console.log('✅ A user connected via WebSocket:', socket.id);
 
-  // When a user logs in, they join a room with their own user ID
+  // User joins their private room
   socket.on('join_user_room', (userId) => {
     socket.join(userId);
-    console.log(`User ${socket.id} joined their private room: ${userId}`);
+    console.log(`User ${socket.id} joined private room: ${userId}`);
   });
 
-  // When a private message is sent
+  // Private message handling
   socket.on('private_message', async (data) => {
-    // data should include: { sender, receiver, text }
     try {
-      // Save the message to the database
       const newMessage = new Message({
         sender: data.sender,
         receiver: data.receiver,
@@ -88,11 +84,10 @@ io.on('connection', (socket) => {
       });
       await newMessage.save();
 
-      // Send the message in real-time to the receiver's private room
       io.to(data.receiver).emit('receive_private_message', newMessage);
       console.log(`Message sent from ${data.sender} to ${data.receiver}`);
     } catch (error) {
-        console.error("Error saving/sending private message:", error);
+      console.error("Error saving/sending private message:", error);
     }
   });
 
@@ -101,9 +96,7 @@ io.on('connection', (socket) => {
   });
 });
 
-
-// --- Start the Server ---
-// IMPORTANT: Use server.listen instead of app.listen
+// --- Start server ---
 server.listen(PORT, () => {
   console.log(`✅ Server is running on http://localhost:${PORT}`);
 });
