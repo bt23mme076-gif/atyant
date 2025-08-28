@@ -1,4 +1,4 @@
-// backend/server.js (Fully Updated for Render & Private Chat)
+// backend/server.js (Production-Ready for Render & Private Chat)
 // ES Module style
 
 import express from 'express';
@@ -7,34 +7,21 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import mongoose from 'mongoose';
 
-// Import your route files
+// Import routes
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chatRoutes.js';
 
-// Import your model files
+// Import models
 import Contact from './models/Contact.js';
 import Message from './models/Message.js';
 
 const app = express();
-const server = http.createServer(app); // Create HTTP server for Socket.IO
-const io = new Server(server, {
-  cors: {
-    origin: [
-      "https://atyant-43hmatjrd-nitins-projects-a657b35d.vercel.app", // Frontend URL
-      "http://localhost:5173"
-    ],
-    methods: ["GET", "POST"]
-  }
-});
-
 const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://atyant-43hmatjrd-nitins-projects-a657b35d.vercel.app";
 app.use(cors({
-  origin: [
-    "https://atyant-43hmatjrd-nitins-projects-a657b35d.vercel.app", 
-    "http://localhost:5173"
-  ],
+  origin: [FRONTEND_URL, "http://localhost:5173"], // dev + prod
   credentials: true
 }));
 app.use(express.json());
@@ -64,17 +51,26 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+// --- Create HTTP server for Socket.IO ---
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: [FRONTEND_URL, "http://localhost:5173"],
+    methods: ["GET", "POST"]
+  }
+});
+
 // --- Socket.IO Private Chat ---
 io.on('connection', (socket) => {
-  console.log('✅ A user connected via WebSocket:', socket.id);
+  console.log('✅ User connected via WebSocket:', socket.id);
 
-  // User joins their private room
+  // Join user to their private room
   socket.on('join_user_room', (userId) => {
     socket.join(userId);
-    console.log(`User ${socket.id} joined private room: ${userId}`);
+    console.log(`User ${socket.id} joined room: ${userId}`);
   });
 
-  // Private message handling
+  // Handle private messages
   socket.on('private_message', async (data) => {
     try {
       const newMessage = new Message({
@@ -87,7 +83,7 @@ io.on('connection', (socket) => {
       io.to(data.receiver).emit('receive_private_message', newMessage);
       console.log(`Message sent from ${data.sender} to ${data.receiver}`);
     } catch (error) {
-      console.error("Error saving/sending private message:", error);
+      console.error('Error saving/sending private message:', error);
     }
   });
 
@@ -98,5 +94,5 @@ io.on('connection', (socket) => {
 
 // --- Start server ---
 server.listen(PORT, () => {
-  console.log(`✅ Server is running on https://atyant.vercel.app/:${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
