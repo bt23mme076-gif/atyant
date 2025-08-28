@@ -1,0 +1,96 @@
+/* src/components/HeroSection.css (Simplified Code) */
+.hero-section {
+  background: linear-gradient(135deg, rgba(4, 27, 81, 0.85) 0.1%, rgba(0, 136, 255, 0.55) 60%), url('https://www.atyant.in/web/image/1375-9cb337d0/Screenshot%202025-05-13%20200908.webp') no-repeat center center/cover;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: white;
+  padding: 40px 20px;
+}
+
+.hero-content {
+  max-width: 900px;
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.hero-subtitle {
+  font-size: 1.4rem;
+  font-weight: 400;
+  margin-bottom: 2.5rem; /* Increased margin */
+  opacity: 0.9;
+}
+
+.button-group {
+  margin-bottom: 2.5rem;
+}
+
+.btn-mentor, .btn-ask {
+  padding: 16px 35px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 136, 255, 0.4);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  margin: 0 10px;
+}
+
+.btn-mentor {
+  background: linear-gradient(135deg, #0088ff 0%, #00a1ff 100%);
+  color: white;
+}
+
+.btn-ask {
+  background: linear-gradient(135deg, #00ff88 0%, #0088ff 100%);
+  color: white;
+}
+
+.btn-mentor:hover, .btn-ask:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 136, 255, 0.6);
+}
+
+.stats-container {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #00ff88 0%, #0088ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-title { font-size: 2.2rem; }
+  .hero-subtitle { font-size: 1.1rem; }
+  .btn-mentor, .btn-ask { display: block; width: 80%; margin: 10px auto; }
+}

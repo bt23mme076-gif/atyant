@@ -1,0 +1,117 @@
+/* frontend/src/components/Footer.css */
+.footer-section {
+  background-color: #1a202c; /* Dark background, matches Navbar */
+  color: #a0aec0; /* Light grey text */
+  padding: 50px 40px 20px;
+  font-family: 'Inter', sans-serif;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 30px; /* Space between columns */
+}
+
+.footer-brand,
+.footer-links,
+.footer-contact {
+  flex: 1;
+  min-width: 250px; /* Minimum width for columns */
+  margin-bottom: 20px;
+}
+
+.footer-brand h3 {
+  font-size: 2rem;
+  color: #00bfff; /* Bright blue for brand */
+  margin-bottom: 15px;
+  font-weight: 800;
+}
+
+.footer-brand p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.social-links {
+  display: flex;
+  gap: 15px;
+}
+
+.social-links a {
+  color: #a0aec0;
+  font-size: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+  color: #00bfff; /* Blue on hover */
+}
+
+.footer-links h4,
+.footer-contact h4 {
+  font-size: 1.2rem;
+  color: white;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links ul li {
+  margin-bottom: 10px;
+}
+
+.footer-links ul li a {
+  color: #a0aec0;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+}
+
+.footer-links ul li a:hover {
+  color: #00bfff;
+}
+
+.footer-contact p {
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #2d3748; /* Subtle separator */
+}
+
+.footer-bottom p {
+  font-size: 0.85rem;
+  color: #718096;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .footer-brand,
+  .footer-links,
+  .footer-contact {
+    min-width: unset;
+    width: 100%;
+    margin-bottom: 30px;
+  }
+  .social-links {
+    justify-content: center;
+  }
+}
