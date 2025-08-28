@@ -1,4 +1,16 @@
 // backend/server.js (Fully Updated for Private Chat)
+import express from 'express';
+import cors from 'cors';
+
+const app = express();
+
+app.use(cors({
+  origin: 'https://atyant-43hmatjrd-nitins-projects-a657b35d.vercel.app', // tera Vercel frontend
+  credentials: true
+}));
+
+// baki routes...
+
 
 const express = require('express');
 const http = require('http'); // Required for Socket.IO
