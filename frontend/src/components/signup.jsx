@@ -24,13 +24,15 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('https://atyant.vercel.app/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      // Sahi Tarika
+const API_URL = import.meta.env.VITE_API_URL; // Yeh Vercel se 'https://atyant-backend.onrender.com' uthayega
 
-      const data = await response.json();
+const response = await fetch(`${API_URL}/api/auth/signup`, { // Dhyan do: API endpoint /api/auth/signup ho sakta hai
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData),
+});
+const data = await response.json();
 
       if (response.ok) {
         setMessage('Signup successful! Welcome!');

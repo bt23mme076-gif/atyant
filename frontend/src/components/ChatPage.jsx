@@ -6,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
 
 // Establish a single socket connection
-const socket = io('http://localhost:3000');
+const socket = io('https://atyant-backend.onrender.com');
 
 const ChatPage = () => {
   const [contactList, setContactList] = useState([]);
@@ -51,9 +51,9 @@ const ChatPage = () => {
     const fetchContacts = async () => {
       let url = '';
       if (currentUser.role === 'user') {
-        url = 'http://localhost:3000/api/mentors';
+        url = 'http://https://atyant-backend.onrender.com/api/mentors';
       } else if (currentUser.role === 'mentor') {
-        url = `http://localhost:3000/api/conversations/mentor/${currentUser.id}`;
+        url = `http://https://atyant-backend.onrender.com/api/conversations/mentor/${currentUser.id}`;
       }
 
       if (url) {
@@ -78,7 +78,7 @@ const ChatPage = () => {
   const handleSelectContact = async (contact) => {
     setSelectedContact(contact);
     try {
-      const response = await fetch(`http://localhost:3000/api/messages/${currentUser.id}/${contact._id}`);
+      const response = await fetch(`http://https://atyant-backend.onrender.com/api/messages/${currentUser.id}/${contact._id}`);
       setMessages(await response.json());
     } catch (error) {
       console.error("Failed to fetch messages:", error);
