@@ -10,7 +10,7 @@ const MentorListPage = () => {
   useEffect(() => {
     const fetchMentors = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/mentors');
+        const response = await fetch('http://https://atyant-backend.onrender.com/api/mentors');
         const data = await response.json();
         setMentors(data);
       } catch (error) {
