@@ -14,12 +14,15 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      const data = await response.json();
+      // Variable ko upar define karo
+const API_URL = import.meta.env.VITE_API_URL;
+
+const response = await fetch(`${API_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData),
+});
+const data = await response.json();
 
       if (response.ok) {
         localStorage.setItem('token', data.token);
