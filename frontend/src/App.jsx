@@ -12,9 +12,9 @@ import WhyChooseUs from './components/WhyChooseUs';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import Login from './components/Login';
-import signup from './components/signup';
+import Signup from './components/Signup'; // <-- THEEK KIYA GAYA
 import ChatPage from './components/ChatPage';
-import MentorListPage from './components/MentorListPage'; // This is the new import
+import MentorListPage from './components/MentorListPage';
 
 // This component represents your homepage and its sections
 const Home = () => (
@@ -39,7 +39,6 @@ const Home = () => (
 
 function App() {
   const location = useLocation();
-  // Check if the current page is the chat page to handle styling
   const isChatPage = location.pathname === '/chat';
 
   return (
@@ -48,13 +47,12 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/signup" element={<signup />} />
+          <Route path="/signup" element={<Signup />} /> {/* <-- THEEK KIYA GAYA */}
           <Route path="/login" element={<Login />} />
           <Route path="/chat" element={<ChatPage />} />
-          <Route path="/mentors" element={<MentorListPage />} /> {/* This is the new route */}
+          <Route path="/mentors" element={<MentorListPage />} />
         </Routes>
       </main>
-      {/* The footer will not be shown on the chat page */}
       {!isChatPage && <Footer />}
     </div>
   );
