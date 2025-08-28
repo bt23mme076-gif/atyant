@@ -12,7 +12,7 @@ import WhyChooseUs from './components/WhyChooseUs';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import Login from './components/Login';
-import Signup from './components/Signup'; // <-- THEEK KIYA GAYA
+import Signup from './components/Signup';
 import ChatPage from './components/ChatPage';
 import MentorListPage from './components/MentorListPage';
 
@@ -38,6 +38,7 @@ const Home = () => (
 );
 
 function App() {
+  // Just a small change to trigger redeploy
   const location = useLocation();
   const isChatPage = location.pathname === '/chat';
 
@@ -47,7 +48,7 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/signup" element={<Signup />} /> {/* <-- THEEK KIYA GAYA */}
+          <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/mentors" element={<MentorListPage />} />
