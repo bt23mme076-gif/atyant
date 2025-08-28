@@ -12,7 +12,7 @@ import WhyChooseUs from './components/WhyChooseUs';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import Login from './components/Login';
-import Signup from './components/Signup';
+import Signup from './components/signup';
 import ChatPage from './components/ChatPage';
 import MentorListPage from './components/MentorListPage'; // This is the new import
 
@@ -48,7 +48,7 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signup" element={<signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/chat" element={<ChatPage />} />
           <Route path="/mentors" element={<MentorListPage />} /> {/* This is the new route */}
