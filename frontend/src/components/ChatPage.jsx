@@ -53,6 +53,7 @@ const ChatPage = () => {
   useEffect(() => {
     if (!currentUser) return;
 
+    // When mentor logs in, fetch users they have chatted with
     const fetchContacts = async () => {
       let url = '';
       if (currentUser.role === 'user') {
@@ -60,14 +61,12 @@ const ChatPage = () => {
       } else if (currentUser.role === 'mentor') {
         url = `${API_URL}/api/conversations/mentor/${currentUser.id}`;
       }
-
       if (url) {
-        try {
-          const response = await fetch(url);
-          setContactList(await response.json());
-        } catch (error) {
-          console.error('Failed to fetch contacts:', error);
-        }
+        const response = await fetch(url);
+        const data = await response.json();
+        // Debug: log contacts
+        console.log('Fetched contacts:', data);
+        setContactList(data);
       }
     };
     fetchContacts();
@@ -100,18 +99,10 @@ const ChatPage = () => {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (newMessage.trim() && selectedContact && currentUser) {
-      // Debug log
-      console.log('Sending message:', {
-        sender: currentUser.id,
-        receiver: selectedContact._id,
-        text: newMessage
-      });
-
       if (!selectedContact._id) {
         alert('No receiver selected!');
         return;
       }
-
       const messageData = {
         sender: currentUser.id,
         receiver: selectedContact._id,

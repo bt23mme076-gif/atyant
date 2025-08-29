@@ -18,16 +18,14 @@ router.get('/mentors', async (req, res) => {
 router.get('/conversations/mentor/:mentorId', async (req, res) => {
   try {
     const { mentorId } = req.params;
-    // Find all messages where the mentor is either the sender or receiver
     const messages = await Message.find({ $or: [{ sender: mentorId }, { receiver: mentorId }] })
-      .populate('sender', 'username')
-      .populate('receiver', 'username');
+      .populate('sender', 'username _id')
+      .populate('receiver', 'username _id');
 
     const conversations = {};
     messages.forEach(msg => {
-      // Determine the 'other' person in the chat
       const otherUser = String(msg.sender._id) === mentorId ? msg.receiver : msg.sender;
-      if (otherUser) {
+      if (otherUser && otherUser._id) {
         conversations[otherUser._id] = otherUser;
       }
     });
