@@ -81,17 +81,45 @@ const ChatPage = () => {
 
   // Helper function to fetch messages for a selected chat
   const handleSelectContact = async (contact) => {
+    if (!contact || !contact._id) {
+      alert('Invalid contact selected!');
+      return;
+    }
     setSelectedContact(contact);
-    // ...fetch messages as before
+
+    // Fetch messages for this conversation
+    try {
+      const response = await fetch(`${API_URL}/api/messages/${currentUser.id}/${contact._id}`);
+      setMessages(await response.json());
+    } catch (error) {
+      console.error("Failed to fetch messages:", error);
+    }
   };
 
   // Function to send a message
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (newMessage.trim() && selectedContact && currentUser) {
-      const messageData = { sender: currentUser.id, receiver: selectedContact._id, text: newMessage };
+      // Debug log
+      console.log('Sending message:', {
+        sender: currentUser.id,
+        receiver: selectedContact._id,
+        text: newMessage
+      });
+
+      // If receiver is missing, show an error and do not send
+      if (!selectedContact._id) {
+        alert('No receiver selected!');
+        return;
+      }
+
+      const messageData = {
+        sender: currentUser.id,
+        receiver: selectedContact._id,
+        text: newMessage
+      };
       socket.emit('private_message', messageData);
-      setMessages((prev) => [...prev, { ...messageData, sender: currentUser.id }]); // Add your own message immediately
+      setMessages((prev) => [...prev, { ...messageData, sender: currentUser.id }]);
       setNewMessage('');
     }
   };
