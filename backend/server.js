@@ -11,9 +11,10 @@ import mongoose from 'mongoose';
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chatRoutes.js';
 
-// Import models
-import Contact from './models/Contact.js';
+// Import models (ESM default imports)
 import Message from './models/Message.js';
+import User from './models/User.js';
+import Contact from './models/Contact.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
