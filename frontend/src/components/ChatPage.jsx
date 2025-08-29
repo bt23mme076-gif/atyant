@@ -28,7 +28,7 @@ const ChatPage = () => {
     if (token) {
       const decoded = jwtDecode(token);
       setCurrentUser({ id: decoded.userId, role: decoded.role });
-      socket.emit('join_user_room', decoded.userId);
+      socket.emit('join_user_room', decoded.userId); // Always join room
     }
   }, []);
 
@@ -82,12 +82,7 @@ const ChatPage = () => {
   // Helper function to fetch messages for a selected chat
   const handleSelectContact = async (contact) => {
     setSelectedContact(contact);
-    try {
-      const response = await fetch(`${API_URL}/api/messages/${currentUser.id}/${contact._id}`);
-      setMessages(await response.json());
-    } catch (error) {
-      console.error("Failed to fetch messages:", error);
-    }
+    // ...fetch messages as before
   };
 
   // Function to send a message

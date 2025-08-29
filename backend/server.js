@@ -77,6 +77,8 @@ io.on('connection', (socket) => {
   // Handle private messages
   socket.on('private_message', async (data) => {
     try {
+      console.log('Received private_message:', data); // <-- Add this line
+
       const newMessage = new Message({
         sender: data.sender,
         receiver: data.receiver,
