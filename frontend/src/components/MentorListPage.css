@@ -1,48 +1,89 @@
 /* src/components/MentorListPage.css */
-.mentor-list-container {
-  max-width: 1200px;
-  margin: 40px auto;
-  padding: 20px;
+
+.mentor-list-container h1 {
   text-align: center;
+  font-size: 2.8rem;
+  color: #041b51;
+  margin-bottom: 10px;
 }
+
+.mentor-list-container > p {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #6c757d;
+  margin-bottom: 40px;
+}
+
 .mentor-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 30px;
-  margin-top: 40px;
 }
+
 .mentor-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  background-color: #ffffff;
+  border-radius: 15px;
+  box-shadow: 0 4px M(20px, 0, 0, 0, 0.05);
   padding: 25px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mentor-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.mentor-image {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 0 auto 20px;
+  border: 5px solid #f8f9fa;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.mentor-name {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #041b51;
+}
+
+.mentor-interest {
+  margin-top: 5px;
+  margin-bottom: 20px;
+  color: #6c757d;
+  font-size: 1rem;
+  min-height: 40px; 
+}
+
+.mentor-card button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
-.mentor-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+
+.mentor-card button:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
 }
-.mentor-avatar {
-  font-size: 4rem;
-  margin-bottom: 15px;
+
+.status-message {
+  text-align: center;
+  font-size: 1.2rem;
+  padding: 50px;
+  color: #6c757d;
 }
-.mentor-card h3 {
-  margin-bottom: 5px;
-  font-size: 1.5rem;
-}
-.mentor-card p {
-  color: #6b7280;
-  margin-bottom: 20px;
-}
-.mentor-card button {
-  width: 100%;
-  padding: 10px;
-  font-size: 1rem;
-  font-weight: bold;
-  color: white;
-  background-color: #4f46e5;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+
+.status-message.error {
+  color: #dc3545;
 }

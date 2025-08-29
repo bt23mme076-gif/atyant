@@ -19,7 +19,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://atyant-43hmatjrd-nitins-projects-a657b35d.vercel.app";
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://atyant.vercel.app/";
 app.use(cors({
   origin: [FRONTEND_URL, "http://localhost:5173"], // dev + prod
   credentials: true
