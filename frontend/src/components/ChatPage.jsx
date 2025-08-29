@@ -5,8 +5,9 @@ import io from 'socket.io-client';
 import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
 
-// Establish a single socket connection
-const socket = io('https://atyant-backend.onrender.com');
+// Use environment variable for socket URL, fallback to backend URL
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'https://atyant-backend.onrender.com';
+const socket = io(SOCKET_URL);
 
 const ChatPage = () => {
   const [contactList, setContactList] = useState([]);
