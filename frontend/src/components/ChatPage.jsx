@@ -20,6 +20,7 @@ const ChatPage = () => {
 
   // Use the API URL from the environment variable
   const API_URL = import.meta.env.VITE_API_URL;
+  const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
   // 1. Set up the current user once
   useEffect(() => {
