@@ -12,9 +12,9 @@ import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chatRoutes.js';
 
 // Import models (ESM default imports)
-import Message from './models/Message.js';
 import User from './models/User.js';
 import Contact from './models/Contact.js';
+import Message from './models/Message.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -77,8 +77,9 @@ io.on('connection', (socket) => {
   // Handle private messages
   socket.on('private_message', async (data) => {
     try {
-      console.log('Received private_message:', data); // <-- Add this line
+      console.log('Received private_message:', data);
 
+      // Save message to MongoDB
       const newMessage = new Message({
         sender: data.sender,
         receiver: data.receiver,
@@ -86,6 +87,7 @@ io.on('connection', (socket) => {
       });
       await newMessage.save();
 
+      // Emit to receiver
       io.to(data.receiver).emit('receive_private_message', newMessage);
       console.log(`Message sent from ${data.sender} to ${data.receiver}`);
     } catch (error) {

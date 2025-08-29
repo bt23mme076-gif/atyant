@@ -100,24 +100,12 @@ const ChatPage = () => {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (newMessage.trim() && selectedContact && currentUser) {
-      // Debug log
-      console.log('Sending message:', {
-        sender: currentUser.id,
-        receiver: selectedContact._id,
-        text: newMessage
-      });
-
-      // If receiver is missing, show an error and do not send
-      if (!selectedContact._id) {
-        alert('No receiver selected!');
-        return;
-      }
-
       const messageData = {
         sender: currentUser.id,
         receiver: selectedContact._id,
         text: newMessage
       };
+      console.log('Sending message:', messageData); // Debug log
       socket.emit('private_message', messageData);
       setMessages((prev) => [...prev, { ...messageData, sender: currentUser.id }]);
       setNewMessage('');
