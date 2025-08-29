@@ -50,9 +50,9 @@ const Navbar = () => {
           <>
             <button type="button" onClick={() => scrollToSection('how-it-works')} className="nav-link">How It Works</button>
             <Link to="/mentors" className="nav-link">Mentors</Link>
-            <Link to="/signup" className="nav-link">Become a Mentor</Link>
+            <Link to="/Signup" className="nav-link">Become a Mentor</Link>
             <Link to="/login" className="nav-button">Login</Link>
-            <Link to="/signup" className="nav-button primary">Sign Up</Link>
+            <Link to="/Signup" className="nav-button primary">Sign Up</Link>
           </>
         )}
       </nav>

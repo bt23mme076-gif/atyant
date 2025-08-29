@@ -1,4 +1,3 @@
-// frontend/src/components/Signup.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './AuthForm.css';
@@ -24,15 +23,21 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      // Sahi Tarika
-const API_URL = import.meta.env.VITE_API_URL; // Yeh Vercel se 'https://atyant-backend.onrender.com' uthayega
+      // Only use the API URL from the environment variable
+      const API_URL = import.meta.env.VITE_API_URL;
 
-const response = await fetch(`${API_URL}/api/auth/signup`, { // Dhyan do: API endpoint /api/auth/signup ho sakta hai
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(formData),
-});
-const data = await response.json();
+      if (!API_URL) {
+        setMessage('API URL is not set. Please check your .env file.');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
 
       if (response.ok) {
         setMessage('Signup successful! Welcome!');
@@ -41,7 +46,7 @@ const data = await response.json();
         
         // Redirect to homepage after a short delay
         setTimeout(() => {
-          navigate('/'); // Yahan par change kiya hai
+          navigate('/');
         }, 1500);
 
       } else {
@@ -63,6 +68,7 @@ const data = await response.json();
           type="text"
           name="username"
           placeholder="Username"
+          value={formData.username}
           onChange={handleChange}
           required
         />
@@ -70,6 +76,7 @@ const data = await response.json();
           type="email"
           name="email"
           placeholder="Email"
+          value={formData.email}
           onChange={handleChange}
           required
         />
@@ -77,6 +84,7 @@ const data = await response.json();
           type="password"
           name="password"
           placeholder="Password"
+          value={formData.password}
           onChange={handleChange}
           required
         />

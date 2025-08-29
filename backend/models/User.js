@@ -1,29 +1,11 @@
-// backend/models/User.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const userSchema = new mongoose.Schema({
-  username: { 
-    type: String, 
-    required: true, 
-    unique: true 
-  },
-  email: { 
-    type: String, 
-    required: true, 
-    unique: true 
-  },
-  password: { 
-    type: String, 
-    required: true 
-  },
-  // THIS FIELD WAS MISSING
-  role: { 
-    type: String,
-    enum: ['user', 'mentor'], // Role can only be 'user' or 'mentor'
-    default: 'user'          // If no role is provided, it will be 'user'
-  }
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  email:    { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role:     { type: String, required: true }
 }, { timestamps: true });
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+const User = mongoose.model('User', UserSchema);
+export default User;

@@ -1,6 +1,6 @@
 // frontend/src/components/ContactForm.jsx (Updated Code)
 
-import React, { useState } from 'react'; // useState ko import kiya
+import React, { useState } from 'react';
 import './ContactForm.css';
 
 const ContactForm = () => {
@@ -10,6 +10,9 @@ const ContactForm = () => {
     email: '',
     message: ''
   });
+
+  // Use the API URL from the environment variable
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // Jaise hi user input mein type karega, yeh function data update karega
   const handleChange = (e) => {
@@ -22,7 +25,7 @@ const ContactForm = () => {
     e.preventDefault(); // Page ko reload hone se roka
     
     try {
-      const response = await fetch('http://https://atyant-backend.onrender.com/api/contact', {
+      const response = await fetch(`${API_URL}/api/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,5 +82,4 @@ const ContactForm = () => {
     </section>
   );
 };
-
 export default ContactForm;

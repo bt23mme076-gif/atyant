@@ -14,7 +14,7 @@ const HeroSection = () => {
         
         <div className="button-group">
           {/* We'll use React Router's Link component for navigation */}
-          <a href="/ignup" className="btn-mentor">Become a Mentor</a>
+          <a href="/Signup" className="btn-mentor">Become a Mentor</a>
           <a href="/chat" className="btn-ask">Ask Your Question Now</a>
         </div>
 

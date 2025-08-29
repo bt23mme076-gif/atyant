@@ -17,6 +17,9 @@ const ChatPage = () => {
   const messagesEndRef = useRef(null);
   const location = useLocation();
 
+  // Use the API URL from the environment variable
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // 1. Set up the current user once
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -51,9 +54,9 @@ const ChatPage = () => {
     const fetchContacts = async () => {
       let url = '';
       if (currentUser.role === 'user') {
-        url = 'http://https://atyant-backend.onrender.com/api/mentors';
+        url = `${API_URL}/api/mentors`;
       } else if (currentUser.role === 'mentor') {
-        url = `http://https://atyant-backend.onrender.com/api/conversations/mentor/${currentUser.id}`;
+        url = `${API_URL}/api/conversations/mentor/${currentUser.id}`;
       }
 
       if (url) {
@@ -66,7 +69,7 @@ const ChatPage = () => {
       }
     };
     fetchContacts();
-    
+
     // Check if a mentor was passed from the previous page
     if (location.state?.selectedMentor) {
       handleSelectContact(location.state.selectedMentor);
@@ -78,7 +81,7 @@ const ChatPage = () => {
   const handleSelectContact = async (contact) => {
     setSelectedContact(contact);
     try {
-      const response = await fetch(`http://https://atyant-backend.onrender.com/api/messages/${currentUser.id}/${contact._id}`);
+      const response = await fetch(`${API_URL}/api/messages/${currentUser.id}/${contact._id}`);
       setMessages(await response.json());
     } catch (error) {
       console.error("Failed to fetch messages:", error);
