@@ -1,106 +1,60 @@
-// backend/server.js (Production-Ready for Render & Private Chat)
-// ES Module style
-
+// backend/server.js
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import mongoose from 'mongoose';
-
-// Import routes
+import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chatRoutes.js';
-
-// Import models (ESM default imports)
-import User from './models/User.js';
-import Contact from './models/Contact.js';
+import contactRoutes from './routes/contactRoutes.js';
 import Message from './models/Message.js';
 
+dotenv.config();
+
 const app = express();
+const server = http.createServer(app);
 const PORT = process.env.PORT || 3000;
 
-// --- Middleware ---
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://atyant.vercel.app";
-const allowedOrigins = [FRONTEND_URL, "http://localhost:5173", "https://atyant.vercel.app"];
+// --- NEW, MORE FLEXIBLE CORS CONFIGURATION ---
+const allowedOrigins = [
+  "https://atyant.vercel.app", 
+  "http://localhost:5173"
+];
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // --- Database Connection ---
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://atyantuser:qf5CWLbdoKKzQlpL@cluster0.vutlgpa.mongodb.net/?retryWrites=true&w=majority';
-
-mongoose.connect(MONGO_URI)
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected successfully!'))
   .catch(err => console.error('MongoDB connection error:', err));
 
 // --- API Routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api', chatRoutes);
+app.use('/api/contact', contactRoutes);
 
-// --- Contact form route ---
-app.post('/api/contact', async (req, res) => {
-  try {
-    const { name, email, message } = req.body;
-    const newContact = new Contact({ name, email, message });
-    await newContact.save();
-    console.log('Contact form data saved:', newContact);
-    res.status(200).json({ message: 'Form data saved successfully!' });
-  } catch (error) {
-    console.error('Error saving contact data:', error);
-    res.status(500).json({ message: 'Server error while saving contact data.' });
-  }
-});
+// --- Socket.IO Setup ---
+const io = new Server(server, { cors: { origin: allowedOrigins } });
 
-// --- Create HTTP server for Socket.IO ---
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    methods: ["GET", "POST"],
-    credentials: true
-  }
-});
-
-// --- Socket.IO Private Chat ---
 io.on('connection', (socket) => {
-  console.log('✅ User connected via WebSocket:', socket.id);
-
-  // Join user to their private room
-  socket.on('join_user_room', (userId) => {
-    socket.join(userId);
-    console.log(`User ${socket.id} joined room: ${userId}`);
-  });
-
-  // Handle private messages
-  socket.on('private_message', async (data) => {
-    try {
-      console.log('Received private_message:', data);
-
-      // Save message to MongoDB
-      const newMessage = new Message({
-        sender: data.sender,
-        receiver: data.receiver,
-        text: data.text
-      });
-      await newMessage.save();
-
-      // Emit to receiver
-      io.to(data.receiver).emit('receive_private_message', newMessage);
-      console.log(`Message sent from ${data.sender} to ${data.receiver}`);
-    } catch (error) {
-      console.error('Error saving/sending private message:', error);
-    }
-  });
-
-  socket.on('disconnect', () => {
-    console.log('❌ User disconnected:', socket.id);
-  });
+  // Your socket logic here...
 });
 
-// --- Start server ---
+// --- Start Server ---
 server.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
