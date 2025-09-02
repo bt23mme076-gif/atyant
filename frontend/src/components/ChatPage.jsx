@@ -20,7 +20,6 @@ const ChatPage = () => {
 
   // Use the API URL from the environment variable
   const API_URL = import.meta.env.VITE_API_URL;
-  const SOCKET_URL = import.meta.env.VITE_SOCKET_URL;
 
   // 1. Set up the current user once
   useEffect(() => {
@@ -36,7 +35,7 @@ const ChatPage = () => {
   useEffect(() => {
     const handleReceiveMessage = (newMessage) => {
       // Only add the message if it's part of the conversation you're currently looking at
-      if (selectedContact && (newMessage.sender === selectedContact._id)) {
+      if (selectedContact && (newMessage.senderId === selectedContact._id)) {
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       }
     };
@@ -104,12 +103,12 @@ const ChatPage = () => {
         return;
       }
       const messageData = {
-        sender: currentUser.id,
-        receiver: selectedContact._id,
-        text: newMessage
+        senderId: currentUser.id,
+        receiverId: selectedContact._id,
+        message: newMessage
       };
-      socket.emit('private_message', messageData);
-      setMessages((prev) => [...prev, { ...messageData, sender: currentUser.id }]);
+      socket.emit('sendMessage', messageData); // aligned with backend
+      setMessages((prev) => [...prev, messageData]);
       setNewMessage('');
     }
   };
@@ -135,8 +134,8 @@ const ChatPage = () => {
         <div className="messages-area">
           {selectedContact ? (
             messages.map((msg, index) => (
-              <div key={index} className={`message ${msg.sender === currentUser.id ? 'sent' : 'received'}`}>
-                <p>{msg.text}</p>
+              <div key={index} className={`message ${msg.senderId === currentUser.id ? 'sent' : 'received'}`}>
+                <p>{msg.message}</p>
               </div>
             ))
           ) : (

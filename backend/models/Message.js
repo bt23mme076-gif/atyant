@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 
 const MessageSchema = new mongoose.Schema({
-  sender: { type: String, required: true },
-  receiver: { type: String, required: true },
-  text: { type: String, required: true },
+  senderId: { type: String, required: true },
+  receiverId: { type: String, required: true },
+  message: { type: String, required: true },
   createdAt: { type: Date, default: Date.now }
 });
 
