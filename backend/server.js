@@ -57,4 +57,5 @@ io.on('connection', (socket) => {
 // --- Start Server ---
 server.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
+  console.log(`✅ mongaDb Connected Successfully ${PORT}`);
 });
