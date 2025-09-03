@@ -1,48 +1,40 @@
-// frontend/src/components/ContactForm.jsx (Updated Code)
-
+// frontend/src/components/ContactForm.jsx
 import React, { useState } from 'react';
 import './ContactForm.css';
 
 const ContactForm = () => {
-  // Form ke data ko store karne ke liye state banaya
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     message: ''
   });
 
-  // Use the API URL from the environment variable
-  const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-  // Jaise hi user input mein type karega, yeh function data update karega
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Form submit hone par yeh function chalega
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Page ko reload hone se roka
-    
+    e.preventDefault();
+
     try {
       const response = await fetch(`${API_URL}/api/contact`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
 
       if (response.ok) {
-        alert('Message sent successfully!');
-        // Form ko khali kar diya
+        alert('✅ Message sent successfully!');
         setFormData({ name: '', email: '', message: '' });
       } else {
-        alert('Failed to send message.');
+        alert('❌ Failed to send message.');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('An error occurred.');
+      alert('⚠️ An error occurred.');
     }
   };
 
@@ -82,4 +74,5 @@ const ContactForm = () => {
     </section>
   );
 };
+
 export default ContactForm;
