@@ -1,10 +1,13 @@
 // frontend/src/components/Login.jsx
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './AuthForm.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { login } from "../services/api";   // 👈 use central service
+import "./AuthForm.css";
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -13,28 +16,21 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage("");
+
     try {
-      // Variable ko upar define karo
-const API_URL = import.meta.env.VITE_API_URL;
+      const data = await login(formData);
 
-const response = await fetch(`${API_URL}/api/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(formData),
-});
-const data = await response.json();
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
 
-      if (response.ok) {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('role', data.role);
-        alert('Login successful!');
-        navigate('/'); // CHANGED: Redirect to homepage
-      } else {
-        alert(data.message || 'Login failed.');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('An error occurred during login.');
+      setMessage("Login successful! Redirecting...");
+      setTimeout(() => navigate("/"), 1000);
+    } catch (err) {
+      setMessage(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,7 +54,15 @@ const data = await response.json();
           onChange={handleChange}
           required
         />
-        <button type="submit">Login</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
+
+        {message && (
+          <p className={`form-message ${message.includes("successful") ? "success" : "error"}`}>
+            {message}
+          </p>
+        )}
       </form>
     </div>
   );
