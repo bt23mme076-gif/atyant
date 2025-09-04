@@ -1,229 +1,217 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './AuthForm.css';
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../AuthContext"; // AuthContext import
+import "./AuthForm.css";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'user'
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    role: "user", // Default role
   });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
-  
   const navigate = useNavigate();
+  const { login, user } = useAuth(); // context se login function aur user state
 
-  // Check if user is already logged in
+  // Agar user already login hai to dashboard par redirect karo
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      navigate('/');
+    if (user) {
+      if (user.role === "mentor") {
+        navigate("/mentor-dashboard");
+      } else {
+        navigate("/student-dashboard");
+      }
     }
-  }, [navigate]);
+  }, [user, navigate]);
 
+  // ✅ Validation function
   const validateForm = () => {
     const newErrors = {};
-    
-    // Username validation
     if (!formData.username.trim()) {
-      newErrors.username = 'Username is required';
+      newErrors.username = "Username is required";
     } else if (formData.username.length < 3) {
-      newErrors.username = 'Username must be at least 3 characters';
+      newErrors.username = "Username must be at least 3 characters";
     }
-    
-    // Email validation
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+      newErrors.email = "Enter a valid email";
     }
-    
-    // Password validation
+
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "Password must be at least 6 characters";
     } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+      newErrors.password = "Password must contain uppercase, lowercase, and a number";
     }
-    
-    // Confirm password validation
+
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+      newErrors.confirmPassword = "Passwords do not match";
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // ✅ Input change handler
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
-    // Clear error when user starts typing in the field
     if (errors[name]) {
-      setErrors({ ...errors, [name]: '' });
+      setErrors({ ...errors, [name]: "" });
     }
   };
 
+  // ✅ Form submit handler
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
+    if (!validateForm()) return;
+
     setLoading(true);
-    setMessage('');
+    setMessage("");
+    setErrors({});
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL;
-
-      if (!API_URL) {
-        setMessage('API URL is not set. Please check your .env file.');
-        setLoading(false);
-        return;
-      }
-
-      // Remove confirmPassword from data sent to server
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
       const { confirmPassword, ...submitData } = formData;
       
       const response = await fetch(`${API_URL}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submitData),
       });
-      
+
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('Signup successful! Redirecting...');
-        localStorage.setItem('token', data.token);
-        
-        // Avoid storing role in localStorage for security
-        // The role should be retrieved from the server when needed
+        setMessage("Signup successful! Redirecting...");
+        // ✅ Fix: login function ko sirf token pass kiya
+        login(data.token); 
         
         setTimeout(() => {
-          navigate('/');
+          if (data.role === "mentor") {
+            navigate("/mentor-dashboard");
+          } else {
+            navigate("/student-dashboard");
+          }
         }, 1500);
+
       } else {
-        // Handle specific error cases
-        if (response.status === 409) {
-          setMessage('Username or email already exists');
-        } else if (response.status === 400) {
-          setMessage('Invalid data provided');
+        // Handle specific server-side errors
+        if (response.status === 409) { // Conflict (user exists)
+          setErrors({ general: "Username or email already exists." });
         } else {
-          setMessage(data.message || 'Signup failed. Please try again.');
+          setMessage(data.message || "Signup failed. Please try again.");
         }
       }
     } catch (error) {
-      console.error('Signup error:', error);
-      setMessage('Network error. Please check your connection and try again.');
+      console.error("Signup error:", error);
+      setMessage("Network error. Please check your connection.");
     } finally {
       setLoading(false);
     }
   };
 
+  // JSX for the form
   return (
     <div className="auth-container">
-      <form className="auth-form" onSubmit={handleSubmit} noValidate>
+      <form className="auth-form" onSubmit={handleSubmit}>
         <h2>Create an Account</h2>
-        
+        {message && <p className="success-message">{message}</p>}
+        {errors.general && <p className="error-message">{errors.general}</p>}
+
         <div className="form-group">
+          <label htmlFor="username">Username</label>
           <input
             type="text"
+            id="username"
             name="username"
-            placeholder="Username"
             value={formData.username}
             onChange={handleChange}
-            className={errors.username ? 'error' : ''}
             required
           />
-          {errors.username && <span className="error-text">{errors.username}</span>}
+          {errors.username && <p className="error-text">{errors.username}</p>}
         </div>
-        
+
         <div className="form-group">
+          <label htmlFor="email">Email</label>
           <input
             type="email"
+            id="email"
             name="email"
-            placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            className={errors.email ? 'error' : ''}
             required
           />
-          {errors.email && <span className="error-text">{errors.email}</span>}
+          {errors.email && <p className="error-text">{errors.email}</p>}
         </div>
-        
+
         <div className="form-group">
+          <label htmlFor="password">Password</label>
           <input
             type="password"
+            id="password"
             name="password"
-            placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            className={errors.password ? 'error' : ''}
             required
           />
-          {errors.password && <span className="error-text">{errors.password}</span>}
+          {errors.password && <p className="error-text">{errors.password}</p>}
         </div>
-        
+
         <div className="form-group">
+          <label htmlFor="confirmPassword">Confirm Password</label>
           <input
             type="password"
+            id="confirmPassword"
             name="confirmPassword"
-            placeholder="Confirm Password"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className={errors.confirmPassword ? 'error' : ''}
             required
           />
-          {errors.confirmPassword && <span className="error-text">{errors.confirmPassword}</span>}
+          {errors.confirmPassword && <p className="error-text">{errors.confirmPassword}</p>}
         </div>
-        
-        <div className="role-selector">
-          <label>
-            <input 
-              type="radio" 
-              name="role" 
-              value="user"
-              checked={formData.role === 'user'} 
-              onChange={handleChange}
-            /> I am a User
-          </label>
-          <label>
-            <input 
-              type="radio" 
-              name="role" 
-              value="mentor"
-              checked={formData.role === 'mentor'} 
-              onChange={handleChange}
-            /> I am a Mentor
-          </label>
-        </div>
-        
-        <button 
-          type="submit" 
-          disabled={loading}
-          className={loading ? 'loading' : ''}
-        >
-          {loading ? (
-            <>
-              <span className="spinner"></span>
-              Creating Account...
-            </>
-          ) : `Sign Up as ${formData.role}`}
-        </button>
 
-        {message && (
-          <p className={`form-message ${message.includes('successful') ? 'success' : 'error'}`}>
-            {message}
-          </p>
-        )}
+        <div className="form-group">
+          <label>Sign up as:</label>
+          <div className="role-selection">
+            <label>
+              <input
+                type="radio"
+                name="role"
+                value="user"
+                checked={formData.role === "user"}
+                onChange={handleChange}
+              />
+              Student
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="role"
+                value="mentor"
+                checked={formData.role === "mentor"}
+                onChange={handleChange}
+              />
+              Mentor
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Signing up..." : "Sign Up"}
+        </button>
+        
+        <p className="switch-auth">
+          Already have an account? <Link to="/login">Login here</Link>
+        </p>
       </form>
     </div>
   );

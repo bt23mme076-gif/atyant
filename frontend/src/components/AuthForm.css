@@ -50,3 +50,10 @@
 .auth-form button:hover {
   background-color: #4338ca;
 }
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 50px 20px;
+  min-height: 80vh;
+}
