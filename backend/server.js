@@ -19,9 +19,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://atyant.vercel.app";
+const allowedOrigins = [
+    process.env.FRONTEND_URL || "https://atyant.vercel.app",
+    "http://localhost:5173"
+];
 app.use(cors({
-  origin: [FRONTEND_URL, "http://localhost:5173"], // dev + prod
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json());
@@ -56,7 +59,7 @@ app.post("/api/contact", async (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [FRONTEND_URL, "http://localhost:5173"],
+    origin: allowedOrigins,
     methods: ["GET", "POST"]
   }
 });

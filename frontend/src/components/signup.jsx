@@ -91,18 +91,22 @@ const Signup = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage("Signup successful! Redirecting...");
-        // ✅ Fix: login function ko sirf token pass kiya
-        login(data.token); 
+  setMessage("Signup successful! Redirecting...");
+       // ✅ Defensive check
+  if (data.token) {
+    login(data.token);
+  } else {
+    console.error("No token received:", data);
+  } 
         
         setTimeout(() => {
-          if (data.role === "mentor") {
-            navigate("/mentor-dashboard");
+    const role = data.role || (data.user && data.user.role) || "user";
+            if (role === "mentor") {
+            navigate("/mentor-dashboard");      
           } else {
             navigate("/student-dashboard");
           }
         }, 1500);
-
       } else {
         // Handle specific server-side errors
         if (response.status === 409) { // Conflict (user exists)

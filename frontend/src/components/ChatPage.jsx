@@ -6,8 +6,8 @@ import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
 
 // Use environment variable for socket URL, fallback to backend URL
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'https://atyant-backend.onrender.com';
-const socket = io(SOCKET_URL);
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const socket = io(API_URL);
 
 const ChatPage = () => {
   const [contactList, setContactList] = useState([]);
@@ -19,7 +19,6 @@ const ChatPage = () => {
   const location = useLocation();
 
   // Use the API URL from the environment variable
-  const API_URL = import.meta.env.VITE_API_URL;
 
   // 1. Set up the current user once
   useEffect(() => {
