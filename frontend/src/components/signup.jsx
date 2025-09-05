@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../AuthContext"; // AuthContext import
+import { useAuth } from "../AuthContext";
 import "./AuthForm.css";
 
 const Signup = () => {
@@ -9,24 +9,16 @@ const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "user", // Default role
+    role: "user",
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
-  const { login, user } = useAuth(); // context se login function aur user state
+  const { login, user } = useAuth();
 
-  // Agar user already login hai to dashboard par redirect karo
-  useEffect(() => {
-    if (user) {
-      if (user.role === "mentor") {
-        navigate("/mentor-dashboard");
-      } else {
-        navigate("/student-dashboard");
-      }
-    }
-  }, [user, navigate]);
+  // Remove the useEffect that automatically redirects based on user state
+  // This is causing the conflict with the manual navigation
 
   // ✅ Validation function
   const validateForm = () => {
@@ -69,7 +61,7 @@ const Signup = () => {
     }
   };
 
-  // ✅ Form submit handler
+  // ✅ Form submit handler - FIXED
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -91,25 +83,30 @@ const Signup = () => {
       const data = await response.json();
 
       if (response.ok) {
-  setMessage("Signup successful! Redirecting...");
-       // ✅ Defensive check
-  if (data.token) {
-    login(data.token);
-  } else {
-    console.error("No token received:", data);
-  } 
+        setMessage("Signup successful! Redirecting...");
         
-        setTimeout(() => {
-    const role = data.role || (data.user && data.user.role) || "user";
+        if (data.token) {
+          // Call login to update the AuthContext
+          login(data.token);
+          
+          // Determine the role from the response data
+          const role = data.role || (data.user && data.user.role) || formData.role;
+          
+          // Navigate after a short delay to ensure context is updated
+          setTimeout(() => {
             if (role === "mentor") {
-            navigate("/mentor-dashboard");      
-          } else {
-            navigate("/student-dashboard");
-          }
-        }, 1500);
+              navigate("/mentor-dashboard");      
+            } else {
+              navigate("/student-dashboard");
+            }
+          }, 100);
+        } else {
+          console.error("No token received:", data);
+          setMessage("Signup completed but no authentication token received.");
+        }
       } else {
         // Handle specific server-side errors
-        if (response.status === 409) { // Conflict (user exists)
+        if (response.status === 409) {
           setErrors({ general: "Username or email already exists." });
         } else {
           setMessage(data.message || "Signup failed. Please try again.");

@@ -1,89 +1,135 @@
 /* src/components/MentorListPage.css */
+.mentor-list-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
 
 .mentor-list-container h1 {
   text-align: center;
-  font-size: 2.8rem;
-  color: #041b51;
+  color: #333;
   margin-bottom: 10px;
 }
 
 .mentor-list-container > p {
   text-align: center;
-  font-size: 1.1rem;
-  color: #6c757d;
-  margin-bottom: 40px;
+  color: #666;
+  margin-bottom: 30px;
 }
 
 .mentor-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 30px;
 }
 
 .mentor-card {
-  background-color: #ffffff;
-  border-radius: 15px;
-  box-shadow: 0 4px M(20px, 0, 0, 0, 0.05);
-  padding: 25px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .mentor-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .mentor-image {
-  width: 140px;
-  height: 140px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
-  margin: 0 auto 20px;
-  border: 5px solid #f8f9fa;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  margin: 0 auto 15px;
+  border: 3px solid #f0f0f0;
 }
 
 .mentor-name {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #041b51;
+  color: #2c3e50;
+  margin: 10px 0 5px;
+  font-size: 1.2em;
 }
 
 .mentor-interest {
-  margin-top: 5px;
-  margin-bottom: 20px;
-  color: #6c757d;
-  font-size: 1rem;
-  min-height: 40px; 
+  color: #7f8c8d;
+  margin-bottom: 15px;
+  font-size: 0.9em;
 }
 
-.mentor-card button {
-  background-color: #007bff;
+.chat-button {
+  background-color: #3498db;
   color: white;
   border: none;
-  border-radius: 25px;
-  padding: 12px 30px;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  font-weight: 600;
+  transition: background-color 0.2s;
 }
 
-.mentor-card button:hover {
-  background-color: #0056b3;
-  transform: scale(1.05);
-  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+.chat-button:hover {
+  background-color: #2980b9;
 }
 
 .status-message {
   text-align: center;
-  font-size: 1.2rem;
-  padding: 50px;
-  color: #6c757d;
+  padding: 40px;
+  font-size: 1.1em;
+}
+
+.status-message.loading {
+  color: #7f8c8d;
 }
 
 .status-message.error {
-  color: #dc3545;
+  color: #e74c3c;
+}
+
+.loading .spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.retry-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 15px;
+}
+
+.retry-button:hover {
+  background-color: #2980b9;
+}
+
+.no-mentors {
+  text-align: center;
+  padding: 40px;
+  color: #7f8c8d;
+}
+
+@media (max-width: 768px) {
+  .mentor-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+  }
+  
+  .mentor-list-container {
+    padding: 15px;
+  }
 }

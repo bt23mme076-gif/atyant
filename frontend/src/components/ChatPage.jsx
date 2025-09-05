@@ -1,13 +1,12 @@
-// src/components/ChatPage.jsx
+// src/components/CPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
 
 // Use environment variable for socket URL, fallback to backend URL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-const socket = io(API_URL);
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5173';
 
 const ChatPage = () => {
   const [contactList, setContactList] = useState([]);
@@ -15,100 +14,268 @@ const ChatPage = () => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [socketStatus, setSocketStatus] = useState('disconnected');
   const messagesEndRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Use the API URL from the environment variable
+  // Initialize socket connection
+  const [socket, setSocket] = useState(null);
 
-  // 1. Set up the current user once
+  // 1. Set up the current user and socket connection
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      const decoded = jwtDecode(token);
-      setCurrentUser({ id: decoded.userId, role: decoded.role });
-      socket.emit('join_user_room', decoded.userId); // Always join room
+      try {
+        const decoded = jwtDecode(token);
+        const userData = { 
+          id: decoded.userId || decoded.id, 
+          role: decoded.role 
+        };
+        setCurrentUser(userData);
+        
+        // Initialize socket connection
+        const newSocket = io(API_URL, {
+          auth: {
+            token: token
+          },
+          transports: ['websocket', 'polling'] // Ensure multiple transport methods
+        });
+        
+        newSocket.on('connect', () => {
+          console.log('Connected to server with ID:', newSocket.id);
+          setSocketStatus('connected');
+          // Join user's room after connection is established
+          newSocket.emit('join_user_room', userData.id);
+          console.log(`Joined room: ${userData.id}`);
+        });
+        
+        newSocket.on('disconnect', (reason) => {
+          console.log('Disconnected from server:', reason);
+          setSocketStatus('disconnected');
+        });
+        
+        newSocket.on('connect_error', (error) => {
+          console.error('Socket connection error:', error);
+          setError('Failed to connect to chat server');
+          setSocketStatus('error');
+        });
+        
+        newSocket.on('reconnect', (attemptNumber) => {
+          console.log('Reconnected to server. Attempt:', attemptNumber);
+          setSocketStatus('connected');
+          // Rejoin user room after reconnection
+          if (currentUser && currentUser.id) {
+            newSocket.emit('join_user_room', currentUser.id);
+          }
+        });
+        
+        newSocket.on('reconnect_error', (error) => {
+          console.error('Reconnection error:', error);
+          setSocketStatus('error');
+        });
+        
+        newSocket.on('reconnect_failed', () => {
+          console.error('Reconnection failed');
+          setSocketStatus('error');
+          setError('Failed to reconnect to chat server. Please refresh the page.');
+        });
+        
+        setSocket(newSocket);
+        
+        // Cleanup on component unmount
+        return () => {
+          if (newSocket) {
+            newSocket.disconnect();
+          }
+        };
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        setError('Authentication error');
+      }
+    } else {
+      setError('No authentication token found');
+      navigate('/login');
     }
-  }, []);
+  }, [navigate]);
 
-  // 2. Set up the socket listener for incoming messages
+  // 2. Set up the socket listener for incoming messages - CRITICAL FIX
   useEffect(() => {
+    if (!socket) return;
+
     const handleReceiveMessage = (newMessage) => {
-      // Only add the message if it's part of the conversation you're currently looking at
-      if (selectedContact && (newMessage.senderId === selectedContact._id)) {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      console.log('Received message:', newMessage);
+      
+      // IMPORTANT: Show ALL messages where current user is either sender or receiver
+      // This ensures mentors receive all messages intended for them
+      const isRelevantMessage = 
+        newMessage.receiver === currentUser?.id || 
+        newMessage.sender === currentUser?.id ||
+        newMessage.receiverId === currentUser?.id || 
+        newMessage.senderId === currentUser?.id;
+      
+      if (isRelevantMessage) {
+        setMessages((prevMessages) => {
+          // Avoid duplicates based on timestamp and sender
+          const isDuplicate = prevMessages.some(msg => 
+            msg._id === newMessage._id || 
+            (msg.timestamp === newMessage.timestamp && 
+             (msg.sender === newMessage.sender || msg.senderId === newMessage.senderId))
+          );
+          
+          if (!isDuplicate) {
+            return [...prevMessages, newMessage];
+          }
+          return prevMessages;
+        });
       }
     };
 
+    // Listen for incoming messages
     socket.on('receive_private_message', handleReceiveMessage);
+    
+    // Also listen for the alternative event name
+    socket.on('new_message', handleReceiveMessage);
+    
+    // Listen for message errors
+    socket.on('message_error', (errorData) => {
+      console.error('Message error:', errorData);
+      setError(errorData.message || 'Error sending/receiving message');
+    });
 
-    // Cleanup: remove the listener when the component is no longer on screen
+    // Cleanup: remove all listeners when the component is no longer on screen
     return () => {
       socket.off('receive_private_message', handleReceiveMessage);
+      socket.off('new_message', handleReceiveMessage);
+      socket.off('message_error');
     };
-  }, [selectedContact]); // IMPORTANT: This hook depends on 'selectedContact'
+  }, [socket, currentUser]); // Removed selectedContact dependency to receive all messages
 
   // 3. Fetch the contact list when the user is set
   useEffect(() => {
     if (!currentUser) return;
 
-    // When mentor logs in, fetch users they have chatted with
     const fetchContacts = async () => {
-      let url = '';
-      if (currentUser.role === 'user') {
-        url = `${API_URL}/api/mentors`;
-      } else if (currentUser.role === 'mentor') {
-        url = `${API_URL}/api/conversations/mentor/${currentUser.id}`;
-      }
-      if (url) {
-        const response = await fetch(url);
-        const data = await response.json();
-        // Debug: log contacts
-        console.log('Fetched contacts:', data);
-        setContactList(data);
+      try {
+        setLoading(true);
+        let url = '';
+        if (currentUser.role === 'user') {
+          url = `${API_URL}/api/mentors`;
+        } else if (currentUser.role === 'mentor') {
+          url = `${API_URL}/api/conversations/mentor/${currentUser.id}`;
+        }
+        
+        if (url) {
+          const token = localStorage.getItem('token');
+          const response = await fetch(url, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          console.log('Fetched contacts:', data);
+          setContactList(data);
+          
+          // Check if a mentor was passed from the previous page
+          if (location.state?.selectedMentor) {
+            handleSelectContact(location.state.selectedMentor);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching contacts:', error);
+        setError('Failed to load contacts');
+      } finally {
+        setLoading(false);
       }
     };
+
     fetchContacts();
-
-    // Check if a mentor was passed from the previous page
-    if (location.state?.selectedMentor) {
-      handleSelectContact(location.state.selectedMentor);
-    }
-
-  }, [currentUser]);
+  }, [currentUser, location.state]);
 
   // Helper function to fetch messages for a selected chat
   const handleSelectContact = async (contact) => {
     if (!contact || !contact._id) {
-      alert('Invalid contact selected!');
+      setError('Invalid contact selected!');
       return;
     }
-    setSelectedContact(contact);
-
-    // Fetch messages for this conversation
+    
     try {
-      const response = await fetch(`${API_URL}/api/messages/${currentUser.id}/${contact._id}`);
-      setMessages(await response.json());
+      setSelectedContact(contact);
+      setError('');
+      
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${API_URL}/api/messages/${currentUser.id}/${contact._id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch messages: ${response.status}`);
+      }
+      
+      const messageData = await response.json();
+      setMessages(messageData);
     } catch (error) {
       console.error("Failed to fetch messages:", error);
+      setError('Failed to load messages');
     }
   };
 
-  // Function to send a message
-  const handleSendMessage = (e) => {
+  // Function to send a message - ENHANCED
+  const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (newMessage.trim() && selectedContact && currentUser) {
-      if (!selectedContact._id) {
-        alert('No receiver selected!');
-        return;
-      }
+    
+    if (!newMessage.trim()) {
+      setError('Message cannot be empty');
+      return;
+    }
+    
+    if (!selectedContact || !selectedContact._id) {
+      setError('No contact selected!');
+      return;
+    }
+    
+    if (!socket || !currentUser || socketStatus !== 'connected') {
+      setError('Not connected to chat. Please check your connection and try again.');
+      return;
+    }
+    
+    try {
       const messageData = {
-        senderId: currentUser.id,
-        receiverId: selectedContact._id,
-        message: newMessage
+        sender: currentUser.id,
+        receiver: selectedContact._id,
+        text: newMessage.trim(),
+        timestamp: new Date().toISOString()
       };
-      socket.emit('sendMessage', messageData); // aligned with backend
-      setMessages((prev) => [...prev, messageData]);
+      
+      console.log('Sending message:', messageData);
+      
+      // Emit the message
+      socket.emit('private_message', messageData);
+      
+      // Optimistically add the message to the UI
+      setMessages((prev) => [...prev, {
+        _id: Date.now().toString(), // Temporary ID
+        ...messageData,
+        createdAt: new Date()
+      }]);
+      
       setNewMessage('');
+      setError('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setError('Failed to send message. Please try again.');
     }
   };
   
@@ -117,38 +284,114 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Rejoin room if socket reconnects or user changes
+  useEffect(() => {
+    if (socket && socketStatus === 'connected' && currentUser) {
+      socket.emit('join_user_room', currentUser.id);
+      console.log(`Rejoined room: ${currentUser.id}`);
+    }
+  }, [socket, socketStatus, currentUser]);
+
+  if (error && !loading) {
+    return (
+      <div className="chat-error">
+        <h3>Error</h3>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()}>Retry</button>
+        <button onClick={() => navigate('/mentors')}>Back to Mentors</button>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <div className="loading">Loading chats...</div>;
+  }
+
   return (
     <div className="chat-page">
       <div className="sidebar">
         <h3>{currentUser?.role === 'user' ? 'Mentors' : 'My Chats'}</h3>
-        <ul>
-          {contactList.map((contact) => (
-            <li key={contact._id} onClick={() => handleSelectContact(contact)}>
-              {contact.username}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="chat-window">
-        <div className="messages-area">
-          {selectedContact ? (
-            messages.map((msg, index) => (
-              <div key={index} className={`message ${msg.senderId === currentUser.id ? 'sent' : 'received'}`}>
-                <p>{msg.message}</p>
-              </div>
-            ))
-          ) : (
-            <div className="no-chat-selected">
-              Select a {currentUser?.role === 'user' ? 'mentor' : 'user'} to start chatting.
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+        <div className="connection-status">
+          Status: <span className={socketStatus}>{socketStatus}</span>
         </div>
-        {selectedContact && (
-          <form onSubmit={handleSendMessage} className="message-form">
-            <input type="text" value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Type your message..." />
-            <button type="submit">Send</button>
-          </form>
+        {contactList.length === 0 ? (
+          <p className="no-contacts">No contacts available</p>
+        ) : (
+          <ul>
+            {contactList.map((contact) => (
+              <li 
+                key={contact._id} 
+                onClick={() => handleSelectContact(contact)}
+                className={selectedContact?._id === contact._id ? 'selected' : ''}
+              >
+                <div className="contact-name">{contact.username || contact.name}</div>
+                <div className="contact-role">{contact.role}</div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+      
+      <div className="chat-window">
+        {selectedContact ? (
+          <>
+            <div className="chat-header">
+              <h4>Chat with {selectedContact.username || selectedContact.name}</h4>
+              <div className="connection-info">
+                <small>User ID: {currentUser?.id} | Status: {socketStatus}</small>
+              </div>
+            </div>
+            
+            <div className="messages-area">
+              {messages.length === 0 ? (
+                <div className="no-messages">
+                  No messages yet. Start the conversation!
+                </div>
+              ) : (
+                messages.map((msg, index) => (
+                  <div 
+                    key={index} 
+                    className={`message ${msg.sender === currentUser.id || msg.senderId === currentUser.id ? 'sent' : 'received'}`}
+                  >
+                    <p>{msg.text || msg.message}</p>
+                    <span className="message-time">
+                      {new Date(msg.timestamp || msg.createdAt || Date.now()).toLocaleTimeString()}
+                    </span>
+                    <span className="message-status">
+                      {msg.sender === currentUser.id || msg.senderId === currentUser.id ? 'Sent' : 'Received'}
+                    </span>
+                  </div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+            
+            <form onSubmit={handleSendMessage} className="message-form">
+              <input 
+                type="text" 
+                value={newMessage} 
+                onChange={(e) => setNewMessage(e.target.value)} 
+                placeholder="Type your message..." 
+                disabled={!selectedContact || socketStatus !== 'connected'}
+              />
+              <button 
+                type="submit" 
+                disabled={!selectedContact || !newMessage.trim() || socketStatus !== 'connected'}
+                className={socketStatus !== 'connected' ? 'disabled' : ''}
+              >
+                {socketStatus === 'connected' ? 'Send' : 'Connecting...'}
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="no-chat-selected">
+            <h4>Select a {currentUser?.role === 'user' ? 'mentor' : 'user'} to start chatting</h4>
+            <div className="connection-info">
+              <p>Socket status: <span className={socketStatus}>{socketStatus}</span></p>
+              <p>Your ID: {currentUser?.id}</p>
+              <p>Your role: {currentUser?.role}</p>
+            </div>
+          </div>
         )}
       </div>
     </div>

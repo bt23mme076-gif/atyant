@@ -1,7 +1,6 @@
 // src/AuthContext.jsx
-
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { jwtDecode } from 'jwt-decode'; // Updated import
+import { jwtDecode } from 'jwt-decode';
 
 // 1. AuthContext create kiya gaya
 export const AuthContext = createContext(null);
@@ -9,6 +8,7 @@ export const AuthContext = createContext(null);
 // 2. AuthProvider component banaya gaya jo state manage karega
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true); // Loading state add kiya gaya
 
   // Jab component load hoga, token check karega localStorage se
   useEffect(() => {
@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       }
     }
+    setLoading(false); // Loading complete
   }, []);
 
   // Login function: token store karta hai aur user state update karta hai
@@ -59,9 +60,9 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // ✅ Main Fix: AuthContext.Provider se value ko pass kiya gaya
+  // ✅ AuthContext.Provider se value ko pass kiya gaya
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );
@@ -69,5 +70,9 @@ export const AuthProvider = ({ children }) => {
 
 // 3. Custom hook (useAuth) banaya gaya taki context aasani se use ho sake
 export const useAuth = () => {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };
