@@ -6,7 +6,7 @@ import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
 
 // Use environment variable for socket URL, fallback to backend URL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5173';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const ChatPage = () => {
   const [contactList, setContactList] = useState([]);
@@ -38,11 +38,11 @@ const ChatPage = () => {
         
         // Initialize socket connection
         const newSocket = io(API_URL, {
-          auth: {
-            token: token
-          },
-          transports: ['websocket', 'polling'] // Ensure multiple transport methods
-        });
+  auth: {
+    token: token
+  },
+  transports: ['websocket', 'polling'] // Ensure this matches backend
+});
         
         newSocket.on('connect', () => {
           console.log('Connected to server with ID:', newSocket.id);

@@ -1,21 +1,23 @@
 import mongoose from 'mongoose';
 
 const MessageSchema = new mongoose.Schema({
-  sender: {  // Changed from senderId to match your data
-    type: String, 
-    required: true 
+  sender: {
+    type: mongoose.Schema.Types.ObjectId, // Changed from String to ObjectId
+    ref: 'User', // Reference to User model
+    required: true
   },
-  receiver: {  // Changed from receiverId to match your data
-    type: String, 
-    required: true 
+  receiver: {
+    type: mongoose.Schema.Types.ObjectId, // Changed from String to ObjectId
+    ref: 'User', // Reference to User model
+    required: true
   },
-  text: {  // Changed from message to match your data
-    type: String, 
-    required: true 
+  text: {
+    type: String,
+    required: true
   },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
 });
 

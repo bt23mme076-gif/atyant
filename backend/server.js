@@ -1,4 +1,4 @@
-// backend/server.js - Updated with chat fixes
+// backend/server.js - COMPLETE FIXED VERSION
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
@@ -12,7 +12,7 @@ import chatRoutes from './routes/chatRoutes.js';
 // Import models
 import Contact from './models/Contact.js';
 import Message from './models/Message.js';
-import User from './models/User.js'; // Make sure you have a User model
+import User from './models/User.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -54,12 +54,11 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-// --- NEW: Add endpoint to validate mentor ---
+// --- Validate mentor endpoint ---
 app.post("/api/validate-mentor", async (req, res) => {
   try {
     const { mentorId, userId } = req.body;
     
-    // Check if mentor exists and is actually a mentor
     const mentor = await User.findById(mentorId);
     if (!mentor) {
       return res.status(404).json({ 
@@ -75,7 +74,6 @@ app.post("/api/validate-mentor", async (req, res) => {
       });
     }
     
-    // Check if mentor accepts messages
     if (mentor.chatDisabled) {
       return res.status(403).json({ 
         valid: false, 
@@ -95,17 +93,20 @@ app.post("/api/validate-mentor", async (req, res) => {
 
 // --- Create HTTP server for Socket.IO ---
 const server = http.createServer(app);
-// In your server.js, update Socket.IO configuration
+
+// --- Socket.IO Configuration ---
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
   },
-  transports: ['websocket', 'polling'] // Add this line
+  transports: ['websocket', 'polling'],
+  pingTimeout: 60000,
+  pingInterval: 25000
 });
 
-// --- Socket.IO Private Chat - ENHANCED ---
+// --- Socket.IO Private Chat - COMPLETELY FIXED ---
 io.on("connection", (socket) => {
   console.log(`✅ User connected via WebSocket: ${socket.id}`);
 
@@ -115,10 +116,21 @@ io.on("connection", (socket) => {
     console.log(`👤 User ${socket.id} joined room: ${userId}`);
   });
 
-  // Handle private messages with validation
+  // Handle private messages with validation - COMPLETELY FIXED
   socket.on("private_message", async (data) => {
     try {
-      // Validate that both sender and receiver exist
+      console.log("📩 Received message data:", data);
+      
+      // Validate required fields
+      if (!data.sender || !data.receiver || !data.text) {
+        socket.emit("message_error", {
+          error: "Missing required fields",
+          message: "Sender, receiver, and text content are required"
+        });
+        return;
+      }
+
+      // Validate that both users exist
       const [sender, receiver] = await Promise.all([
         User.findById(data.sender),
         User.findById(data.receiver)
@@ -141,15 +153,57 @@ io.on("connection", (socket) => {
         return;
       }
 
+      // Create and save the message
       const newMessage = new Message({
         sender: data.sender,
         receiver: data.receiver,
         text: data.text,
       });
+      
       await newMessage.save();
+      console.log(`💾 Message saved to MongoDB: ${newMessage._id}`);
 
-      io.to(data.receiver).emit("receive_private_message", newMessage);
-      console.log(`💬 Message sent from ${data.sender} to ${data.receiver}`);
+      // Populate message with user data for frontend
+      const populatedMessage = await Message.findById(newMessage._id)
+        .populate('sender', 'username name email')
+        .populate('receiver', 'username name email');
+
+      // Prepare message for frontend
+      const messageForFrontend = {
+        _id: populatedMessage._id,
+        sender: populatedMessage.sender._id,
+        senderName: populatedMessage.sender.username || populatedMessage.sender.name,
+        receiver: populatedMessage.receiver._id,
+        receiverName: populatedMessage.receiver.username || populatedMessage.receiver.name,
+        text: populatedMessage.text,
+        createdAt: populatedMessage.createdAt
+      };
+
+      console.log(`📤 Emitting to receiver: ${data.receiver}`);
+      console.log(`📤 Emitting to sender: ${data.sender}`);
+      
+      // CRITICAL FIX: Use io.to() instead of socket.emit() for broadcasting
+      // This ensures messages reach all connected clients in the room
+      io.to(data.receiver).emit("receive_private_message", messageForFrontend);
+      io.to(data.sender).emit("receive_private_message", messageForFrontend);
+      
+      // Also send chat update events to refresh conversation lists
+      io.to(data.sender).emit("chat_update", {
+        type: 'new_message',
+        chatId: `${data.sender}-${data.receiver}`,
+        messageId: newMessage._id,
+        timestamp: new Date().toISOString()
+      });
+      
+      io.to(data.receiver).emit("chat_update", {
+        type: 'new_message', 
+        chatId: `${data.sender}-${data.receiver}`,
+        messageId: newMessage._id,
+        timestamp: new Date().toISOString()
+      });
+
+      console.log(`💬 Message successfully sent from ${data.sender} to ${data.receiver}`);
+      
     } catch (error) {
       console.error("❌ Error saving/sending private message:", error);
       socket.emit("message_error", {
@@ -159,20 +213,48 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("disconnect", () => {
-    console.log(`❌ User disconnected: ${socket.id}`);
+  // Handle message delivery status
+  socket.on("message_delivered", (data) => {
+    console.log(`✓ Message delivered: ${data.messageId}`);
+    // Notify sender that message was delivered
+    io.to(data.sender).emit("message_status", {
+      messageId: data.messageId,
+      status: 'delivered',
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // Handle message read status
+  socket.on("message_read", (data) => {
+    console.log(`✓ Message read: ${data.messageId}`);
+    // Notify sender that message was read
+    io.to(data.sender).emit("message_status", {
+      messageId: data.messageId,
+      status: 'read',
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.log(`❌ User disconnected: ${socket.id}, reason: ${reason}`);
   });
 });
+
+// --- Message History Endpoint - FIXED ---
 app.get('/api/messages/:userId1/:userId2', async (req, res) => {
   try {
     const { userId1, userId2 } = req.params;
     
     const messages = await Message.find({
       $or: [
-        { senderId: userId1, receiverId: userId2 },
-        { senderId: userId2, receiverId: userId1 }
+        { sender: userId1, receiver: userId2 },
+        { sender: userId2, receiver: userId1 }
       ]
-    }).sort({ createdAt: 1 }).exec();
+    })
+    .populate('sender', 'username name')
+    .populate('receiver', 'username name')
+    .sort({ createdAt: 1 })
+    .exec();
     
     res.json(messages);
   } catch (error) {
@@ -180,28 +262,28 @@ app.get('/api/messages/:userId1/:userId2', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-// --- Start server ---
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
-// Add these debug endpoints to your server.js
 
-// Check active Socket.IO connections
+// --- Debug Endpoints ---
 app.get('/api/debug/connections', (req, res) => {
   const rooms = io.sockets.adapter.rooms;
   const activeRooms = {};
   
   rooms.forEach((sockets, roomName) => {
-    activeRooms[roomName] = Array.from(sockets);
+    if (roomName.length === 24) { // MongoDB ObjectIds are 24 chars
+      activeRooms[roomName] = {
+        socketCount: sockets.size,
+        sockets: Array.from(sockets)
+      };
+    }
   });
   
   res.json({
     activeConnections: io.engine.clientsCount,
-    activeRooms: activeRooms
+    activeRooms: activeRooms,
+    timestamp: new Date().toISOString()
   });
 });
 
-// Check if a specific user is connected
 app.get('/api/debug/user/:userId/connected', (req, res) => {
   const userId = req.params.userId;
   const room = io.sockets.adapter.rooms.get(userId);
@@ -209,6 +291,45 @@ app.get('/api/debug/user/:userId/connected', (req, res) => {
   res.json({
     userId: userId,
     isConnected: !!room,
-    connectionCount: room ? room.size : 0
+    connectionCount: room ? room.size : 0,
+    timestamp: new Date().toISOString()
   });
+});
+
+// Check message history for debugging
+app.get('/api/debug/messages', async (req, res) => {
+  try {
+    const messages = await Message.find()
+      .populate('sender', 'username name')
+      .populate('receiver', 'username name')
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .exec();
+    
+    res.json({
+      count: messages.length,
+      messages: messages,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error fetching debug messages:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// --- Health Check Endpoint ---
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    connections: io.engine.clientsCount
+  });
+});
+
+// --- Start server ---
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📡 Socket.IO enabled with CORS for: ${allowedOrigins.join(', ')}`);
 });
