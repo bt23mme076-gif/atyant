@@ -12,7 +12,7 @@ import WhyChooseUs from './components/WhyChooseUs';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import Login from './components/Login';
-import Signup from './components/Signup';
+import Signup from './components/signup';
 import ChatPage from './components/ChatPage';
 import MentorListPage from './components/MentorListPage';
 
