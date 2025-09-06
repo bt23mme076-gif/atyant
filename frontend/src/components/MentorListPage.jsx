@@ -67,7 +67,7 @@ const MentorListPage = () => {
       navigate('/chat', { 
         state: { 
           selectedMentor: {
-            id: mentor._id,
+            _id: mentor._id,
             name: mentor.username || mentor.name,
             email: mentor.email,
             image: mentor.image || `https://i.pravatar.cc/150?u=${mentor._id}`

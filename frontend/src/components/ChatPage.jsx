@@ -102,56 +102,38 @@ const ChatPage = () => {
   }, [navigate]);
 
   // 2. Set up the socket listener for incoming messages - CRITICAL FIX
-  useEffect(() => {
-    if (!socket) return;
+useEffect(() => {
+  if (!socket) return;
 
-    const handleReceiveMessage = (newMessage) => {
-      console.log('Received message:', newMessage);
-      
-      // IMPORTANT: Show ALL messages where current user is either sender or receiver
-      // This ensures mentors receive all messages intended for them
-      const isRelevantMessage = 
-        newMessage.receiver === currentUser?.id || 
-        newMessage.sender === currentUser?.id ||
-        newMessage.receiverId === currentUser?.id || 
-        newMessage.senderId === currentUser?.id;
-      
-      if (isRelevantMessage) {
-        setMessages((prevMessages) => {
-          // Avoid duplicates based on timestamp and sender
-          const isDuplicate = prevMessages.some(msg => 
-            msg._id === newMessage._id || 
-            (msg.timestamp === newMessage.timestamp && 
-             (msg.sender === newMessage.sender || msg.senderId === newMessage.senderId))
-          );
-          
-          if (!isDuplicate) {
-            return [...prevMessages, newMessage];
-          }
-          return prevMessages;
-        });
-      }
-    };
+  const handleReceiveMessage = (newMessage) => {
+    // Only add if message is for the currently selected chat
+    if (
+      selectedContact &&
+      (
+        (newMessage.sender === currentUser?.id && newMessage.receiver === selectedContact._id) ||
+        (newMessage.receiver === currentUser?.id && newMessage.sender === selectedContact._id)
+      )
+    ) {
+      setMessages((prevMessages) => {
+        const isDuplicate = prevMessages.some(msg =>
+          msg._id === newMessage._id
+        );
+        if (!isDuplicate) {
+          return [...prevMessages, newMessage];
+        }
+        return prevMessages;
+      });
+    }
+  };
 
-    // Listen for incoming messages
-    socket.on('receive_private_message', handleReceiveMessage);
-    
-    // Also listen for the alternative event name
-    socket.on('new_message', handleReceiveMessage);
-    
-    // Listen for message errors
-    socket.on('message_error', (errorData) => {
-      console.error('Message error:', errorData);
-      setError(errorData.message || 'Error sending/receiving message');
-    });
+  socket.on('receive_private_message', handleReceiveMessage);
+  socket.on('new_message', handleReceiveMessage);
 
-    // Cleanup: remove all listeners when the component is no longer on screen
-    return () => {
-      socket.off('receive_private_message', handleReceiveMessage);
-      socket.off('new_message', handleReceiveMessage);
-      socket.off('message_error');
-    };
-  }, [socket, currentUser]); // Removed selectedContact dependency to receive all messages
+  return () => {
+    socket.off('receive_private_message', handleReceiveMessage);
+    socket.off('new_message', handleReceiveMessage);
+  };
+}, [socket, currentUser, selectedContact]); // Removed selectedContact dependency to receive all messages
 
   // 3. Fetch the contact list when the user is set
   useEffect(() => {
@@ -208,6 +190,7 @@ const ChatPage = () => {
     
     try {
       setSelectedContact(contact);
+      setMessages([]);
       setError('');
       
       const token = localStorage.getItem('token');
@@ -233,51 +216,47 @@ const ChatPage = () => {
   };
 
   // Function to send a message - ENHANCED
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    
-    if (!newMessage.trim()) {
-      setError('Message cannot be empty');
-      return;
-    }
-    
-    if (!selectedContact || !selectedContact._id) {
-      setError('No contact selected!');
-      return;
-    }
-    
-    if (!socket || !currentUser || socketStatus !== 'connected') {
-      setError('Not connected to chat. Please check your connection and try again.');
-      return;
-    }
-    
-    try {
-      const messageData = {
-        sender: currentUser.id,
-        receiver: selectedContact._id,
-        text: newMessage.trim(),
-        timestamp: new Date().toISOString()
-      };
-      
-      console.log('Sending message:', messageData);
-      
-      // Emit the message
-      socket.emit('private_message', messageData);
-      
-      // Optimistically add the message to the UI
-      setMessages((prev) => [...prev, {
-        _id: Date.now().toString(), // Temporary ID
-        ...messageData,
-        createdAt: new Date()
-      }]);
-      
-      setNewMessage('');
-      setError('');
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setError('Failed to send message. Please try again.');
-    }
-  };
+const handleSendMessage = async (e) => {
+  e.preventDefault();
+
+  if (!newMessage.trim()) {
+    setError("Message cannot be empty");
+    return;
+  }
+
+  if (!selectedContact || !selectedContact._id) {
+    setError("No contact selected!");
+    return;
+  }
+
+  if (!socket || !currentUser || socketStatus !== "connected") {
+    setError(
+      "Not connected to chat. Please check your connection and try again."
+    );
+    return;
+  }
+
+  try {
+    const messageData = {
+      sender: currentUser.id,
+      receiver: selectedContact._id,
+      text: newMessage.trim(),
+      timestamp: new Date().toISOString(),
+    };
+
+    console.log("Sending message:", messageData);
+
+    // Emit the message
+    socket.emit("private_message", messageData);
+
+    // Do NOT optimistically add the message here!
+    setNewMessage("");
+    setError("");
+  } catch (error) {
+    console.error("Error sending message:", error);
+    setError("Failed to send message. Please try again.");
+  }
+};
   
   // Auto-scroll to the bottom of the chat
   useEffect(() => {
