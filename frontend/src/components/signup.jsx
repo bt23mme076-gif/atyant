@@ -9,7 +9,7 @@ const Signup = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "user",
+    role: "user ",
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -84,7 +84,8 @@ const Signup = () => {
 
       if (response.ok) {
         setMessage("Signup successful! Redirecting...");
-        
+        localStorage.setItem('token', data.token);
+    localStorage.setItem('role', data.role || (data.user && data.user.role) || formData.role);
         if (data.token) {
           // Call login to update the AuthContext
           login(data.token);
@@ -95,7 +96,7 @@ const Signup = () => {
           // Navigate after a short delay to ensure context is updated
           setTimeout(() => {
             if (role === "mentor") {
-              navigate("/mentor-dashboard");      
+              navigate("/");      
             } else {
               navigate("/student-dashboard");
             }
