@@ -9,7 +9,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './components/Home';
 import Login from './components/Login';
-import Signup from './components/Signup'; // Corrected capitalization
+import Signup from './components/signup'; // Corrected capitalization
 import ChatPage from './components/ChatPage';
 import MentorListPage from './components/MentorListPage';
 import ForgotPassword from './components/ForgotPassword';
