@@ -4,7 +4,8 @@ import Message from '../models/Message.js';
 
 const router = express.Router();
 
-// Route to get all mentors
+// This route remains unchanged
+// It's used for the "Find Mentors" page
 router.get('/mentors', async (req, res) => {
   try {
     const mentors = await User.find({ role: 'mentor' }).select('username email _id');
@@ -14,13 +15,14 @@ router.get('/mentors', async (req, res) => {
   }
 });
 
-// NEW: Route for a mentor to get a list of users they have conversations with
+// This route remains unchanged
+// It's for a MENTOR to get their list of chats
 router.get('/conversations/mentor/:mentorId', async (req, res) => {
   try {
     const { mentorId } = req.params;
     const messages = await Message.find({ $or: [{ sender: mentorId }, { receiver: mentorId }] })
-      .populate('sender', 'username _id')
-      .populate('receiver', 'username _id');
+      .populate('sender', 'username _id role')
+      .populate('receiver', 'username _id role');
 
     const conversations = {};
     messages.forEach(msg => {
@@ -32,11 +34,39 @@ router.get('/conversations/mentor/:mentorId', async (req, res) => {
 
     res.json(Object.values(conversations));
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching conversations.' });
+    res.status(500).json({ message: 'Error fetching mentor conversations.' });
   }
 });
 
-// Route to get messages between two users
+// --- NEW ROUTE ADDED HERE ---
+// This new route is for a USER to get their list of chats
+router.get('/conversations/user/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+        // Find all messages involving this user
+        const messages = await Message.find({ $or: [{ sender: userId }, { receiver: userId }] })
+            .populate('sender', 'username _id role')
+            .populate('receiver', 'username _id role');
+
+        const conversations = {};
+        messages.forEach(msg => {
+            // Find the other person in the chat
+            const otherUser = String(msg.sender._id) === userId ? msg.receiver : msg.sender;
+            // Add them to the list only if they are a mentor
+            if (otherUser && otherUser.role === 'mentor') {
+              conversations[otherUser._id] = otherUser;
+            }
+        });
+        
+        res.json(Object.values(conversations));
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching user conversations.' });
+    }
+});
+
+
+// This route remains unchanged
+// It's for getting the actual messages for a specific chat
 router.get('/messages/:userId1/:userId2', async (req, res) => {
   try {
     const { userId1, userId2 } = req.params;
