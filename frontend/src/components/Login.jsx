@@ -18,7 +18,7 @@ const Login = () => {
     setLoading(true);
     setMessage('');
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,7 +47,7 @@ const Login = () => {
     setLoading(true);
     setMessage('');
     try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
         const res = await fetch(`${API_URL}/api/auth/google-login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
