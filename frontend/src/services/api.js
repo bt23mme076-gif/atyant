@@ -1,6 +1,6 @@
 // src/services/api.js
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 // A small helper for all API calls
 export async function apiRequest(endpoint, options = {}) {

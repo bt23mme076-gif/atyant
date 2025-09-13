@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
+import { useAuth } from '../AuthContext'; // THIS IMPORT WAS MISSING
 import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
 
@@ -20,6 +21,7 @@ const ChatPage = () => {
   const messagesEndRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth(); // Get user from our custom hook
 
   // Initialize socket connection
   const [socket, setSocket] = useState(null);

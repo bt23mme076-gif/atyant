@@ -1,30 +1,17 @@
-// frontend/src/components/Navbar.jsx
+// src/components/Navbar.jsx
 import React from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext'; // Use the custom hook
 import './Navbar.css';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const isLoggedIn = !!localStorage.getItem('token');
-  const userRole = localStorage.getItem('role');
+  const { user, logout } = useAuth(); // Get user and logout from the hook
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
+    logout();
     alert('You have been logged out.');
     navigate('/login');
-  };
-
-  const scrollToSection = (sectionId) => {
-    if (location.pathname !== '/') {
-      navigate('/');
-      setTimeout(() => {
-        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } else {
-      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
-    }
   };
 
   return (
@@ -33,30 +20,34 @@ const Navbar = () => {
         <Link to="/">अत्यant</Link>
       </div>
       <nav className="navbar-links">
-        {isLoggedIn ? (
-          userRole === 'mentor' ? (
+        {user ? (
+          // --- LOGGED-IN VIEW ---
+          user.role === 'mentor' ? (
+            // --- MENTOR'S NAVBAR ---
             <>
               <Link to="/chat" className="nav-link">Student Chats</Link>
+              <Link to="/profile" className="nav-link">Profile</Link>
               <button onClick={handleLogout} className="nav-button primary">Logout</button>
             </>
           ) : (
+            // --- USER'S NAVBAR ---
             <>
               <Link to="/mentors" className="nav-link">Find Mentors</Link>
               <Link to="/chat" className="nav-link">My Chats</Link>
+              <Link to="/profile" className="nav-link">Profile</Link>
               <button onClick={handleLogout} className="nav-button primary">Logout</button>
             </>
           )
         ) : (
+          // --- LOGGED-OUT VIEW ---
           <>
-            <button type="button" onClick={() => scrollToSection('how-it-works')} className="nav-link">How It Works</button>
             <Link to="/mentors" className="nav-link">Mentors</Link>
             <Link to="/login" className="nav-button">Login</Link>
-            <Link to="/Signup" className="nav-button primary">Sign Up</Link>
+            <Link to="/signup" className="nav-button primary">Sign Up</Link>
           </>
         )}
       </nav>
     </header>
   );
 };
-
 export default Navbar;

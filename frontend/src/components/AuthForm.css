@@ -4,56 +4,151 @@
   justify-content: center;
   align-items: center;
   padding: 50px 20px;
-  min-height: 80vh;
+  min-height: 90vh;
+  background-color: #f3f4f6; /* Light grey background for the whole page */
 }
 
 .auth-form {
   width: 100%;
-  max-width: 400px;
-  padding: 30px;
+  max-width: 420px;
+  padding: 40px;
   background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
 }
 
 .auth-form h2 {
   text-align: center;
-  font-size: 2rem;
+  font-size: 2.2rem;
+  font-weight: 700;
   margin-bottom: 25px;
   color: #111827;
 }
 
-.auth-form input {
+.form-group {
+  width: 100%;
+  margin-bottom: 18px;
+  position: relative;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"] {
   width: 100%;
   padding: 12px;
-  margin-bottom: 15px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-family: 'Poppins', sans-serif;
   font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.auth-form button {
+.auth-form input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.error-text {
+  color: #ef4444; /* Red color for errors */
+  font-size: 0.875rem;
+  margin-top: 5px;
+  display: block;
+}
+
+.role-selector {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+.role-selector label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.auth-form button[type="submit"] {
   width: 100%;
   padding: 12px;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: bold;
   color: white;
   background-color: #4f46e5;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  margin-top: 10px;
   transition: background-color 0.3s ease;
 }
 
-.auth-form button:hover {
-  background-color: #4338ca;
+.auth-form button:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
 }
-.auth-container {
+
+.form-message {
+  text-align: center;
+  margin-top: 15px;
+  font-weight: 500;
+}
+
+.form-message.success {
+  color: #22c55e;
+}
+
+.form-message.error {
+  color: #ef4444;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 20px;
+  color: #6b7280;
+}
+
+.auth-switch a {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+.forgot-password-link {
+  display: block;
+  text-align: right;
+  margin-top: -10px;
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+}
+
+/* Styles for Google Login Button */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #9ca3af;
+  margin: 25px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.divider:not(:empty)::before {
+  margin-right: .5em;
+}
+
+.divider:not(:empty)::after {
+  margin-left: .5em;
+}
+
+.google-login-button-container {
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 50px 20px;
-  min-height: 80vh;
+  margin-bottom: 15px;
 }

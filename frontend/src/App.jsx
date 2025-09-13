@@ -1,57 +1,43 @@
-// frontend/src/App.jsx
-import React from 'react';
+// src/App.jsx
+import React, { useContext } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
+import { AuthContext } from './AuthContext';
 
-// Import all your components
+// Import all components
 import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection';
-import AboutUs from './components/AboutUs';
-import HowItWorks from './components/HowItWorks';
-import WhyChooseUs from './components/WhyChooseUs';
-import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
+import Home from './components/Home';
 import Login from './components/Login';
-import Signup from './components/signup';
+import Signup from './components/Signup'; // Corrected capitalization
 import ChatPage from './components/ChatPage';
 import MentorListPage from './components/MentorListPage';
-
-// This component represents your homepage and its sections
-const Home = () => (
-  <>
-    <div id="home">
-      <HeroSection />
-    </div>
-    <div id="about">
-      <AboutUs />
-    </div>
-    <div id="how-it-works">
-      <HowItWorks />
-    </div>
-    <div id="why-choose-us">
-      <WhyChooseUs />
-    </div>
-    <div id="contact">
-      <ContactForm />
-    </div>
-  </>
-);
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import ProtectedRoute from './components/ProtectedRoute';
+import ProfilePage from './components/ProfilePage';
 
 function App() {
-  // Just a small change to trigger redeploy
   const location = useLocation();
+  const { user } = useContext(AuthContext);
   const isChatPage = location.pathname === '/chat';
 
   return (
-    <div className={isChatPage ? 'App chat-active' : 'App'}>
+    <div className={isChatPage && user ? 'App chat-active' : 'App'}>
       <Navbar />
       <main>
         <Routes>
+          {/* Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="/mentors" element={<MentorListPage />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+          {/* Protected Routes (only accessible when logged in) */}
+          <Route path="/mentors" element={<ProtectedRoute><MentorListPage /></ProtectedRoute>} />
+          <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         </Routes>
       </main>
       {!isChatPage && <Footer />}

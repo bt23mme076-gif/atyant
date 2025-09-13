@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 // backend/server.js - COMPLETE FIXED VERSION
 import express from 'express';
 import http from 'http';
@@ -8,6 +10,9 @@ import mongoose from 'mongoose';
 // Import routes
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chatRoutes.js';
+import profileRoutes from './routes/profileRoutes.js'; // 1. IMPORT the new routes
+import contactRoutes from './routes/contactRoutes.js'; // THIS LINE WAS MISSING
+
 
 // Import models
 import Contact from './models/Contact.js';
@@ -37,8 +42,11 @@ mongoose.connect(MONGO_URI)
   .catch(err => console.error("❌ MongoDB connection error:", err));
 
 // --- API Routes ---
-app.use("/api/auth", authRoutes);
-app.use("/api", chatRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api', chatRoutes);
+app.use('/api/contact', contactRoutes);
+app.use('/api/profile', profileRoutes); // 2. USE the new routes
+
 
 // --- Contact form route ---
 app.post("/api/contact", async (req, res) => {
@@ -327,6 +335,8 @@ app.get('/api/health', (req, res) => {
     connections: io.engine.clientsCount
   });
 });
+
+
 
 // --- Start server ---
 server.listen(PORT, () => {

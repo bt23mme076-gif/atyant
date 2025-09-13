@@ -4,29 +4,20 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from './AuthContext'; // ✅ AuthProvider import kar
+import { AuthProvider } from './AuthContext'; // AuthProvider ko import kiya
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>   {/* ✅ App ko AuthProvider ke andar wrap kar */}
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
-  </React.StrictMode>
-);
-// Add these future flags to your router configuration
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-
-const router = createBrowserRouter(routes, {
-  future: {
-    v7_startTransition: true,
-    v7_relativeSplatPath: true,
-  },
-});
-
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <BrowserRouter>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
+  </React.StrictMode>,
 );
