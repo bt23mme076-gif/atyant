@@ -1,0 +1,97 @@
+/* src/components/FeedbackForm.css */
+
+.feedback-section {
+  padding: 60px 20px;
+  background-color: #f9fafb; /* Light grey background */
+  font-family: 'Poppins', sans-serif;
+}
+
+.feedback-container {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.feedback-container h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #111827; /* Dark text for headings */
+  margin-bottom: 15px;
+}
+
+.feedback-container p {
+  font-size: 1.1rem;
+  color: #6b7280; /* Softer grey for subtitles */
+  margin-bottom: 40px;
+}
+
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+}
+
+.feedback-form input,
+.feedback-form select,
+.feedback-form textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f9fafb;
+  transition: all 0.3s ease;
+}
+
+.feedback-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.feedback-form input:focus,
+.feedback-form select:focus,
+.feedback-form textarea:focus {
+  outline: none;
+  border-color: #4f46e5; /* Atyant's primary blue */
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.submit-btn {
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  background-color: #4f46e5; /* Atyant's primary blue */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #4338ca; /* Darker blue on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2);
+}
+
+.submit-btn:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.form-message {
+  text-align: center;
+  margin-top: 15px;
+  font-weight: 500;
+  color: #22c55e; /* Green for success */
+}

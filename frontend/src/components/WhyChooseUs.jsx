@@ -5,19 +5,19 @@ import './WhyChooseUs.css';
 const features = [
   {
     icon: '🏆',
-    title: 'Expert Team',
-    description: 'Our team consists of highly skilled professionals dedicated to excellence.'
+    title: 'Achievers, Not Generic Experts',
+    description: 'Our mentors are students, professionals, and creators who have been there, done that. They guide you with real, lived experience.'
+  },
+  {
+    icon: '⚡',
+    title: 'Instant, Direct Chat',
+    description: 'No browsing random blogs or videos. You get advice tailored to your situation—fast and clear .'
   },
   {
     icon: '💡',
-    title: 'Innovative Solutions',
-    description: 'We leverage the latest technologies to provide cutting-edge solutions.'
+    title: 'AI + Human Wisdom',
+    description: 'We use AI to match you smartly, but your guidance always comes from real people who cracked the same problems'
   },
-  {
-    icon: '🤝',
-    title: 'Client-Centric Approach',
-    description: 'Your success is our priority. We work closely with you to achieve your goals.'
-  }
 ];
 
 const WhyChooseUs = () => {

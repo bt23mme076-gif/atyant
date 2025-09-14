@@ -11,11 +11,10 @@ import mongoose from 'mongoose';
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chatRoutes.js';
 import profileRoutes from './routes/profileRoutes.js'; // 1. IMPORT the new routes
-import contactRoutes from './routes/contactRoutes.js'; // THIS LINE WAS MISSING
-
+import feedbackRoutes from './routes/feedbackRoutes.js'; 
 
 // Import models
-import Contact from './models/Contact.js';
+import Feedback from './models/Feedback.js';
 import Message from './models/Message.js';
 import User from './models/User.js';
 
@@ -44,7 +43,7 @@ mongoose.connect(MONGO_URI)
 // --- API Routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api', chatRoutes);
-app.use('/api/contact', contactRoutes);
+app.use('/api/feedback', feedbackRoutes);
 app.use('/api/profile', profileRoutes); // 2. USE the new routes
 
 

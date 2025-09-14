@@ -6,17 +6,17 @@ const steps = [
   {
     icon: '❓',
     title: 'Ask Your Question',
-    description: 'Submit your specific question about academics, careers, or personal growth. Our system ensures it reaches the most qualified mentors.'
+    description: 'Got a doubt about academics, career, or personal growth? Just type it out. No confusing forms, no long wait.'
   },
   {
     icon: '🤝',
     title: 'Get Matched Instantly',
-    description: 'Our AI connects you with verified achievers who have successfully navigated the exact challenge you\'re facing.'
+    description: 'Our AI finds the best mentor—someone who has already solved the exact challenge you are facing'
   },
   {
-    icon: '💡',
-    title: 'Receive Tailored Advice',
-    description: 'Get detailed, actionable guidance specific to your situation—not generic information you could find anywhere else.'
+    icon: '💬',
+    title: 'Chat Directly with Mentors',
+    description: 'No one-way advice. You can talk to mentors in real time, ask follow-up questions, and get practical solutions that actually work.'
   }
 ];
 
@@ -26,7 +26,7 @@ const HowItWorks = () => {
       <div className="container">
         <div className="section-header">
           <h2>How अत्यAnT Works</h2>
-          <p>Get personalized guidance in three simple steps</p>
+          <p>Get answers from real achievers in just 3 simple steps</p>
         </div>
         <div className="steps-grid">
           {steps.map((step, index) => (

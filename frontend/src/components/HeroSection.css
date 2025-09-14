@@ -1,65 +1,105 @@
-/* src/components/HeroSection.css (Simplified Code) */
+/* src/components/HeroSection.css */
+
 .hero-section {
-  background: linear-gradient(135deg, rgba(4, 27, 81, 0.85) 0.1%, rgba(0, 136, 255, 0.55) 60%), url('https://www.atyant.in/web/image/1375-9cb337d0/Screenshot%202025-05-13%20200908.webp') no-repeat center center/cover;
+  background: #0D1117; /* GitHub Dark Color */
+  background-image: 
+    linear-gradient(rgba(13, 17, 23, 0.95), rgba(13, 17, 23, 0.8)),
+    url('https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
-  color: white;
+  color: #c9d1d9; /* Light grey text */
   padding: 40px 20px;
+  overflow: hidden;
 }
 
 .hero-content {
   max-width: 900px;
+  animation: fadeIn 1s ease-in-out;
 }
 
 .hero-title {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 1.5rem;
+  color: #ffffff;
+  text-shadow: 0 0 15px rgba(0, 191, 255, 0.3);
+}
+
+.hero-title .highlight {
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .hero-subtitle {
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 400;
-  margin-bottom: 2.5rem; /* Increased margin */
+  margin-bottom: 2rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
   opacity: 0.9;
 }
 
-.button-group {
+.hero-rotator {
+  font-size: 1.8rem;
   margin-bottom: 2.5rem;
+  min-height: 50px;
 }
 
-.btn-mentor, .btn-ask {
-  padding: 16px 35px;
-  font-size: 1.1rem;
+.typed-text {
+  color: #38bdf8; /* Bright blue for typed text */
+  font-weight: 600;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.hero-button {
+  padding: 14px 32px;
+  font-size: 1rem;
   font-weight: 600;
   border-radius: 50px;
   text-decoration: none;
-  border: none;
+  border: 2px solid transparent;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0, 136, 255, 0.4);
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
-  margin: 0 10px;
 }
 
-.btn-mentor {
-  background: linear-gradient(135deg, #0088ff 0%, #00a1ff 100%);
+.hero-button.primary {
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
   color: white;
+  box-shadow: 0 5px 15px rgba(129, 140, 248, 0.3);
 }
 
-.btn-ask {
-  background: linear-gradient(135deg, #00ff88 0%, #0088ff 100%);
-  color: white;
-}
-
-.btn-mentor:hover, .btn-ask:hover {
+.hero-button.primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0, 136, 255, 0.6);
+  box-shadow: 0 8px 25px rgba(129, 140, 248, 0.5);
+}
+
+.hero-button.secondary {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+.hero-button.secondary:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: white;
 }
 
 .stats-container {
@@ -67,30 +107,36 @@
   justify-content: center;
   gap: 40px;
   flex-wrap: wrap;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .stat-item {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .stat-number {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #00ff88 0%, #0088ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #ffffff;
 }
 
 .stat-label {
   font-size: 0.9rem;
-  opacity: 0.8;
+  opacity: 0.7;
   text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* Responsive adjustments */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 768px) {
-  .hero-title { font-size: 2.2rem; }
+  .hero-title { font-size: 2.5rem; }
   .hero-subtitle { font-size: 1.1rem; }
-  .btn-mentor, .btn-ask { display: block; width: 80%; margin: 10px auto; }
+  .hero-rotator { font-size: 1.5rem; }
 }

@@ -1,35 +1,54 @@
-// src/components/HeroSection.jsx (Simplified Code)
+// src/components/HeroSection.jsx
 import React from 'react';
-// Humne 'Typed' ko yahan se hata diya hai
+import { TypeAnimation } from 'react-type-animation';
+import { Link } from 'react-router-dom';
 import './HeroSection.css';
 
 const HeroSection = () => {
   return (
     <section className="hero-section">
       <div className="hero-content">
-        <h1 className="hero-title">Your Journey from Confused to Confident Starts Here</h1>
-        <h2 className="hero-subtitle">
-          Connect with verified achievers who have successfully navigated the exact challenges you're facing today
-        </h2>
+        <h1 className="hero-title">
+          Your Journey from <span className="highlight">Confused to Confident</span> Starts Here
+        </h1>
+        <p className="hero-subtitle">
+          Connect with verified achievers who have successfully navigated the exact challenges you're facing today.
+        </p>
         
+        <div className="hero-rotator">
+          Your gateway to answers in{' '}
+          <TypeAnimation
+            sequence={[
+              'Engineering Admissions', 1500,
+              'Internships', 1500,
+              'College Life', 1500,
+              'Competitive Exams', 1500,
+              'Career Growth', 1500,
+              'Placements', 1500,
+            ]}
+            wrapper="span"
+            speed={50}
+            className="typed-text"
+            repeat={Infinity}
+          />
+        </div>
+
         <div className="button-group">
-          {/* We'll use React Router's Link component for navigation */}
-          <a href="/Signup" className="btn-mentor">Become a Mentor</a>
-          <a href="/chat" className="btn-ask">Ask Your Question Now</a>
+          <Link to="/mentors" className="hero-button secondary">Ask Your Question Now</Link>
         </div>
 
         <div className="stats-container">
           <div className="stat-item">
-            <div className="stat-number">1,000+</div>
-            <div className="stat-label">Students Helped</div>
+            <span className="stat-number">1,000+</span>
+            <span className="stat-label">Students Helped</span>
           </div>
           <div className="stat-item">
-            <div className="stat-number">50+</div>
-            <div className="stat-label">Verified Mentors</div>
+            <span className="stat-number">50+</span>
+            <span className="stat-label">Verified Mentors</span>
           </div>
           <div className="stat-item">
-            <div className="stat-number">24/7</div>
-            <div className="stat-label">Support</div>
+            <span className="stat-number">24/7</span>
+            <span className="stat-label">Support</span>
           </div>
         </div>
       </div>
