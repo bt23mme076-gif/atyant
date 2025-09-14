@@ -98,7 +98,7 @@ const Signup = () => {
             if (role === "mentor") {
               navigate("/");      
             } else {
-              navigate("/student-dashboard");
+              navigate("/profile");
             }
           }, 100);
         } else {
