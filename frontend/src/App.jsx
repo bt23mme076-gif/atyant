@@ -3,6 +3,7 @@ import React, { useContext } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthContext } from './AuthContext';
+import { Analytics } from '@vercel/analytics/react'; // 1. Import Analytics
 
 // Import all components
 import Navbar from './components/Navbar';
@@ -41,6 +42,7 @@ function App() {
         </Routes>
       </main>
       {!isChatPage && <Footer />}
+      <Analytics /> {/* 2. Add the Analytics component here */}
     </div>
   );
 }
