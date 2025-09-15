@@ -23,7 +23,7 @@ const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
 const allowedOrigins = [
-    process.env.FRONTEND_URL || "https://atyant.vercel.app",
+    process.env.FRONTEND_URL || "https://www.atyant.in",
     "http://localhost:5173"
 ];
 app.use(cors({
