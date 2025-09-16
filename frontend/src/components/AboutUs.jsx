@@ -14,7 +14,7 @@ const AboutUs = () => {
         <div className="about-content">
           <h2>Who We Are</h2>
           <p>
-            Atyant is a premier software development company dedicated to delivering top-notch, innovative solutions. Our team of expert developers, designers, and strategists work collaboratively to bring your vision to life, ensuring scalability and success for your business. We believe in building partnerships, not just projects.
+            At Atyant, we’re building a space where students don’t have to struggle alone. We connect you with people who have already faced the same challenges and found solutions—so you can move forward faster. Our mission is simple: make knowledge sharing easy, practical, and accessible for every student
           </p>
         </div>
       </div>

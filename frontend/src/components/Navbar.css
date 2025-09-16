@@ -60,3 +60,11 @@
   background-color: #00bfff;
   color: white;
 }
+/* Add this to the end of Navbar.css */
+@media (max-width: 768px) {
+  .navbar-links {
+    display: none; /* Hide links on mobile */
+  }
+  /* You would need to add a hamburger menu icon and JavaScript
+     in Navbar.jsx to toggle the menu's visibility */
+}
