@@ -1,4 +1,5 @@
 /* src/components/Navbar.css */
+
 :root {
   --bg: #0b0f14;
   --panel: #121821;
@@ -11,7 +12,6 @@
 }
 
 * { box-sizing: border-box; }
-a { text-decoration: none; color: inherit; }
 
 .navbar {
   width: 100%;
@@ -31,41 +31,36 @@ a { text-decoration: none; color: inherit; }
   font-weight: 700;
   letter-spacing: 0.3px;
   color: var(--text);
+  text-decoration: none;
   font-size: 20px;
 }
 
-/* Inline links (desktop) */
-.navbar-links {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.nav-link, .nav-button {
-  padding: 8px 12px;
-  border-radius: 8px;
-  color: var(--text);
-  border: 1px solid transparent;
-}
-.nav-link:hover { background: rgba(255,255,255,0.05); border-color: var(--border); }
-.nav-button { background: rgba(255,255,255,0.04); border: 1px solid var(--border); cursor: pointer; }
-.nav-button:hover { background: rgba(255,255,255,0.08); }
-.nav-button.primary { background: var(--primary); color: #fff; border-color: transparent; }
-.nav-button.primary:hover { background: var(--primary-600); }
-
-/* Hamburger button */
 .hamburger {
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
   width: 40px;
   height: 36px;
+  border: 1px solid var(--border);
+  background: transparent;
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
 }
+.hamburger:hover { background: rgba(255,255,255,0.04); }
+.hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--text);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.hamburger.is-open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.hamburger.is-open span:nth-child(2) { opacity: 0; }
+.hamburger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
-/* Slide-down mobile panel */
+/* Slide-down panel */
 .menu-panel {
   position: absolute;
   left: 0;
@@ -86,12 +81,43 @@ a { text-decoration: none; color: inherit; }
   pointer-events: auto;
 }
 
-/* Visibility control */
-/* Default = desktop-first: show desktop links, hide mobile UI */
-.desktop-only { display: flex; }
-.mobile-only { display: none; }
+.menu-link, .menu-button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px 10px;
+  margin: 4px 0;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--text);
+  border: 1px solid transparent;
+}
+.menu-link { color: var(--text); }
+.menu-link:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--border);
+}
+.menu-button {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.menu-button:hover { background: rgba(255,255,255,0.08); }
+.menu-button.primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: transparent;
+}
+.menu-button.primary:hover { background: var(--primary-600); }
 
-/* Mobile breakpoint */
-@media (max-width: 767px) {
-  .desktop-only { display: none; }    /* hide inline links on mobile */
-  .mobile-only { display: block;
+/* Desktop wide: keep same behavior (simple, centered panel). */
+@media (min-width: 768px) {
+  .menu-panel {
+    max-width: 520px;
+    margin: 0 auto;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-radius: 0 0 12px 12px;
+  }
+}
