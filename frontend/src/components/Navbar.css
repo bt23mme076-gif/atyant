@@ -1,5 +1,4 @@
 /* src/components/Navbar.css */
-
 :root {
   --bg: #0b0f14;
   --panel: #121821;
@@ -35,20 +34,56 @@
   font-size: 20px;
 }
 
+/* Inline nav (desktop default) */
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Buttons/links shared styles */
+.nav-link,
+.nav-button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text);
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+.nav-link:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--border);
+}
+.nav-button {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.nav-button:hover { background: rgba(255,255,255,0.08); }
+.nav-button.primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: transparent;
+}
+.nav-button.primary:hover { background: var(--primary-600); }
+
+/* Hamburger (hidden on desktop by default) */
 .hamburger {
   width: 40px;
   height: 36px;
   border: 1px solid var(--border);
   background: transparent;
   border-radius: 8px;
-  display: inline-flex;
+  display: none;            /* desktop default: hidden */
   align-items: center;
   justify-content: center;
-  gap: 4px;
   cursor: pointer;
+  color: var(--text);       /* lucide icon uses currentColor */
   transition: background 0.2s;
 }
 .hamburger:hover { background: rgba(255,255,255,0.04); }
+
+/* If using custom spans instead of lucide icon */
 .hamburger span {
   display: block;
   width: 20px;
@@ -60,7 +95,7 @@
 .hamburger.is-open span:nth-child(2) { opacity: 0; }
 .hamburger.is-open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 
-/* Slide-down panel */
+/* Slide-down panel (mobile menu) */
 .menu-panel {
   position: absolute;
   left: 0;
@@ -74,14 +109,18 @@
   pointer-events: none;
   transition: transform 0.22s ease, opacity 0.22s ease;
   padding: 8px 12px;
+  display: none;            /* desktop default: hidden */
 }
+
 .menu-panel.open {
   transform: translateY(0);
   opacity: 1;
   pointer-events: auto;
 }
 
-.menu-link, .menu-button {
+/* Items inside mobile panel */
+.menu-link,
+.menu-button {
   display: block;
   width: 100%;
   text-align: left;
@@ -93,7 +132,6 @@
   color: var(--text);
   border: 1px solid transparent;
 }
-.menu-link { color: var(--text); }
 .menu-link:hover {
   background: rgba(255,255,255,0.05);
   border-color: var(--border);
@@ -111,7 +149,15 @@
 }
 .menu-button.primary:hover { background: var(--primary-600); }
 
-/* Desktop wide: keep same behavior (simple, centered panel). */
+/* Responsive visibility control */
+/* Mobile: hide inline links, show hamburger + panel */
+@media (max-width: 767px) {
+  .navbar-links { display: none; }   /* hide desktop inline links */
+  .hamburger { display: inline-flex; } /* show hamburger on mobile */
+  .menu-panel { display: block; }    /* allow panel to animate open */
+}
+
+/* Optional: wider desktop panel styling if you open it on tablets/desktops */
 @media (min-width: 768px) {
   .menu-panel {
     max-width: 520px;
