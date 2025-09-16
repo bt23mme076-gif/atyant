@@ -2,17 +2,22 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
-import { GoogleLogin } from '@react-oauth/google'; // 1. Import GoogleLogin
+import { GoogleLogin } from '@react-oauth/google';
+import { Eye, EyeOff } from 'lucide-react';
 import './AuthForm.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
-  // This function for email/password login remains unchanged
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -42,7 +47,6 @@ const Login = () => {
     }
   };
 
-  // 2. Add a new function to handle Google's response
   const handleGoogleSuccess = async (credentialResponse) => {
     setLoading(true);
     setMessage('');
@@ -67,10 +71,6 @@ const Login = () => {
     }
   };
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-  
   return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
@@ -78,16 +78,32 @@ const Login = () => {
         <div className="form-group">
           <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
         </div>
-        <div className="form-group">
-          <input type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} required />
+        
+        <div className="form-group password-group">
+          <input 
+            type={showPassword ? "text" : "password"} 
+            name="password" 
+            placeholder="Password" 
+            value={formData.password} 
+            onChange={handleChange} 
+            required 
+          />
+          <button 
+            type="button" 
+            className="password-toggle-btn" 
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
         </div>
+
         <div className="forgot-password-link">
             <Link to="/forgot-password">Forgot Password?</Link>
         </div>
         <button type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
         
-        {/* 3. Add the divider and Google Login button */}
         <div className="divider">OR</div>
+        
         <div className="google-login-button-container">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}

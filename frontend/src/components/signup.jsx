@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import "./AuthForm.css";
+import { Eye, EyeOff } from 'lucide-react'; // Import the eye icons 
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +17,17 @@ const Signup = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
   const { login, user } = useAuth();
+
+    // 2. Password visibility ke liye naya state add kiya
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+        if (user.role === "mentor") navigate("/");
+        else navigate("/");
+    }
+  }, [user, navigate]);
 
   // Remove the useEffect that automatically redirects based on user state
   // This is causing the conflict with the manual navigation
@@ -122,65 +134,56 @@ const Signup = () => {
   };
 
   // JSX for the form
-  return (
+ return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
         <h2>Create an Account</h2>
-        {message && <p className="success-message">{message}</p>}
-        {errors.general && <p className="error-message">{errors.general}</p>}
-
+        {/* Username aur Email fields waise hi rahenge */}
         <div className="form-group">
           <label htmlFor="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            required
-          />
+          <input type="text" id="username" name="username" value={formData.username} onChange={handleChange} required />
           {errors.username && <p className="error-text">{errors.username}</p>}
         </div>
-
         <div className="form-group">
           <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+          <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
           {errors.email && <p className="error-text">{errors.email}</p>}
         </div>
 
-        <div className="form-group">
+        {/* 3. Password field ko update kiya */}
+        <div className="form-group password-group">
           <label htmlFor="password">Password</label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             id="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
             required
           />
+          <button type="button" className="password-toggle-btn" onClick={() => setShowPassword(!showPassword)}>
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
           {errors.password && <p className="error-text">{errors.password}</p>}
         </div>
 
-        <div className="form-group">
+        {/* 4. Confirm Password field ko update kiya */}
+        <div className="form-group password-group">
           <label htmlFor="confirmPassword">Confirm Password</label>
           <input
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             id="confirmPassword"
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
             required
           />
+          <button type="button" className="password-toggle-btn" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
           {errors.confirmPassword && <p className="error-text">{errors.confirmPassword}</p>}
         </div>
-
+        
         <div className="form-group">
           <label>Sign up as:</label>
           <div className="role-selection">
