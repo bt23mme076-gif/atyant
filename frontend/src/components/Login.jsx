@@ -36,7 +36,7 @@ const Login = () => {
         setTimeout(() => {
           if (data.role === 'mentor') navigate('/chat');
           else navigate('/');
-        }, 1500);
+        }, 200);
       } else {
         setMessage(data.message || 'Login failed.');
       }
