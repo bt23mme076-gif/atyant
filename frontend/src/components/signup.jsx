@@ -112,7 +112,7 @@ const Signup = () => {
             } else {
               navigate("/profile");
             }
-          }, 100);
+          },100);
         } else {
           console.error("No token received:", data);
           setMessage("Signup completed but no authentication token received.");
