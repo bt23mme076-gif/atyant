@@ -12,7 +12,7 @@ import nodemailer from 'nodemailer'; // Nodemailer ko import karein
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chatRoutes.js';
 import profileRoutes from './routes/profileRoutes.js'; // 1. IMPORT the new routes
-import feedbackRoutes from './routes/feedbackRoutes.js'; 
+import feedbackRoutes from './routes/feedbackRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
 
 // Import models
@@ -20,13 +20,17 @@ import Feedback from './models/Feedback.js';
 import Message from './models/Message.js';
 import User from './models/User.js';
 
+// NOTE: Contact is used below but not imported in your snippet.
+// Keeping code as-is per request; ensure Contact model exists/imported in project.
+// import Contact from './models/Contact.js';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // --- Middleware ---
 const allowedOrigins = [
-    process.env.FRONTEND_URL || "https://www.atyant.in",
-    "http://localhost:5173"
+  process.env.FRONTEND_URL || "https://www.atyant.in",
+  "http://localhost:5173"
 ];
 app.use(cors({
   origin: allowedOrigins,
@@ -35,7 +39,7 @@ app.use(cors({
 app.use(express.json());
 
 // --- Database Connection ---
-const MONGO_URI = process.env.MONGO_URI || 
+const MONGO_URI = process.env.MONGO_URI ||
   "mongodb+srv://atyantuser:qf5CWLbdoKKzQlpL@cluster0.vutlgpa.mongodb.net/atyant?retryWrites=true&w=majority";
 
 mongoose.connect(MONGO_URI)
@@ -67,35 +71,35 @@ app.post("/api/contact", async (req, res) => {
 app.post("/api/validate-mentor", async (req, res) => {
   try {
     const { mentorId, userId } = req.body;
-    
+
     const mentor = await User.findById(mentorId);
     if (!mentor) {
-      return res.status(404).json({ 
-        valid: false, 
-        message: "Mentor not found" 
+      return res.status(404).json({
+        valid: false,
+        message: "Mentor not found"
       });
     }
-    
+
     if (mentor.role !== 'mentor') {
-      return res.status(400).json({ 
-        valid: false, 
-        message: "Selected user is not a mentor" 
+      return res.status(400).json({
+        valid: false,
+        message: "Selected user is not a mentor"
       });
     }
-    
+
     if (mentor.chatDisabled) {
-      return res.status(403).json({ 
-        valid: false, 
-        message: "This mentor is not accepting messages at this time" 
+      return res.status(403).json({
+        valid: false,
+        message: "This mentor is not accepting messages at this time"
       });
     }
-    
+
     res.json({ valid: true, mentor: mentor });
   } catch (error) {
     console.error("Error validating mentor:", error);
-    res.status(500).json({ 
-      valid: false, 
-      message: "Server error during validation" 
+    res.status(500).json({
+      valid: false,
+      message: "Server error during validation"
     });
   }
 });
@@ -115,7 +119,7 @@ const io = new Server(server, {
   pingInterval: 25000
 });
 
-// --- Socket.IO Private Chat - COMPLETELY FIXED ---
+// Socket.IO handlers (single connection block)
 io.on("connection", (socket) => {
   console.log(`✅ User connected via WebSocket: ${socket.id}`);
 
@@ -125,11 +129,54 @@ io.on("connection", (socket) => {
     console.log(`👤 User ${socket.id} joined room: ${userId}`);
   });
 
-  // Handle private messages with validation - COMPLETELY FIXED
+  // Lightweight private_message handler (kept as-is, but merged inside the same connection block)
+  socket.on("private_message", async (data) => {
+    try {
+      if (!data.sender || !data.receiver || !data.text) return;
+
+      const [sender, receiver] = await Promise.all([
+        User.findById(data.sender),
+        User.findById(data.receiver)
+      ]);
+      if (!sender || !receiver) return;
+
+      const newMessage = new Message({
+        sender: data.sender,
+        receiver: data.receiver,
+        text: data.text,
+      });
+      await newMessage.save();
+
+      io.to(data.receiver).emit("receive_private_message", newMessage);
+
+      // --- EMAIL NOTIFICATION LOGIC ---
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: '"Atyant" <notification@atyant.in>',
+        to: receiver.email,
+        subject: `New Message from ${sender.username}`,
+        text: `You have a new message from ${sender.username}.\n\nMessage: "${data.text}"\n\nPlease log in to your Atyant account to reply.`,
+        html: `<p>You have a new message from <strong>${sender.username}</strong>.</p><p>Message: <em>"${data.text}"</em></p><p>Please log in to your Atyant account to reply.</p>`,
+      });
+
+      console.log(`📧 Email notification sent to ${receiver.email}`);
+    } catch (error) {
+      console.error("❌ Error in private_message:", error);
+    }
+  });
+
+  // Robust private_message handler with validation - kept as-is and placed after the lightweight one
   socket.on("private_message", async (data) => {
     try {
       console.log("📩 Received message data:", data);
-      
+
       // Validate required fields
       if (!data.sender || !data.receiver || !data.text) {
         socket.emit("message_error", {
@@ -144,7 +191,7 @@ io.on("connection", (socket) => {
         User.findById(data.sender),
         User.findById(data.receiver)
       ]);
-      
+
       if (!sender || !receiver) {
         socket.emit("message_error", {
           error: "Invalid contact selected!",
@@ -152,7 +199,7 @@ io.on("connection", (socket) => {
         });
         return;
       }
-      
+
       // Check if receiver is a mentor and accepts messages
       if (receiver.role === 'mentor' && receiver.chatDisabled) {
         socket.emit("message_error", {
@@ -168,7 +215,7 @@ io.on("connection", (socket) => {
         receiver: data.receiver,
         text: data.text,
       });
-      
+
       await newMessage.save();
       console.log(`💾 Message saved to MongoDB: ${newMessage._id}`);
 
@@ -199,27 +246,26 @@ io.on("connection", (socket) => {
 
       console.log(`📤 Emitting to receiver: ${data.receiver}`);
       console.log(`📤 Emitting to sender: ${data.sender}`);
-      
+
       // Use io.to() for broadcasting message and chat list update
       io.to(data.receiver).emit("receive_private_message", messageForFrontend);
       io.to(data.sender).emit("receive_private_message", messageForFrontend);
-      
+
       io.to(data.sender).emit("chat_update", {
         type: 'new_message',
         chatId: `${data.sender}-${data.receiver}`,
         messageId: newMessage._id,
         timestamp: new Date().toISOString()
       });
-      
+
       io.to(data.receiver).emit("chat_update", {
-        type: 'new_message', 
+        type: 'new_message',
         chatId: `${data.sender}-${data.receiver}`,
         messageId: newMessage._id,
         timestamp: new Date().toISOString()
       });
 
       console.log(`💬 Message successfully sent from ${data.sender} to ${data.receiver}`);
-      
     } catch (error) {
       console.error("❌ Error saving/sending private message:", error);
       socket.emit("message_error", {
@@ -228,6 +274,7 @@ io.on("connection", (socket) => {
       });
     }
   });
+
   // Handle message delivery status
   socket.on("message_delivered", (data) => {
     console.log(`✓ Message delivered: ${data.messageId}`);
@@ -248,18 +295,18 @@ io.on("connection", (socket) => {
 app.get('/api/messages/:userId1/:userId2', async (req, res) => {
   try {
     const { userId1, userId2 } = req.params;
-    
+
     const messages = await Message.find({
       $or: [
         { sender: userId1, receiver: userId2 },
         { sender: userId2, receiver: userId1 }
       ]
     })
-    .populate('sender', 'username name')
-    .populate('receiver', 'username name')
-    .sort({ createdAt: 1 })
-    .exec();
-    
+      .populate('sender', 'username name')
+      .populate('receiver', 'username name')
+      .sort({ createdAt: 1 })
+      .exec();
+
     res.json(messages);
   } catch (error) {
     console.error('Error fetching messages:', error);
@@ -271,7 +318,7 @@ app.get('/api/messages/:userId1/:userId2', async (req, res) => {
 app.get('/api/debug/connections', (req, res) => {
   const rooms = io.sockets.adapter.rooms;
   const activeRooms = {};
-  
+
   rooms.forEach((sockets, roomName) => {
     if (roomName.length === 24) { // MongoDB ObjectIds are 24 chars
       activeRooms[roomName] = {
@@ -280,7 +327,7 @@ app.get('/api/debug/connections', (req, res) => {
       };
     }
   });
-  
+
   res.json({
     activeConnections: io.engine.clientsCount,
     activeRooms: activeRooms,
@@ -291,7 +338,7 @@ app.get('/api/debug/connections', (req, res) => {
 app.get('/api/debug/user/:userId/connected', (req, res) => {
   const userId = req.params.userId;
   const room = io.sockets.adapter.rooms.get(userId);
-  
+
   res.json({
     userId: userId,
     isConnected: !!room,
@@ -309,7 +356,7 @@ app.get('/api/debug/messages', async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(10)
       .exec();
-    
+
     res.json({
       count: messages.length,
       messages: messages,
@@ -348,6 +395,7 @@ app.get('/api/profile/:username', async (req, res) => {
     res.status(500).json({ message: 'Error fetching profile' }); // Return JSON error
   }
 });
+
 // --- Start server ---
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
