@@ -1,209 +1,94 @@
-// src/pages/ProfilePage.jsx
-import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../AuthContext';
-import './ProfilePage.css';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import './PublicProfilePage.css'; // Import CSS file
 
-const ProfilePage = () => {
-  const { user } = useContext(AuthContext);
-  const [formData, setFormData] = useState({ username: '', bio: '', expertise: [] });
+const PublicProfilePage = () => {
+  const { username } = useParams();
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
-      if (!user || !user.token) {
-        setLoading(false);
-        return;
-      }
-
       setLoading(true);
+      setError('');
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        const response = await fetch(`${API_URL}/api/profile/me`, {
-          headers: { 'Authorization': `Bearer ${user.token}` },
-        });
+        const response = await fetch(`${API_URL}/api/profile/${username}`);
 
         if (!response.ok) {
-          setMessage('Failed to load profile.');
+          const errorData = await response.json(); // Try to get JSON error
+          const errorMessage = errorData.message || response.statusText; // Use message if available
+          console.error(`Failed to load profile: ${response.status} - ${errorMessage}`);
+          setError(`Failed to load profile: ${errorMessage}`);
           return;
         }
 
         const data = await response.json();
-        setFormData({
-          username: data.username,
-          bio: data.bio || '',
-          expertise: data.expertise || [],
-        });
-        setImagePreview(data.profilePicture || ''); // Set initial image preview
-
-      } catch (error) {
-        setMessage('An error occurred while loading profile.');
+        setProfile(data);
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+        setError("Failed to load profile. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [user]);
+  }, [username]);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+  const startChat = () => {
+    if (profile) {
+      navigate('/chat', { state: { selectedContact: profile } });
     }
   };
 
-  const handleImageUpload = async () => {
-    if (!imageFile) return;
+  if (loading) {
+    return <div className="status-message">Loading profile...</div>;
+  }
 
-    setLoading(true);
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const uploadData = new FormData();
-      uploadData.append('profilePicture', imageFile);
+  if (error) {
+    return (
+      <div className="status-message error">
+        <h3>Error</h3>
+        <p>{error}</p>
+      </div>
+    );
+  }
 
-      const response = await fetch(`${API_URL}/api/profile/upload-picture`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${user.token}` },
-        body: uploadData,
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('Picture updated!');
-        setImagePreview(data.profilePicture); // Update image preview after upload
-      } else {
-        setMessage(data.message || 'Upload failed.');
-      }
-    } catch (error) {
-      setMessage('An error occurred during upload.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!user || !user.token) {
-      setMessage("You must be logged in to save.");
-      return;
-    }
-
-    setLoading(true);
-    setMessage('');
-
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${API_URL}/api/profile/me`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('Profile updated successfully!');
-      } else {
-        setMessage(data.message || 'Failed to update profile.');
-      }
-    } catch (error) {
-      setMessage('An error occurred.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) return <div className="status-message">Loading Profile...</div>;
-  if (!user) return <div className="status-message">Please log in to view your profile.</div>;
+  if (!profile) {
+    return <div className="status-message">Profile not found.</div>;
+  }
 
   return (
-    <div className="profile-container">
-      <div className="profile-picture-section">
+    <div className="public-profile-container">
+      <div className="profile-card">
         <img
-          src={imagePreview || `https://api.pravatar.cc/150?u=${user?.id}`}
-          alt="Profile"
+          src={profile.profilePicture || `https://api.pravatar.cc/150?u=${username}`}
+          alt={profile.username}
           className="profile-avatar"
         />
-        <input
-          type="file"
-          id="imageUpload"
-          accept="image/*"
-          onChange={handleImageChange}
-        />
-        <label htmlFor="imageUpload" className="upload-btn">
-          Choose Image
-        </label>
-        <button
-          type="button"
-          onClick={handleImageUpload}
-          disabled={!imageFile || loading}
-          className="upload-photo-btn" // Added class for styling
-        >
-          {loading ? 'Uploading...' : 'Upload Picture'}
-        </button>
-      </div>
+        <h1>{profile.username}</h1>
+        <p className="profile-role">{profile.role}</p>
+        <p className="profile-bio">{profile.bio || 'No bio available.'}</p>
 
-      <form className="profile-form" onSubmit={handleSubmit}>
-        <h2>Edit Your Profile</h2>
-
-        <div className="form-group">
-          <label htmlFor="username">Username</label>
-          <input
-            id="username"
-            name="username"
-            type="text"
-            value={formData.username}
-            onChange={(e) =>
-              setFormData({ ...formData, username: e.target.value })
-            }
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="bio">Bio</label>
-          <textarea
-            id="bio"
-            name="bio"
-            rows="4"
-            value={formData.bio}
-            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-          />
-        </div>
-
-        {user?.role === 'mentor' && (
-          <div className="form-group">
-            <label htmlFor="expertise">Expertise (comma separated)</label>
-            <input
-              id="expertise"
-              name="expertise"
-              type="text"
-              value={formData.expertise.join(', ')}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  expertise: e.target.value.split(',').map((item) => item.trim()),
-                })
-              }
-            />
+        {profile.expertise && profile.expertise.length > 0 && (
+          <div className="expertise-section">
+            <h4>Expertise</h4>
+            <div className="tags">
+              {profile.expertise.map((skill, index) => (
+                <span className="tag" key={index}>
+                  {skill}
+                </span>
+              ))}
+            </div>
           </div>
         )}
-
-        <button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : 'Save Changes'}
-        </button>
-        {message && <p className="form-message success">{message}</p>}
-      </form>
+        <button className="chat-now-btn" onClick={startChat}>Chat Now</button>
+      </div>
     </div>
   );
 };
 
-export default ProfilePage;
+export default PublicProfilePage;

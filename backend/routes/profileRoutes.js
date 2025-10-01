@@ -62,7 +62,7 @@ router.post('/upload-picture', protect, upload.single('profilePicture'), async (
             folder: "atyant_profiles"
         }, async (error, result) => {
             if (error) throw new Error('Cloudinary upload failed');
-            
+
             user.profilePicture = result.secure_url;
             await user.save();
             res.json({ message: 'Profile picture updated successfully', profilePicture: user.profilePicture });
