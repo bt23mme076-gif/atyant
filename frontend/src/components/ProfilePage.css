@@ -1,6 +1,48 @@
-/* ProfilePage.css */
+/* ProfilePage.css - Enhanced Version */
 
-/* Modern CSS Reset and Variables */
+/* Modern CSS Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h5 {
+  overflow-wrap: break-word;
+}
+
+/* Updated CSS Variables with Enhanced Palette */
 :root {
   --primary: #6366f1;
   --primary-dark: #4f46e5;
@@ -16,67 +58,115 @@
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 25px 50px rgba(0, 0, 0, 0.2);
   --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  --gradient-secondary: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+  --gradient-surface: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Base Container Styles */
+/* Enhanced Base Container with Glass Morphism Effect */
 .profile-container {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 40px auto;
-  padding: 40px;
+  padding: 50px;
   display: grid;
   grid-template-columns: 1fr 2fr;
-  gap: 50px;
+  gap: 60px;
   align-items: start;
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
+  overflow: hidden;
 }
 
-/* Profile Picture Section */
+.profile-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: var(--gradient-primary);
+  opacity: 0.05;
+  z-index: -1;
+  animation: rotate 15s linear infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Enhanced Profile Picture Section */
 .profile-picture-section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 30px 20px;
-  background: var(--surface-alt);
-  border-radius: var(--radius-lg);
+  gap: 25px;
+  padding: 35px 25px;
+  background: var(--gradient-surface);
+  border-radius: var(--radius-xl);
   border: 2px dashed var(--border-light);
-  transition: var(--transition);
+  transition: var(--transition-slow);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-picture-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(99, 102, 241, 0.1),
+    transparent
+  );
+  transition: left 0.7s ease;
+}
+
+.profile-picture-section:hover::before {
+  left: 100%;
 }
 
 .profile-picture-section:hover {
   border-color: var(--primary-light);
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-sm);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-lg);
 }
 
-.profile-image {
-  width: 200px;
-  height: 200px;
+/* Enhanced Profile Image with Animated Border */
+.profile-avatar {
+  position: relative;
+  width: 220px;
+  height: 220px;
   border-radius: 50%;
   object-fit: cover;
-  border: 6px solid transparent;
-  background: var(--gradient-primary) padding-box, 
-              var(--gradient-primary) border-box;
-  background-clip: padding-box, border-box;
+  border: 4px solid white;
   transition: var(--transition);
+  box-shadow: var(--shadow-md);
 }
 
-.profile-image:hover {
-  transform: scale(1.05);
-}
-
-/* Upload Button Styles */
-.upload-button {
-  padding: 12px 24px;
+/* Enhanced Upload Button with Icon */
+.upload-btn {
+  padding: 14px 28px;
   background: var(--gradient-primary);
   color: white;
   border: none;
@@ -86,44 +176,154 @@
   transition: var(--transition);
   text-align: center;
   width: 100%;
-  max-width: 200px;
+  max-width: 220px;
+  position: relative;
+  overflow: hidden;
+  display: inline-flex; /* Changed to inline-flex */
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-decoration: none; /* Added to remove underline from label */
 }
 
-.upload-button:hover {
-  filter: brightness(1.1);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+.upload-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
 }
 
-.upload-button:disabled {
+.upload-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.upload-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+}
+
+.upload-btn:active {
+  transform: translateY(-1px);
+}
+
+.upload-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+  animation: pulse 2s infinite;
 }
 
-/* Profile Form Styles */
+/* Style for the Upload Picture button */
+.upload-photo-btn {
+  padding: 14px 28px;
+  background: var(--gradient-secondary); /* Use a different gradient */
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition);
+  text-align: center;
+  width: 100%;
+  max-width: 220px;
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.upload-photo-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.upload-photo-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.upload-photo-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4); /* Adjust shadow color */
+}
+
+.upload-photo-btn:active {
+  transform: translateY(-1px);
+}
+
+.upload-photo-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  animation: pulse 2s infinite;
+}
+
+/* Hide the default file input */
+#imageUpload {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Enhanced Profile Form */
 .profile-form {
   display: flex;
   flex-direction: column;
-  gap: 25px;
+  gap: 30px;
 }
 
 .profile-form h2 {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   background: var(--gradient-primary);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   text-align: center;
+  position: relative;
+  padding-bottom: 15px;
 }
 
-/* Form Group Styles */
+.profile-form h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+}
+
+/* Enhanced Form Groups with Floating Labels */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  position: relative;
 }
 
 .form-group label {
@@ -131,127 +331,218 @@
   color: var(--text-dark);
   font-size: 1rem;
   margin-bottom: 5px;
+  transition: var(--transition);
 }
 
-/* Input and Textarea Styles */
+/* Enhanced Input and Textarea with Modern Styling */
 .form-group input,
 .form-group textarea {
-  padding: 15px 20px;
+  padding: 18px 22px;
   border: 2px solid var(--border);
-  border-radius: var(--radius-md);
-  font-size: 1rem;
+  border-radius: var(--radius-lg);
+  font-size: 1.05rem;
   transition: var(--transition);
   background: var(--surface);
   width: 100%;
   box-sizing: border-box;
+  position: relative;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-  transform: translateY(-2px);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+  transform: translateY(-3px);
+  background: rgba(99, 102, 241, 0.02);
 }
 
 .form-group textarea {
   resize: vertical;
-  min-height: 120px;
+  min-height: 140px;
   font-family: inherit;
+  line-height: 1.6;
 }
 
-/* Submit Button */
-.profile-form button[type="submit"] {
-  padding: 16px 32px;
+/* Enhanced Submit Button with Advanced Effects */
+.profile-form button[type='submit'] {
+  padding: 18px 36px;
   background: var(--gradient-primary);
   color: white;
   border: none;
-  border-radius: var(--radius-md);
-  font-size: 1.1rem;
-  font-weight: 600;
+  border-radius: var(--radius-lg);
+  font-size: 1.15rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: var(--transition);
-  margin-top: 10px;
+  transition: var(--transition-slow);
+  margin-top: 15px;
+  position: relative;
+  overflow: hidden;
 }
 
-.profile-form button[type="submit"]:hover:not(:disabled) {
-  filter: brightness(1.1);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+.profile-form button[type='submit']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.7s;
 }
 
-.profile-form button[type="submit"]:disabled {
+.profile-form button[type='submit']:hover::before {
+  left: 100%;
+}
+
+.profile-form button[type='submit']:hover:not(:disabled) {
+  filter: brightness(1.15);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
+}
+
+.profile-form button[type='submit']:active:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.profile-form button[type='submit']:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+  animation: pulse 2s infinite;
 }
 
-/* Form Message */
+/* Enhanced Form Message with Status Colors */
 .form-message {
-  padding: 15px;
-  border-radius: var(--radius-md);
+  padding: 18px;
+  border-radius: var(--radius-lg);
   text-align: center;
-  font-weight: 500;
-  margin-top: 20px;
+  font-weight: 600;
+  margin-top: 25px;
   background: var(--surface-alt);
-  border-left: 4px solid var(--primary);
+  border-left: 6px solid var(--primary);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Status Messages */
+.form-message::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-primary);
+  opacity: 0.05;
+  z-index: -1;
+}
+
+/* Enhanced Status Messages */
 .status-message {
-  min-height: 50vh;
+  min-height: 60vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   color: var(--text-light);
   text-align: center;
+  flex-direction: column;
+  gap: 20px;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .profile-container {
-    grid-template-columns: 1fr;
-    gap: 30px;
-    padding: 20px;
-    margin: 20px;
-  }
-  
-  .profile-picture-section {
-    padding: 20px;
-  }
-  
-  .profile-image {
-    width: 150px;
-    height: 150px;
-  }
-  
-  .profile-form h2 {
-    font-size: 1.5rem;
-  }
-  
-  .form-group input,
-  .form-group textarea {
-    padding: 12px 16px;
+/* Loading Spinner Enhancement */
+.loading-spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(99, 102, 241, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin 1.2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* Focus States for Accessibility */
+/* Enhanced Focus States for Accessibility */
 .profile-form input:focus,
 .profile-form textarea:focus,
-.upload-button:focus {
-  outline: 2px solid var(--primary-light);
+.upload-btn:focus,
+.upload-photo-btn:focus {
+  outline: 3px solid rgba(99, 102, 241, 0.3);
   outline-offset: 2px;
 }
 
-/* Loading Animation */
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+/* Advanced Responsive Design */
+@media (max-width: 968px) {
+  .profile-container {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 30px;
+    margin: 20px;
+  }
+
+  .profile-picture-section {
+    padding: 25px;
+  }
+
+  .profile-avatar {
+    width: 180px;
+    height: 180px;
+  }
+
+  .profile-form h2 {
+    font-size: 2rem;
+  }
 }
 
-.profile-form button[type="submit"]:disabled,
-.upload-button:disabled {
-  animation: pulse 2s infinite;
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 20px;
+    margin: 15px;
+    gap: 30px;
+  }
+
+  .profile-picture-section {
+    padding: 20px;
+  }
+
+  .profile-avatar {
+    width: 150px;
+    height: 150px;
+  }
+
+  .profile-form h2 {
+    font-size: 1.8rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 16px 20px;
+  }
+
+  .upload-btn,
+  .profile-form button[type='submit'],
+  .upload-photo-btn {
+    padding: 16px 24px;
+  }
+}
+
+/* Reduced Motion for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
