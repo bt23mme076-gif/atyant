@@ -10,10 +10,10 @@ const HeroSection = () => {
     <section className="hero-section">
       <div className="hero-content">
         <h1 className="hero-title">
-          Your Journey from <span className="highlight">Confused to Confident</span> Starts Here
+          Ask from <span className="highlight">Those Who’ve</span> Done It Before
         </h1>
         <p className="hero-subtitle">
-          Connect with verified achievers who have successfully navigated the exact challenges you're facing today.
+          No guesswork. Just experienced real answers from people who faced the same problem in the same situation.
         </p>
  {/* 2. Add the SearchBar component here */}
         <SearchBar />
