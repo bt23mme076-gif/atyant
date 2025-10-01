@@ -1,12 +1,15 @@
-// src/components/CPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
-import { useAuth } from '../AuthContext'; // THIS IMPORT WAS MISSING
+import { useAuth } from '../AuthContext';
 import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
 
-// Use environment variable for socket URL, fallback to backend URL
+// ---- ADD THIS ----
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+// -------------------
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const ChatPage = () => {
@@ -21,12 +24,16 @@ const ChatPage = () => {
   const messagesEndRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useAuth(); // Get user from our custom hook
-
-  // Initialize socket connection
+  const { user } = useAuth();
+  const [highlightedContactId, setHighlightedContactId] = useState(null);
   const [socket, setSocket] = useState(null);
 
-  // 1. Set up the current user and socket connection
+  // New state variables for scrolling
+  const [allMessagesLoaded, setAllMessagesLoaded] = useState(false);
+  const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
+  const [skip, setSkip] = useState(0); // How many messages to skip
+  const limit = 20; // Number of messages to load per batch
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -37,64 +44,45 @@ const ChatPage = () => {
           role: decoded.role 
         };
         setCurrentUser(userData);
-        
-        // Initialize socket connection
+
         const newSocket = io(API_URL, {
-  auth: {
-    token: token
-  },
-  transports: ['websocket', 'polling'] // Ensure this matches backend
-});
-        
-        newSocket.on('connect', () => {
-          console.log('Connected to server with ID:', newSocket.id);
-          setSocketStatus('connected');
-          // Join user's room after connection is established
-          newSocket.emit('join_user_room', userData.id);
-          console.log(`Joined room: ${userData.id}`);
+          auth: { token },
+          transports: ['websocket', 'polling']
         });
-        
+
+        newSocket.on('connect', () => {
+          setSocketStatus('connected');
+          newSocket.emit('join_user_room', userData.id);
+        });
         newSocket.on('disconnect', (reason) => {
-          console.log('Disconnected from server:', reason);
           setSocketStatus('disconnected');
         });
-        
         newSocket.on('connect_error', (error) => {
-          console.error('Socket connection error:', error);
           setError('Failed to connect to chat server');
           setSocketStatus('error');
         });
-        
         newSocket.on('reconnect', (attemptNumber) => {
-          console.log('Reconnected to server. Attempt:', attemptNumber);
           setSocketStatus('connected');
-          // Rejoin user room after reconnection
           if (currentUser && currentUser.id) {
             newSocket.emit('join_user_room', currentUser.id);
           }
         });
-        
         newSocket.on('reconnect_error', (error) => {
-          console.error('Reconnection error:', error);
           setSocketStatus('error');
         });
-        
         newSocket.on('reconnect_failed', () => {
-          console.error('Reconnection failed');
           setSocketStatus('error');
           setError('Failed to reconnect to chat server. Please refresh the page.');
         });
-        
+
         setSocket(newSocket);
-        
-        // Cleanup on component unmount
+
         return () => {
           if (newSocket) {
             newSocket.disconnect();
           }
         };
       } catch (error) {
-        console.error('Error decoding token:', error);
         setError('Authentication error');
       }
     } else {
@@ -103,175 +91,260 @@ const ChatPage = () => {
     }
   }, [navigate]);
 
-  // 2. Set up the socket listener for incoming messages - CRITICAL FIX
-useEffect(() => {
-  if (!socket) return;
-
-  const handleReceiveMessage = (newMessage) => {
-    // Only add if message is for the currently selected chat
-    if (
-      selectedContact &&
-      (
-        (newMessage.sender === currentUser?.id && newMessage.receiver === selectedContact._id) ||
-        (newMessage.receiver === currentUser?.id && newMessage.sender === selectedContact._id)
+  // ---- MESSAGE STATUS FEATURE ----
+  // Marks all incoming messages as seen when selectedContact/view changes
+  useEffect(() => {
+    if (!socket || !selectedContact || !currentUser) return;
+    const unreadMsgIds = messages
+      .filter(
+        msg =>
+          msg.receiver === currentUser.id &&
+          !msg.seen
       )
-    ) {
-      setMessages((prevMessages) => {
-        const isDuplicate = prevMessages.some(msg =>
-          msg._id === newMessage._id
-        );
-        if (!isDuplicate) {
-          return [...prevMessages, newMessage];
+      .map(msg => msg._id);
+    if (unreadMsgIds.length) {
+      unreadMsgIds.forEach(messageId => {
+        // Check if message is already seen before emitting
+        const message = messages.find(msg => msg._id === messageId);
+        if (!message.seen) {
+          socket.emit('message_read', {
+            messageId: messageId,
+            sender: selectedContact._id, // the contact's id
+            receiver: currentUser.id,
+          });
         }
-        return prevMessages;
       });
     }
-  };
+  }, [messages, selectedContact, socket, currentUser]);
+  
+  // Updates message "seen" status live
+  useEffect(() => {
+    if (!socket) return;
+    socket.on('message_status', (statusUpdate) => {
+      setMessages(prevMsgs =>
+        prevMsgs.map(msg =>
+          msg._id === statusUpdate.messageId && statusUpdate.status === 'seen'
+            ? { ...msg, seen: true }
+            : msg
+        )
+      );
+    });
+    return () => socket.off('message_status');
+  }, [socket]);
 
-  socket.on('receive_private_message', handleReceiveMessage);
-  socket.on('new_message', handleReceiveMessage);
+  useEffect(() => {
+    if (!socket) return;
 
-  return () => {
-    socket.off('receive_private_message', handleReceiveMessage);
-    socket.off('new_message', handleReceiveMessage);
-  };
-}, [socket, currentUser, selectedContact]); // Removed selectedContact dependency to receive all messages
+    // Handle new messages and reordering/highlight
+    const handleReceiveMessage = (newMessage) => {
+      if (
+        selectedContact &&
+        (
+          (newMessage.sender === currentUser?.id && newMessage.receiver === selectedContact._id) ||
+          (newMessage.receiver === currentUser?.id && newMessage.sender === selectedContact._id)
+        )
+      ) {
+        setMessages((prevMessages) => {
+          const isDuplicate = prevMessages.some(msg => msg._id === newMessage._id);
+          if (!isDuplicate) {
+            return [...prevMessages, newMessage];
+          }
+          return prevMessages;
+        });
+      }
 
-  // 3. Fetch the contact list when the user is set
+      // Pop-up and highlight for incoming/outgoing
+      let chatPartnerId = newMessage.sender === currentUser?.id ? newMessage.receiver : newMessage.sender;
+      let chatPartnerName = newMessage.sender === currentUser?.id ? newMessage.receiverName || newMessage.receiver : newMessage.senderName || newMessage.sender;
+      let isOwnMsg = newMessage.sender === currentUser?.id;
+
+      setContactList(prevContacts => {
+        const idx = prevContacts.findIndex(c => c._id === chatPartnerId);
+        if (idx === -1) return prevContacts;
+        const updatedContact = { ...prevContacts[idx] };
+        const newContacts = prevContacts.filter((_, i) => i !== idx);
+        newContacts.unshift(updatedContact);
+        return newContacts;
+      });
+
+      setHighlightedContactId(chatPartnerId);
+      setTimeout(() => setHighlightedContactId(null), 2000);
+
+      if (!isOwnMsg) {
+        toast.info(`New message from ${chatPartnerName}: ${newMessage.text || newMessage.message}`);
+      }
+    };
+
+    // Handle backend "chat_notification"
+    const handleNotification = (notif) => {
+      setContactList(prevContacts => {
+        const idx = prevContacts.findIndex(c => c._id === notif.from);
+        if (idx === -1) return prevContacts;
+        const updatedContact = { ...prevContacts[idx] };
+        const newContacts = prevContacts.filter((_, i) => i !== idx);
+        newContacts.unshift(updatedContact);
+        return newContacts;
+      });
+
+      setHighlightedContactId(notif.from);
+      setTimeout(() => setHighlightedContactId(null), 2000);
+      toast.info(`New message from ${notif.fromName}: ${notif.message}`);
+    };
+
+    socket.on('receive_private_message', handleReceiveMessage);
+    socket.on('new_message', handleReceiveMessage);
+    socket.on('chat_notification', handleNotification);
+
+    return () => {
+      socket.off('receive_private_message', handleReceiveMessage);
+      socket.off('new_message', handleReceiveMessage);
+      socket.off('chat_notification', handleNotification);
+    };
+  }, [socket, currentUser, selectedContact]);
+
   useEffect(() => {
     if (!currentUser) return;
-
     const fetchContacts = async () => {
       try {
         setLoading(true);
         let url = '';
         if (currentUser.role === 'user') {
-          url = `${API_URL}/api/mentors`;
+          url = `${API_URL}/api/conversations/user/${currentUser.id}`;
         } else if (currentUser.role === 'mentor') {
           url = `${API_URL}/api/conversations/mentor/${currentUser.id}`;
         }
-        
         if (url) {
           const token = localStorage.getItem('token');
           const response = await fetch(url, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
           });
-          
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          
           const data = await response.json();
-          console.log('Fetched contacts:', data);
           setContactList(data);
-          
-          // Check if a mentor was passed from the previous page
-          if (location.state?.selectedMentor) {
-            handleSelectContact(location.state.selectedMentor);
+          if (location.state?.selectedContact) {
+            handleSelectContact(location.state.selectedContact);
           }
         }
       } catch (error) {
-        console.error('Error fetching contacts:', error);
         setError('Failed to load contacts');
       } finally {
         setLoading(false);
       }
     };
-
     fetchContacts();
   }, [currentUser, location.state]);
 
-  // Helper function to fetch messages for a selected chat
   const handleSelectContact = async (contact) => {
     if (!contact || !contact._id) {
       setError('Invalid contact selected!');
       return;
     }
-    
     try {
       setSelectedContact(contact);
       setMessages([]);
       setError('');
-      
+      setSkip(0); // Reset skip when selecting a new contact
+      setAllMessagesLoaded(false); // Reset all messages loaded
+
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `${API_URL}/api/messages/${currentUser.id}/${contact._id}`,
+        `${API_URL}/api/messages/${currentUser.id}/${contact._id}?skip=0&limit=${limit}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         }
       );
-      
       if (!response.ok) {
         throw new Error(`Failed to fetch messages: ${response.status}`);
       }
-      
       const messageData = await response.json();
       setMessages(messageData);
+      if (messageData.length < limit) {
+        setAllMessagesLoaded(true);
+      }
     } catch (error) {
-      console.error("Failed to fetch messages:", error);
       setError('Failed to load messages');
     }
   };
 
-  // Function to send a message - ENHANCED
-const handleSendMessage = async (e) => {
-  e.preventDefault();
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) {
+      setError("Message cannot be empty");
+      return;
+    }
+    if (!selectedContact || !selectedContact._id) {
+      setError("No contact selected!");
+      return;
+    }
+    if (!socket || !currentUser || socketStatus !== "connected") {
+      setError("Not connected to chat. Please check your connection and try again.");
+      return;
+    }
+    try {
+      const messageData = {
+        sender: currentUser.id,
+        receiver: selectedContact._id,
+        text: newMessage.trim(),
+        timestamp: new Date().toISOString(),
+      };
+      socket.emit("private_message", messageData);
+      setNewMessage("");
+      setError("");
+    } catch (error) {
+      setError("Failed to send message. Please try again.");
+    }
+  };
 
-  if (!newMessage.trim()) {
-    setError("Message cannot be empty");
-    return;
-  }
-
-  if (!selectedContact || !selectedContact._id) {
-    setError("No contact selected!");
-    return;
-  }
-
-  if (!socket || !currentUser || socketStatus !== "connected") {
-    setError(
-      "Not connected to chat. Please check your connection and try again."
-    );
-    return;
-  }
-
-  try {
-    const messageData = {
-      sender: currentUser.id,
-      receiver: selectedContact._id,
-      text: newMessage.trim(),
-      timestamp: new Date().toISOString(),
-    };
-
-    console.log("Sending message:", messageData);
-
-    // Emit the message
-    socket.emit("private_message", messageData);
-
-    // Do NOT optimistically add the message here!
-    setNewMessage("");
-    setError("");
-  } catch (error) {
-    console.error("Error sending message:", error);
-    setError("Failed to send message. Please try again.");
-  }
-};
-  
-  // Auto-scroll to the bottom of the chat
+  // useEffect to scroll to the bottom on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]); // Only trigger when messages change
 
-  // Rejoin room if socket reconnects or user changes
   useEffect(() => {
     if (socket && socketStatus === 'connected' && currentUser) {
       socket.emit('join_user_room', currentUser.id);
-      console.log(`Rejoined room: ${currentUser.id}`);
     }
   }, [socket, socketStatus, currentUser]);
+
+  // New function to load more messages
+  const loadMoreMessages = async () => {
+    if (loadingMoreMessages || allMessagesLoaded || !selectedContact) return;
+
+    setLoadingMoreMessages(true);
+    const newSkip = skip + limit;
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(
+        `${API_URL}/api/messages/${currentUser.id}/${selectedContact._id}?skip=${newSkip}&limit=${limit}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to load more messages: ${response.status}`);
+      }
+      const newMessages = await response.json();
+
+      if (newMessages.length === 0) {
+        setAllMessagesLoaded(true);
+      } else {
+        setMessages(prevMessages => [...newMessages, ...prevMessages]);
+        setSkip(newSkip);
+      }
+    } catch (error) {
+      console.error("Failed to load more messages:", error);
+    } finally {
+      setLoadingMoreMessages(false);
+    }
+  };
 
   if (error && !loading) {
     return (
@@ -290,6 +363,8 @@ const handleSendMessage = async (e) => {
 
   return (
     <div className="chat-page">
+      {/* Toast notifications container */}
+      <ToastContainer position="top-right" autoClose={2500} />
       <div className="sidebar">
         <h3>{currentUser?.role === 'user' ? 'Mentors' : 'My Chats'}</h3>
         <div className="connection-status">
@@ -300,10 +375,13 @@ const handleSendMessage = async (e) => {
         ) : (
           <ul>
             {contactList.map((contact) => (
-              <li 
-                key={contact._id} 
+              <li
+                key={contact._id}
                 onClick={() => handleSelectContact(contact)}
-                className={selectedContact?._id === contact._id ? 'selected' : ''}
+                className={[
+                  selectedContact?._id === contact._id ? 'selected' : '',
+                  highlightedContactId === contact._id ? 'highlighted' : '',
+                ].join(' ').trim()}
               >
                 <div className="contact-name">{contact.username || contact.name}</div>
                 <div className="contact-role">{contact.role}</div>
@@ -322,16 +400,22 @@ const handleSendMessage = async (e) => {
                 <small>User ID: {currentUser?.id} | Status: {socketStatus}</small>
               </div>
             </div>
-            
-            <div className="messages-area">
+            <div
+              className="messages-area"
+              onScroll={(e) => {
+                if (e.target.scrollTop === 0) {
+                  loadMoreMessages();
+                }
+              }}
+            >
               {messages.length === 0 ? (
                 <div className="no-messages">
                   No messages yet. Start the conversation!
                 </div>
               ) : (
                 messages.map((msg, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className={`message ${msg.sender === currentUser.id || msg.senderId === currentUser.id ? 'sent' : 'received'}`}
                   >
                     <p>{msg.text || msg.message}</p>
@@ -339,24 +423,26 @@ const handleSendMessage = async (e) => {
                       {new Date(msg.timestamp || msg.createdAt || Date.now()).toLocaleTimeString()}
                     </span>
                     <span className="message-status">
-                      {msg.sender === currentUser.id || msg.senderId === currentUser.id ? 'Sent' : 'Received'}
+                      {msg.sender === currentUser.id || msg.senderId === currentUser.id
+                        ? msg.seen ? 'Seen' : 'Sent'
+                        : ''}
                     </span>
                   </div>
                 ))
               )}
+              {loadingMoreMessages && <div>Loading more messages...</div>}
               <div ref={messagesEndRef} />
             </div>
-            
             <form onSubmit={handleSendMessage} className="message-form">
-              <input 
-                type="text" 
-                value={newMessage} 
-                onChange={(e) => setNewMessage(e.target.value)} 
-                placeholder="Type your message..." 
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type your message..."
                 disabled={!selectedContact || socketStatus !== 'connected'}
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={!selectedContact || !newMessage.trim() || socketStatus !== 'connected'}
                 className={socketStatus !== 'connected' ? 'disabled' : ''}
               >

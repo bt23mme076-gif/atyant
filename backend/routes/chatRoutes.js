@@ -39,7 +39,7 @@ router.get('/conversations/mentor/:mentorId', async (req, res) => {
 });
 
 // --- NEW ROUTE ADDED HERE ---
-// This new route is for a USER to get their list of chats
+// This new route is for a USER to get their "My Chats" list
 router.get('/conversations/user/:userId', async (req, res) => {
     try {
         const { userId } = req.params;

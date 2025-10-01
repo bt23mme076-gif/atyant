@@ -17,6 +17,7 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProfilePage from './components/ProfilePage';
+import PublicProfilePage from './components/PublicProfilePage';
 
 function App() {
   const location = useLocation();
@@ -39,6 +40,7 @@ function App() {
           <Route path="/mentors" element={<ProtectedRoute><MentorListPage /></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/profile/:username" element={<PublicProfilePage />} />
         </Routes>
       </main>
       {!isChatPage && <Footer />}

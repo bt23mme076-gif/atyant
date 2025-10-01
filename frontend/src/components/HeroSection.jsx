@@ -1,5 +1,6 @@
 // src/components/HeroSection.jsx
 import React from 'react';
+import SearchBar from './SearchBar'; // Import the new component
 import { TypeAnimation } from 'react-type-animation';
 import { Link } from 'react-router-dom';
 import './HeroSection.css';
@@ -14,7 +15,8 @@ const HeroSection = () => {
         <p className="hero-subtitle">
           Connect with verified achievers who have successfully navigated the exact challenges you're facing today.
         </p>
-        
+ {/* 2. Add the SearchBar component here */}
+        <SearchBar />
         <div className="hero-rotator">
           Your gateway to answers in{' '}
           <TypeAnimation
@@ -33,9 +35,7 @@ const HeroSection = () => {
           />
         </div>
 
-        <div className="button-group">
-          <Link to="/mentors" className="hero-button secondary">Ask Your Question Now</Link>
-        </div>
+        
 
         <div className="stats-container">
           <div className="stat-item">

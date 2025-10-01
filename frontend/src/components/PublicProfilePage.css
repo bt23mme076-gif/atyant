@@ -1,0 +1,66 @@
+.public-profile-container {
+  padding: 50px 20px;
+  background-color: #f3f4f6;
+  min-height: 90vh;
+}
+.profile-card {
+  max-width: 600px;
+  margin: auto;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+.profile-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 20px;
+  border: 4px solid #4f46e5;
+}
+.profile-card h1 {
+  font-size: 2.5rem;
+}
+.profile-role {
+  font-size: 1rem;
+  color: #6b7280;
+  text-transform: capitalize;
+  margin-bottom: 20px;
+}
+.profile-bio {
+  font-size: 1.1rem;
+  color: #374151;
+  margin-bottom: 30px;
+}
+.expertise-section h4 {
+  margin-bottom: 15px;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+.tag {
+  background-color: #e0e7ff;
+  color: #4338ca;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.chat-now-btn {
+  display: inline-block;
+  padding: 12px 30px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: white;
+  background-color: #4f46e5;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+}

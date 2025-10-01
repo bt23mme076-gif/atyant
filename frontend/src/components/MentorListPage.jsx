@@ -1,124 +1,89 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import { useNavigate, Link } from 'react-router-dom'; // Import Link
 import './MentorListPage.css';
 
 const MentorListPage = () => {
   const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
-  const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchMentors = async () => {
-      try {
-        setLoading(true);
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        const response = await fetch(`${API_URL}/api/mentors`);
-        
-        if (!response.ok) {
-          throw new Error('Data could not be fetched!');
-        }
-        
-        const data = await response.json();
-        setMentors(data);
-      } catch (error) {
-        setError('Could not load mentors. Please try again later.');
-        console.error('Failed to fetch mentors:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchMentors();
-  }, []);
-
-  const validateAndStartChat = async (mentor) => {
+  const fetchMentors = async (query = '') => {
+    setLoading(true);
+    setError(null);
     try {
-      setError(null);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const url = query 
+        ? `${API_URL}/api/search/mentors?q=${query}`
+        : `${API_URL}/api/mentors`;
       
-      if (!mentor || !mentor._id) {
-        throw new Error("Invalid mentor data");
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Data could not be fetched!');
       }
-      
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5173';
-      
-      // First validate the mentor
-      const validationResponse = await fetch(`${API_URL}/api/validate-mentor`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          mentorId: mentor._id,
-          userId: user.id
-        })
-      });
-      
-      const validationResult = await validationResponse.json();
-      
-      if (!validationResult.valid) {
-        throw new Error(validationResult.message || "Cannot start chat with this mentor");
-      }
-      
-      // If validation passed, navigate to chat
-      navigate('/chat', { 
-        state: { 
-          selectedMentor: {
-            _id: mentor._id,
-            name: mentor.username || mentor.name,
-            email: mentor.email,
-            image: mentor.image || `https://i.pravatar.cc/150?u=${mentor._id}`
-          }
-        }
-      });
-      
-    } catch (error) {
-      console.error("Error starting chat:", error);
-      setError(error.message || "Failed to start chat. Please try again.");
+      const data = await response.json();
+      setMentors(data);
+    } catch (err) {
+      setError('Could not load mentors. Please try again later.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading) {
-    return <div className="status-message">Loading Mentors...</div>;
-  }
+  useEffect(() => {
+    fetchMentors(); // Fetch all mentors initially
+  }, []);
 
-  if (error) {
-    return (
-      <div className="status-message error">
-        <h3>Error</h3>
-        <p>{error}</p>
-        <button onClick={() => setError(null)}>Try Again</button>
-      </div>
-    );
-  }
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchMentors(searchTerm);
+  };
+
+  const startChatWithMentor = (mentor) => {
+    navigate('/chat', { state: { selectedContact: mentor } });
+  };
 
   return (
     <div className="mentor-list-container">
       <h1>Meet Our Mentors</h1>
-      <p>Select a mentor to start a conversation.</p>
+      <p>Search for a mentor by name or skill to start a conversation.</p>
       
-      <div className="mentor-grid">
-        {mentors.map((mentor) => (
-          <div className="mentor-card" key={mentor._id}>
-            <img 
-              src={mentor.image || `https://i.pravatar.cc/150?u=${mentor._id}`} 
-              alt={mentor.username} 
-              className="mentor-image" 
-            />
-            <h3 className="mentor-name">{mentor.username}</h3>
-            <p className="mentor-interest">{mentor.interest || 'Expert Mentor'}</p>
-            <button 
-              onClick={() => validateAndStartChat(mentor)}
-              className="chat-button"
-            >
-              Start Chat
-            </button>
-          </div>
-        ))}
-      </div>
+      <form className="search-bar" onSubmit={handleSearch}>
+        <input 
+          type="text"
+          placeholder="e.g., 'Java', 'Placements', 'Career Growth'..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button type="submit">Search</button>
+      </form>
+      
+      {loading && <div className="status-message">Loading Mentors...</div>}
+      {error && <div className="status-message error">{error}</div>}
+      
+      {!loading && !error && (
+        <div className="mentor-grid">
+          {mentors.length > 0 ? (
+            mentors.map((mentor) => (
+              <div className="mentor-card" key={mentor._id}>
+                <img 
+                  src={`https://api.pravatar.cc/150?u=${mentor._id}`} 
+                  alt={mentor.username} 
+                  className="mentor-image" 
+                />
+                <h3 className="mentor-name">
+                  <Link to={`/profile/${mentor.username}`}>{mentor.username}</Link>
+                </h3>
+                <p className="mentor-interest">Expert Mentor</p>
+                <button onClick={() => startChatWithMentor(mentor)}>Chat Now</button>
+              </div>
+            ))
+          ) : (
+            <p className="no-mentors-found">No mentors found matching your search.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

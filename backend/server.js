@@ -12,6 +12,7 @@ import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chatRoutes.js';
 import profileRoutes from './routes/profileRoutes.js'; // 1. IMPORT the new routes
 import feedbackRoutes from './routes/feedbackRoutes.js'; 
+import searchRoutes from './routes/searchRoutes.js';
 
 // Import models
 import Feedback from './models/Feedback.js';
@@ -45,7 +46,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api', chatRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/profile', profileRoutes); // 2. USE the new routes
-
+app.use('/api/search', searchRoutes);
 
 // --- Contact form route ---
 app.post("/api/contact", async (req, res) => {
@@ -186,15 +187,22 @@ io.on("connection", (socket) => {
         createdAt: populatedMessage.createdAt
       };
 
+      // --- NEW: Real-time notification signal to receiver ---
+      io.to(data.receiver).emit("chat_notification", {
+        from: messageForFrontend.sender,
+        fromName: messageForFrontend.senderName,
+        message: messageForFrontend.text,
+        timestamp: messageForFrontend.createdAt
+      });
+      // ------------------------------------------------------
+
       console.log(`📤 Emitting to receiver: ${data.receiver}`);
       console.log(`📤 Emitting to sender: ${data.sender}`);
       
-      // CRITICAL FIX: Use io.to() instead of socket.emit() for broadcasting
-      // This ensures messages reach all connected clients in the room
+      // Use io.to() for broadcasting message and chat list update
       io.to(data.receiver).emit("receive_private_message", messageForFrontend);
       io.to(data.sender).emit("receive_private_message", messageForFrontend);
       
-      // Also send chat update events to refresh conversation lists
       io.to(data.sender).emit("chat_update", {
         type: 'new_message',
         chatId: `${data.sender}-${data.receiver}`,
@@ -219,7 +227,6 @@ io.on("connection", (socket) => {
       });
     }
   });
-
   // Handle message delivery status
   socket.on("message_delivered", (data) => {
     console.log(`✓ Message delivered: ${data.messageId}`);
@@ -227,17 +234,6 @@ io.on("connection", (socket) => {
     io.to(data.sender).emit("message_status", {
       messageId: data.messageId,
       status: 'delivered',
-      timestamp: new Date().toISOString()
-    });
-  });
-
-  // Handle message read status
-  socket.on("message_read", (data) => {
-    console.log(`✓ Message read: ${data.messageId}`);
-    // Notify sender that message was read
-    io.to(data.sender).emit("message_status", {
-      messageId: data.messageId,
-      status: 'read',
       timestamp: new Date().toISOString()
     });
   });
@@ -335,7 +331,22 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// --- Profile endpoint by username ---
+app.get('/api/profile/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const profile = await User.findOne({ username }); // Assuming you have a User model
 
+    if (!profile) {
+      return res.status(404).json({ message: 'Profile not found' }); // Return JSON error
+    }
+
+    res.status(200).json(profile); // Return JSON profile
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    res.status(500).json({ message: 'Error fetching profile' }); // Return JSON error
+  }
+});
 
 // --- Start server ---
 server.listen(PORT, () => {
