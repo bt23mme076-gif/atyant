@@ -142,7 +142,7 @@
 .hamburger {
   width: 49px; height: 42px;
   border-radius: 13px;
-  border: 1.5px solid #27272f99;
+  border: 1.5px solid #ffffff99;
   background: var(--nav-panel);
   display: none; align-items: center; justify-content: center;
   margin-left: 10px; cursor: pointer;
@@ -196,7 +196,7 @@
   font-size: 1.12rem;
   color: var(--nav-text);
   font-family: var(--brand-font);
-  background: transparent;
+  background:  #ffffff 105%);
   border: none;
   box-shadow: none;
   transition: background .18s, color .17s;
@@ -224,7 +224,7 @@
 }
 
 @media (min-width: 820px) {
-  .navbar {padding: 16px 44px;}
+  .navbar {padding: 11px 20px;}
   .menu-panel { max-width: 430px; margin:0 auto;}
 }
 
