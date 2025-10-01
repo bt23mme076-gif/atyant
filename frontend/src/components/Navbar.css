@@ -21,7 +21,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1px 2vw;
+  padding: 11px 20px;
   background: var(--nav-bg);
   box-shadow: var(--nav-shadow);
   border-radius: 0 0 var(--nav-radius) var(--nav-radius);
@@ -42,7 +42,7 @@
   font-weight: 900;
   font-size: 1.5rem;
   color: var(--nav-text);
-  padding: 4px 2px;
+  padding: 10px 10px;
   border-radius: 14px;
   letter-spacing: 1.4px;
  
