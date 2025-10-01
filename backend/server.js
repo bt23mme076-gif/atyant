@@ -6,6 +6,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import mongoose from 'mongoose';
+import nodemailer from 'nodemailer'; // Nodemailer ko import karein
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -347,7 +348,6 @@ app.get('/api/profile/:username', async (req, res) => {
     res.status(500).json({ message: 'Error fetching profile' }); // Return JSON error
   }
 });
-
 // --- Start server ---
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
