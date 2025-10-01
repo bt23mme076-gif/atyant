@@ -4,11 +4,12 @@ import Message from '../models/Message.js';
 
 const router = express.Router();
 
-// This route remains unchanged
-// It's used for the "Find Mentors" page
+// Route to get all mentors
 router.get('/mentors', async (req, res) => {
   try {
-    const mentors = await User.find({ role: 'mentor' }).select('username email _id');
+    // YEH LINE THEEK KI GAYI HAI
+    // Hum ab 'profilePicture' bhi maang rahe hain
+    const mentors = await User.find({ role: 'mentor' }).select('username email _id profilePicture');
     res.json(mentors);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching mentors.' });

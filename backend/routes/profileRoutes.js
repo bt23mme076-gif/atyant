@@ -1,4 +1,3 @@
-// backend/routes/profileRoutes.js
 import express from 'express';
 import multer from 'multer';
 import User from '../models/User.js';

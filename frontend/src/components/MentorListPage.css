@@ -186,7 +186,21 @@
   gap: 30px;
   margin-top: 20px;
 }
+.mentor-image-placeholder {
+  width: 120px; /* Adjust as needed */
+  height: 120px; /* Adjust as needed */
+  border-radius: 50%;
+  background-color: #8b5cf6; /* Light gray, adjust as needed */
+  margin-bottom: 10px;
+}
 
+.mentor-image {
+  width: 150px; /* Adjust as needed */
+  height: 150px; /* Adjust as needed */
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
 .mentor-card {
   background: var(--surface);
   border-radius: var(--radius-xl);

@@ -16,7 +16,7 @@ router.get('/mentors', async (req, res) => {
             role: 'mentor',
             $or: [
                 { username: { $regex: query, $options: 'i' } }, // Case-insensitive username search
-                { skills: { $regex: query, $options: 'i' } }   // Case-insensitive skills search
+                { expertise: { $regex: query, $options: 'i' } }   // Case-insensitive skills search
             ]
         }).select('username _id'); // Select only needed fields
         res.json(mentors);

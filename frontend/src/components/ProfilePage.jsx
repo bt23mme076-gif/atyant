@@ -145,6 +145,7 @@ const ProfilePage = () => {
           type="button"
           onClick={handleImageUpload}
           disabled={!imageFile || loading}
+          className="upload-photo-btn" // Added class for styling
         >
           {loading ? 'Uploading...' : 'Upload Picture'}
         </button>

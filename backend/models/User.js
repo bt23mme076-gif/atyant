@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   }],
+  expertise: {
+    type: [String], // Ensure it's an array of strings
+    default: []
+  },
   profilePicture: {
     type: String,
     default: null // You can set a default image URL here
