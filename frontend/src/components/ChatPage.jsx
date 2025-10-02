@@ -5,14 +5,13 @@ import { useAuth } from '../AuthContext';
 import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
 
-// ---- ADD THIS ----
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// -------------------
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const ChatPage = () => {
+  // Original states
   const [contactList, setContactList] = useState([]);
   const [selectedContact, setSelectedContact] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -28,11 +27,20 @@ const ChatPage = () => {
   const [highlightedContactId, setHighlightedContactId] = useState(null);
   const [socket, setSocket] = useState(null);
 
-  // New state variables for scrolling
   const [allMessagesLoaded, setAllMessagesLoaded] = useState(false);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
   const [skip, setSkip] = useState(0); // How many messages to skip
   const limit = 20; // Number of messages to load per batch
+
+  // --- Mobile sidebar state (main addition) ---
+  const isMobile = window.innerWidth <= 768;
+  const [showSidebarOnMobile, setShowSidebarOnMobile] = useState(isMobile && !selectedContact);
+
+  useEffect(() => {
+    if (isMobile && !selectedContact) setShowSidebarOnMobile(true);
+    if (isMobile && selectedContact) setShowSidebarOnMobile(false);
+    // On desktop, sidebar always shows
+  }, [selectedContact]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -91,8 +99,6 @@ const ChatPage = () => {
     }
   }, [navigate]);
 
-  // ---- MESSAGE STATUS FEATURE ----
-  // Marks all incoming messages as seen when selectedContact/view changes
   useEffect(() => {
     if (!socket || !selectedContact || !currentUser) return;
     const unreadMsgIds = messages
@@ -104,12 +110,11 @@ const ChatPage = () => {
       .map(msg => msg._id);
     if (unreadMsgIds.length) {
       unreadMsgIds.forEach(messageId => {
-        // Check if message is already seen before emitting
         const message = messages.find(msg => msg._id === messageId);
         if (!message.seen) {
           socket.emit('message_read', {
             messageId: messageId,
-            sender: selectedContact._id, // the contact's id
+            sender: selectedContact._id, 
             receiver: currentUser.id,
           });
         }
@@ -117,7 +122,6 @@ const ChatPage = () => {
     }
   }, [messages, selectedContact, socket, currentUser]);
   
-  // Updates message "seen" status live
   useEffect(() => {
     if (!socket) return;
     socket.on('message_status', (statusUpdate) => {
@@ -134,8 +138,6 @@ const ChatPage = () => {
 
   useEffect(() => {
     if (!socket) return;
-
-    // Handle new messages and reordering/highlight
     const handleReceiveMessage = (newMessage) => {
       if (
         selectedContact &&
@@ -152,8 +154,6 @@ const ChatPage = () => {
           return prevMessages;
         });
       }
-
-      // Pop-up and highlight for incoming/outgoing
       let chatPartnerId = newMessage.sender === currentUser?.id ? newMessage.receiver : newMessage.sender;
       let chatPartnerName = newMessage.sender === currentUser?.id ? newMessage.receiverName || newMessage.receiver : newMessage.senderName || newMessage.sender;
       let isOwnMsg = newMessage.sender === currentUser?.id;
@@ -166,7 +166,6 @@ const ChatPage = () => {
         newContacts.unshift(updatedContact);
         return newContacts;
       });
-
       setHighlightedContactId(chatPartnerId);
       setTimeout(() => setHighlightedContactId(null), 2000);
 
@@ -175,7 +174,6 @@ const ChatPage = () => {
       }
     };
 
-    // Handle backend "chat_notification"
     const handleNotification = (notif) => {
       setContactList(prevContacts => {
         const idx = prevContacts.findIndex(c => c._id === notif.from);
@@ -185,7 +183,6 @@ const ChatPage = () => {
         newContacts.unshift(updatedContact);
         return newContacts;
       });
-
       setHighlightedContactId(notif.from);
       setTimeout(() => setHighlightedContactId(null), 2000);
       toast.info(`New message from ${notif.fromName}: ${notif.message}`);
@@ -243,10 +240,11 @@ const ChatPage = () => {
     }
     try {
       setSelectedContact(contact);
+      setShowSidebarOnMobile(false); // Hide sidebar on mobile after selection
       setMessages([]);
       setError('');
-      setSkip(0); // Reset skip when selecting a new contact
-      setAllMessagesLoaded(false); // Reset all messages loaded
+      setSkip(0);
+      setAllMessagesLoaded(false);
 
       const token = localStorage.getItem('token');
       const response = await fetch(
@@ -299,12 +297,11 @@ const ChatPage = () => {
     }
   };
 
-  // useEffect to scroll to the bottom on new messages
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]); // Only trigger when messages change
+  }, [messages]);
 
   useEffect(() => {
     if (socket && socketStatus === 'connected' && currentUser) {
@@ -312,7 +309,6 @@ const ChatPage = () => {
     }
   }, [socket, socketStatus, currentUser]);
 
-  // New function to load more messages
   const loadMoreMessages = async () => {
     if (loadingMoreMessages || allMessagesLoaded || !selectedContact) return;
 
@@ -363,41 +359,62 @@ const ChatPage = () => {
 
   return (
     <div className="chat-page">
-      {/* Toast notifications container */}
       <ToastContainer position="top-right" autoClose={2500} />
-      <div className="sidebar">
-        <h3>{currentUser?.role === 'user' ? 'Mentors' : 'My Chats'}</h3>
-        <div className="connection-status">
-          Status: <span className={socketStatus}>{socketStatus}</span>
+
+      {/* SIDEBAR for desktop/mobile */}
+      {(window.innerWidth > 768 || showSidebarOnMobile) && (
+        <div className={`sidebar${showSidebarOnMobile ? ' active' : ''}`}>
+          <h3>{currentUser?.role === 'user' ? 'Mentors' : 'My Chats'}</h3>
+          <div className="connection-status">
+            Status: <span className={socketStatus}>{socketStatus}</span>
+          </div>
+          {contactList.length === 0 ? (
+            <p className="no-contacts">No contacts available</p>
+          ) : (
+            <ul>
+              {contactList.map((contact) => (
+                <li
+                  key={contact._id}
+                  onClick={() => handleSelectContact(contact)}
+                  className={[
+                    selectedContact?._id === contact._id ? 'selected' : '',
+                    highlightedContactId === contact._id ? 'highlighted' : '',
+                  ].join(' ').trim()}
+                >
+                  <div className="contact-name">{contact.username || contact.name}</div>
+                  <div className="contact-role">{contact.role}</div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-        {contactList.length === 0 ? (
-          <p className="no-contacts">No contacts available</p>
-        ) : (
-          <ul>
-            {contactList.map((contact) => (
-              <li
-                key={contact._id}
-                onClick={() => handleSelectContact(contact)}
-                className={[
-                  selectedContact?._id === contact._id ? 'selected' : '',
-                  highlightedContactId === contact._id ? 'highlighted' : '',
-                ].join(' ').trim()}
-              >
-                <div className="contact-name">{contact.username || contact.name}</div>
-                <div className="contact-role">{contact.role}</div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      
+      )}
+
       <div className="chat-window">
         {selectedContact ? (
           <>
             <div className="chat-header">
-              <h4>Chat with {selectedContact.username || selectedContact.name}</h4>
-              <div className="connection-info">
-                <small>User ID: {currentUser?.id} | Status: {socketStatus}</small>
+              {/* Mobile back button */}
+              {isMobile && (
+                <span
+                  className="back-btn"
+                  onClick={() => {
+                    setSelectedContact(null);
+                    setShowSidebarOnMobile(true);
+                  }}
+                >
+                  &lt;
+                </span>
+              )}
+              <div className="chat-header-info">
+                <div className="chat-header-name">
+                  {selectedContact.username || selectedContact.name}
+                </div>
+                <div className="chat-header-status">
+                  {/* Example status (customize as required) */}
+                  <span className={`status-indicator status-online`}></span>
+                  Online
+                </div>
               </div>
             </div>
             <div
@@ -430,6 +447,7 @@ const ChatPage = () => {
                   </div>
                 ))
               )}
+
               {loadingMoreMessages && <div>Loading more messages...</div>}
               <div ref={messagesEndRef} />
             </div>
@@ -451,14 +469,19 @@ const ChatPage = () => {
             </form>
           </>
         ) : (
-          <div className="no-chat-selected">
-            <h4>Select a {currentUser?.role === 'user' ? 'mentor' : 'user'} to start chatting</h4>
-            <div className="connection-info">
-              <p>Socket status: <span className={socketStatus}>{socketStatus}</span></p>
-              <p>Your ID: {currentUser?.id}</p>
-              <p>Your role: {currentUser?.role}</p>
+          // If mobile & sidebar not shown, give a way to open sidebar (mentor list)
+          isMobile && !showSidebarOnMobile ? (
+            <button onClick={() => setShowSidebarOnMobile(true)}>Show Mentors</button>
+          ) : (
+            <div className="no-chat-selected">
+              <h4>Select a {currentUser?.role === 'user' ? 'mentor' : 'user'} to start chatting</h4>
+              <div className="connection-info">
+                <p>Socket status: <span className={socketStatus}>{socketStatus}</span></p>
+                <p>Your ID: {currentUser?.id}</p>
+                <p>Your role: {currentUser?.role}</p>
+              </div>
             </div>
-          </div>
+          )
         )}
       </div>
     </div>
