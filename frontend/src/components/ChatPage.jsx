@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+// src/pages/ChatPage.jsx
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import io from 'socket.io-client';
 import { useAuth } from '../AuthContext';
@@ -7,6 +8,10 @@ import './ChatPage.css';
 
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+// If AuthContext is exported separately and contains user object with token/email/username,
+// this line enables using it for prefill; if not present in project, it won’t break because it’s unused elsewhere.
+import { AuthContext } from '../AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -24,6 +29,9 @@ const ChatPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const authCtx = useContext(AuthContext) || {};
+  const ctxUser = authCtx?.user || {};
+
   const [highlightedContactId, setHighlightedContactId] = useState(null);
   const [socket, setSocket] = useState(null);
 
@@ -31,6 +39,9 @@ const ChatPage = () => {
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
   const [skip, setSkip] = useState(0); // How many messages to skip
   const limit = 20; // Number of messages to load per batch
+
+  const [credits, setCredits] = useState(0); // State to hold credit count
+
 
   // --- Mobile sidebar state (main addition) ---
   const isMobile = window.innerWidth <= 768;
@@ -99,6 +110,7 @@ const ChatPage = () => {
     }
   }, [navigate]);
 
+
   useEffect(() => {
     if (!socket || !selectedContact || !currentUser) return;
     const unreadMsgIds = messages
@@ -135,6 +147,23 @@ const ChatPage = () => {
     });
     return () => socket.off('message_status');
   }, [socket]);
+
+  useEffect(() => {
+    // Fetch the user's profile to get their credit count
+    const fetchUserProfile = async () => {
+        if (user && user.role === 'user') {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+            const response = await fetch(`${API_URL}/api/profile/me`, {
+                headers: { 'Authorization': `Bearer ${user.token}` }
+            });
+            const data = await response.json();
+            if (response.ok) {
+                setCredits(data.messageCredits);
+            }
+        }
+    };
+    fetchUserProfile();
+  }, [user]);
 
   useEffect(() => {
     if (!socket) return;
@@ -342,6 +371,79 @@ const ChatPage = () => {
     }
   };
 
+  // Razorpay payment handler (non-invasive: does not alter any existing chat logic)
+  const handlePayment = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      // 1. Create an Order from backend
+      const orderResponse = await fetch(`${API_URL}/api/payment/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!orderResponse.ok) {
+        const t = await orderResponse.text();
+        throw new Error(`Create order failed: ${orderResponse.status} ${t}`);
+      }
+      const order = await orderResponse.json();
+
+      // 2. Configure Razorpay options
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Atyant",
+        description: "Mentor Chat Credits",
+        order_id: order.id,
+        handler: async function (response) {
+          // 3. Verify payment on backend
+          const verificationResponse = await fetch(`${API_URL}/api/payment/verify-payment`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify(response),
+          });
+          const result = await verificationResponse.json();
+          if (result.success) {
+            toast.success("Payment successful! Credits added.");
+            // Optionally trigger a refresh of credit count if UI has such state
+          } else {
+            toast.error("Payment verification failed. Please contact support.");
+          }
+        },
+        prefill: {
+          name: ctxUser?.username || user?.username || '',
+          email: ctxUser?.email || user?.email || '',
+        },
+        theme: {
+          color: "#4f46e5",
+        },
+      };
+
+      // Ensure Razorpay script is available
+      if (!window.Razorpay) {
+        // Lazy-load script if not present; keeps existing logic unchanged
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.body.appendChild(script);
+        });
+      }
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      console.error("Payment error:", error);
+      toast.error("An error occurred while initiating payment.");
+    }
+  };
+
   if (error && !loading) {
     return (
       <div className="chat-error">
@@ -365,9 +467,17 @@ const ChatPage = () => {
       {(window.innerWidth > 768 || showSidebarOnMobile) && (
         <div className={`sidebar${showSidebarOnMobile ? ' active' : ''}`}>
           <h3>{currentUser?.role === 'user' ? 'Mentors' : 'My Chats'}</h3>
+
+          {/* Connection status keeps existing UI */}
           <div className="connection-status">
             Status: <span className={socketStatus}>{socketStatus}</span>
           </div>
+
+          {/* Buy Credits Button (added without changing existing logic) */}
+          <button onClick={handlePayment} className="buy-credits-btn">
+            Buy More Credits
+          </button>
+
           {contactList.length === 0 ? (
             <p className="no-contacts">No contacts available</p>
           ) : (
@@ -411,7 +521,6 @@ const ChatPage = () => {
                   {selectedContact.username || selectedContact.name}
                 </div>
                 <div className="chat-header-status">
-                  {/* Example status (customize as required) */}
                   <span className={`status-indicator status-online`}></span>
                   Online
                 </div>

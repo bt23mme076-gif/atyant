@@ -1,6 +1,32 @@
 /* src/styles/ChatPage.css - Professional Redesign with WhatsApp Features */
 
 /* ====== VARIABLES & RESET ====== */
+.buy-credits-btn {
+  display: block;
+  width: 90%;
+  margin: 18px auto 12px auto;
+  padding: 11px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(90deg, #4f46e5 45%, #8b5cf6 100%);
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(79,70,229,0.06);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.13s;
+  letter-spacing: 0.03em;
+}
+.buy-credits-btn:hover, .buy-credits-btn:focus {
+  background: linear-gradient(90deg, #8b5cf6 45%, #4f46e5 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 18px rgba(79,70,229,0.11);
+}
+.buy-credits-btn:active {
+  transform: scale(0.97);
+  filter: brightness(0.94);
+}
+
 :root {
   --primary-gradient: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
   --secondary-gradient: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);

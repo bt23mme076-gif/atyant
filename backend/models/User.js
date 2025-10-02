@@ -63,11 +63,13 @@ const userSchema = new mongoose.Schema({
   },
   passwordResetExpires: {
     type: Date
+  },
+   messageCredits: {
+    type: Number,
+    default: 5 // Every new user gets 5 free message credits
   }
-}, {
-  timestamps: true
-});
+  
+}, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
-
 export default User;

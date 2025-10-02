@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import { Resend } from 'resend';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -52,6 +53,7 @@ app.use('/api', chatRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // --- Contact form route ---
 app.post("/api/contact", async (req, res) => {
@@ -126,7 +128,7 @@ io.on("connection", (socket) => {
         });
         return;
       }
-
+      
       // Validate that both users exist
       const [sender, receiver] = await Promise.all([
         User.findById(data.sender),
@@ -171,6 +173,21 @@ io.on("connection", (socket) => {
         text: populatedMessage.text,
         createdAt: populatedMessage.createdAt
       };
+       // --- CREDIT CHECK LOGIC WITH NOTIFICATION ---
+    if (sender.role === 'user') {
+      if (sender.messageCredits <= 0) {
+        // If credits are zero, send an error signal and stop
+        return socket.emit("insufficient_credits", { 
+          message: "Your free message limit is over. Please buy credits to continue." 
+        });
+      }
+      // If credits are available, subtract one
+      sender.messageCredits -= 1;
+      await sender.save();
+    }
+    // Send the real-time message to the receiver
+    io.to(data.receiver).emit("receive_private_message", newMessage);
+
 
       // --- Real-time notification signal to receiver ---
       io.to(data.receiver).emit("chat_notification", {
