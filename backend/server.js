@@ -6,12 +6,12 @@ import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import mongoose from 'mongoose';
-import nodemailer from 'nodemailer'; // Nodemailer ko import karein
+import { Resend } from 'resend';
 
 // Import routes
 import authRoutes from './routes/auth.js';
 import chatRoutes from './routes/chatRoutes.js';
-import profileRoutes from './routes/profileRoutes.js'; // 1. IMPORT the new routes
+import profileRoutes from './routes/profileRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
 
@@ -19,10 +19,10 @@ import searchRoutes from './routes/searchRoutes.js';
 import Feedback from './models/Feedback.js';
 import Message from './models/Message.js';
 import User from './models/User.js';
+// import Contact from './models/Contact.js'; 
 
-// NOTE: Contact is used below but not imported in your snippet.
-// Keeping code as-is per request; ensure Contact model exists/imported in project.
-// import Contact from './models/Contact.js';
+// Initialize Resend with your API key
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -50,7 +50,7 @@ mongoose.connect(MONGO_URI)
 app.use('/api/auth', authRoutes);
 app.use('/api', chatRoutes);
 app.use('/api/feedback', feedbackRoutes);
-app.use('/api/profile', profileRoutes); // 2. USE the new routes
+app.use('/api/profile', profileRoutes);
 app.use('/api/search', searchRoutes);
 
 // --- Contact form route ---
@@ -71,36 +71,20 @@ app.post("/api/contact", async (req, res) => {
 app.post("/api/validate-mentor", async (req, res) => {
   try {
     const { mentorId, userId } = req.body;
-
     const mentor = await User.findById(mentorId);
     if (!mentor) {
-      return res.status(404).json({
-        valid: false,
-        message: "Mentor not found"
-      });
+      return res.status(404).json({ valid: false, message: "Mentor not found" });
     }
-
     if (mentor.role !== 'mentor') {
-      return res.status(400).json({
-        valid: false,
-        message: "Selected user is not a mentor"
-      });
+      return res.status(400).json({ valid: false, message: "Selected user is not a mentor" });
     }
-
     if (mentor.chatDisabled) {
-      return res.status(403).json({
-        valid: false,
-        message: "This mentor is not accepting messages at this time"
-      });
+      return res.status(403).json({ valid: false, message: "This mentor is not accepting messages at this time" });
     }
-
     res.json({ valid: true, mentor: mentor });
   } catch (error) {
     console.error("Error validating mentor:", error);
-    res.status(500).json({
-      valid: false,
-      message: "Server error during validation"
-    });
+    res.status(500).json({ valid: false, message: "Server error during validation" });
   }
 });
 
@@ -129,7 +113,7 @@ io.on("connection", (socket) => {
     console.log(`👤 User ${socket.id} joined room: ${userId}`);
   });
 
-  // ONLY ONE private_message handler with all logic (including Nodemailer)
+  // ONLY ONE private_message handler with Resend logic
   socket.on("private_message", async (data) => {
     try {
       console.log("📩 Received message data:", data);
@@ -148,7 +132,6 @@ io.on("connection", (socket) => {
         User.findById(data.sender),
         User.findById(data.receiver)
       ]);
-
       if (!sender || !receiver) {
         socket.emit("message_error", {
           error: "Invalid contact selected!",
@@ -156,8 +139,6 @@ io.on("connection", (socket) => {
         });
         return;
       }
-
-      // Check if receiver is a mentor and accepts messages
       if (receiver.role === 'mentor' && receiver.chatDisabled) {
         socket.emit("message_error", {
           error: "Mentor not available",
@@ -172,7 +153,6 @@ io.on("connection", (socket) => {
         receiver: data.receiver,
         text: data.text,
       });
-
       await newMessage.save();
       console.log(`💾 Message saved to MongoDB: ${newMessage._id}`);
 
@@ -200,10 +180,6 @@ io.on("connection", (socket) => {
         timestamp: messageForFrontend.createdAt
       });
 
-      console.log(`📤 Emitting to receiver: ${data.receiver}`);
-      console.log(`📤 Emitting to sender: ${data.sender}`);
-
-      // Use io.to() for broadcasting message and chat list update
       io.to(data.receiver).emit("receive_private_message", messageForFrontend);
       io.to(data.sender).emit("receive_private_message", messageForFrontend);
 
@@ -223,25 +199,15 @@ io.on("connection", (socket) => {
 
       console.log(`💬 Message successfully sent from ${data.sender} to ${data.receiver}`);
 
-      // --- EMAIL NOTIFICATION LOGIC (inside async handler, no SyntaxError) ---
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      await transporter.sendMail({
-        from: '"Atyant" <notification@atyant.in>',
+      // --- EMAIL NOTIFICATION LOGIC WITH RESEND ---
+      await resend.emails.send({
+        from: 'notification@atyant.in',
         to: receiver.email,
         subject: `New Message from ${sender.username}`,
         text: `You have a new message from ${sender.username}.\n\nMessage: "${data.text}"\n\nPlease log in to your Atyant account to reply.`,
-        html: `<p>You have a new message from <strong>${sender.username}</strong>.</p><p>Message: <em>"${data.text}"</em></p><p>Please log in to your Atyant account to reply.</p>`,
+        html: `<p>You have a new message from <strong>${sender.username}</strong>.</p><p>Message: <em>"${data.text}"</em></p><p>Please log in to your Atyant account to reply.</p>`
       });
-
-      console.log(`📧 Email notification sent to ${receiver.email}`);
-      // --- END EMAIL LOGIC ---
+      console.log(`📧 Email notification sent via Resend to ${receiver.email}`);
 
     } catch (error) {
       console.error("❌ Error saving/sending private message:", error);
@@ -255,7 +221,6 @@ io.on("connection", (socket) => {
   // Handle message delivery status
   socket.on("message_delivered", (data) => {
     console.log(`✓ Message delivered: ${data.messageId}`);
-    // Notify sender that message was delivered
     io.to(data.sender).emit("message_status", {
       messageId: data.messageId,
       status: 'delivered',
@@ -272,7 +237,6 @@ io.on("connection", (socket) => {
 app.get('/api/messages/:userId1/:userId2', async (req, res) => {
   try {
     const { userId1, userId2 } = req.params;
-
     const messages = await Message.find({
       $or: [
         { sender: userId1, receiver: userId2 },
@@ -297,7 +261,7 @@ app.get('/api/debug/connections', (req, res) => {
   const activeRooms = {};
 
   rooms.forEach((sockets, roomName) => {
-    if (roomName.length === 24) { // MongoDB ObjectIds are 24 chars
+    if (roomName.length === 24) {
       activeRooms[roomName] = {
         socketCount: sockets.size,
         sockets: Array.from(sockets)
@@ -360,16 +324,14 @@ app.get('/api/health', (req, res) => {
 app.get('/api/profile/:username', async (req, res) => {
   try {
     const { username } = req.params;
-    const profile = await User.findOne({ username }); // Assuming you have a User model
-
+    const profile = await User.findOne({ username });
     if (!profile) {
-      return res.status(404).json({ message: 'Profile not found' }); // Return JSON error
+      return res.status(404).json({ message: 'Profile not found' });
     }
-
-    res.status(200).json(profile); // Return JSON profile
+    res.status(200).json(profile);
   } catch (error) {
     console.error('Error fetching profile:', error);
-    res.status(500).json({ message: 'Error fetching profile' }); // Return JSON error
+    res.status(500).json({ message: 'Error fetching profile' });
   }
 });
 
