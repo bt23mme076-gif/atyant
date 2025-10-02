@@ -2,9 +2,11 @@ import express from 'express';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import protect from '../middleware/authMiddleware.js';
+import User from '../models/User.js';
 import dotenv from "dotenv";
 dotenv.config(); 
 const router = express.Router();
+
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,

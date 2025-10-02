@@ -5,18 +5,14 @@ import io from 'socket.io-client';
 import { useAuth } from '../AuthContext';
 import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
-
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-// If AuthContext is exported separately and contains user object with token/email/username,
-// this line enables using it for prefill; if not present in project, it won’t break because it’s unused elsewhere.
 import { AuthContext } from '../AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const ChatPage = () => {
-  // Original states
+  // State definitions
   const [contactList, setContactList] = useState([]);
   const [selectedContact, setSelectedContact] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -37,69 +33,63 @@ const ChatPage = () => {
 
   const [allMessagesLoaded, setAllMessagesLoaded] = useState(false);
   const [loadingMoreMessages, setLoadingMoreMessages] = useState(false);
-  const [skip, setSkip] = useState(0); // How many messages to skip
-  const limit = 20; // Number of messages to load per batch
+  const [skip, setSkip] = useState(0);
+  const limit = 20;
 
-  const [credits, setCredits] = useState(0); // State to hold credit count
+  // Credits state
+  const [credits, setCredits] = useState(null);
 
-
-  // --- Mobile sidebar state (main addition) ---
+  // Mobile sidebar state
   const isMobile = window.innerWidth <= 768;
   const [showSidebarOnMobile, setShowSidebarOnMobile] = useState(isMobile && !selectedContact);
 
   useEffect(() => {
     if (isMobile && !selectedContact) setShowSidebarOnMobile(true);
     if (isMobile && selectedContact) setShowSidebarOnMobile(false);
-    // On desktop, sidebar always shows
   }, [selectedContact]);
 
+  // Auth and socket initialization
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        const userData = { 
-          id: decoded.userId || decoded.id, 
-          role: decoded.role 
-        };
+        const userData = { id: decoded.userId || decoded.id, role: decoded.role };
         setCurrentUser(userData);
 
         const newSocket = io(API_URL, {
           auth: { token },
-          transports: ['websocket', 'polling']
+          transports: ['websocket', 'polling'],
         });
 
         newSocket.on('connect', () => {
           setSocketStatus('connected');
           newSocket.emit('join_user_room', userData.id);
         });
-        newSocket.on('disconnect', (reason) => {
-          setSocketStatus('disconnected');
-        });
-        newSocket.on('connect_error', (error) => {
+        newSocket.on('disconnect', () => setSocketStatus('disconnected'));
+        newSocket.on('connect_error', () => {
           setError('Failed to connect to chat server');
           setSocketStatus('error');
         });
-        newSocket.on('reconnect', (attemptNumber) => {
+        newSocket.on('reconnect', () => {
           setSocketStatus('connected');
-          if (currentUser && currentUser.id) {
-            newSocket.emit('join_user_room', currentUser.id);
-          }
+          if (currentUser && currentUser.id) newSocket.emit('join_user_room', currentUser.id);
         });
-        newSocket.on('reconnect_error', (error) => {
-          setSocketStatus('error');
-        });
+        newSocket.on('reconnect_error', () => setSocketStatus('error'));
         newSocket.on('reconnect_failed', () => {
           setSocketStatus('error');
           setError('Failed to reconnect to chat server. Please refresh the page.');
         });
 
+        // --- Insufficient credits notification ---
+        newSocket.on('insufficient_credits', (data) => {
+          toast.error(data.message || "You are out of credits. Please purchase more.");
+        });
+
         setSocket(newSocket);
 
         return () => {
-          if (newSocket) {
-            newSocket.disconnect();
-          }
+          newSocket.disconnect();
         };
       } catch (error) {
         setError('Authentication error');
@@ -110,30 +100,28 @@ const ChatPage = () => {
     }
   }, [navigate]);
 
-
   useEffect(() => {
+    // Read/unread status
     if (!socket || !selectedContact || !currentUser) return;
-    const unreadMsgIds = messages
-      .filter(
-        msg =>
-          msg.receiver === currentUser.id &&
-          !msg.seen
-      )
-      .map(msg => msg._id);
+    const unreadMsgIds = messages.filter(
+      msg =>
+        msg.receiver === currentUser.id &&
+        !msg.seen
+    ).map(msg => msg._id);
     if (unreadMsgIds.length) {
       unreadMsgIds.forEach(messageId => {
         const message = messages.find(msg => msg._id === messageId);
         if (!message.seen) {
           socket.emit('message_read', {
             messageId: messageId,
-            sender: selectedContact._id, 
+            sender: selectedContact._id,
             receiver: currentUser.id,
           });
         }
       });
     }
   }, [messages, selectedContact, socket, currentUser]);
-  
+
   useEffect(() => {
     if (!socket) return;
     socket.on('message_status', (statusUpdate) => {
@@ -148,25 +136,24 @@ const ChatPage = () => {
     return () => socket.off('message_status');
   }, [socket]);
 
+  // Fetch user profile/credits
   useEffect(() => {
-    // Fetch the user's profile to get their credit count
     const fetchUserProfile = async () => {
-        if (user && user.role === 'user') {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-            const response = await fetch(`${API_URL}/api/profile/me`, {
-                headers: { 'Authorization': `Bearer ${user.token}` }
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setCredits(data.messageCredits);
-            }
-        }
+      if (user && user.role === 'user') {
+        const response = await fetch(`${API_URL}/api/profile/me`, {
+          headers: { 'Authorization': `Bearer ${user.token}` },
+        });
+        const data = await response.json();
+        if (response.ok) setCredits(data.messageCredits);
+      }
     };
     fetchUserProfile();
-  }, [user]);
+  }, [user, messages]); // refetch credits after message
 
+  // Listen messages and notifications
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !currentUser) return;
+
     const handleReceiveMessage = (newMessage) => {
       if (
         selectedContact &&
@@ -221,10 +208,16 @@ const ChatPage = () => {
     socket.on('new_message', handleReceiveMessage);
     socket.on('chat_notification', handleNotification);
 
+    // credits notification for out-of-credits
+    socket.on('insufficient_credits', (data) => {
+      toast.error(data.message || "You are out of credits. Please purchase more.");
+    });
+
     return () => {
       socket.off('receive_private_message', handleReceiveMessage);
       socket.off('new_message', handleReceiveMessage);
       socket.off('chat_notification', handleNotification);
+      socket.off('insufficient_credits');
     };
   }, [socket, currentUser, selectedContact]);
 
@@ -242,18 +235,16 @@ const ChatPage = () => {
         if (url) {
           const token = localStorage.getItem('token');
           const response = await fetch(url, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': `Bearer ${token}` },
           });
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           const data = await response.json();
           setContactList(data);
           if (location.state?.selectedContact) {
             handleSelectContact(location.state.selectedContact);
           }
         }
-      } catch (error) {
+      } catch {
         setError('Failed to load contacts');
       } finally {
         setLoading(false);
@@ -269,7 +260,7 @@ const ChatPage = () => {
     }
     try {
       setSelectedContact(contact);
-      setShowSidebarOnMobile(false); // Hide sidebar on mobile after selection
+      setShowSidebarOnMobile(false);
       setMessages([]);
       setError('');
       setSkip(0);
@@ -279,24 +270,19 @@ const ChatPage = () => {
       const response = await fetch(
         `${API_URL}/api/messages/${currentUser.id}/${contact._id}?skip=0&limit=${limit}`,
         {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`Failed to fetch messages: ${response.status}`);
-      }
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      if (!response.ok) throw new Error(`Failed to fetch messages: ${response.status}`);
+
       const messageData = await response.json();
       setMessages(messageData);
-      if (messageData.length < limit) {
-        setAllMessagesLoaded(true);
-      }
-    } catch (error) {
+      if (messageData.length < limit) setAllMessagesLoaded(true);
+    } catch {
       setError('Failed to load messages');
     }
   };
 
+  // --- Block sending when credits are out ---
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) {
@@ -311,6 +297,11 @@ const ChatPage = () => {
       setError("Not connected to chat. Please check your connection and try again.");
       return;
     }
+    // block if no credits left for user
+    if (currentUser?.role === 'user' && (credits === 0 || credits < 0)) {
+      toast.error("You are out of credits. Please purchase more to continue.");
+      return;
+    }
     try {
       const messageData = {
         sender: currentUser.id,
@@ -321,7 +312,7 @@ const ChatPage = () => {
       socket.emit("private_message", messageData);
       setNewMessage("");
       setError("");
-    } catch (error) {
+    } catch {
       setError("Failed to send message. Please try again.");
     }
   };
@@ -340,7 +331,6 @@ const ChatPage = () => {
 
   const loadMoreMessages = async () => {
     if (loadingMoreMessages || allMessagesLoaded || !selectedContact) return;
-
     setLoadingMoreMessages(true);
     const newSkip = skip + limit;
     try {
@@ -348,14 +338,9 @@ const ChatPage = () => {
       const response = await fetch(
         `${API_URL}/api/messages/${currentUser.id}/${selectedContact._id}?skip=${newSkip}&limit=${limit}`,
         {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`Failed to load more messages: ${response.status}`);
-      }
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      if (!response.ok) throw new Error(`Failed to load more messages: ${response.status}`);
       const newMessages = await response.json();
 
       if (newMessages.length === 0) {
@@ -371,17 +356,17 @@ const ChatPage = () => {
     }
   };
 
-  // Razorpay payment handler (non-invasive: does not alter any existing chat logic)
+  // Razorpay payment handler
   const handlePayment = async () => {
     try {
       const token = localStorage.getItem('token');
-      // 1. Create an Order from backend
+      // 1. Create Order from backend
       const orderResponse = await fetch(`${API_URL}/api/payment/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-        },
+        }
       });
       if (!orderResponse.ok) {
         const t = await orderResponse.text();
@@ -410,7 +395,6 @@ const ChatPage = () => {
           const result = await verificationResponse.json();
           if (result.success) {
             toast.success("Payment successful! Credits added.");
-            // Optionally trigger a refresh of credit count if UI has such state
           } else {
             toast.error("Payment verification failed. Please contact support.");
           }
@@ -419,14 +403,11 @@ const ChatPage = () => {
           name: ctxUser?.username || user?.username || '',
           email: ctxUser?.email || user?.email || '',
         },
-        theme: {
-          color: "#4f46e5",
-        },
+        theme: { color: "#4f46e5" }
       };
 
       // Ensure Razorpay script is available
       if (!window.Razorpay) {
-        // Lazy-load script if not present; keeps existing logic unchanged
         await new Promise((resolve, reject) => {
           const script = document.createElement('script');
           script.src = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -463,21 +444,18 @@ const ChatPage = () => {
     <div className="chat-page">
       <ToastContainer position="top-right" autoClose={2500} />
 
-      {/* SIDEBAR for desktop/mobile */}
       {(window.innerWidth > 768 || showSidebarOnMobile) && (
         <div className={`sidebar${showSidebarOnMobile ? ' active' : ''}`}>
           <h3>{currentUser?.role === 'user' ? 'Mentors' : 'My Chats'}</h3>
-
-          {/* Connection status keeps existing UI */}
           <div className="connection-status">
             Status: <span className={socketStatus}>{socketStatus}</span>
           </div>
-
-          {/* Buy Credits Button (added without changing existing logic) */}
-          <button onClick={handlePayment} className="buy-credits-btn">
-            Buy More Credits
-          </button>
-
+          {currentUser && currentUser.role === 'user' && (
+            <div className="credits-section">
+              <p>Credits Remaining: {credits !== null ? credits : 'Loading...'}</p>
+              <button onClick={handlePayment} className="buy-credits-btn">Buy More Credits</button>
+            </div>
+          )}
           {contactList.length === 0 ? (
             <p className="no-contacts">No contacts available</p>
           ) : (
@@ -488,7 +466,7 @@ const ChatPage = () => {
                   onClick={() => handleSelectContact(contact)}
                   className={[
                     selectedContact?._id === contact._id ? 'selected' : '',
-                    highlightedContactId === contact._id ? 'highlighted' : '',
+                    highlightedContactId === contact._id ? 'highlighted' : ''
                   ].join(' ').trim()}
                 >
                   <div className="contact-name">{contact.username || contact.name}</div>
@@ -560,22 +538,30 @@ const ChatPage = () => {
               {loadingMoreMessages && <div>Loading more messages...</div>}
               <div ref={messagesEndRef} />
             </div>
-            <form onSubmit={handleSendMessage} className="message-form">
-              <input
-                type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type your message..."
-                disabled={!selectedContact || socketStatus !== 'connected'}
-              />
-              <button
-                type="submit"
-                disabled={!selectedContact || !newMessage.trim() || socketStatus !== 'connected'}
-                className={socketStatus !== 'connected' ? 'disabled' : ''}
-              >
-                {socketStatus === 'connected' ? 'Send' : 'Connecting...'}
-              </button>
-            </form>
+            {/* Out-of-credits overlay/disable input */}
+            {currentUser?.role === 'user' && (credits === 0 || credits < 0) ? (
+              <div className="limit-reached-overlay">
+                <p>Your free limit is over.</p>
+                <button onClick={handlePayment} className="buy-credits-btn">Buy Credits to Continue</button>
+              </div>
+            ) : (
+              <form onSubmit={handleSendMessage} className="message-form">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type your message..."
+                  disabled={!selectedContact || socketStatus !== 'connected'}
+                />
+                <button
+                  type="submit"
+                  disabled={!selectedContact || !newMessage.trim() || socketStatus !== 'connected'}
+                  className={socketStatus !== 'connected' ? 'disabled' : ''}
+                >
+                  {socketStatus === 'connected' ? 'Send' : 'Connecting...'}
+                </button>
+              </form>
+            )}
           </>
         ) : (
           // If mobile & sidebar not shown, give a way to open sidebar (mentor list)
