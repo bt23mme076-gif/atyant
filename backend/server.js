@@ -129,50 +129,7 @@ io.on("connection", (socket) => {
     console.log(`👤 User ${socket.id} joined room: ${userId}`);
   });
 
-  // Lightweight private_message handler (kept as-is, but merged inside the same connection block)
-  socket.on("private_message", async (data) => {
-    try {
-      if (!data.sender || !data.receiver || !data.text) return;
-
-      const [sender, receiver] = await Promise.all([
-        User.findById(data.sender),
-        User.findById(data.receiver)
-      ]);
-      if (!sender || !receiver) return;
-
-      const newMessage = new Message({
-        sender: data.sender,
-        receiver: data.receiver,
-        text: data.text,
-      });
-      await newMessage.save();
-
-      io.to(data.receiver).emit("receive_private_message", newMessage);
-
-      // --- EMAIL NOTIFICATION LOGIC ---
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      await transporter.sendMail({
-        from: '"Atyant" <notification@atyant.in>',
-        to: receiver.email,
-        subject: `New Message from ${sender.username}`,
-        text: `You have a new message from ${sender.username}.\n\nMessage: "${data.text}"\n\nPlease log in to your Atyant account to reply.`,
-        html: `<p>You have a new message from <strong>${sender.username}</strong>.</p><p>Message: <em>"${data.text}"</em></p><p>Please log in to your Atyant account to reply.</p>`,
-      });
-
-      console.log(`📧 Email notification sent to ${receiver.email}`);
-    } catch (error) {
-      console.error("❌ Error in private_message:", error);
-    }
-  });
-
-  // Robust private_message handler with validation - kept as-is and placed after the lightweight one
+  // ONLY ONE private_message handler with all logic (including Nodemailer)
   socket.on("private_message", async (data) => {
     try {
       console.log("📩 Received message data:", data);
@@ -235,14 +192,13 @@ io.on("connection", (socket) => {
         createdAt: populatedMessage.createdAt
       };
 
-      // --- NEW: Real-time notification signal to receiver ---
+      // --- Real-time notification signal to receiver ---
       io.to(data.receiver).emit("chat_notification", {
         from: messageForFrontend.sender,
         fromName: messageForFrontend.senderName,
         message: messageForFrontend.text,
         timestamp: messageForFrontend.createdAt
       });
-      // ------------------------------------------------------
 
       console.log(`📤 Emitting to receiver: ${data.receiver}`);
       console.log(`📤 Emitting to sender: ${data.sender}`);
@@ -266,6 +222,27 @@ io.on("connection", (socket) => {
       });
 
       console.log(`💬 Message successfully sent from ${data.sender} to ${data.receiver}`);
+
+      // --- EMAIL NOTIFICATION LOGIC (inside async handler, no SyntaxError) ---
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: '"Atyant" <notification@atyant.in>',
+        to: receiver.email,
+        subject: `New Message from ${sender.username}`,
+        text: `You have a new message from ${sender.username}.\n\nMessage: "${data.text}"\n\nPlease log in to your Atyant account to reply.`,
+        html: `<p>You have a new message from <strong>${sender.username}</strong>.</p><p>Message: <em>"${data.text}"</em></p><p>Please log in to your Atyant account to reply.</p>`,
+      });
+
+      console.log(`📧 Email notification sent to ${receiver.email}`);
+      // --- END EMAIL LOGIC ---
+
     } catch (error) {
       console.error("❌ Error saving/sending private message:", error);
       socket.emit("message_error", {
