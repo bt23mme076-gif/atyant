@@ -18,6 +18,7 @@ import ResetPassword from './components/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import ProfilePage from './components/ProfilePage';
 import PublicProfilePage from './components/PublicProfilePage';
+import AskQuestionPage from './components/AskQuestionPage';
 
 function App() {
   const location = useLocation();
@@ -41,6 +42,7 @@ function App() {
           <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/profile/:username" element={<PublicProfilePage />} />
+          <Route path="/ask" element={<ProtectedRoute><AskQuestionPage /></ProtectedRoute>} />
         </Routes>
       </main>
       {!isChatPage && <Footer />}

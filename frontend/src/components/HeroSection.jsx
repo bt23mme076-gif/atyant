@@ -8,15 +8,17 @@ import './HeroSection.css';
 const HeroSection = () => {
   return (
     <section className="hero-section">
+  
       <div className="hero-content">
         <h1 className="hero-title">
-          Ask from <span className="highlight">Those Who’ve</span> Done It Before
+          Your Journey from <span className="highlight"> Confused to Confident </span> Start Here
         </h1>
         <p className="hero-subtitle">
           No guesswork. Just experienced real answers from people who faced the same problem in the same situation.
         </p>
  {/* 2. Add the SearchBar component here */}
         <SearchBar />
+        
         <div className="hero-rotator">
           Your gateway to answers in{' '}
           <TypeAnimation
@@ -34,9 +36,10 @@ const HeroSection = () => {
             repeat={Infinity}
           />
         </div>
-
-        
-
+        <div className="button-group">
+        {/* CORRECTED LINK */}
+        <Link to="/ask" className="hero-button primary">Ask Your Question</Link>
+      </div>
         <div className="stats-container">
           <div className="stat-item">
             <span className="stat-number">1,000+</span>

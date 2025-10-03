@@ -15,6 +15,7 @@ import chatRoutes from './routes/chatRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
+import askRoutes from './routes/askRoutes.js';
 
 // Import models
 import Feedback from './models/Feedback.js';
@@ -54,6 +55,7 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/ask', askRoutes);
 
 // --- Contact form route ---
 app.post("/api/contact", async (req, res) => {

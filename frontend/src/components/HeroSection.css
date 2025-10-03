@@ -125,7 +125,7 @@
 
 .stat-label {
   font-size: 0.9rem;
-  opacity: 0.7;
+  opacity: 100;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
