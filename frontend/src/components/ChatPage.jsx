@@ -527,30 +527,25 @@ const ChatPage = () => {
                 }
               }}
             >
-              {messages.length === 0 ? (
-                <div className="no-messages">
-                  No messages yet. Start the conversation!
-                </div>
-              ) : (
-                messages.map((msg, index) => (
+              {messages.length > 0 && messages.map((msg, index) => {
+                const senderId = String(msg.sender?._id || msg.senderId || msg.sender);
+                const isMine = senderId === String(currentUser.id);
+
+                return (
                   <div
                     key={index}
-                    className={`message ${
-                      msg.sender === currentUser.id || msg.senderId === currentUser.id ? 'sent' : 'received'
-                    }`}
+                    className={`message ${isMine ? 'sent' : 'received'}`}
                   >
                     <p>{msg.text || msg.message}</p>
                     <span className="message-time">
-                      {new Date(msg.timestamp || msg.createdAt || Date.now()).toLocaleTimeString()}
-                    </span>
-                    <span className="message-status">
-                      {msg.sender === currentUser.id || msg.senderId === currentUser.id
-                        ? msg.seen ? 'Seen' : 'Sent'
-                        : ''}
-                    </span>
+                     {new Date(msg.timestamp || msg.createdAt || Date.now()).toLocaleTimeString()}
+                  </span>
+                  <span className="message-status">
+                     {isMine ? (msg.seen ? 'Seen' : 'Sent') : ''}
+                  </span>
                   </div>
-                ))
-              )}
+                );
+            })}
 
               {loadingMoreMessages && <div>Loading more messages...</div>}
               <div ref={messagesEndRef} />
