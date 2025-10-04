@@ -7,8 +7,6 @@ const router = express.Router();
 // Route to get all mentors
 router.get('/mentors', async (req, res) => {
   try {
-    // YEH LINE THEEK KI GAYI HAI
-    // Hum ab 'profilePicture' bhi maang rahe hain
     const mentors = await User.find({ role: 'mentor' }).select('username email _id profilePicture');
     res.json(mentors);
   } catch (error) {
@@ -16,8 +14,7 @@ router.get('/mentors', async (req, res) => {
   }
 });
 
-// This route remains unchanged
-// It's for a MENTOR to get their list of chats
+// Mentor -> get their list of chats
 router.get('/conversations/mentor/:mentorId', async (req, res) => {
   try {
     const { mentorId } = req.params;
@@ -27,6 +24,8 @@ router.get('/conversations/mentor/:mentorId', async (req, res) => {
 
     const conversations = {};
     messages.forEach(msg => {
+      if (!msg.sender || !msg.receiver) return; // skip broken refs
+
       const otherUser = String(msg.sender._id) === mentorId ? msg.receiver : msg.sender;
       if (otherUser && otherUser._id) {
         conversations[otherUser._id] = otherUser;
@@ -35,39 +34,37 @@ router.get('/conversations/mentor/:mentorId', async (req, res) => {
 
     res.json(Object.values(conversations));
   } catch (error) {
+    console.error('Error fetching mentor conversations:', error);
     res.status(500).json({ message: 'Error fetching mentor conversations.' });
   }
 });
 
-// --- NEW ROUTE ADDED HERE ---
-// This new route is for a USER to get their "My Chats" list
+// User -> get their "My Chats" list
 router.get('/conversations/user/:userId', async (req, res) => {
-    try {
-        const { userId } = req.params;
-        // Find all messages involving this user
-        const messages = await Message.find({ $or: [{ sender: userId }, { receiver: userId }] })
-            .populate('sender', 'username _id role')
-            .populate('receiver', 'username _id role');
+  try {
+    const { userId } = req.params;
+    const messages = await Message.find({ $or: [{ sender: userId }, { receiver: userId }] })
+      .populate('sender', 'username _id role')
+      .populate('receiver', 'username _id role');
 
-        const conversations = {};
-        messages.forEach(msg => {
-            // Find the other person in the chat
-            const otherUser = String(msg.sender._id) === userId ? msg.receiver : msg.sender;
-            // Add them to the list only if they are a mentor
-            if (otherUser && otherUser.role === 'mentor') {
-              conversations[otherUser._id] = otherUser;
-            }
-        });
-        
-        res.json(Object.values(conversations));
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching user conversations.' });
-    }
+    const conversations = {};
+    messages.forEach(msg => {
+      if (!msg.sender || !msg.receiver) return; // skip broken refs
+
+      const otherUser = String(msg.sender._id) === userId ? msg.receiver : msg.sender;
+      if (otherUser && otherUser.role === 'mentor') {
+        conversations[otherUser._id] = otherUser;
+      }
+    });
+
+    res.json(Object.values(conversations));
+  } catch (error) {
+    console.error('Error fetching user conversations:', error);
+    res.status(500).json({ message: 'Error fetching user conversations.' });
+  }
 });
 
-
-// This route remains unchanged
-// It's for getting the actual messages for a specific chat
+// Get actual messages for a specific chat
 router.get('/messages/:userId1/:userId2', async (req, res) => {
   try {
     const { userId1, userId2 } = req.params;
@@ -77,8 +74,10 @@ router.get('/messages/:userId1/:userId2', async (req, res) => {
         { sender: userId2, receiver: userId1 }
       ]
     }).sort({ createdAt: 'asc' });
+
     res.json(messages);
   } catch (error) {
+    console.error('Error fetching messages:', error);
     res.status(500).json({ message: 'Error fetching messages.' });
   }
 });
