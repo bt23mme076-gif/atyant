@@ -17,7 +17,7 @@ const razorpay = new Razorpay({
 router.post('/create-order', protect, async (req, res) => {
   try {
     const options = {
-      amount: 100, // Amount in paisa (e.g., 1.00 INR)
+      amount: 500, // Amount in paisa (e.g., 5.00 INR)
       currency: 'INR',
     };
     const order = await razorpay.orders.create(options);

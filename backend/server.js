@@ -224,7 +224,7 @@ io.on("connection", (socket) => {
         to: receiver.email,
         subject: `New Message from ${sender.username}`,
         text: `You have a new message from ${sender.username}.\n\nMessage: "${data.text}"\n\nPlease log in to your Atyant account to reply.`,
-        html: `<p>You have a new message from <strong>${sender.username}</strong>.</p><p>Message: <em>"${data.text}"</em></p><p>Please log in to your Atyant account to reply.</p>`
+        html: `<p>You have a new message from <strong>${sender.username}</strong>.</p><p>Message: <em>"${data.text}"</em></p><p>Please log in to your Atyant account to reply [https://www.atyant.in].</p>`
       });
       console.log(`📧 Email notification sent via Resend to ${receiver.email}`);
 
