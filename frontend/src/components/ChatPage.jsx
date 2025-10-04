@@ -1,6 +1,6 @@
 // src/pages/ChatPage.jsx
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import io from 'socket.io-client';
 import { useAuth } from '../AuthContext';
 import { jwtDecode } from 'jwt-decode';
@@ -12,7 +12,6 @@ import { AuthContext } from '../AuthContext';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const ChatPage = () => {
-  // State definitions
   const [contactList, setContactList] = useState([]);
   const [selectedContact, setSelectedContact] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -36,10 +35,8 @@ const ChatPage = () => {
   const [skip, setSkip] = useState(0);
   const limit = 20;
 
-  // Credits state
   const [credits, setCredits] = useState(null);
 
-  // Mobile sidebar state
   const isMobile = window.innerWidth <= 768;
   const [showSidebarOnMobile, setShowSidebarOnMobile] = useState(isMobile && !selectedContact);
 
@@ -48,7 +45,6 @@ const ChatPage = () => {
     if (isMobile && selectedContact) setShowSidebarOnMobile(false);
   }, [selectedContact]);
 
-  // Auth and socket initialization
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -81,7 +77,6 @@ const ChatPage = () => {
           setError('Failed to reconnect to chat server. Please refresh the page.');
         });
 
-        // --- Insufficient credits notification ---
         newSocket.on('insufficient_credits', (data) => {
           toast.error(data.message || "You are out of credits. Please purchase more.");
         });
@@ -101,13 +96,10 @@ const ChatPage = () => {
   }, [navigate]);
 
   useEffect(() => {
-    // Read/unread status
     if (!socket || !selectedContact || !currentUser) return;
-    const unreadMsgIds = messages.filter(
-      msg =>
-        msg.receiver === currentUser.id &&
-        !msg.seen
-    ).map(msg => msg._id);
+    const unreadMsgIds = messages
+      .filter(msg => msg.receiver === currentUser.id && !msg.seen)
+      .map(msg => msg._id);
     if (unreadMsgIds.length) {
       unreadMsgIds.forEach(messageId => {
         const message = messages.find(msg => msg._id === messageId);
@@ -136,7 +128,6 @@ const ChatPage = () => {
     return () => socket.off('message_status');
   }, [socket]);
 
-  // Fetch user profile/credits
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (user && user.role === 'user') {
@@ -148,9 +139,8 @@ const ChatPage = () => {
       }
     };
     fetchUserProfile();
-  }, [user, messages]); // refetch credits after message
+  }, [user, messages]);
 
-  // Listen messages and notifications
   useEffect(() => {
     if (!socket || !currentUser) return;
 
@@ -208,7 +198,6 @@ const ChatPage = () => {
     socket.on('new_message', handleReceiveMessage);
     socket.on('chat_notification', handleNotification);
 
-    // credits notification for out-of-credits
     socket.on('insufficient_credits', (data) => {
       toast.error(data.message || "You are out of credits. Please purchase more.");
     });
@@ -282,7 +271,6 @@ const ChatPage = () => {
     }
   };
 
-  // --- Block sending when credits are out ---
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) {
@@ -297,7 +285,6 @@ const ChatPage = () => {
       setError("Not connected to chat. Please check your connection and try again.");
       return;
     }
-    // block if no credits left for user
     if (currentUser?.role === 'user' && (credits === 0 || credits < 0)) {
       toast.error("You are out of credits. Please purchase more to continue.");
       return;
@@ -356,11 +343,9 @@ const ChatPage = () => {
     }
   };
 
-  // Razorpay payment handler
   const handlePayment = async () => {
     try {
       const token = localStorage.getItem('token');
-      // 1. Create Order from backend
       const orderResponse = await fetch(`${API_URL}/api/payment/create-order`, {
         method: 'POST',
         headers: {
@@ -374,7 +359,6 @@ const ChatPage = () => {
       }
       const order = await orderResponse.json();
 
-      // 2. Configure Razorpay options
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
@@ -383,7 +367,6 @@ const ChatPage = () => {
         description: "Mentor Chat Credits",
         order_id: order.id,
         handler: async function (response) {
-          // 3. Verify payment on backend
           const verificationResponse = await fetch(`${API_URL}/api/payment/verify-payment`, {
             method: 'POST',
             headers: {
@@ -406,7 +389,6 @@ const ChatPage = () => {
         theme: { color: "#4f46e5" }
       };
 
-      // Ensure Razorpay script is available
       if (!window.Razorpay) {
         await new Promise((resolve, reject) => {
           const script = document.createElement('script');
@@ -469,7 +451,9 @@ const ChatPage = () => {
                     highlightedContactId === contact._id ? 'highlighted' : ''
                   ].join(' ').trim()}
                 >
-                  <div className="contact-name">{contact.username || contact.name}</div>
+                  <div className="contact-name">
+                    {contact.username || contact.name}
+                  </div>
                   <div className="contact-role">{contact.role}</div>
                 </li>
               ))}
@@ -481,8 +465,12 @@ const ChatPage = () => {
       <div className="chat-window">
         {selectedContact ? (
           <>
-            <div className="chat-header">
-              {/* Mobile back button */}
+            {/* --- Profile Photo + Name with Online Status in Chat Header --- */}
+            <div className="chat-header" style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
               {isMobile && (
                 <span
                   className="back-btn"
@@ -494,16 +482,43 @@ const ChatPage = () => {
                   &lt;
                 </span>
               )}
-              <div className="chat-header-info">
-                <div className="chat-header-name">
-                  {selectedContact.username || selectedContact.name}
-                </div>
-                <div className="chat-header-status">
-                  <span className={`status-indicator status-online`}></span>
-                  Online
-                </div>
+
+              <Link
+                to={`/profile/${selectedContact.username}`}
+                className="chat-header-info"
+                style={{
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '1rem'
+                }}
+              >
+                <img
+                  src={
+                    selectedContact.profilePicture
+                    || `https://api.pravatar.cc/150?u=${selectedContact.username || selectedContact._id}`
+                  }
+                  alt={selectedContact.username}
+                  className="chat-header-avatar"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '2px solid #eee'
+                  }}
+                />
+                <h4 style={{ margin: 0, color: '#222', fontWeight: 600 }}>
+                  {selectedContact.username}
+                </h4>
+              </Link>
+              <div className="chat-header-status"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span className={`status-indicator status-online`}></span>
+                <span style={{ fontWeight: 500, fontSize: '14px', color: '#4f46e5' }}>Online</span>
               </div>
             </div>
+
             <div
               className="messages-area"
               onScroll={(e) => {
@@ -520,7 +535,9 @@ const ChatPage = () => {
                 messages.map((msg, index) => (
                   <div
                     key={index}
-                    className={`message ${msg.sender === currentUser.id || msg.senderId === currentUser.id ? 'sent' : 'received'}`}
+                    className={`message ${
+                      msg.sender === currentUser.id || msg.senderId === currentUser.id ? 'sent' : 'received'
+                    }`}
                   >
                     <p>{msg.text || msg.message}</p>
                     <span className="message-time">
@@ -538,7 +555,6 @@ const ChatPage = () => {
               {loadingMoreMessages && <div>Loading more messages...</div>}
               <div ref={messagesEndRef} />
             </div>
-            {/* Out-of-credits overlay/disable input */}
             {currentUser?.role === 'user' && (credits === 0 || credits < 0) ? (
               <div className="limit-reached-overlay">
                 <p>Your free limit is over.</p>
@@ -564,7 +580,6 @@ const ChatPage = () => {
             )}
           </>
         ) : (
-          // If mobile & sidebar not shown, give a way to open sidebar (mentor list)
           isMobile && !showSidebarOnMobile ? (
             <button onClick={() => setShowSidebarOnMobile(true)}>Show Mentors</button>
           ) : (

@@ -599,4 +599,24 @@
     max-width: 90%;
     padding: 10px 16px;
   }
+  .chat-header-link {
+  color: inherit; /* Keeps the text color the same */
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.3s ease;
 }
+
+.chat-header-link:hover {
+  border-bottom-color: #4f46e5; /* Adds an underline on hover */
+}
+
+}
+/* ChatPage.css */
+.chat-header-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+}
+
