@@ -236,6 +236,28 @@ io.on("connection", (socket) => {
       });
     }
   });
+    // --- YEH NAYA HANDLER ADD KAREIN ---
+  socket.on("delete_message", async (data) => {
+    try {
+      const { messageId, userId } = data;
+      
+      const message = await Message.findById(messageId);
+
+      // Security Check: Sirf message bhejne wala hi delete kar sakta hai
+      if (message && message.sender.toString() === userId) {
+        // Database se message delete karein
+        await Message.deleteOne({ _id: messageId });
+
+        // Dono users (sender aur receiver) ko batayein ki message delete ho gaya hai
+        io.to(message.sender.toString()).emit("message_deleted", { messageId });
+        io.to(message.receiver.toString()).emit("message_deleted", { messageId });
+        
+        console.log(`🗑️ Message ${messageId} deleted by user ${userId}`);
+      }
+    } catch (error) {
+      console.error("❌ Error deleting message:", error);
+    }
+  });
 
   // Handle message delivery status
   socket.on("message_delivered", (data) => {

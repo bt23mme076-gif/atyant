@@ -619,4 +619,75 @@
   object-fit: cover;
   border: 2px solid #eee;
 }
+.protoast {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  width: 360px;
+  max-width: calc(100vw - 24px);
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid rgba(15,23,42,0.06);
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.12), 0 4px 6px -4px rgba(0,0,0,0.10);
+}
+.protoast-avatar {
+  width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
+  border: 2px solid rgba(79,70,229,0.16);
+}
+.protoast-body { display:flex; flex-direction:column; gap:4px; min-width:0; }
+.protoast-title { font-weight:700; font-size:14px; }
+.protoast-preview { font-size:13px; color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.protoast-meta { font-size:12px; color:#64748b; }
+.protoast-actions { display:flex; gap:8px; }
+.protoast-btn { border:1px solid rgba(15,23,42,0.10); background:transparent; color:inherit; padding:6px 10px; font-size:12.5px; font-weight:600; border-radius:10px; cursor:pointer; transition:all .18s; }
+.protoast-btn:hover { border-color: rgba(79,70,229,0.35); transform: translateY(-1px); }
+.protoast-btn.primary { background:#4f46e5; color:#fff; border-color:#4f46e5; }
+.Toastify__toast { background:transparent !important; box-shadow:none !important; padding:0 !important; min-height:auto !important; }
+.Toastify__toast-body { padding:0 !important; margin:0 !important; }
+.Toastify__close-button { display:none !important; }
+.unread-badge {
+  display: inline-block;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  margin-left: 7px;
+  background: #e11d48;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 50px;
+  text-align: center;
+  line-height: 18px;
+  position: relative;
+  top: -3px;
+  box-shadow: none;
+}
+.message-delete-btn {
+  background: transparent;
+  border: none;
+  color: #fff;
+  margin-left: 8px;
+  padding: 0;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  vertical-align: middle;
+  /* Optional: icon height/width if you use SVG */
+  line-height: 1;
+}
 
+.message-delete-btn:hover {
+  opacity: 1;
+  color: #ff4d4f; /* red on hover */
+}
+
+/* Optional: Adjusts wrapper for alignment */
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
