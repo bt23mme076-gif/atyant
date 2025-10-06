@@ -69,7 +69,7 @@ const AskQuestionPage = () => {
               {suggestedMentors.length > 0 ? (
                 suggestedMentors.map((mentor) => (
                   <div className="mentor-card" key={mentor._id}>
-                    <img src={mentor.profilePicture || `https://i.pravatar.cc/150?u=${mentor._id}`} alt={mentor.username} className="mentor-image" />
+                    <img src={mentor.profilePicture || `https://api.pravatar.cc/150?u=${mentor._id}`} alt={mentor.username} className="mentor-image" />
                     <h3 className="mentor-name">{mentor.username}</h3>
                     <p className="mentor-interest">Expert Mentor</p>
                     <button onClick={() => startChatWithMentor(mentor)}>Chat Now</button>

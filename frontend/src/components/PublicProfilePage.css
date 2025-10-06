@@ -1,3 +1,6 @@
+/* PublicProfilePage.css - COMBINED & ENHANCED */
+
+/* Container Styles */
 .public-profile-container {
   display: flex;
   justify-content: center;
@@ -7,6 +10,7 @@
   padding: 40px 16px;
 }
 
+/* Profile Card Styles */
 .profile-card {
   background: rgba(255,255,255,0.92);
   border-radius: 22px;
@@ -28,6 +32,7 @@
   box-shadow: 0 24px 64px -4px #6C63FF55;
 }
 
+/* Avatar */
 .profile-avatar {
   width: 141px;
   height: 141px;
@@ -47,6 +52,7 @@
   transform: scale(1.04) rotate(-2deg);
 }
 
+/* Name/Role/Bio */
 .profile-card h1 {
   font-family: 'Montserrat', 'Roboto', sans-serif;
   font-size: 2.8rem;
@@ -77,24 +83,22 @@
   font-weight: 400;
 }
 
+/* Expertise Section */
 .expertise-section {
   margin-top: 20px;
 }
-
 .expertise-section h4 {
   font-size: 1.19rem;
   color: #3d3b75;
   margin-bottom: 8px;
   font-weight: 600;
 }
-
 .tags {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   margin-bottom: 12px;
 }
-
 .tag {
   background: linear-gradient(90deg, #e0e7ff 0%, #d1d5ff 90%);
   color: #4f46e5;
@@ -111,27 +115,49 @@
   background: linear-gradient(90deg, #c7d2fe 0%, #fff 100%);
 }
 
+/* Action Buttons (Chat + LinkedIn) */
+.profile-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+.chat-now-btn,
+.linkedin-btn {
+  padding: 12px 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  border: none;
+  transition: all 0.3s ease;
+}
 .chat-now-btn {
   background: linear-gradient(90deg,#4f46e5 60%, #7c3aed 100%);
   color: white;
-  padding: 13px 38px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1.09rem;
+  box-shadow: 0 3px 8px rgba(80,70,220,0.10);
   font-family: 'Montserrat', 'Roboto', sans-serif;
   font-weight: 700;
-  box-shadow: 0 3px 8px rgba(80,70,220,0.10);
-  transition: background 0.25s, box-shadow 0.25s, transform 0.21s;
-  margin-top: 18px;
+  border: none;
+  padding: 13px 38px;
 }
-
 .chat-now-btn:hover {
   background: linear-gradient(90deg,#4338ca 60%, #6d28d9 100%);
   box-shadow: 0 8px 24px -8px #7c3aed77;
   transform: scale(1.07);
 }
+.linkedin-btn {
+  background-color: transparent;
+  color: #0A66C2; /* LinkedIn's brand color */
+  border: 2px solid #0A66C2;
+}
+.linkedin-btn:hover {
+  background-color: #0A66C2;
+  color: white;
+}
 
+/* Responsive Design */
 @media (max-width: 600px) {
   .public-profile-container {
     padding: 10px 2px;
@@ -150,7 +176,7 @@
   .profile-card h1 {
     font-size: 2rem;
   }
-  .chat-now-btn {
+  .chat-now-btn, .linkedin-btn {
     padding: 10px 15px;
     font-size: 0.98rem;
   }

@@ -8,6 +8,20 @@ import User from '../models/User.js';
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const router = express.Router();
 
+// Helper to sign JWT with richer payload (includes profilePicture)
+const signUserToken = (user) => {
+  return jwt.sign(
+    {
+      userId: user._id,
+      role: user.role,
+      username: user.username,
+      profilePicture: user.profilePicture || null, // new: include profile pic
+    },
+    process.env.JWT_SECRET || 'your_jwt_secret',
+    { expiresIn: '1h' }
+  );
+};
+
 // --- Signup Route (with auto-login) ---
 router.post('/signup', async (req, res) => {
   try {
@@ -15,22 +29,33 @@ router.post('/signup', async (req, res) => {
     if (!username || !email || !password || !role) {
       return res.status(400).json({ message: 'Please enter all fields.' });
     }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'User with this email already exists.' });
+      return res
+        .status(400)
+        .json({ message: 'User with this email already exists.' });
     }
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, email, password: hashedPassword, role });
+
+    // If model supports it, profilePicture can be defaulted in schema or set here
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      role,
+      // profilePicture: req.body.profilePicture || undefined, // optional if provided
+    });
+
     await newUser.save();
 
-    const token = jwt.sign(
-      { userId: newUser._id, role: newUser.role, username: newUser.username }, // Added username
-      process.env.JWT_SECRET || 'your_jwt_secret',
-      { expiresIn: '1h' }
-    );
-    res.status(201).json({ token, role: newUser.role });
+    const token = signUserToken(newUser);
+    return res.status(201).json({ token, role: newUser.role });
   } catch (error) {
-    res.status(500).json({ message: 'Server error during user creation.' });
+    return res
+      .status(500)
+      .json({ message: 'Server error during user creation.' });
   }
 });
 
@@ -38,52 +63,58 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials.' });
     }
+
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: 'Invalid credentials.' });
     }
-    const token = jwt.sign(
-      { userId: user._id, role: user.role, username: user.username }, // Added username
-      process.env.JWT_SECRET || 'your_jwt_secret',
-      { expiresIn: '1h' }
-    );
-    res.json({ token, role: user.role });
+
+    const token = signUserToken(user);
+    return res.json({ token, role: user.role });
   } catch (error) {
-    res.status(500).json({ message: 'Server error during login.' });
+    return res.status(500).json({ message: 'Server error during login.' });
   }
 });
+
 // --- GOOGLE LOGIN ROUTE ---
 router.post('/google-login', async (req, res) => {
-    const { token } = req.body;
-    try {
-        const ticket = await client.verifyIdToken({
-            idToken: token,
-            audience: process.env.GOOGLE_CLIENT_ID, // Verifies the token is for your app
-        });
-        const { name, email, sub } = ticket.getPayload();
-        
-        let user = await User.findOne({ email });
+  const { token } = req.body;
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID, // Verifies the token is for your app
+    });
 
-        if (!user) { // If user doesn't exist, create a new one
-            user = new User({
-                username: name,
-                email: email,
-                password: await bcrypt.hash(sub + email, 10),
-                role: 'user'
-            });
-            await user.save();
-        }
-        
-        const jwtToken = jwt.sign({ userId: user._id, role: user.role, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.json({ token: jwtToken, role: user.role });
+    const { name, email, sub, picture } = ticket.getPayload();
 
-    } catch (error) {
-        console.error("Google auth error:", error);
-        res.status(400).json({ message: 'Google authentication failed.' });
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({
+        username: name,
+        email,
+        password: await bcrypt.hash(sub + email, 10),
+        role: 'user',
+        profilePicture: picture || null, // seed from Google profile if available
+      });
+      await user.save();
+    } else if (!user.profilePicture && picture) {
+      // optional: backfill profile pic if empty
+      user.profilePicture = picture;
+      await user.save();
     }
+
+    const jwtToken = signUserToken(user);
+    return res.json({ token: jwtToken, role: user.role });
+  } catch (error) {
+    console.error('Google auth error:', error);
+    return res.status(400).json({ message: 'Google authentication failed.' });
+  }
 });
+
 export default router;

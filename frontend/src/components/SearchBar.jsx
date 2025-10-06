@@ -9,7 +9,6 @@ const SearchBar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Don't search if the query is empty
     if (!query.trim()) {
       setSuggestions([]);
       return;
@@ -22,8 +21,6 @@ const SearchBar = () => {
       setSuggestions(data);
     };
 
-    // This prevents sending an API request on every single keystroke.
-    // It waits for 300ms after the user stops typing.
     const delayDebounceFn = setTimeout(() => {
       fetchSuggestions();
     }, 300);
@@ -35,6 +32,8 @@ const SearchBar = () => {
     navigate('/chat', { state: { selectedContact: mentor } });
   };
 
+  const showNoResults = query.trim() && suggestions.length === 0;
+
   return (
     <div className="search-container">
       <input
@@ -44,15 +43,22 @@ const SearchBar = () => {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
+
       {suggestions.length > 0 && (
         <ul className="suggestions-list">
           <li className="suggestions-header">Suggested Mentors:</li>
-          {suggestions.map(mentor => (
+          {suggestions.map((mentor) => (
             <li key={mentor._id} onClick={() => startChatWithMentor(mentor)}>
               {mentor.username}
             </li>
           ))}
         </ul>
+      )}
+
+      {showNoResults && (
+        <div className="no-results-msg">
+          No mentors found for “<b>{query}</b>”.
+        </div>
       )}
     </div>
   );

@@ -34,6 +34,7 @@ const ProfilePage = () => {
           username: data.username,
           bio: data.bio || '',
           expertise: data.expertise || [],
+          linkedinProfile: data.linkedinProfile || '',
         });
         setImagePreview(data.profilePicture || ''); // Set initial image preview
 
@@ -176,6 +177,11 @@ const ProfilePage = () => {
             value={formData.bio}
             onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
           />
+        </div>
+
+        <div className="form-group">
+            <label htmlFor="linkedinProfile">LinkedIn Profile URL</label>
+            <input id="linkedinProfile" name="linkedinProfile" type="text" value={formData.linkedinProfile} onChange={(e) => setFormData({ ...formData, linkedinProfile: e.target.value })} />
         </div>
 
         {user?.role === 'mentor' && (

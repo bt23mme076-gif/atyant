@@ -67,6 +67,10 @@ const userSchema = new mongoose.Schema({
    messageCredits: {
     type: Number,
     default: 5 // Every new user gets 5 free message credits
+  },
+   linkedinProfile: {
+    type: String,
+    default: ''
   }
   
 }, { timestamps: true });

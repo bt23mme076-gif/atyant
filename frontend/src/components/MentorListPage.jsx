@@ -18,7 +18,7 @@ const MentorListPage = () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const url = query
-        ? `${API_URL}/api/search/mentors?q=${query}`
+        ? `${API_URL}/api/search/mentors?q=${encodeURIComponent(query)}`
         : `${API_URL}/api/mentors`;
 
       const response = await fetch(url);
@@ -26,7 +26,7 @@ const MentorListPage = () => {
         throw new Error('Data could not be fetched!');
       }
       const data = await response.json();
-      setMentors(data);
+      setMentors(Array.isArray(data) ? data : []);
     } catch (err) {
       setError('Could not load mentors. Please try again later.');
       console.error('Failed to fetch mentors:', err);
@@ -36,19 +36,17 @@ const MentorListPage = () => {
   };
 
   useEffect(() => {
-    fetchMentors(); // Fetch all mentors initially
+    fetchMentors();
   }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchMentors(searchTerm);
+    fetchMentors(searchTerm.trim());
   };
 
   const startChatWithMentor = (mentor) => {
     navigate('/chat', {
-      state: {
-        selectedContact: mentor
-      }
+      state: { selectedContact: mentor }
     });
   };
 
@@ -72,33 +70,113 @@ const MentorListPage = () => {
 
       {!loading && !error && (
         <div className="mentor-grid">
-          {mentors.map((mentor) => (
-            <div className="mentor-card" key={mentor._id}>
-              {mentor.profilePicture ? (
-                <img
-                  src={mentor.profilePicture}
-                  alt={mentor.username}
-                  className="mentor-image"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = '/default-profile-image.jpg';
-                  }}
-                />
-              ) : (
-                <div className="mentor-image-placeholder"></div>
-              )}
-              <h3 className="mentor-name">
-                <Link to={`/profile/${mentor.username}`}>{mentor.username}</Link>
-              </h3>
-              <p className="mentor-interest">Expert Mentor</p>
-              <button
-                onClick={() => startChatWithMentor(mentor)}
-                className="chat-button"
-              >
-                Start Chat
-              </button>
+          {mentors.length === 0 && (
+            <div className="no-mentors-found">
+              No mentors found. Try a different search.
             </div>
-          ))}
+          )}
+
+          {mentors.map((mentor) => {
+            const {
+              _id,
+              username,
+              profilePicture,
+              title,           // optional: job title
+              company,         // optional: org
+              rating,          // optional: number
+              reviewsCount,    // optional: number
+              tags,            // optional: array of strings
+              badges,          // optional: array of strings/short labels
+              hasScheduling    // optional: boolean
+            } = mentor || {};
+
+            return (
+              <div className="mentor-card" key={_id}>
+                <div className="mentor-card-content">
+                  <div className="mentor-image-container">
+                    {profilePicture ? (
+                      <img
+                        src={profilePicture}
+                        alt={username}
+                        className="mentor-image"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = '/default-profile-image.jpg';
+                        }}
+                      />
+                    ) : (
+                      <div className="mentor-image-placeholder" />
+                    )}
+                    <span className="mentor-status" />
+                  </div>
+
+                  <h3 className="mentor-name">
+                    <Link to={`/profile/${username}`}>{username}</Link>
+                  </h3>
+
+                  {title || company ? (
+                    <p className="mentor-title">
+                      {title ? title : 'Expert Mentor'}
+                      {company ? ` • ${company}` : ''}
+                    </p>
+                  ) : (
+                    <p className="mentor-interest">Expert Mentor</p>
+                  )}
+
+                  {(typeof rating === 'number' || typeof reviewsCount === 'number') && (
+                    <div className="mentor-stats">
+                      {typeof rating === 'number' && (
+                        <div className="stat">
+                          <div className="stat-value">⭐ {rating.toFixed(1)}</div>
+                          <div className="stat-label">Rating</div>
+                        </div>
+                      )}
+                      {typeof reviewsCount === 'number' && (
+                        <div className="stat">
+                          <div className="stat-value">{reviewsCount}</div>
+                          <div className="stat-label">Reviews</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {Array.isArray(badges) && badges.length > 0 && (
+                    <div className="mentor-badges">
+                      {badges.slice(0, 4).map((b, idx) => (
+                        <span className="mentor-badge" key={idx}>{b}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  {Array.isArray(tags) && tags.length > 0 && (
+                    <div className="mentor-tags">
+                      {tags.slice(0, 3).map((t, idx) => (
+                        <span className="mentor-tag" key={idx}>#{t}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mentor-actions">
+                    <button
+                      onClick={() => startChatWithMentor(mentor)}
+                      className="chat-button"
+                    >
+                      Start Chat
+                    </button>
+                    {hasScheduling && (
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => navigate(`/profile/${username}#schedule`)}
+                      >
+                        Schedule Call
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

@@ -32,6 +32,7 @@ router.put('/me', protect, async (req, res) => {
     if (user) {
       user.username = req.body.username || user.username;
       user.bio = req.body.bio || user.bio;
+      user.linkedinProfile = req.body.linkedinProfile || user.linkedinProfile; // LinkedIn URL ko save karein
       if (user.role === 'mentor') {
           user.expertise = req.body.expertise || user.expertise;
       }

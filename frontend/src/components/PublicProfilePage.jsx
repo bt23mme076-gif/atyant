@@ -85,7 +85,16 @@ const PublicProfilePage = () => {
             </div>
           </div>
         )}
-        <button className="chat-now-btn" onClick={startChat}>Chat Now</button>
+        
+        <div className="profile-buttons">
+           <button className="chat-now-btn" onClick={startChat}>Chat Now</button>
+           {/* YEH NAYA LINK ADD KIYA GAYA HAI */}
+           {profile.linkedinProfile && (
+             <a href={profile.linkedinProfile} target="_blank" rel="noopener noreferrer" className="linkedin-btn">
+              View LinkedIn
+             </a> 
+           )} 
+        </div>    
       </div>
     </div>
   );
