@@ -155,11 +155,11 @@ const Signup = () => {
               <input
                 type="radio"
                 name="role"
-                value="user "
-                checked={formData.role === "user "}
+                value="user"
+                checked={formData.role === "user"}
                 onChange={handleChange}
               />
-              <div className="role-button" tabIndex={0} aria-pressed={formData.role === "user "}>
+              <div className="role-button" tabIndex={0} aria-pressed={formData.role === "user"}>
                 Student
               </div>
             </label>
