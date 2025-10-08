@@ -74,6 +74,9 @@ const userSchema = new mongoose.Schema({
   }
   
 }, { timestamps: true });
+// In backend/models/User.js, add:
+userSchema.index({ email: 1 });
+userSchema.index({ username: 1 });
 
 const User = mongoose.model('User', userSchema);
 export default User;
