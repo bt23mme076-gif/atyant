@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
+import nodemailer from 'nodemailer'; // Import nodemailer
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const router = express.Router();
@@ -40,7 +41,7 @@ router.post('/signup', async (req, res) => {
     console.timeEnd('user-existence-check'); // ⭐ ADD THIS
     
     if (existingUser) {
-      console.timeEnd('signup-operation'); // ⭐ ADD THIS - error case में भी end करें
+      console.timeEnd('signup-operation'); // ⭐ ADD THIS - error case में end करें
       return res
         .status(400)
         .json({ message: 'User with this email already exists.' });
@@ -155,6 +156,98 @@ router.post('/google-login', async (req, res) => {
     console.timeEnd('google-login-operation'); // ⭐ ADD THIS
     console.error('Google auth error:', error);
     return res.status(400).json({ message: 'Google authentication failed.' });
+  }
+});
+
+// --- Forgot Password Route ---
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Check if the email exists in the database
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User with this email does not exist.' });
+    }
+
+    // Generate a unique password reset token
+    const resetToken = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET || 'your_jwt_secret',
+      { expiresIn: '1h' }
+    );
+
+    // Store the token in the database
+    user.passwordResetToken = resetToken;
+    user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    // Send an email to the user with a link to reset their password
+    const resetLink = `http://localhost:5173/reset-password/${resetToken}`; // Replace with your frontend URL
+    
+    // Create a transporter object using the default SMTP transport
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    // Define the email options
+    const mailOptions = {
+      from: '"Atyant" <notification@atyant.in>',
+      to: user.email,
+      subject: 'Password Reset Request',
+      text: `Please click on the following link to reset your password: ${resetLink}`,
+      html: `<p>Please click on the following link to reset your password: <a href="${resetLink}">${resetLink}</a></p>`
+    };
+
+    // Send the email
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        return res.status(500).json({ message: 'Failed to send password reset email.' });
+      } else {
+        console.log('Email sent:', info.response);
+        return res.json({ message: 'Password reset link sent to your email address.' });
+      }
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Server error during password reset request.' });
+  }
+});
+
+// --- Reset Password Route ---
+router.post('/reset-password/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Check if the token exists in the database and is not expired
+    const user = await User.findOne({
+      passwordResetToken: token,
+      passwordResetExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired password reset token.' });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Update the user's password in the database
+    user.password = hashedPassword;
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
+    await user.save();
+
+    res.json({ message: 'Password reset successfully.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Server error during password reset.' });
   }
 });
 
