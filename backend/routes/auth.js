@@ -2,9 +2,14 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import User from '../models/User.js';
+<<<<<<< HEAD
 import nodemailer from 'nodemailer'; // Import nodemailer
+=======
+import { sendPasswordResetEmail, sendPasswordResetConfirmation } from '../utils/emailService.js';
+>>>>>>> aed01af7cf144901ba8e386c23308f8e17e78b3c
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const router = express.Router();
@@ -159,6 +164,7 @@ router.post('/google-login', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // --- Forgot Password Route ---
 router.post('/forgot-password', async (req, res) => {
   try {
@@ -252,3 +258,144 @@ router.post('/reset-password/:token', async (req, res) => {
 });
 
 export default router;
+=======
+// --- FORGOT PASSWORD ROUTE ---
+router.post('/forgot-password', async (req, res) => {
+  console.time('forgot-password-operation');
+  
+  try {
+    const { email } = req.body;
+    
+    // Validate email input
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required.' });
+    }
+
+    console.time('user-lookup');
+    const user = await User.findOne({ email });
+    console.timeEnd('user-lookup');
+    
+    if (!user) {
+      // Don't reveal if email exists or not for security
+      return res.status(200).json({ 
+        message: 'If an account with that email exists, we have sent a password reset link.' 
+      });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    
+    // Set reset token and expiration (1 hour from now)
+    user.passwordResetToken = hashedToken;
+    user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    
+    console.time('user-save');
+    await user.save();
+    console.timeEnd('user-save');
+    
+    // Send email with reset link
+    try {
+      console.time('email-send');
+      await sendPasswordResetEmail(email, resetToken);
+      console.timeEnd('email-send');
+      
+      console.timeEnd('forgot-password-operation');
+      return res.status(200).json({ 
+        message: 'Password reset link has been sent to your email.' 
+      });
+    } catch (emailError) {
+      console.error('Failed to send reset email:', emailError);
+      
+      // Clear the reset token if email fails
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      await user.save();
+      
+      console.timeEnd('forgot-password-operation');
+      return res.status(500).json({ 
+        message: 'Failed to send password reset email. Please try again later.' 
+      });
+    }
+    
+  } catch (error) {
+    console.timeEnd('forgot-password-operation');
+    console.error('Forgot password error:', error);
+    return res.status(500).json({ 
+      message: 'Server error. Please try again later.' 
+    });
+  }
+});
+
+// --- RESET PASSWORD ROUTE ---
+router.post('/reset-password', async (req, res) => {
+  console.time('reset-password-operation');
+  
+  try {
+    const { token, password } = req.body;
+    
+    // Validate input
+    if (!token || !password) {
+      return res.status(400).json({ message: 'Token and password are required.' });
+    }
+    
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters long.' });
+    }
+
+    // Hash the token to compare with stored hashed token
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    
+    console.time('user-lookup');
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: new Date() }
+    });
+    console.timeEnd('user-lookup');
+    
+    if (!user) {
+      return res.status(400).json({ 
+        message: 'Invalid or expired password reset token.' 
+      });
+    }
+
+    // Hash new password
+    console.time('password-hashing');
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.timeEnd('password-hashing');
+    
+    // Update user password and clear reset token
+    user.password = hashedPassword;
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    
+    console.time('user-save');
+    await user.save();
+    console.timeEnd('user-save');
+    
+    // Send confirmation email
+    try {
+      console.time('confirmation-email-send');
+      await sendPasswordResetConfirmation(user.email, user.username);
+      console.timeEnd('confirmation-email-send');
+    } catch (emailError) {
+      console.error('Failed to send confirmation email:', emailError);
+      // Don't fail the request if confirmation email fails
+    }
+    
+    console.timeEnd('reset-password-operation');
+    return res.status(200).json({ 
+      message: 'Password has been reset successfully. You can now log in with your new password.' 
+    });
+    
+  } catch (error) {
+    console.timeEnd('reset-password-operation');
+    console.error('Reset password error:', error);
+    return res.status(500).json({ 
+      message: 'Server error. Please try again later.' 
+    });
+  }
+});
+
+export default router;
+>>>>>>> aed01af7cf144901ba8e386c23308f8e17e78b3c
