@@ -3,7 +3,8 @@ import React, { useContext } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthContext } from './AuthContext';
-import { Analytics } from '@vercel/analytics/react'; // 1. Import Analytics
+import { Analytics } from '@vercel/analytics/react';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Import all components
 import Navbar from './components/Navbar';
@@ -39,7 +40,13 @@ function App() {
 
           {/* Protected Routes (only accessible when logged in) */}
           <Route path="/mentors" element={<ProtectedRoute><MentorListPage /></ProtectedRoute>} />
-          <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+          <Route path="/chat" element={
+            <ProtectedRoute>
+              <ErrorBoundary>
+                <ChatPage />
+              </ErrorBoundary>
+            </ProtectedRoute>
+          } />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/profile/:username" element={<PublicProfilePage />} />
           <Route path="/ask" element={<ProtectedRoute><AskQuestionPage /></ProtectedRoute>} />

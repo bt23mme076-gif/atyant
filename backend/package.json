@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "dependencies": {
+    "bad-words": "^4.0.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.7.0",
     "cors": "^2.8.5",

@@ -21,6 +21,7 @@ import askRoutes from './routes/askRoutes.js';
 import Feedback from './models/Feedback.js';
 import Message from './models/Message.js';
 import User from './models/User.js';
+import { moderator } from './utils/ContentModerator.js';
 // import Contact from './models/Contact.js'; 
 
 // Initialize Resend with your API key
@@ -36,7 +37,9 @@ const allowedOrigins = [
 ];
 app.use(cors({
   origin: allowedOrigins,
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
@@ -96,6 +99,10 @@ app.post("/api/validate-mentor", async (req, res) => {
 const server = http.createServer(app);
 
 // --- Socket.IO Configuration ---
+// Track active users and their current chat partners
+const activeUsers = new Map(); // stores userId -> Set of active chat partner IDs
+const userSockets = new Map(); // stores userId -> socket.id
+
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
@@ -110,15 +117,85 @@ const io = new Server(server, {
 // Socket.IO handlers (single connection block)
 io.on("connection", (socket) => {
   console.log(`✅ User connected via WebSocket: ${socket.id}`);
+  let currentUserId = null;
 
   // Join user to their private room
   socket.on("join_user_room", (userId) => {
+    currentUserId = userId;
     socket.join(userId);
+    userSockets.set(userId, socket.id);
+    if (!activeUsers.has(userId)) {
+      activeUsers.set(userId, new Set());
+    }
     console.log(`👤 User ${socket.id} joined room: ${userId}`);
+  });
+
+  // Handle active chat
+  socket.on("enter_chat", ({ partnerId }) => {
+    if (currentUserId) {
+      const userChats = activeUsers.get(currentUserId) || new Set();
+      userChats.add(partnerId);
+      activeUsers.set(currentUserId, userChats);
+      console.log(`👥 User ${currentUserId} entered chat with ${partnerId}`);
+    }
+  });
+
+  // Handle leaving chat
+  socket.on("leave_chat", ({ partnerId }) => {
+    if (currentUserId) {
+      const userChats = activeUsers.get(currentUserId);
+      if (userChats) {
+        userChats.delete(partnerId);
+        console.log(`👥 User ${currentUserId} left chat with ${partnerId}`);
+      }
+    }
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    if (currentUserId) {
+      userSockets.delete(currentUserId);
+      activeUsers.delete(currentUserId);
+      console.log(`❌ User disconnected: ${currentUserId}`);
+    }
   });
 
   // ONLY ONE private_message handler with Resend logic
   socket.on("private_message", async (data) => {
+    try {
+      // Content moderation
+      if (!data.text) {
+        socket.emit('message_error', {
+          error: 'Message cannot be empty',
+          timestamp: new Date()
+        });
+        return;
+      }
+
+      // Check for inappropriate content
+      const validationResult = moderator.validateMessage(data.text);
+      if (!validationResult.isValid) {
+        socket.emit('message_error', {
+          error: 'Message blocked: ' + validationResult.reason,
+          timestamp: new Date()
+        });
+        return;
+      }
+      
+      // Remove any potential bad words or inappropriate content
+      const cleanedText = moderator.clean(data.text);
+      data.text = cleanedText;
+
+      // Continue with the rest of the message handling
+      console.log("📩 Received message data:", data);
+    } catch (error) {
+      console.error("Error processing message:", error);
+      socket.emit('message_error', {
+        error: 'An error occurred while processing your message',
+        timestamp: new Date()
+      });
+      return;
+    }
     try {
       console.log("📩 Received message data:", data);
 
@@ -219,15 +296,30 @@ io.on("connection", (socket) => {
       console.log(`💬 Message successfully sent from ${data.sender} to ${data.receiver}`);
 
       // --- EMAIL NOTIFICATION LOGIC WITH RESEND ---
-      await resend.emails.send({
-        from: 'notification@atyant.in',
-        to: receiver.email,
-        subject: `New Message from ${sender.username}`,
-        text: `You have a new message from ${sender.username}.\n\nMessage: "${data.text}"\n\nPlease log in to your Atyant account to reply.`,
-        html: `<p>You have a new message from <strong>${sender.username}</strong>.</p><p>Message: <em>"${data.text}"</em></p><p>Please log in to your Atyant account to reply [https://www.atyant.in].</p>`
-      });
-      console.log(`📧 Email notification sent via Resend to ${receiver.email}`);
-
+      try {
+        // Check if receiver is actively chatting with sender
+        const receiverChats = activeUsers.get(data.receiver);
+        const isReceiverActive = receiverChats && receiverChats.has(data.sender);
+        const receiverSocketId = userSockets.get(data.receiver);
+        const isReceiverOnline = !!receiverSocketId;
+        
+        // Only send email if receiver is offline or not actively chatting with sender
+        if (!isReceiverActive && !isReceiverOnline) {
+          await resend.emails.send({
+            from: 'notification@atyant.in',
+            to: receiver.email,
+            subject: `New Message from ${sender.username}`,
+            text: `You have a new message from ${sender.username}.\n\nMessage: "${data.text}"\n\nPlease log in to your Atyant account to reply.`,
+            html: `<p>You have a new message from <strong>${sender.username}</strong>.</p><p>Message: <em>"${data.text}"</em></p><p>Please log in to your Atyant account to reply [https://www.atyant.in].</p>`
+          });
+          console.log(`📧 Email notification sent via Resend to ${receiver.email}`);
+        } else {
+          console.log(`📧 Email notification skipped - receiver is ${isReceiverActive ? 'actively chatting' : 'online'}`);
+        }
+      } catch (error) {
+        console.error("❌ Error sending email notification:", error);
+        // Don't emit error to client as message was already sent successfully
+      }
     } catch (error) {
       console.error("❌ Error saving/sending private message:", error);
       socket.emit("message_error", {

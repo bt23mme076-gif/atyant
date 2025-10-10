@@ -50,6 +50,10 @@ const ChatPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [socketStatus, setSocketStatus] = useState('disconnected');
+  const [isTyping, setIsTyping] = useState(false);
+  const [partnerTyping, setPartnerTyping] = useState(false);
+  const typingTimeoutRef = useRef();
+  const lastMessageRef = useRef(null);
   const messagesEndRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
@@ -98,6 +102,15 @@ const ChatPage = () => {
 
   // Reset unread set when thread opens
   const handleSelectContact = async (contact, extraMessage = null) => {
+    // If there was a previous contact, notify server we're leaving that chat
+    if (selectedContact && socket) {
+      socket.emit('leave_chat', { partnerId: selectedContact._id });
+    }
+    
+    // Notify server we're entering new chat
+    if (socket && contact) {
+      socket.emit('enter_chat', { partnerId: contact._id });
+    }
     if (!contact || !contact._id) {
       setError('Invalid contact selected!');
       return;
@@ -270,7 +283,13 @@ const ChatPage = () => {
       );
     };
     socket.on('message_status', handler);
-    return () => socket.off('message_status', handler);
+    return () => {
+      socket.off('message_status', handler);
+      // If in a chat when unmounting, notify server we're leaving
+      if (selectedContact) {
+        socket.emit('leave_chat', { partnerId: selectedContact._id });
+      }
+    };
   }, [socket]);
 
   useEffect(() => {

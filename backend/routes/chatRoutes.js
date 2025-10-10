@@ -1,8 +1,132 @@
 import express from 'express';
 import User from '../models/User.js';
 import Message from '../models/Message.js';
+import { chatMessageLimiter, chatInfoLimiter } from '../middleware/rateLimiters.js';
+import { moderator } from '../utils/ContentModerator.js';
 
 const router = express.Router();
+
+// Add error handling middleware
+const errorHandler = (err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    error: 'Internal Server Error',
+    message: err.message 
+  });
+};
+
+// Middleware to check message content
+const messageContentMiddleware = (req, res, next) => {
+    const messageText = req.body.text || req.body.content || req.body.message;
+    
+    if (messageText) {
+        const validationResult = moderator.validateMessage(messageText);
+        if (!validationResult.isValid) {
+            return res.status(400).json({
+                success: false,
+                message: validationResult.reason
+            });
+        }
+        // Clean the message text
+        req.body.text = moderator.clean(messageText);
+    }
+    next();
+};
+
+// Apply content moderation to all routes
+router.use(messageContentMiddleware);
+
+// Apply specific rate limiters to different routes
+router.use('/messages', chatMessageLimiter); // For sending messages
+router.use(['/recent-chats', '/conversations'], chatInfoLimiter); // For fetching chat info
+
+// Get recent chats with last message and unread count
+router.get('/recent-chats', async (req, res) => {
+  try {
+    if (!req.user?._id) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Get all conversations for the user
+    const messages = await Message.aggregate([
+      {
+        $match: {
+          $or: [
+            { sender: req.user._id },
+            { receiver: req.user._id }
+          ]
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      },
+      {
+        $group: {
+          _id: {
+            $cond: [
+              { $eq: ['$sender', req.user._id] },
+              '$receiver',
+              '$sender'
+            ]
+          },
+          lastMessage: { $first: '$$ROOT' },
+          unreadCount: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $eq: ['$receiver', req.user._id] },
+                    { $ne: ['$status', 'seen'] }
+                  ]
+                },
+                1,
+                0
+              ]
+            }
+          }
+        }
+      }
+    ]);
+
+    // Get user details for each conversation
+    const conversationsWithUsers = await Promise.all(
+      messages.map(async (conv) => {
+        const otherUser = await User.findById(conv._id).select('username profilePicture role');
+        return {
+          user: otherUser,
+          lastMessage: conv.lastMessage,
+          unreadCount: conv.unreadCount
+        };
+      })
+    );
+
+    res.json(conversationsWithUsers);
+  } catch (error) {
+    console.error('Error in recent-chats:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch recent chats',
+      details: error.message
+    });
+  }
+});
+
+// Add retry logic for failed requests
+const withRetry = async (operation, maxRetries = 3) => {
+  let lastError;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      if (error.status === 429) { // Rate limit error
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // Exponential backoff
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw lastError;
+};
 
 // Route to get all mentors
 router.get('/mentors', async (req, res) => {
@@ -102,4 +226,112 @@ router.delete('/messages/:id', async (req, res) => {
     res.status(500).json({ message: 'Error deleting message.' });
   }
 });
+// Get unread message count
+router.get('/unread/:userId', async (req, res) => {
+  try {
+    const count = await Message.countDocuments({
+      receiver: req.user._id,
+      sender: req.params.userId,
+      status: { $ne: 'seen' }
+    });
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching unread count.' });
+  }
+});
+
+// Mark messages as seen
+router.put('/messages/seen/:senderId', async (req, res) => {
+  try {
+    await Message.updateMany(
+      {
+        sender: req.params.senderId,
+        receiver: req.user._id,
+        status: { $ne: 'seen' }
+      },
+      { status: 'seen' }
+    );
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating message status.' });
+  }
+});
+
+// Get recent conversations with last message and unread count
+router.get('/recent-chats', async (req, res) => {
+  try {
+    const userId = req.user._id;
+    
+    // Get all conversations where user is involved
+    const conversations = await Message.aggregate([
+      {
+        $match: {
+          $or: [
+            { sender: userId },
+            { receiver: userId }
+          ]
+        }
+      },
+      {
+        $sort: { createdAt: -1 }
+      },
+      {
+        $group: {
+          _id: {
+            $cond: [
+              { $eq: ['$sender', userId] },
+              '$receiver',
+              '$sender'
+            ]
+          },
+          lastMessage: { $first: '$$ROOT' },
+          unreadCount: {
+            $sum: {
+              $cond: [
+                { 
+                  $and: [
+                    { $eq: ['$receiver', userId] },
+                    { $ne: ['$status', 'seen'] }
+                  ]
+                },
+                1,
+                0
+              ]
+            }
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $project: {
+          _id: 1,
+          lastMessage: 1,
+          unreadCount: 1,
+          'user.username': 1,
+          'user.profilePicture': 1,
+          'user.role': 1
+        }
+      },
+      {
+        $sort: { 'lastMessage.createdAt': -1 }
+      }
+    ]);
+
+    res.json(conversations);
+  } catch (error) {
+    console.error('Error fetching recent chats:', error);
+    res.status(500).json({ message: 'Error fetching recent chats.' });
+  }
+});
+
 export default router;

@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useRef, useContext, useMemo } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import io from 'socket.io-client';
 import { useAuth } from '../AuthContext';
-import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
-import { ToastContainer, toast, Slide } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { AuthContext } from '../AuthContext';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -19,27 +16,50 @@ const formatWhen = (t) => {
   return `${Math.floor(s / 3600)}h ago`;
 };
 
-const ProToast = ({ avatarUrl, title, preview, when, onOpen, onClose }) => (
-  <div className="protoast">
-    <img
-      className="protoast-avatar"
-      src={avatarUrl}
-      alt={title}
-      onError={e => {
-        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(title)}&background=4f46e5&color=fff&size=44`;
-      }}
-    />
-    <div className="protoast-body">
-      <div className="protoast-title">{title}</div>
-      <div className="protoast-preview">{preview}</div>
-      <div className="protoast-meta">{when}</div>
+const ChatPage = () => {
+  const [contactList, setContactList] = useState([]);
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const messagesEndRef = useRef(null);
+  const { user } = useAuth();
+
+const ContactListItem = ({ contact, selected, onClick }) => {
+  const unreadCount = contact.unreadCount || 0;
+  const lastMessage = contact.lastMessage?.text || '';
+  
+  return (
+    <div 
+      className={`recent-message-item ${selected ? 'selected' : ''}`}
+      onClick={onClick}
+    >
+      <img
+        className="recent-message-avatar"
+        src={contact.profilePicture}
+        alt={contact.username}
+        onError={e => {
+          e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.username)}&background=4f46e5&color=fff&size=48`;
+        }}
+      />
+      <div className="recent-message-content">
+        <div className="recent-message-header">
+          <span className="recent-message-name">{contact.username}</span>
+          <span className="recent-message-time">
+            {contact.lastMessage ? formatWhen(contact.lastMessage.createdAt) : ''}
+          </span>
+        </div>
+        <div className="recent-message-preview">{lastMessage}</div>
+      </div>
+      {unreadCount > 0 && (
+        <div className="unread-count">{unreadCount}</div>
+      )}
     </div>
-    <div className="protoast-actions">
-      <button className="protoast-btn primary" onClick={onOpen}>Open</button>
-      <button className="protoast-btn" onClick={onClose}>Dismiss</button>
-    </div>
-  </div>
-);
+  );
+};
 
 const ChatPage = () => {
   const [contactList, setContactList] = useState([]);
@@ -48,9 +68,11 @@ const ChatPage = () => {
   const [newMessage, setNewMessage] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [unreadCounts, setUnreadCounts] = useState({});
+  const [lastMessages, setLastMessages] = useState({});
+  const messagesEndRef = useRef(null);
   const [error, setError] = useState(null);
   const [socketStatus, setSocketStatus] = useState('disconnected');
-  const messagesEndRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -80,6 +102,103 @@ const ChatPage = () => {
   const handleMenuOpen = (msgId) => setOpenMenuMsgId(msgId);
   const handleMenuClose = () => setOpenMenuMsgId(null);
 
+  // Fetch with retry logic
+  const fetchWithRetry = async (url, options, maxRetries = 3) => {
+    let lastError;
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const response = await fetch(url, options);
+        if (response.status === 429) { // Rate limit error
+          const retryAfter = response.headers.get('Retry-After') || (i + 1);
+          await new Promise(resolve => setTimeout(resolve, retryAfter * 1000));
+          continue;
+        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        return await response.json();
+      } catch (error) {
+        lastError = error;
+        if (i === maxRetries - 1) throw error;
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+      }
+    }
+    throw lastError;
+  };
+
+  // Load recent chats
+  useEffect(() => {
+    const loadRecentChats = async () => {
+      if (!user?.id) {
+        setContactList([]);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/api/recent-chats`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch recent chats: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Sort contacts by latest message
+        const sortedContacts = data.sort((a, b) => {
+          const timeA = new Date(a.lastMessage?.createdAt || 0);
+          const timeB = new Date(b.lastMessage?.createdAt || 0);
+          return timeB - timeA;
+        });
+
+        setContactList(sortedContacts);
+
+        // Update unread counts
+        const newUnreadCounts = {};
+        sortedContacts.forEach(chat => {
+          if (chat.unreadCount > 0) {
+            newUnreadCounts[chat.user._id] = chat.unreadCount;
+          }
+        });
+        setUnreadCounts(newUnreadCounts);
+
+      } catch (error) {
+        console.error('Error loading recent chats:', error);
+        setError(error.message);
+        setContactList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRecentChats();
+  }, [user?.id]);
+        
+        setContactList(data.sort((a, b) => 
+          new Date(b.lastMessage?.createdAt) - new Date(a.lastMessage?.createdAt)
+        ));
+        
+        // Update unread counts
+        const counts = {};
+        data.forEach(chat => {
+          counts[chat.user._id] = chat.unreadCount;
+        });
+        setUnreadCounts(counts);
+      } catch (error) {
+        console.error('Error loading recent chats:', error);
+        setError('Failed to load recent chats');
+      }
+    };
+
+    loadRecentChats();
+  }, [user?.id]);
+
   const handleDeleteMessage = async (msgId) => {
     try {
       const token = localStorage.getItem('token');
@@ -96,13 +215,149 @@ const ChatPage = () => {
     handleMenuClose(); // Hide menu after delete
   };
 
-  // Reset unread set when thread opens
+  const renderMessageStatus = (message) => {
+    if (message.sender !== user.id) return null;
+    
+    const getStatusIcon = () => {
+      switch (message.status) {
+        case 'sent':
+          return '✓';
+        case 'delivered':
+          return '✓✓';
+        case 'seen':
+          return <span style={{ color: '#53BDEB' }}>✓✓</span>;
+        default:
+          return null;
+      }
+    };
+
+    return (
+      <div className="message-status">
+        <span className="message-time">{formatWhen(message.createdAt)}</span>
+        <span className={`status-icon ${message.status}`}>{getStatusIcon()}</span>
+      </div>
+    );
+  };
+
+  const renderMessage = (message) => {
+    const isSender = message.sender === user.id;
+    return (
+      <div key={message._id} className={`message-wrapper ${isSender ? 'sent' : 'received'}`}>
+        <div className="message">
+          <div className="message-content">{message.text}</div>
+          {renderMessageStatus(message)}
+        </div>
+      </div>
+    );
+  };
+
+  // Setup socket connection
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const newSocket = io(API_URL, {
+      auth: {
+        token: localStorage.getItem('token')
+      },
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      transports: ['websocket', 'polling']
+    });
+
+    newSocket.on('connect', () => {
+      setSocketStatus('connected');
+      console.log('Socket connected');
+    });
+
+    newSocket.on('disconnect', () => {
+      setSocketStatus('disconnected');
+      console.log('Socket disconnected');
+      // Attempt to reconnect after a delay
+      setTimeout(() => {
+        if (newSocket.disconnected) {
+          newSocket.connect();
+        }
+      }, 5000);
+    });
+
+    newSocket.on('error', (error) => {
+      console.error('Socket error:', error);
+      setSocketStatus('error');
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      setSocketStatus('connection_error');
+    });
+
+    newSocket.on('reconnect', (attemptNumber) => {
+      console.log('Socket reconnected after', attemptNumber, 'attempts');
+      setSocketStatus('connected');
+    });
+
+    newSocket.on('private_message', handleNewMessage);
+    newSocket.on('message_status', handleMessageStatus);
+    newSocket.on('unread_count', handleUnreadCount);
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.close();
+    };
+  }, [user?.id]);
+
+  // Handle new message
+  const handleNewMessage = (message) => {
+    setMessages(prevMessages => [...prevMessages, message]);
+    updateUnreadCount(message.sender);
+    scrollToBottom();
+  };
+
+  // Handle message status updates
+  const handleMessageStatus = ({ messageId, status }) => {
+    setMessages(prevMessages => 
+      prevMessages.map(msg => 
+        msg._id === messageId ? { ...msg, status } : msg
+      )
+    );
+  };
+
+  // Handle unread count updates
+  const handleUnreadCount = ({ senderId, count }) => {
+    setUnreadCounts(prev => ({
+      ...prev,
+      [senderId]: count
+    }));
+  };
+
+  // Scroll to bottom of messages
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Handle contact selection and message loading
   const handleSelectContact = async (contact, extraMessage = null) => {
+    // If there was a previous contact, notify server we're leaving that chat
+    if (selectedContact && socket) {
+      socket.emit('leave_chat', { partnerId: selectedContact._id });
+    }
+    
+    // Notify server we're entering new chat
+    if (socket && contact) {
+      socket.emit('enter_chat', { partnerId: contact._id });
+    }
+    
     if (!contact || !contact._id) {
       setError('Invalid contact selected!');
       return;
     }
-    setUnreadMap(prev => ({ ...prev, [contact._id]: new Set() })); // reset Set
+
+    // Mark messages as seen when opening chat
+    await markMessagesAsSeen(contact._id);
+    
+    // Reset unread count for this contact
+    setUnreadCounts(prev => ({ ...prev, [contact._id]: 0 }));
     try {
       setSelectedContact(contact);
       setShowSidebarOnMobile(false);
@@ -125,6 +380,46 @@ const ChatPage = () => {
       if (messageData.length < limit) setAllMessagesLoaded(true);
     } catch {
       setError('Failed to load messages');
+    }
+  };
+
+  // Fetch recent chats with unread counts
+  const fetchRecentChats = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/api/recent-chats`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch recent chats');
+      const data = await response.json();
+      
+      // Update contact list with last messages and unread counts
+      setContactList(data.map(chat => ({
+        ...chat.user,
+        lastMessage: chat.lastMessage,
+        unreadCount: chat.unreadCount
+      })));
+    } catch (error) {
+      console.error('Error fetching recent chats:', error);
+    }
+  };
+
+  // Mark messages as seen when chat is opened
+  const markMessagesAsSeen = async (senderId) => {
+    try {
+      const token = localStorage.getItem('token');
+      await fetch(`${API_URL}/api/messages/seen/${senderId}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      
+      // Update local unread counts
+      setUnreadCounts(prev => ({
+        ...prev,
+        [senderId]: 0
+      }));
+    } catch (error) {
+      console.error('Error marking messages as seen:', error);
     }
   };
 
@@ -270,7 +565,13 @@ const ChatPage = () => {
       );
     };
     socket.on('message_status', handler);
-    return () => socket.off('message_status', handler);
+    return () => {
+      socket.off('message_status', handler);
+      // If in a chat when unmounting, notify server we're leaving
+      if (selectedContact) {
+        socket.emit('leave_chat', { partnerId: selectedContact._id });
+      }
+    };
   }, [socket]);
 
   useEffect(() => {
