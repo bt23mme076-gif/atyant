@@ -194,6 +194,15 @@
 .divider:not(:empty)::before { margin-right: .65em; }
 .divider:not(:empty)::after { margin-left: .65em; }
 
+/* Google Login Button Container */
+.google-login-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 16px 0;
+}
+
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .auth-container {
