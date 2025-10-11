@@ -39,7 +39,7 @@ const SearchBar = () => {
       <input
         type="text"
         className="search-input"
-        placeholder="Search for mentors, skills, or topics..."
+        placeholder="Search for Problem Solver, skills, or topics..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}
       />
@@ -57,7 +57,7 @@ const SearchBar = () => {
 
       {showNoResults && (
         <div className="no-results-msg">
-          No mentors found for “<b>{query}</b>”.
+          No Problem Solver found for “<b>{query}</b>”.
         </div>
       )}
     </div>

@@ -28,8 +28,8 @@ const MentorListPage = () => {
       const data = await response.json();
       setMentors(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError('Could not load mentors. Please try again later.');
-      console.error('Failed to fetch mentors:', err);
+      setError('Could not load Problem Solver. Please try again later.');
+      console.error('Failed to fetch Problem Solver:', err);
     } finally {
       setLoading(false);
     }
@@ -52,8 +52,8 @@ const MentorListPage = () => {
 
   return (
     <div className="mentor-list-container">
-      <h1>Meet Our Mentors</h1>
-      <p>Search for a mentor by name or skill to start a conversation.</p>
+      <h1>Meet Our Problem Solver</h1>
+      <p>Search for a Problem Solver by name or skill to start a conversation.</p>
 
       <form className="search-bar" onSubmit={handleSearch}>
         <input
@@ -65,14 +65,14 @@ const MentorListPage = () => {
         <button type="submit">Search</button>
       </form>
 
-      {loading && <div className="status-message">Loading Mentors...</div>}
+      {loading && <div className="status-message">Loading Problem Solver...</div>}
       {error && <div className="status-message error">{error}</div>}
 
       {!loading && !error && (
         <div className="mentor-grid">
           {mentors.length === 0 && (
             <div className="no-mentors-found">
-              No mentors found. Try a different search.
+              No Problem Solver found. Try a different search.
             </div>
           )}
 
@@ -116,11 +116,11 @@ const MentorListPage = () => {
 
                   {title || company ? (
                     <p className="mentor-title">
-                      {title ? title : 'Expert Mentor'}
+                      {title ? title : 'Problem Solver'}
                       {company ? ` • ${company}` : ''}
                     </p>
                   ) : (
-                    <p className="mentor-interest">Expert Mentor</p>
+                    <p className="mentor-interest">Problem Solver</p>
                   )}
 
                   {(typeof rating === 'number' || typeof reviewsCount === 'number') && (
