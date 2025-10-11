@@ -1,6 +1,7 @@
 // src/components/MentorGallery.jsx
 import React, { useState, useEffect } from 'react';
 import './MentorGallery.css';
+import defaultAvatar from '../assets/default-avatar.svg';
 
 const MentorGallery = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -34,8 +35,9 @@ const MentorGallery = () => {
             <div className="mentor-gallery-card" key={`first-${index}`}>
               <div className="mentor-image-container">
                 <img 
-                  src={mentor.profilePicture || `https://api.pravatar.cc/150?u=${mentor._id}`} 
+                  src={mentor.profilePicture || defaultAvatar} 
                   alt={mentor.username} 
+                  onError={(e) => { e.target.src = defaultAvatar }}
                 />
               </div>
               <div className="mentor-info">
@@ -62,8 +64,9 @@ const MentorGallery = () => {
             <div className="mentor-gallery-card" key={`second-${index}`}>
               <div className="mentor-image-container">
                 <img 
-                  src={mentor.profilePicture || `https://api.pravatar.cc/150?u=${mentor._id}`} 
+                  src={mentor.profilePicture || defaultAvatar} 
                   alt={mentor.username} 
+                  onError={(e) => { e.target.src = defaultAvatar }}
                 />
               </div>
               <div className="mentor-info">
