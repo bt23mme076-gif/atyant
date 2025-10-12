@@ -17,15 +17,28 @@ const MentorListPage = () => {
     setError(null);
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      
+      // Use the same endpoint as MentorGallery to get consistent data structure
       const url = query
         ? `${API_URL}/api/search/mentors?q=${encodeURIComponent(query)}`
-        : `${API_URL}/api/mentors`;
+        : `${API_URL}/api/users/mentors`; // Changed from /api/mentors to /api/users/mentors
+      
+      console.log('Fetching from URL:', url); // Debug log
 
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Data could not be fetched!');
       }
       const data = await response.json();
+      
+      // Debug logging
+      console.log('API Response:', data);
+      if (data && data.length > 0) {
+        console.log('First mentor structure:', data[0]);
+        console.log('First mentor bio field:', data[0].bio);
+        console.log('All mentor fields:', Object.keys(data[0]));
+      }
+      
       setMentors(Array.isArray(data) ? data : []);
     } catch (err) {
       setError('Could not load Problem Solver. Please try again later.');
@@ -77,27 +90,38 @@ const MentorListPage = () => {
           )}
 
           {mentors.map((mentor) => {
+            // Debug logging for each mentor
+            console.log('Processing mentor:', mentor);
+            console.log('Mentor bio:', mentor?.bio);
+            
+            if (!mentor) {
+              return null;
+            }
+
             const {
               _id,
               username,
+              name, // Add name field which might be different from username
               profilePicture,
-              title,           // optional: job title
-              company,         // optional: org
-              rating,          // optional: number
-              reviewsCount,    // optional: number
-              tags,            // optional: array of strings
-              badges,          // optional: array of strings/short labels
-              hasScheduling    // optional: boolean
-            } = mentor || {};
+              title,
+              company,
+              rating,
+              reviewsCount,
+              tags,
+              specialties, // Add specialties field from MentorGallery
+              badges,
+              hasScheduling,
+              bio
+            } = mentor;
 
             return (
-              <div className="mentor-card" key={_id}>
+              <div className="mentor-card" key={_id || username}>
                 <div className="mentor-card-content">
                   <div className="mentor-image-container">
                     {profilePicture ? (
                       <img
                         src={profilePicture}
-                        alt={username}
+                        alt={name || username}
                         className="mentor-image"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
@@ -111,16 +135,35 @@ const MentorListPage = () => {
                   </div>
 
                   <h3 className="mentor-name">
-                    <Link to={`/profile/${username}`}>{username}</Link>
+                    <Link to={`/profile/${username}`}>
+                      {name || username}
+                    </Link>
                   </h3>
 
-                  {title || company ? (
+                  {/* Bio section - same logic as MentorGallery */}
+                  <p className="mentor-bio">
+                    {mentor.bio && typeof mentor.bio === 'string' && mentor.bio.trim() !== ''
+                      ? (mentor.bio.length > 100
+                         ? `${mentor.bio.substring(0, 100)}...`
+                         : mentor.bio)
+                      : "No bio available"
+                    }
+                  </p>
+
+                  {(title || company) && (
                     <p className="mentor-title">
                       {title ? title : 'Problem Solver'}
                       {company ? ` • ${company}` : ''}
                     </p>
-                  ) : (
-                    <p className="mentor-interest">Problem Solver</p>
+                  )}
+
+                  {/* Display specialties if available (from MentorGallery structure) */}
+                  {Array.isArray(specialties) && specialties.length > 0 && (
+                    <div className="mentor-specialties">
+                      {specialties.slice(0, 3).map((specialty, i) => (
+                        <span key={i} className="specialty-tag">{specialty}</span>
+                      ))}
+                    </div>
                   )}
 
                   {(typeof rating === 'number' || typeof reviewsCount === 'number') && (
