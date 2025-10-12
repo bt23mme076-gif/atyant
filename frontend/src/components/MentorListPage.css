@@ -64,12 +64,15 @@
   margin-top:12px;
 }
 
-/* Card */
+/* Card - Fixed for uniform button alignment */
 .mentor-card{
   position:relative; background:var(--card); border:1px solid #efe7c2;
   border-radius:var(--br); box-shadow:0 8px 26px rgba(17,24,39,.08);
   overflow:hidden; transform:translateZ(0);
   animation:fadeInUp .45s ease both;
+  display:flex; /* Add flex for uniform height */
+  flex-direction:column; /* Stack content vertically */
+  height:100%; /* Full height of grid cell */
 }
 .mentor-card::before{
   content:''; position:absolute; inset:0 0 auto 0; height:5px;
@@ -82,7 +85,18 @@
 
 .mentor-card-content{
   padding:20px 20px 18px;
-  display:flex; flex-direction:column; align-items:center; /* switch to flex-start for left-align */
+  display:flex; flex-direction:column; align-items:center;
+  flex:1; /* Take remaining space */
+  justify-content:space-between; /* Distribute content evenly */
+}
+
+/* Content wrapper for better spacing */
+.mentor-info{
+  flex:1; /* Take available space */
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  width:100%;
 }
 
 /* Avatar */
@@ -101,6 +115,19 @@
 .mentor-title{ color:#6b7280; font-weight:600; font-size:14px; margin-bottom:2px; }
 .mentor-interest{ color:#6b7280; font-size:14px; margin-bottom:12px; }
 
+/* Bio - Fixed height to maintain consistency */
+.mentor-bio{
+  color:#6b7280; 
+  font-size:14px; 
+  line-height:1.5;
+  margin:8px 0 12px;
+  min-height:42px; /* Fixed minimum height for 3 lines */
+  display:-webkit-box;
+  -webkit-line-clamp:3; /* Limit to 3 lines */
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}
+
 /* Stats */
 .mentor-stats{
   display:flex; gap:14px; width:100%; justify-content:center;
@@ -112,12 +139,31 @@
 .stat-label{ font-size:12.5px; color:var(--muted); }
 
 /* Badges & tags */
-.mentor-badges, .mentor-tags{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin:6px 0 4px; }
+.mentor-badges, .mentor-tags{ 
+  display:flex; gap:8px; flex-wrap:wrap; justify-content:center; 
+  margin:6px 0 4px;
+  min-height:32px; /* Consistent height even when empty */
+}
 .mentor-badge{ font-size:12px; padding:6px 10px; border-radius:12px; border:1px solid #e9eef5; background:#fff; }
 .mentor-tag{ font-size:11.5px; padding:5px 10px; border-radius:999px; background:#f3f4f6; color:#374151; }
 
-/* Actions */
-.mentor-actions{ display:flex; gap:12px; width:100%; margin-top:14px; }
+/* Specialties */
+.mentor-specialties{ 
+  display:flex; gap:8px; flex-wrap:wrap; justify-content:center; 
+  margin:6px 0 4px;
+  min-height:32px; /* Consistent height */
+}
+.specialty-tag{ 
+  font-size:11.5px; padding:5px 10px; border-radius:999px; 
+  background:#e0e7ff; color:#3730a3; 
+}
+
+/* Actions - Always at bottom */
+.mentor-actions{ 
+  display:flex; gap:12px; width:100%; 
+  margin-top:auto; /* Push to bottom */
+  padding-top:14px; /* Add spacing from content above */
+}
 .chat-button{
   flex:1; height:44px; padding:12px 14px; border-radius:12px; border:0; color:#fff;
   background:linear-gradient(135deg,#6d28d9,#8b5cf6); font-weight:700; cursor:pointer; transition:.25s ease;
