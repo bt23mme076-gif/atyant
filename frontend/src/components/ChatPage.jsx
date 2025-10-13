@@ -594,7 +594,7 @@ const ChatPage = () => {
       />
       {(window.innerWidth > 768 || showSidebarOnMobile) && (
         <div className={`sidebar${showSidebarOnMobile ? ' active' : ''}`}>
-          <h3>{currentUser?.role === 'user' ? 'Problem Solver' : 'My Chats'}</h3>
+          <h3>{currentUser?.role === 'user' ? 'Mentors' : 'My Chats'}</h3>
           <div className="connection-status">
             Status: <span className={socketStatus}>{socketStatus}</span>
           </div>

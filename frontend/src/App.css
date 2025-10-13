@@ -6,6 +6,25 @@
   min-height: 100vh;
 }
 
+.app-container {
+  width: 100vw;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Hide scrollbar */
+.app-container::-webkit-scrollbar {
+  display: none;
+}
+
+.app-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Ensure content fits viewport */
 main {
-  flex-grow: 1;
+  width: 100%;
+  overflow-x: hidden;
 }
