@@ -1,7 +1,6 @@
-/* src/styles/MentorGallery.css */
 .gallery-section {
   padding: 40px 0;
-  background-color: #f9fafb;
+  background: #f9fafb;
   text-align: center;
 }
 
@@ -11,11 +10,11 @@
 }
 
 .scrolling-wrapper {
-  width: 100%;
+  width: 100vw;      /* Changed from 100% to 100vw for proper horizontal scrolling */
   overflow: hidden;
+  position: relative;
   padding: 20px 0;
-  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
-  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
 
 .scrolling-content {
@@ -24,7 +23,6 @@
   animation: scroll 60s linear infinite;
   padding: 10px 0;
 }
-
 .scrolling-content:hover {
   animation-play-state: paused;
 }
@@ -39,9 +37,8 @@
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
-
 .mentor-gallery-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 6px 20px rgba(0,0,0,0.12);
@@ -53,7 +50,6 @@
   margin-bottom: 15px;
   position: relative;
 }
-
 .mentor-image-container img {
   width: 100%;
   height: 100%;
@@ -62,26 +58,21 @@
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
   border: 3px solid #fff;
 }
-
 .mentor-info {
   text-align: center;
-  width: 100%;
 }
-
 .mentor-info h3 {
   font-size: 1.2rem;
   font-weight: 600;
   margin: 0 0 8px 0;
   color: #2c3e50;
 }
-
 .mentor-bio {
   font-size: 0.9rem;
   color: #666;
   margin: 0 0 12px 0;
   line-height: 1.4;
 }
-
 .mentor-specialties {
   display: flex;
   flex-wrap: wrap;
@@ -89,7 +80,6 @@
   justify-content: center;
   margin-top: 10px;
 }
-
 .specialty-tag {
   background: #e3f2fd;
   color: #1976d2;
@@ -99,11 +89,8 @@
   font-weight: 500;
 }
 
+/* Makes the scrolling-content twice as long for seamless repeat */
 @keyframes scroll {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+  0% { transform: translateX(0);}
+  100% { transform: translateX(-50%);}
 }
