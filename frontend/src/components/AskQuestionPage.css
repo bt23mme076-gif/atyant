@@ -7,3 +7,50 @@
 .ask-question-form button { padding: 14px; font-size: 1.1rem; font-weight: bold; color: white; background-color: #4f46e5; border: none; border-radius: 8px; cursor: pointer; }
 .results-section { margin-top: 40px; padding-top: 40px; border-top: 1px solid #e5e7eb; }
 .results-section h2 { font-size: 2rem; margin-bottom: 30px; }
+/* AskQuestionPage.css */
+
+/* ... aapke existing styles ... */
+
+/* ✅ NEW: Mentor Card ke Button ko Style karne ke liye */
+.mentor-card .chat-now-btn {
+  width: 100%;
+  padding: 14px 20px;
+  margin-top: 15px; /* Thoda upar se space */
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  
+  /* Gradient background to match your app's theme */
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  
+  border: none;
+  border-radius: 8px; /* Halka sa gol corner */
+  cursor: pointer;
+  
+  /* Smooth transition for hover effects */
+  transition: all 0.3s ease;
+  
+  /* Subtle shadow */
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+}
+
+/* Hover effect - jab mouse button par jayega */
+.mentor-card .chat-now-btn:hover:not(:disabled) {
+  transform: translateY(-3px); /* Button halka sa upar uthega */
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3); /* Shadow badhegi */
+  filter: brightness(1.1); /* Thodi si chamak badhegi */
+}
+
+/* Active effect - jab button par click hoga */
+.mentor-card .chat-now-btn:active:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+}
+
+/* Disabled state - agar button disabled ho */
+.mentor-card .chat-now-btn:disabled {
+  background: #9ca3af; /* Gray background */
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}

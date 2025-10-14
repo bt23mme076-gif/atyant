@@ -18,10 +18,14 @@ router.get('/mentors', async (req, res) => {
                 { username: { $regex: query, $options: 'i' } }, // Case-insensitive username search
                 { expertise: { $regex: query, $options: 'i' } }   // Case-insensitive skills search
             ]
-        }).select('username _id'); // Select only needed fields
+        })
+        .select('username profilePicture _id') // Select only needed fields
+        .limit(10);  // Limit results to 10
+
         res.json(mentors);
     } catch (error) {
-        res.status(500).json({ message: 'Error searching for mentors' });
+        console.error('Search error:', error);
+        res.status(500).json({ message: 'Server error during search' });
     }
 });
 

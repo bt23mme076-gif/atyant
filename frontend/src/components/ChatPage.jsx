@@ -41,7 +41,7 @@ const ProToast = ({ avatarUrl, title, preview, when, onOpen, onClose }) => (
   </div>
 );
 
-const ChatPage = () => {
+const ChatPage = ({ recipientId, recipientName }) => {
   const [contactList, setContactList] = useState([]);
   const [selectedContact, setSelectedContact] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -565,6 +565,43 @@ const ChatPage = () => {
       toast.error("An error occurred while initiating payment.");
     }
   };
+
+  const [recipientAvatar, setRecipientAvatar] = useState('');
+
+  useEffect(() => {
+    // ✅ FIX: Safely fetch and set recipient's profile picture
+    const fetchRecipientData = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/users/${recipientId}`, {
+          headers: { 'Authorization': authHeader() }
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          
+          // Check if profilePicture exists and is valid
+          if (data.profilePicture && data.profilePicture.startsWith('http')) {
+            setRecipientAvatar(data.profilePicture);
+          } else if (data.profilePicture && data.profilePicture.startsWith('/uploads')) {
+            // If it's a relative path, prepend API_URL
+            setRecipientAvatar(`${API_URL}${data.profilePicture}`);
+          } else {
+            // Use default avatar with username
+            setRecipientAvatar(`https://ui-avatars.com/api/?name=${recipientName}&background=random&size=150`);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching recipient data:', err);
+        // Fallback to default avatar
+        setRecipientAvatar(`https://ui-avatars.com/api/?name=${recipientName}&background=random&size=150`);
+      }
+    };
+    
+    if (recipientId) {
+      fetchRecipientData();
+    }
+    
+  }, [recipientId, recipientName]);
 
   if (error && !loading) {
     return (

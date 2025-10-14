@@ -72,7 +72,7 @@ const AskQuestionPage = () => {
                     <img src={mentor.profilePicture || `https://api.pravatar.cc/150?u=${mentor._id}`} alt={mentor.username} className="mentor-image" />
                     <h3 className="mentor-name">{mentor.username}</h3>
                     <p className="mentor-interest">Problem Solver</p>
-                    <button onClick={() => startChatWithMentor(mentor)}>Chat Now</button>
+                    <button className="chat-now-btn" onClick={() => startChatWithMentor(mentor)}>Chat Now</button>
                   </div>
                 ))
               ) : (
