@@ -24,59 +24,141 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'mentor', 'admin'],
+    enum: ['user', 'mentor', 'mentee', 'admin'],
     default: 'user'
   },
-  // Corrected skills property
+  
+  // ========== PROFILE FIELDS ==========
+  profilePicture: {
+    type: String,
+    default: null
+  },
+  bio: {
+    type: String,
+    default: '',
+    maxlength: 500
+  },
+  city: {
+    type: String,
+    default: '',
+    trim: true
+  },
+  
+  // ========== SKILLS & EXPERTISE ==========
   skills: [{
     type: String,
     trim: true
   }],
   expertise: {
-    type: [String], // Ensure it's an array of strings
+    type: [String],
     default: []
   },
-  profilePicture: {
-    type: String,
-    default: null // You can set a default image URL here
+  interests: {
+    type: [String],
+    default: []
   },
-  bio: {
+  domainExperience: {
+    type: [String],
+    default: []
+  },
+  
+  // ========== EDUCATION ==========
+  education: [{
+    institution: {
+      type: String,
+      trim: true
+    },
+    degree: {
+      type: String,
+      trim: true
+    },
+    field: {
+      type: String,
+      trim: true
+    },
+    year: {
+      type: String,
+      trim: true
+    }
+  }],
+  
+  // ========== SOCIAL LINKS ==========
+  linkedinProfile: {
     type: String,
-    default: null,
-    maxlength: 500
+    default: '',
+    trim: true
   },
   socialLinks: {
     type: Map,
     of: String,
     default: {}
   },
+  
+  // ========== VERIFICATION ==========
   isVerified: {
     type: Boolean,
     default: false
   },
   verificationToken: {
     type: String,
+    sparse: true,
     unique: true
   },
+  
+  // ========== PASSWORD RESET ==========
   passwordResetToken: {
     type: String
   },
   passwordResetExpires: {
     type: Date
   },
-   messageCredits: {
+  
+  // ========== MESSAGE CREDITS ==========
+  messageCredits: {
     type: Number,
-    default: 5 // Every new user gets 5 free message credits
-  },
-   linkedinProfile: {
-    type: String,
-    default: ''
+    default: 5
   }
   
-}, { timestamps: true });
-// In backend/models/User.js, add:
+}, { 
+  timestamps: true 
+});
+
+// ========== INDEXES ==========
 userSchema.index({ email: 1 });
 userSchema.index({ username: 1 });
+userSchema.index({ role: 1 });
+
+// ========== INSTANCE METHODS ==========
+
+// Check if profile is complete
+userSchema.methods.isProfileComplete = function() {
+  const hasInterests = this.interests && this.interests.length > 0;
+  const hasEducation = this.education && this.education.length > 0;
+  const hasCity = this.city && this.city.trim() !== '';
+  
+  return hasInterests && hasEducation && hasCity;
+};
+
+// Get public profile (exclude sensitive data)
+userSchema.methods.getPublicProfile = function() {
+  return {
+    _id: this._id,
+    username: this.username,
+    role: this.role,
+    profilePicture: this.profilePicture,
+    bio: this.bio,
+    city: this.city,
+    expertise: this.expertise,
+    interests: this.interests,
+    domainExperience: this.domainExperience,
+    education: this.education,
+    linkedinProfile: this.linkedinProfile,
+    skills: this.skills,
+    isVerified: this.isVerified,
+    createdAt: this.createdAt
+  };
+};
 
 const User = mongoose.model('User', userSchema);
+
 export default User;
