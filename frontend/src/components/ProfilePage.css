@@ -42,497 +42,312 @@ h5 {
   overflow-wrap: break-word;
 }
 
-/* Updated CSS Variables with Enhanced Palette */
-:root {
+/* ========== 1. VARIABLES (Scoped to this component) ========== */
+.profile-page-layout {
   --primary: #6366f1;
   --primary-dark: #4f46e5;
-  --primary-light: #8b8ff7;
-  --secondary: #f59e0b;
-  --accent: #ec4899;
-  --text-dark: #1f2937;
+  --primary-light: #eef2ff;
+  --danger: #ef4444;
+  --danger-dark: #dc2626;
+  --text-dark: #111827;
   --text-light: #6b7280;
   --surface: #ffffff;
-  --surface-alt: #f8fafc;
-  --border: #e5e7eb;
-  --border-light: #f1f5f9;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.12);
-  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.15);
-  --shadow-xl: 0 25px 50px rgba(0, 0, 0, 0.2);
-  --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  --gradient-secondary: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-  --gradient-surface: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  --radius-sm: 8px;
-  --radius-md: 12px;
+  --surface-alt: #f9fafb;
+  --border: #d1d5db;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --radius-md: 8px;
   --radius-lg: 16px;
-  --radius-xl: 24px;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.2s ease-in-out;
 }
 
-/* Enhanced Base Container with Glass Morphism Effect */
-.profile-container {
-  max-width: 1000px;
+/* ========== 2. MAIN LAYOUT ========== */
+.profile-page-layout {
+  max-width: 1200px;
   margin: 40px auto;
-  padding: 50px;
+  padding: 20px;
   display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 60px;
+  grid-template-columns: 320px 1fr;
+  gap: 40px;
   align-items: start;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-xl);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  position: relative;
-  overflow: hidden;
 }
 
-.profile-container::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: var(--gradient-primary);
-  opacity: 0.05;
-  z-index: -1;
-  animation: rotate 15s linear infinite;
-}
-
-@keyframes rotate {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/* Enhanced Profile Picture Section */
-.profile-picture-section {
+/* ========== 3. PROFILE PICTURE SECTION (LEFT) ========== */
+.profile-page-layout .profile-picture-container {
+  position: sticky;
+  top: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 25px;
-  padding: 35px 25px;
-  background: var(--gradient-surface);
-  border-radius: var(--radius-xl);
-  border: 2px dashed var(--border-light);
-  transition: var(--transition-slow);
-  position: relative;
-  overflow: hidden;
-}
-
-.profile-picture-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(99, 102, 241, 0.1),
-    transparent
-  );
-  transition: left 0.7s ease;
-}
-
-.profile-picture-section:hover::before {
-  left: 100%;
-}
-
-.profile-picture-section:hover {
-  border-color: var(--primary-light);
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: var(--shadow-lg);
-}
-
-/* Enhanced Profile Image with Animated Border */
-.profile-avatar {
-  position: relative;
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid white;
-  transition: var(--transition);
+  gap: 20px;
+  padding: 30px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
 }
 
-/* Enhanced Upload Button with Icon */
-.upload-btn {
-  padding: 14px 28px;
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
+.profile-page-layout .profile-picture-container h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.profile-page-layout .profile-avatar {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 5px solid var(--surface);
+  box-shadow: 0 0 0 4px var(--primary);
+  transition: var(--transition);
+}
+
+.profile-page-layout .profile-picture-container:hover .profile-avatar {
+  transform: scale(1.05) rotate(3deg);
+}
+
+.profile-page-layout .upload-btn,
+.profile-page-layout .save-photo-btn {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 600;
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-weight: 600;
   transition: var(--transition);
   text-align: center;
-  width: 100%;
-  max-width: 220px;
-  position: relative;
-  overflow: hidden;
-  display: inline-flex; /* Changed to inline-flex */
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  text-decoration: none; /* Added to remove underline from label */
-}
-
-.upload-btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.upload-btn:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
-.upload-btn:hover {
-  filter: brightness(1.15);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
-}
-
-.upload-btn:active {
-  transform: translateY(-1px);
-}
-
-.upload-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  animation: pulse 2s infinite;
-}
-
-/* Style for the Upload Picture button */
-.upload-photo-btn {
-  padding: 14px 28px;
-  background: var(--gradient-secondary); /* Use a different gradient */
-  color: white;
   border: none;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-weight: 600;
-  transition: var(--transition);
+}
+
+.profile-page-layout .upload-btn {
+  background: var(--primary);
+  color: white;
+}
+
+.profile-page-layout .upload-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.profile-page-layout .save-photo-btn {
+  background: #10b981; /* Green for save */
+  color: white;
+}
+
+/* ========== 4. PROFILE FORM SECTION (RIGHT) ========== */
+.profile-page-layout .profile-form-container {
+  padding: 40px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.profile-page-layout .profile-form-container h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 40px;
   text-align: center;
-  width: 100%;
-  max-width: 220px;
-  position: relative;
-  overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
 }
 
-.upload-photo-btn::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.upload-photo-btn:hover::before {
-  width: 300px;
-  height: 300px;
-}
-
-.upload-photo-btn:hover {
-  filter: brightness(1.15);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4); /* Adjust shadow color */
-}
-
-.upload-photo-btn:active {
-  transform: translateY(-1px);
-}
-
-.upload-photo-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  animation: pulse 2s infinite;
-}
-
-/* Hide the default file input */
-#imageUpload {
-  width: 0;
-  height: 0;
-  opacity: 0;
-  position: absolute;
-  pointer-events: none;
-}
-
-/* Enhanced Profile Form */
-.profile-form {
+.profile-page-layout .profile-form-container form {
   display: flex;
   flex-direction: column;
   gap: 30px;
 }
 
-.profile-form h2 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  margin-bottom: 15px;
-  text-align: center;
-  position: relative;
-  padding-bottom: 15px;
-}
-
-.profile-form h2::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 4px;
-  background: var(--gradient-primary);
-  border-radius: 2px;
-}
-
-/* Enhanced Form Groups with Floating Labels */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  position: relative;
-}
-
-.form-group label {
-  font-weight: 600;
+.profile-page-layout .profile-form-container h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--text-dark);
-  font-size: 1rem;
-  margin-bottom: 5px;
-  transition: var(--transition);
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary-light);
+  margin-bottom: 0;
 }
 
-/* Enhanced Input and Textarea with Modern Styling */
-.form-group input,
-.form-group textarea {
-  padding: 18px 22px;
-  border: 2px solid var(--border);
-  border-radius: var(--radius-lg);
-  font-size: 1.05rem;
-  transition: var(--transition);
-  background: var(--surface);
+/* Form Inputs, Textarea, and Select */
+.profile-page-layout form input,
+.profile-page-layout form textarea,
+.profile-page-layout form select {
   width: 100%;
-  box-sizing: border-box;
-  position: relative;
+  padding: 12px 16px;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background-color: var(--surface-alt);
+  transition: var(--transition);
+  color: var(--text-dark);
 }
 
-.form-group input:focus,
-.form-group textarea:focus {
+.profile-page-layout form input:focus,
+.profile-page-layout form textarea:focus,
+.profile-page-layout form select:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
-  transform: translateY(-3px);
-  background: rgba(99, 102, 241, 0.02);
+  background-color: var(--surface);
+  box-shadow: 0 0 0 3px var(--primary-light);
 }
 
-.form-group textarea {
-  resize: vertical;
-  min-height: 140px;
-  font-family: inherit;
-  line-height: 1.6;
+/* Custom styling for dropdowns */
+.profile-page-layout form select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.7rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
 }
 
-/* Enhanced Submit Button with Advanced Effects */
-.profile-form button[type='submit'] {
-  padding: 18px 36px;
-  background: var(--gradient-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-lg);
-  font-size: 1.15rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: var(--transition-slow);
-  margin-top: 15px;
-  position: relative;
-  overflow: hidden;
-}
-
-.profile-form button[type='submit']::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.3),
-    transparent
-  );
-  transition: left 0.7s;
-}
-
-.profile-form button[type='submit']:hover::before {
-  left: 100%;
-}
-
-.profile-form button[type='submit']:hover:not(:disabled) {
-  filter: brightness(1.15);
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(99, 102, 241, 0.4);
-}
-
-.profile-form button[type='submit']:active:not(:disabled) {
-  transform: translateY(-2px);
-}
-
-.profile-form button[type='submit']:disabled {
-  opacity: 0.6;
+.profile-page-layout form select:disabled {
+  background-color: #e5e7eb;
   cursor: not-allowed;
-  transform: none;
-  animation: pulse 2s infinite;
+  opacity: 0.7;
 }
 
-/* Enhanced Form Message with Status Colors */
-.form-message {
-  padding: 18px;
-  border-radius: var(--radius-lg);
-  text-align: center;
-  font-weight: 600;
-  margin-top: 25px;
-  background: var(--surface-alt);
-  border-left: 6px solid var(--primary);
-  transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.form-message::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--gradient-primary);
-  opacity: 0.05;
-  z-index: -1;
-}
-
-/* Enhanced Status Messages */
-.status-message {
-  min-height: 60vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.8rem;
+.profile-page-layout .helper-text {
+  display: block;
   color: var(--text-light);
-  text-align: center;
-  flex-direction: column;
-  gap: 20px;
+  font-size: 0.875rem;
+  margin-top: -20px;
 }
 
-/* Loading Spinner Enhancement */
-.loading-spinner {
-  width: 60px;
-  height: 60px;
-  border: 5px solid rgba(99, 102, 241, 0.2);
+/* ========== 5. EDUCATION SECTION ========== */
+.profile-page-layout .education-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  position: relative;
+  background-color: var(--surface-alt);
+}
+
+.profile-page-layout .education-group select[value=""],
+.profile-page-layout .education-group input[value=""] {
+  color: var(--text-light);
+}
+
+/* Make college and field of study span full width */
+.profile-page-layout .education-group select[disabled],
+.profile-page-layout .education-group input[placeholder*="College"],
+.profile-page-layout .education-group input[placeholder*="Field"] {
+  grid-column: 1 / -1;
+}
+
+.profile-page-layout .remove-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 5px;
   border-radius: 50%;
-  border-top-color: var(--primary);
-  animation: spin 1.2s ease-in-out infinite;
+  width: 32px;
+  height: 32px;
+  font-weight: bold;
+  font-size: 1.4rem;
+  line-height: 1;
+  transition: var(--transition);
+}
+.profile-page-layout .remove-btn:hover {
+  background: var(--danger);
+  color: white;
+  transform: rotate(90deg);
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.profile-page-layout .add-btn {
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px dashed var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  transition: var(--transition);
+  align-self: flex-start;
 }
 
-/* Enhanced Focus States for Accessibility */
-.profile-form input:focus,
-.profile-form textarea:focus,
-.upload-btn:focus,
-.upload-photo-btn:focus {
-  outline: 3px solid rgba(99, 102, 241, 0.3);
-  outline-offset: 2px;
+.profile-page-layout .add-btn:hover {
+  background: var(--primary);
+  color: white;
+  border-style: solid;
 }
 
-/* Advanced Responsive Design */
+/* ========== 6. SUBMIT & MESSAGE ========== */
+.profile-page-layout form button[type='submit'] {
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  background: var(--primary);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 10px;
+}
+
+.profile-page-layout form button[type='submit']:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.profile-page-layout form button[type='submit']:disabled {
+  background: var(--text-light);
+  cursor: not-allowed;
+}
+
+.profile-page-layout .form-message {
+  padding: 15px;
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-weight: 500;
+}
+
+.profile-page-layout .form-message.success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.profile-page-layout .form-message.error {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* ========== 7. RESPONSIVENESS ========== */
 @media (max-width: 968px) {
-  .profile-container {
+  .profile-page-layout {
     grid-template-columns: 1fr;
-    gap: 40px;
-    padding: 30px;
-    margin: 20px;
-  }
-
-  .profile-picture-section {
-    padding: 25px;
-  }
-
-  .profile-avatar {
-    width: 180px;
-    height: 180px;
-  }
-
-  .profile-form h2 {
-    font-size: 2rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .profile-container {
-    padding: 20px;
-    margin: 15px;
     gap: 30px;
   }
+  .profile-page-layout .profile-picture-container {
+    position: static;
+  }
+}
 
-  .profile-picture-section {
+@media (max-width: 576px) {
+  .profile-page-layout {
+    padding: 10px;
+  }
+  .profile-page-layout .profile-form-container {
     padding: 20px;
+    box-shadow: none;
+    border: none;
   }
-
-  .profile-avatar {
-    width: 150px;
-    height: 150px;
+  .profile-page-layout .education-group {
+    grid-template-columns: 1fr;
   }
-
-  .profile-form h2 {
-    font-size: 1.8rem;
-  }
-
-  .form-group input,
-  .form-group textarea {
-    padding: 16px 20px;
-  }
-
-  .upload-btn,
-  .profile-form button[type='submit'],
-  .upload-photo-btn {
-    padding: 16px 24px;
+  .profile-page-layout .education-group input,
+  .profile-page-layout .education-group select {
+    grid-column: auto;
   }
 }
 
@@ -545,4 +360,22 @@ h5 {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Hide the default file input */
+#imageUpload {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Enhanced Focus States for Accessibility */
+.profile-form input:focus,
+.profile-form textarea:focus,
+.upload-btn:focus,
+.upload-photo-btn:focus {
+  outline: 3px solid rgba(99, 102, 241, 0.3);
+  outline-offset: 2px;
 }

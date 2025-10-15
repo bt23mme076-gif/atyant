@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import User from '../models/User.js';
 import cloudinary from '../config/cloudinary.js';
-import protect from '../middleware/authMiddleware.js';
+import protect  from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -30,22 +30,31 @@ router.put('/me', protect, async (req, res) => {
     const user = await User.findById(req.user.userId);
 
     if (user) {
-      user.username = req.body.username || user.username;
-      user.bio = req.body.bio || user.bio;
-      user.linkedinProfile = req.body.linkedinProfile || user.linkedinProfile; // LinkedIn URL ko save karein
-      if (user.role === 'mentor') {
-          user.expertise = req.body.expertise || user.expertise;
-      }
-      const updatedUser = await user.save();
-      res.json({
-          _id: updatedUser._id,
-          username: updatedUser.username,
-          email: updatedUser.email,
-          role: updatedUser.role,
-          bio: updatedUser.bio,
-          expertise: updatedUser.expertise,
-      });
-    } else {
+  user.username = req.body.username || user.username;
+  user.bio = req.body.bio || user.bio;
+  user.linkedinProfile = req.body.linkedinProfile || user.linkedinProfile;
+  user.city = req.body.city || user.city;
+  if (Array.isArray(req.body.education)) {
+    user.education = req.body.education; // [{ institution, degree, field, year }]
+  }
+  if (user.role === 'mentor') {
+      user.expertise = req.body.expertise || user.expertise;
+      user.domainexpertise = req.body.domainexpertise || user.domainexpertise;
+  }
+  const updatedUser = await user.save();
+  res.json({
+      _id: updatedUser._id,
+      username: updatedUser.username,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      bio: updatedUser.bio,
+      city: updatedUser.city,
+      education: updatedUser.education,
+      expertise: updatedUser.expertise,
+  });
+}
+
+     else {
       res.status(404).json({ message: 'User not found' });
     }
   } catch (error) {
@@ -84,6 +93,42 @@ router.get('/:username', async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// GET current user profile
+router.get('/', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// UPDATE user profile
+router.put('/', protect, async (req, res) => {
+  try {
+    const { bio, city, interests, education, expertise, domainExperience } = req.body;
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        $set: {
+          bio,
+          city,
+          interests,
+          education,
+          expertise,
+          domainExperience
+        }
+      },
+      { new: true }
+    ).select('-password');
+    
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update profile' });
   }
 });
 
