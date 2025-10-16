@@ -41,6 +41,7 @@ router.put('/me', protect, async (req, res) => {
       user.expertise = req.body.expertise || user.expertise;
       user.domainexpertise = req.body.domainexpertise || user.domainexpertise;
   }
+  user.interests = req.body.interests || user.interests;
   const updatedUser = await user.save();
   res.json({
       _id: updatedUser._id,
@@ -131,5 +132,4 @@ router.put('/', protect, async (req, res) => {
     res.status(500).json({ message: 'Failed to update profile' });
   }
 });
-
 export default router;
