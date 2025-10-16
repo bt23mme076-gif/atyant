@@ -24,27 +24,26 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'mentor', 'mentee', 'admin'],
+    enum: ['user', 'mentor', 'admin'],
     default: 'user'
   },
   
-  // ========== PROFILE FIELDS ==========
+  // ========== PROFILE FIELDS (All Optional) ==========
   profilePicture: {
     type: String,
     default: null
   },
   bio: {
     type: String,
-    default: '',
+    default: null,
     maxlength: 500
   },
   city: {
     type: String,
-    default: '',
-    trim: true
+    default: ''
   },
   
-  // ========== SKILLS & EXPERTISE ==========
+  // ========== SKILLS & EXPERTISE (All Optional) ==========
   skills: [{
     type: String,
     trim: true
@@ -62,31 +61,18 @@ const userSchema = new mongoose.Schema({
     default: []
   },
   
-  // ========== EDUCATION ==========
+  // ========== EDUCATION (Optional) ==========
   education: [{
-    institution: {
-      type: String,
-      trim: true
-    },
-    degree: {
-      type: String,
-      trim: true
-    },
-    field: {
-      type: String,
-      trim: true
-    },
-    year: {
-      type: String,
-      trim: true
-    }
+    institution: { type: String },
+    degree: { type: String },
+    field: { type: String },
+    year: { type: String }
   }],
   
-  // ========== SOCIAL LINKS ==========
+  // ========== SOCIAL LINKS (Optional) ==========
   linkedinProfile: {
     type: String,
-    default: '',
-    trim: true
+    default: ''
   },
   socialLinks: {
     type: Map,
@@ -100,9 +86,7 @@ const userSchema = new mongoose.Schema({
     default: false
   },
   verificationToken: {
-    type: String,
-    sparse: true,
-    unique: true
+    type: String
   },
   
   // ========== PASSWORD RESET ==========
@@ -128,9 +112,7 @@ userSchema.index({ email: 1 });
 userSchema.index({ username: 1 });
 userSchema.index({ role: 1 });
 
-// ========== INSTANCE METHODS ==========
-
-// Check if profile is complete
+// ========== HELPER METHODS ==========
 userSchema.methods.isProfileComplete = function() {
   const hasInterests = this.interests && this.interests.length > 0;
   const hasEducation = this.education && this.education.length > 0;
@@ -139,7 +121,6 @@ userSchema.methods.isProfileComplete = function() {
   return hasInterests && hasEducation && hasCity;
 };
 
-// Get public profile (exclude sensitive data)
 userSchema.methods.getPublicProfile = function() {
   return {
     _id: this._id,
