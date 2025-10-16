@@ -50,7 +50,7 @@ const Navbar = () => {
         </>
       ) : (
         <>
-          <Link to="/mentors" className="nav-link" onClick={linkAction}>Find Problem Solvers</Link>
+          <Link to="/mentors" className="nav-link" onClick={linkAction}>Find Mentor</Link>
           <Link to="/chat" className="nav-link" onClick={linkAction}>My Chats</Link>
           <Link to="/profile" className="nav-link" onClick={linkAction}>Profile</Link>
         </>

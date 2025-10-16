@@ -32,7 +32,7 @@ const AskQuestionPage = () => {
       const data = await response.json();
       setSuggestedMentors(data);
     } catch (error) {
-      console.error('Failed to find Problem Solver:', error);
+      console.error('Failed to find Mentor:', error);
     } finally {
       setLoading(false);
     }
@@ -45,7 +45,7 @@ const AskQuestionPage = () => {
   return (
     <div className="ask-question-container">
       <h1>Ask Your Question</h1>
-      <p>Describe your problem, and we'll suggest Problem Solver who have solved similar issues.</p>
+      <p>Describe your problem, and we'll suggest Mentors who have solved similar issues.</p>
 
       <form className="ask-question-form" onSubmit={handleFindMentors}>
         <textarea
@@ -55,13 +55,13 @@ const AskQuestionPage = () => {
           rows="6"
         />
         <button type="submit" disabled={loading}>
-          {loading ? 'Finding Problem Solver..' : 'Find a Problem Solver'}
+          {loading ? 'Finding Mentors..' : 'Find a Mentor'}
         </button>
       </form>
 
       {hasSearched && (
         <div className="results-section">
-          <h2>Suggested Problem Solver</h2>
+          <h2>Suggested Mentors</h2>
           {loading ? (
             <div className="status-message">Loading...</div>
           ) : (
@@ -71,12 +71,12 @@ const AskQuestionPage = () => {
                   <div className="mentor-card" key={mentor._id}>
                     <img src={mentor.profilePicture || `https://api.pravatar.cc/150?u=${mentor._id}`} alt={mentor.username} className="mentor-image" />
                     <h3 className="mentor-name">{mentor.username}</h3>
-                    <p className="mentor-interest">Problem Solver</p>
+                    <p className="mentor-interest">Mentor</p>
                     <button className="chat-now-btn" onClick={() => startChatWithMentor(mentor)}>Chat Now</button>
                   </div>
                 ))
               ) : (
-                <p className="no-mentors-found">No Problem Solver found with this expertise. Try rephrasing your question.</p>
+                <p className="no-mentors-found">No Mentor found with this expertise. Try rephrasing your question.</p>
               )}
             </div>
           )}

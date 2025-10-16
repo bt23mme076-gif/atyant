@@ -25,7 +25,7 @@ const MentorGallery = () => {
 
   return (
     <section className="gallery-section">
-      <h2>Problem Solvers</h2>
+      <h2>Meet Our Mentors</h2>
       <div className="scrolling-wrapper">
         <div className="scrolling-content">
           {scrollingMentors.map((mentor, idx) => (
