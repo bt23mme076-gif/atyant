@@ -110,12 +110,13 @@ const ProfilePage = () => {
     }
   };
 
-  // ========== HANDLE FORM INPUT CHANGES ==========
+  // ========== HANDLE FORM INPUT CHANGES (FIXED) ==========
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    // Handle comma-separated arrays (interests, expertise, domainExperience)
+    // ✅ Handle comma-separated arrays with better UX
     if (name === 'interests' || name === 'expertise' || name === 'domainExperience') {
+      // Keep raw value for display, but split for storage
       setFormData(prev => ({ 
         ...prev, 
         [name]: value.split(',').map(s => s.trim()).filter(s => s !== '')
@@ -123,6 +124,69 @@ const ProfilePage = () => {
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  // ✅ NEW: Handle chip-based interest input
+  const [interestInput, setInterestInput] = useState('');
+  const [expertiseInput, setExpertiseInput] = useState('');
+
+  const handleInterestKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const newInterest = interestInput.trim();
+      
+      if (newInterest && !formData.interests.includes(newInterest)) {
+        setFormData(prev => ({
+          ...prev,
+          interests: [...prev.interests, newInterest]
+        }));
+        setInterestInput(''); // Clear input
+      }
+    }
+    
+    // Handle backspace to remove last chip
+    if (e.key === 'Backspace' && interestInput === '' && formData.interests.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        interests: prev.interests.slice(0, -1)
+      }));
+    }
+  };
+
+  const handleExpertiseKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const newExpertise = expertiseInput.trim();
+      
+      if (newExpertise && !formData.expertise.includes(newExpertise)) {
+        setFormData(prev => ({
+          ...prev,
+          expertise: [...prev.expertise, newExpertise]
+        }));
+        setExpertiseInput('');
+      }
+    }
+    
+    if (e.key === 'Backspace' && expertiseInput === '' && formData.expertise.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        expertise: prev.expertise.slice(0, -1)
+      }));
+    }
+  };
+
+  const removeInterest = (indexToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      interests: prev.interests.filter((_, index) => index !== indexToRemove)
+    }));
+  };
+
+  const removeExpertise = (indexToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      expertise: prev.expertise.filter((_, index) => index !== indexToRemove)
+    }));
   };
 
   // ✅ NEW: Handle education field changes
@@ -390,14 +454,34 @@ const ProfilePage = () => {
           {user?.role === 'user' && (
             <>
               <h3>Student Details</h3>
-              <input
-                name="interests"
-                value={formData.interests.join(', ')}
-                onChange={handleChange}
-                placeholder="Your Interests (comma-separated, e.g., AI, Web Development, GATE Preparation)"
-              />
+              
+              {/* ✅ CHIP-BASED INTEREST INPUT */}
+              <div className="chip-input-container">
+                <div className="chips-wrapper">
+                  {formData.interests.map((interest, index) => (
+                    <span key={index} className="chip">
+                      {interest}
+                      <button 
+                        type="button" 
+                        className="chip-remove" 
+                        onClick={() => removeInterest(index)}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    type="text"
+                    value={interestInput}
+                    onChange={(e) => setInterestInput(e.target.value)}
+                    onKeyDown={handleInterestKeyDown}
+                    placeholder={formData.interests.length === 0 ? "Type interest and press Enter (e.g., DSA, Coding, AI)" : "Add more..."}
+                    className="chip-input"
+                  />
+                </div>
+              </div>
               <small className="helper-text">
-                💡 These help us match you with the right mentors
+                💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each interest • Press <kbd>Backspace</kbd> to remove
               </small>
             </>
           )}
@@ -406,14 +490,34 @@ const ProfilePage = () => {
           {user?.role === 'mentor' && (
             <>
               <h3>Mentor Details</h3>
-              <input
-                name="expertise"
-                value={formData.expertise.join(', ')}
-                onChange={handleChange}
-                placeholder="Your Expertise (comma-separated, e.g., Java, React, Career Counseling)"
-              />
+              
+              {/* ✅ CHIP-BASED EXPERTISE INPUT */}
+              <div className="chip-input-container">
+                <div className="chips-wrapper">
+                  {formData.expertise.map((skill, index) => (
+                    <span key={index} className="chip">
+                      {skill}
+                      <button 
+                        type="button" 
+                        className="chip-remove" 
+                        onClick={() => removeExpertise(index)}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    type="text"
+                    value={expertiseInput}
+                    onChange={(e) => setExpertiseInput(e.target.value)}
+                    onKeyDown={handleExpertiseKeyDown}
+                    placeholder={formData.expertise.length === 0 ? "Type expertise and press Enter (e.g., React, Java)" : "Add more..."}
+                    className="chip-input"
+                  />
+                </div>
+              </div>
               <small className="helper-text">
-                💡 This helps students find you for the right questions
+                💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each skill • Press <kbd>Backspace</kbd> to remove
               </small>
             </>
           )}

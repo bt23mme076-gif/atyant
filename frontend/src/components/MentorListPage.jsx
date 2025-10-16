@@ -18,12 +18,11 @@ const MentorListPage = () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       
-      // Use the same endpoint as MentorGallery to get consistent data structure
       const url = query
         ? `${API_URL}/api/search/mentors?q=${encodeURIComponent(query)}`
-        : `${API_URL}/api/users/mentors`; // Changed from /api/mentors to /api/users/mentors
+        : `${API_URL}/api/users/mentors`;
       
-      console.log('Fetching from URL:', url); // Debug log
+      console.log('Fetching from URL:', url);
 
       const response = await fetch(url);
       if (!response.ok) {
@@ -31,7 +30,6 @@ const MentorListPage = () => {
       }
       const data = await response.json();
       
-      // Debug logging
       console.log('API Response:', data);
       if (data && data.length > 0) {
         console.log('First mentor structure:', data[0]);
@@ -57,12 +55,28 @@ const MentorListPage = () => {
     fetchMentors(searchTerm.trim());
   };
 
-  const startChatWithMentor = (mentor) => {
+  const startChatWithMentor = (e, mentor) => {
+    e.stopPropagation(); // ✅ Prevent card click when clicking chat button
     navigate('/chat', {
       state: { selectedContact: mentor }
     });
   };
 
+  const handleScheduleClick = (e, username) => {
+    e.stopPropagation(); // ✅ Prevent card click when clicking schedule button
+    navigate(`/profile/${username}#schedule`);
+  };
+
+  const handleCardClick = (username) => {
+    // Play click sound
+    const audio = new Audio('/click-sound.mp3');
+    audio.play().catch(() => {}); // Ignore if autoplay blocked
+  
+    navigate(`/profile/${username}`);
+   };
+
+  // ✅ NEW: Handle card click to navigate to profile
+  
   return (
     <div className="mentor-list-container">
       <h1>Meet Our Mentors</h1>
@@ -90,7 +104,6 @@ const MentorListPage = () => {
           )}
 
           {mentors.map((mentor) => {
-            // Debug logging for each mentor
             console.log('Processing mentor:', mentor);
             console.log('Mentor bio:', mentor?.bio);
             
@@ -101,21 +114,32 @@ const MentorListPage = () => {
             const {
               _id,
               username,
-              name, // Add name field which might be different from username
+              name,
               profilePicture,
               title,
               company,
               rating,
               reviewsCount,
               tags,
-              specialties, // Add specialties field from MentorGallery
+              specialties,
               badges,
               hasScheduling,
               bio
             } = mentor;
 
             return (
-              <div className="mentor-card" key={_id || username}>
+              <div 
+                className="mentor-card clickable-card" 
+                key={_id || username}
+                onClick={() => handleCardClick(username)}
+                role="button"
+                tabIndex={0}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleCardClick(username);
+                  }
+                }}
+              >
                 <div className="mentor-card-content">
                   <div className="mentor-image-container">
                     {profilePicture ? (
@@ -135,12 +159,9 @@ const MentorListPage = () => {
                   </div>
 
                   <h3 className="mentor-name">
-                    <Link to={`/profile/${username}`}>
-                      {name || username}
-                    </Link>
+                    {name || username}
                   </h3>
 
-                  {/* Bio section - same logic as MentorGallery */}
                   <p className="mentor-bio">
                     {mentor.bio && typeof mentor.bio === 'string' && mentor.bio.trim() !== ''
                       ? (mentor.bio.length > 100
@@ -157,7 +178,6 @@ const MentorListPage = () => {
                     </p>
                   )}
 
-                  {/* Display specialties if available (from MentorGallery structure) */}
                   {Array.isArray(specialties) && specialties.length > 0 && (
                     <div className="mentor-specialties">
                       {specialties.slice(0, 3).map((specialty, i) => (
@@ -201,7 +221,7 @@ const MentorListPage = () => {
 
                   <div className="mentor-actions">
                     <button
-                      onClick={() => startChatWithMentor(mentor)}
+                      onClick={(e) => startChatWithMentor(e, mentor)}
                       className="chat-button"
                     >
                       Start Chat
@@ -210,7 +230,7 @@ const MentorListPage = () => {
                       <button
                         type="button"
                         className="secondary-button"
-                        onClick={() => navigate(`/profile/${username}#schedule`)}
+                        onClick={(e) => handleScheduleClick(e, username)}
                       >
                         Schedule Call
                       </button>
