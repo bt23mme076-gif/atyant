@@ -2,134 +2,193 @@ import express from 'express';
 import multer from 'multer';
 import User from '../models/User.js';
 import cloudinary from '../config/cloudinary.js';
-import protect  from '../middleware/authMiddleware.js';
+import protect from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
-// @desc    Get user profile
-// @route   GET /api/profile/me
-// @access  Private
+
+// ========== GET CURRENT USER PROFILE (PROTECTED) ==========
 router.get('/me', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select('-password');
-    if (user) {
-      res.json(user);
-    } else {
-      res.status(404).json({ message: 'User not found' });
+    console.log('🔍 Fetching profile for user ID:', req.user.id || req.user.userId);
+    
+    // ✅ Try both possible user ID fields
+    const userId = req.user.id || req.user.userId;
+    
+    const user = await User.findById(userId).select('-password -verificationToken -passwordResetToken');
+    
+    if (!user) {
+      console.log('❌ User not found');
+      return res.status(404).json({ message: 'User not found' });
     }
+    
+    console.log('✅ User found:', user.username);
+    res.json(user);
+    
   } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
+    console.error('❌ Error fetching profile:', error);
+    res.status(500).json({ message: 'Server Error', error: error.message });
   }
 });
 
-// @desc    Update user profile
-// @route   PUT /api/profile/me
-// @access  Private
+// ========== UPDATE USER PROFILE (PROTECTED) - FIXED ==========
 router.put('/me', protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId);
-
-    if (user) {
-  user.username = req.body.username || user.username;
-  user.bio = req.body.bio || user.bio;
-  user.linkedinProfile = req.body.linkedinProfile || user.linkedinProfile;
-  user.city = req.body.city || user.city;
-  if (Array.isArray(req.body.education)) {
-    user.education = req.body.education; // [{ institution, degree, field, year }]
-  }
-  if (user.role === 'mentor') {
-      user.expertise = req.body.expertise || user.expertise;
-      user.domainexpertise = req.body.domainexpertise || user.domainexpertise;
-  }
-  user.interests = req.body.interests || user.interests;
-  const updatedUser = await user.save();
-  res.json({
-      _id: updatedUser._id,
-      username: updatedUser.username,
-      email: updatedUser.email,
-      role: updatedUser.role,
-      bio: updatedUser.bio,
-      city: updatedUser.city,
-      education: updatedUser.education,
-      expertise: updatedUser.expertise,
-  });
-}
-
-     else {
-      res.status(404).json({ message: 'User not found' });
+    const userId = req.user.id || req.user.userId;
+    
+    console.log('📝 Update request for user:', userId);
+    console.log('📦 Request body:', JSON.stringify(req.body, null, 2));
+    
+    const { 
+      username, 
+      bio, 
+      city, 
+      interests,        // ✅ Added
+      education, 
+      expertise,        // ✅ Added
+      domainExperience, // ✅ Fixed spelling
+      linkedinProfile,
+      skills
+    } = req.body;
+    
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      console.log('❌ User not found for update');
+      return res.status(404).json({ message: 'User not found' });
     }
+    
+    // ✅ Update fields properly (handle undefined vs empty arrays)
+    if (username !== undefined) user.username = username;
+    if (bio !== undefined) user.bio = bio;
+    if (city !== undefined) user.city = city;
+    if (linkedinProfile !== undefined) user.linkedinProfile = linkedinProfile;
+    
+    // ✅ Handle arrays correctly (check for undefined, not falsy)
+    if (interests !== undefined) {
+      user.interests = Array.isArray(interests) ? interests : [];
+      console.log('✅ Interests updated:', user.interests);
+    }
+    
+    if (expertise !== undefined) {
+      user.expertise = Array.isArray(expertise) ? expertise : [];
+      console.log('✅ Expertise updated:', user.expertise);
+    }
+    
+    if (domainExperience !== undefined) {
+      user.domainExperience = Array.isArray(domainExperience) ? domainExperience : [];
+      console.log('✅ Domain Experience updated:', user.domainExperience);
+    }
+    
+    if (skills !== undefined) {
+      user.skills = Array.isArray(skills) ? skills : [];
+    }
+    
+    if (education !== undefined) {
+      user.education = Array.isArray(education) ? education : [];
+      console.log('✅ Education updated:', user.education);
+    }
+    
+    // ✅ Save with validation
+    const updatedUser = await user.save();
+    
+    console.log('✅ User updated successfully');
+    console.log('📤 Final interests:', updatedUser.interests);
+    
+    // ✅ Return updated user without password
+    const userResponse = updatedUser.toObject();
+    delete userResponse.password;
+    delete userResponse.verificationToken;
+    delete userResponse.passwordResetToken;
+    
+    res.json(userResponse);
+    
   } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
+    console.error('❌ Error updating profile:', error);
+    
+    if (error.code === 11000) {
+      return res.status(400).json({ 
+        message: 'Username already exists' 
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Server Error', 
+      error: error.message 
+    });
   }
 });
-// --- NEW ROUTE FOR IMAGE UPLOAD ---
+
+// ========== UPLOAD PROFILE PICTURE (PROTECTED) ==========
 router.post('/upload-picture', protect, upload.single('profilePicture'), async (req, res) => {
-    try {
-        const user = await User.findById(req.user.userId);
-        if (!user) return res.status(404).json({ message: 'User not found' });
-
-        // Upload image to Cloudinary
-        const result = await cloudinary.uploader.upload_stream({
-            folder: "atyant_profiles"
-        }, async (error, result) => {
-            if (error) throw new Error('Cloudinary upload failed');
-
-            user.profilePicture = result.secure_url;
-            await user.save();
-            res.json({ message: 'Profile picture updated successfully', profilePicture: user.profilePicture });
-        }).end(req.file.buffer);
-
-    } catch (error) {
-        res.status(500).json({ message: 'Server error during upload' });
+  try {
+    const userId = req.user.id || req.user.userId;
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
-}); // Closing brace for the route handler
 
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    // ✅ Upload to Cloudinary using Promise
+    const uploadPromise = new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: 'atyant_profiles' },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(req.file.buffer);
+    });
+
+    const result = await uploadPromise;
+    
+    user.profilePicture = result.secure_url;
+    await user.save();
+    
+    console.log('✅ Profile picture updated:', result.secure_url);
+    
+    res.json({ 
+      message: 'Profile picture updated successfully', 
+      profilePicture: user.profilePicture 
+    });
+    
+  } catch (error) {
+    console.error('❌ Error uploading picture:', error);
+    res.status(500).json({ 
+      message: 'Server error during upload',
+      error: error.message 
+    });
+  }
+});
+
+// ========== GET PUBLIC PROFILE BY USERNAME ==========
 router.get('/:username', async (req, res) => {
   try {
-    const user = await User.findOne({ username: req.params.username }).select('-password');
-    if (user) {
-      res.json(user);
-    } else {
-      res.status(404).json({ message: 'User not found' });
+    console.log('🔍 Fetching public profile for:', req.params.username);
+    
+    const user = await User.findOne({ 
+      username: new RegExp(`^${req.params.username}$`, 'i')
+    }).select('-password -verificationToken -passwordResetToken -passwordResetExpires');
+    
+    if (!user) {
+      console.log('❌ User not found:', req.params.username);
+      return res.status(404).json({ message: 'User not found' });
     }
-  } catch (error) {
-    res.status(500).json({ message: 'Server Error' });
-  }
-});
-
-// GET current user profile
-router.get('/', protect, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
+    
+    console.log('✅ Public profile sent for:', user.username);
     res.json(user);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// UPDATE user profile
-router.put('/', protect, async (req, res) => {
-  try {
-    const { bio, city, interests, education, expertise, domainExperience } = req.body;
     
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user.id,
-      {
-        $set: {
-          bio,
-          city,
-          interests,
-          education,
-          expertise,
-          domainExperience
-        }
-      },
-      { new: true }
-    ).select('-password');
-    
-    res.json(updatedUser);
   } catch (error) {
-    res.status(500).json({ message: 'Failed to update profile' });
+    console.error('❌ Error fetching public profile:', error);
+    res.status(500).json({ 
+      message: 'Server Error',
+      error: error.message 
+    });
   }
 });
 
