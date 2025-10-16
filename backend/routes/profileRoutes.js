@@ -191,5 +191,4 @@ router.get('/:username', async (req, res) => {
     });
   }
 });
-
 export default router;
