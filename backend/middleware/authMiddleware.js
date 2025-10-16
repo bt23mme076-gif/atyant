@@ -32,8 +32,14 @@ const protect = (req, res, next) => {
         });
       }
 
-      // Attach user info to request
-      req.user = decoded;
+      // ✅ ADDED: Standardize user object for consistent access
+      // Attach user info to request (keep all existing fields + add standardized ones)
+      req.user = {
+        ...decoded,                        // Keep all existing token data
+        id: decoded.id || decoded.userId,  // ✅ Add standardized 'id' field
+        userId: decoded.id || decoded.userId  // ✅ Add standardized 'userId' field
+      };
+      
       next();
     } catch (jwtError) {
       console.error('JWT verification failed:', jwtError);
