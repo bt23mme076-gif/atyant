@@ -3,7 +3,7 @@ const router = express.Router();
 import User from '../models/User.js';
 import auth from '../middleware/auth.js';
 
-// ========== UPDATE USER LOCATION - FIXED PRIORITY ==========
+// ========== UPDATE USER LOCATION - FIXED FOR VILLAGES ==========
 router.post('/update-location', auth, async (req, res) => {
   try {
     const { latitude, longitude, city, state, country } = req.body;
@@ -33,14 +33,14 @@ router.post('/update-location', auth, async (req, res) => {
     let finalCountry = country || 'India';
     let finalDistrict = '';
 
-    // ========== GEOCODING WITH CORRECT PRIORITY ==========
+    // ========== GEOCODING WITH VILLAGE PRIORITY ==========
     if (!city) {
       try {
         console.log('🔍 Fetching location from Nominatim...\n');
         
-        // Use zoom 12 for better tehsil/town detection
+        // Use zoom 14 for better village detection
         const geoResponse = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=12&addressdetails=1`,
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=14&addressdetails=1`,
           {
             headers: {
               'User-Agent': 'AtyantMentorApp/1.0 (contact@example.com)'
@@ -53,6 +53,8 @@ router.post('/update-location', auth, async (req, res) => {
           
           console.log('📍 Nominatim Response:');
           console.log('   Village:', data.address?.village);
+          console.log('   Hamlet:', data.address?.hamlet);
+          console.log('   Locality:', data.address?.locality);
           console.log('   Town:', data.address?.town);
           console.log('   City:', data.address?.city);
           console.log('   County:', data.address?.county);              // ← Tehsil/Taluka
@@ -61,28 +63,36 @@ router.post('/update-location', auth, async (req, res) => {
           console.log('   Country:', data.address?.country);
           console.log('');
 
-          // ========== PRIORITY: county > town > city > village ==========
-          // County usually contains tehsil/taluka name (more relevant than small village)
+          // ========== FIXED PRIORITY: village/hamlet > locality > town > county > city ==========
+          // Village ko highest priority do, county (tehsil) ko last me
           
-          const county = data.address?.county;
+          const village = data.address?.village;
+          const hamlet = data.address?.hamlet;
+          const locality = data.address?.locality;
           const town = data.address?.town;
           const cityName = data.address?.city;
-          const village = data.address?.village;
+          const county = data.address?.county; // Tehsil
           const stateDistrict = data.address?.state_district;
 
-          // Choose county (tehsil) as primary city
-          if (county) {
-            finalCity = county;
-            console.log('✅ Using County (Tehsil):', county);
+          // Village ko highest priority - yeh fix hai
+          if (village) {
+            finalCity = village;
+            console.log('✅ Using Village:', village);
+          } else if (hamlet) {
+            finalCity = hamlet;
+            console.log('✅ Using Hamlet:', hamlet);
+          } else if (locality) {
+            finalCity = locality;
+            console.log('✅ Using Locality:', locality);
           } else if (town) {
             finalCity = town;
             console.log('✅ Using Town:', town);
           } else if (cityName) {
             finalCity = cityName;
             console.log('✅ Using City:', cityName);
-          } else if (village) {
-            finalCity = village;
-            console.log('⚠️  Fallback to Village:', village);
+          } else if (county) {
+            finalCity = county;
+            console.log('⚠️  Fallback to County (Tehsil):', county);
           } else {
             finalCity = 'Unknown Location';
             console.log('❌ No location name found');
@@ -96,7 +106,7 @@ router.post('/update-location', auth, async (req, res) => {
           finalCountry = data.address?.country || 'India';
 
           console.log('\n📌 Final Selection:');
-          console.log('   City/Tehsil:', finalCity);
+          console.log('   City/Village:', finalCity);
           console.log('   District:', finalDistrict || 'N/A');
           console.log('   State:', finalState);
           console.log('');
@@ -135,7 +145,7 @@ router.post('/update-location', auth, async (req, res) => {
     await existingUser.save();
 
     console.log('✅ Location saved successfully:');
-    console.log('   City:', finalCity);
+    console.log('   City/Village:', finalCity);
     console.log('   District:', finalDistrict);
     console.log('   State:', finalState);
     console.log('   Coordinates:', [longitude, latitude]);
@@ -220,7 +230,7 @@ router.post('/nearby', auth, async (req, res) => {
       role: 'mentor',
       _id: { $ne: req.user.userId },
       'location.coordinates': { $exists: true, $ne: [] }
-    }).select('username profilePicture bio expertise skills location');
+    }).select('username profilePicture bio expertise skills location availableForOfflineMeet');
 
     console.log(`📍 Found ${mentors.length} mentors\n`);
 
