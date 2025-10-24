@@ -96,6 +96,23 @@ const userSchema = new mongoose.Schema({
   passwordResetExpires: {
     type: Date
   },
+
+  // ========== LOCATION SCHEMA - CHECK THIS ==========
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      default: 'Point'
+    },
+    coordinates: {
+      type: [Number],  // [longitude, latitude]
+      default: []
+    },
+    city: { type: String, default: null },
+    state: { type: String, default: null },
+    country: { type: String, default: 'India' },
+    lastUpdated: { type: Date, default: null }
+  },
   
   // ========== MESSAGE CREDITS ==========
   messageCredits: {
@@ -140,6 +157,7 @@ userSchema.methods.getPublicProfile = function() {
   };
 };
 
+userSchema.index({ 'location.coordinates': '2dsphere' });
 const User = mongoose.model('User', userSchema);
 
 export default User;

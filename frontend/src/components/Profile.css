@@ -1,0 +1,132 @@
+/* ...all your existing CSS remains same... */
+
+/* ========== NEW: ADD THESE STYLES AT THE END ========== */
+.location-section {
+  margin: 30px 0;
+  padding: 25px;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border-radius: 16px;
+  border-left: 4px solid #0ea5e9;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.location-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #0c4a6e;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.current-location-display {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #bae6fd;
+}
+
+.current-location-display p {
+  margin: 5px 0;
+  color: #0c4a6e;
+}
+
+.current-location-display strong {
+  color: #0369a1;
+  font-size: 1.1rem;
+}
+
+.location-updated {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 8px;
+}
+
+.location-description {
+  color: #475569;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+.update-location-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(14, 165, 233, 0.3);
+}
+
+.update-location-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+}
+
+.update-location-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.location-status {
+  margin-top: 15px;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  border: 2px solid #bae6fd;
+  color: #0c4a6e;
+}
+/* ========== END NEW STYLES ========== */
+
+/* Location section styles */
+.location-setup-section {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border: 2px solid #90caf9;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+  transition: all 0.3s ease;
+}
+
+.location-setup-section.urgent {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border: 2px solid #ffb74d;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 183, 77, 0.4); }
+  50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(255, 183, 77, 0); }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ...rest of existing styles... */

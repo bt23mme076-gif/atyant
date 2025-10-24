@@ -17,6 +17,7 @@ import feedbackRoutes from './routes/feedbackRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
 import askRoutes from './routes/askRoutes.js';
 import mentorRoutes from './routes/mentorRoutes.js';
+import locationRoutes from './routes/locationRoutes.js';  // ✅ YE LINE
 
 
 // Import models
@@ -62,6 +63,8 @@ app.use('/api/search', searchRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/ask', askRoutes);
 app.use('/api/users', mentorRoutes);
+app.use('/api/location', locationRoutes);  // ✅ YE LINE
+
 
 // --- Contact form route ---
 app.post("/api/contact", async (req, res) => {

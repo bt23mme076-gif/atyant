@@ -20,6 +20,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ProfilePage from './components/ProfilePage';
 import PublicProfilePage from './components/PublicProfilePage';
 import AskQuestionPage from './components/AskQuestionPage';
+import NearbyMentors from './components/NearbyMentors';
 
 function App() {
   const location = useLocation();
@@ -50,6 +51,9 @@ function App() {
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/profile/:username" element={<PublicProfilePage />} />
           <Route path="/ask" element={<ProtectedRoute><AskQuestionPage /></ProtectedRoute>} />
+          
+          {/* ✅ NEW: Nearby Mentors Route */}
+          <Route path="/nearby-mentors" element={<ProtectedRoute><NearbyMentors /></ProtectedRoute>} />
         </Routes>
       </main>
       {!isChatPage && <Footer />}

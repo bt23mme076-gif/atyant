@@ -42,6 +42,7 @@ const Navbar = () => {
   }, [isDropdownOpen]);
   const renderLinks = (isMobile = false) => {
     const linkAction = () => isMobile && setOpen(false);
+    
     if (user) {
       return user.role === 'mentor' ? (
         <>
@@ -51,11 +52,18 @@ const Navbar = () => {
       ) : (
         <>
           <Link to="/mentors" className="nav-link" onClick={linkAction}>Find Mentor</Link>
+          
+          {/* ✅ ADD: nearby-mentors class */}
+          <Link to="/nearby-mentors" className="nav-link nearby-mentors" onClick={linkAction}>
+            Nearby Achievers
+          </Link>
+          
           <Link to="/chat" className="nav-link" onClick={linkAction}>My Chats</Link>
           <Link to="/profile" className="nav-link" onClick={linkAction}>Profile</Link>
         </>
       );
     }
+    
     return (
       <>
         <Link to="/mentors" className="nav-link" onClick={linkAction}>Mentors</Link>

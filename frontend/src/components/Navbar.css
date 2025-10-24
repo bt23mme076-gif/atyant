@@ -19,6 +19,10 @@
   --dropdown-border: #4c3cff73;
   --dropdown-shadow: 0 18px 44px -10px #39e7fa55;
   --muted: #a9b3d6;
+  
+  /* ✅ NEW: Nearby Mentors specific colors */
+  --nearby-icon-glow: 0 0 12px #ff6b6b88, 0 0 4px #ff6b6b;
+  --nearby-bg-hover: linear-gradient(135deg, #667eea22, #764ba233);
 }
 
 /* Container and brand */
@@ -124,6 +128,56 @@
   opacity: 1;
   transform: scaleX(1.08);
 }
+
+/* ✅ NEW: Special styling for Nearby Mentors link */
+.nav-link.nearby-mentors {
+  position: relative;
+  font-weight: 600;
+}
+
+.nav-link.nearby-mentors::before {
+  content: "📍";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2em;
+  filter: drop-shadow(var(--nearby-icon-glow));
+  animation: pulse-location 2s ease-in-out infinite;
+}
+
+@keyframes pulse-location {
+  0%, 100% {
+    transform: translateY(-50%) scale(1);
+    filter: drop-shadow(0 0 8px #ff6b6b88);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.15);
+    filter: drop-shadow(0 0 16px #ff6b6baa);
+  }
+}
+
+.nav-link.nearby-mentors {
+  padding-left: 38px; /* Make room for icon */
+}
+
+.nav-link.nearby-mentors:hover {
+  background: var(--nearby-bg-hover);
+  color: #66faff;
+  box-shadow: 0 4px 20px #667eea44;
+  transform: scale(1.08) translateY(-1px);
+}
+
+.nav-link.nearby-mentors:hover::before {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: translateY(-50%) rotate(0deg); }
+  25% { transform: translateY(-50%) rotate(-10deg); }
+  75% { transform: translateY(-50%) rotate(10deg); }
+}
+
 .nav-button.primary {
   background: var(--nav-btn-grad);
   color: #fff;
@@ -299,6 +353,20 @@
   background: transparent;
   box-shadow: none;
 }
+
+/* ✅ NEW: Mobile nearby mentors styling */
+.menu-panel .nav-link.nearby-mentors {
+  padding-left: 40px;
+  background: var(--nearby-bg-hover);
+  border: 1px solid #667eea33;
+}
+
+.menu-panel .nav-link.nearby-mentors:hover {
+  background: linear-gradient(135deg, #667eea44, #764ba244);
+  border-color: #667eea66;
+  transform: translateX(4px);
+}
+
 .menu-panel .nav-button.primary {
   background: var(--nav-btn-grad);
   color: #fff;
@@ -326,6 +394,14 @@
 @media (max-width: 500px) {
   .navbar { font-size: .98rem; }
   .brand { font-size: 1.11rem; }
+  
+  /* ✅ Adjust nearby icon for smaller screens */
+  .nav-link.nearby-mentors::before {
+    font-size: 1em;
+  }
+  .nav-link.nearby-mentors {
+    padding-left: 32px;
+  }
 }
 
 /* Optional: refine focus states for a11y */
@@ -336,4 +412,17 @@
   outline: 2px solid #39e7fa88;
   outline-offset: 2px;
   box-shadow: 0 0 0 3px #39e7fa22;
+}
+
+/* ✅ NEW: Active state for current page */
+.nav-link.active.nearby-mentors {
+  background: var(--nearby-bg-hover);
+  border: 1px solid #667eea55;
+  box-shadow: 0 4px 16px #667eea33;
+}
+
+.nav-link.active.nearby-mentors::after {
+  opacity: 1;
+  transform: scaleX(1);
+  background: linear-gradient(90deg, #ff6b6b 0%, #667eea 95%);
 }

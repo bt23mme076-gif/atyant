@@ -94,3 +94,220 @@
   0% { transform: translateX(0);}
   100% { transform: translateX(-50%);}
 }
+/* ========== HIERARCHICAL DROPDOWN ========== */
+.hierarchical-select-wrapper {
+  position: relative;
+  width: 100%;
+  min-width: 250px;
+}
+
+.hierarchical-dropdown {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #667eea;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  overflow: hidden;
+  animation: slideDown 0.3s ease-out;
+  min-width: 600px;
+}
+
+.dropdown-categories {
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  max-height: 450px;
+}
+
+/* ========== CATEGORY LIST ========== */
+.category-list {
+  background: linear-gradient(135deg, #f8f9ff, #f0f2ff);
+  border-right: 2px solid #e0e0e0;
+  overflow-y: auto;
+}
+
+.category-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.category-list::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 10px;
+}
+
+.category-item {
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.category-button {
+  width: 100%;
+  padding: 15px 16px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.category-button:hover {
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.category-button.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-weight: 600;
+}
+
+.category-arrow {
+  transition: transform 0.3s;
+  flex-shrink: 0;
+}
+
+.category-arrow.rotated {
+  transform: rotate(90deg);
+}
+
+/* ========== SUBCATEGORY LIST ========== */
+.subcategory-list {
+  background: white;
+  overflow-y: auto;
+  max-height: 450px;
+}
+
+.subcategory-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.subcategory-list::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 10px;
+}
+
+.subcategory-header {
+  padding: 15px 18px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border-bottom: 2px solid #667eea;
+  font-weight: 600;
+  color: #667eea;
+  font-size: 0.95rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.subcategory-options {
+  padding: 10px;
+}
+
+/* ========== SELECTED FILTERS DISPLAY ========== */
+.selected-filters-display {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 15px;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.08));
+  border-radius: 12px;
+  border-left: 4px solid #667eea;
+  animation: fadeIn 0.3s;
+}
+
+.selected-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 25px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  max-width: fit-content;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.category-icon {
+  font-size: 1.2rem;
+}
+
+.selected-category-badge button {
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  line-height: 1;
+  transition: all 0.2s;
+}
+
+.selected-category-badge button:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
+}
+
+.selected-expertise-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+  .hierarchical-dropdown {
+    min-width: 100%;
+    max-width: 90vw;
+  }
+
+  .dropdown-categories {
+    grid-template-columns: 1fr;
+    max-height: 400px;
+  }
+
+  .category-list {
+    max-height: 150px;
+    border-right: none;
+    border-bottom: 2px solid #e0e0e0;
+  }
+
+  .subcategory-list {
+    max-height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hierarchical-select-wrapper {
+    min-width: 100%;
+  }
+
+  .hierarchical-dropdown {
+    left: -20px;
+    right: -20px;
+    width: calc(100% + 40px);
+  }
+
+  .selected-filters-display {
+    padding: 15px;
+  }
+
+  .selected-category-badge {
+    font-size: 0.85rem;
+    padding: 8px 14px;
+  }
+}

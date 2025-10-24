@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../AuthContext';
+import { MapPin, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 import './ProfilePage.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -7,32 +8,37 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const ProfilePage = () => {
   const { user, setUser } = useContext(AuthContext);
   
-  // ========== STATE: Extended form data ==========
   const [formData, setFormData] = useState({
     username: '',
     bio: '',
     linkedinProfile: '',
-    // ✅ NEW: Common fields
     city: '',
     education: [{ institution: '', degree: '', field: '', year: '' }],
-    // ✅ NEW: Student-specific
     interests: [],
-    // ✅ NEW: Mentor-specific
     expertise: [],
     domainExperience: []
   });
   
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
-
-  // ✅ NEW: State for profile picture
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+
+  // Location states
+  const [locationStatus, setLocationStatus] = useState('checking');
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [locationError, setLocationError] = useState('');
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+
+  // Chip input states
+  const [interestInput, setInterestInput] = useState('');
+  const [expertiseInput, setExpertiseInput] = useState('');
 
   // ========== FETCH PROFILE DATA ==========
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user?.token) return;
+      
       setLoading(true);
       
       try {
@@ -61,6 +67,7 @@ const ProfilePage = () => {
           setMessage({ text: 'Failed to load profile.', type: 'error' });
         }
       } catch (err) {
+        console.error('Error fetching profile:', err);
         setMessage({ text: 'An error occurred.', type: 'error' });
       } finally {
         setLoading(false);
@@ -70,7 +77,124 @@ const ProfilePage = () => {
     fetchProfile();
   }, [user]);
 
-  // ========== HANDLE IMAGE SELECTION ==========
+  // ========== CHECK IF LOCATION IS ALREADY SAVED ==========
+  useEffect(() => {
+    if (user && user.token) {
+      checkUserLocation();
+    }
+  }, [user]);
+
+  const checkUserLocation = async () => {
+    try {
+      console.log('🔍 Checking saved location...');
+      
+      const response = await fetch(`${API_URL}/api/location/my-location`, {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.hasLocation) {
+        console.log('✅ Location already saved:', data.location.city);
+        setCurrentLocation(data.location);
+        setLocationStatus('enabled');
+        setShowLocationPrompt(false);
+      } else {
+        console.log('⚠️ No location saved');
+        setLocationStatus('disabled');
+        setShowLocationPrompt(true);
+      }
+    } catch (error) {
+      console.error('Error checking location:', error);
+      setLocationStatus('disabled');
+    }
+  };
+
+  // ========== ENABLE LOCATION USING GPS ==========
+  const enableLocation = async () => {
+    setLocationStatus('updating');
+    setLocationError('');
+
+    if (!navigator.geolocation) {
+      setLocationError('Your browser does not support location services');
+      setLocationStatus('disabled');
+      return;
+    }
+
+    console.log('📍 Getting GPS location...');
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        console.log('✅ GPS coordinates received:', { latitude, longitude });
+
+        try {
+          const response = await fetch(`${API_URL}/api/location/update-location`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${user.token}`
+            },
+            body: JSON.stringify({
+              latitude,
+              longitude
+            })
+          });
+
+          const data = await response.json();
+
+          console.log('📍 Backend response:', data);
+
+          if (data.success) {
+            setCurrentLocation(data.location);
+            setLocationStatus('enabled');
+            setShowLocationPrompt(false);
+            setMessage({ text: '✅ Location enabled successfully!', type: 'success' });
+            
+            // Clear success message after 3 seconds
+            setTimeout(() => {
+              setMessage({ text: '', type: '' });
+            }, 3000);
+          } else {
+            setLocationError('Failed to save location: ' + data.message);
+            setLocationStatus('disabled');
+          }
+        } catch (error) {
+          console.error('❌ Error saving location:', error);
+          setLocationError('Error saving location. Please try again.');
+          setLocationStatus('disabled');
+        }
+      },
+      (error) => {
+        console.error('❌ GPS error:', error);
+        
+        if (error.code === 1) {
+          setLocationError('Location permission denied. Please enable location access in your browser settings.');
+        } else if (error.code === 2) {
+          setLocationError('Location information unavailable. Please check your device GPS.');
+        } else if (error.code === 3) {
+          setLocationError('Location request timeout. Please try again.');
+        }
+        
+        setLocationStatus('disabled');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
+      }
+    );
+  };
+
+  // ========== UPDATE LOCATION (REFRESH GPS) ==========
+  const updateLocation = () => {
+    console.log('🔄 Updating location...');
+    enableLocation();
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -79,7 +203,6 @@ const ProfilePage = () => {
     }
   };
 
-  // ========== HANDLE IMAGE UPLOAD ==========
   const handleImageUpload = async () => {
     if (!imageFile) return;
     setLoading(true);
@@ -110,13 +233,10 @@ const ProfilePage = () => {
     }
   };
 
-  // ========== HANDLE FORM INPUT CHANGES (FIXED) ==========
   const handleChange = (e) => {
     const { name, value } = e.target;
     
-    // ✅ Handle comma-separated arrays with better UX
     if (name === 'interests' || name === 'expertise' || name === 'domainExperience') {
-      // Keep raw value for display, but split for storage
       setFormData(prev => ({ 
         ...prev, 
         [name]: value.split(',').map(s => s.trim()).filter(s => s !== '')
@@ -125,10 +245,6 @@ const ProfilePage = () => {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
-
-  // ✅ NEW: Handle chip-based interest input
-  const [interestInput, setInterestInput] = useState('');
-  const [expertiseInput, setExpertiseInput] = useState('');
 
   const handleInterestKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ',') {
@@ -140,11 +256,10 @@ const ProfilePage = () => {
           ...prev,
           interests: [...prev.interests, newInterest]
         }));
-        setInterestInput(''); // Clear input
+        setInterestInput('');
       }
     }
     
-    // Handle backspace to remove last chip
     if (e.key === 'Backspace' && interestInput === '' && formData.interests.length > 0) {
       setFormData(prev => ({
         ...prev,
@@ -189,14 +304,12 @@ const ProfilePage = () => {
     }));
   };
 
-  // ✅ NEW: Handle education field changes
   const handleEducationChange = (index, field, value) => {
     const newEducation = [...formData.education];
     newEducation[index][field] = value;
     setFormData(prev => ({ ...prev, education: newEducation }));
   };
 
-  // ✅ NEW: Add another education entry
   const addEducation = () => {
     setFormData(prev => ({
       ...prev,
@@ -204,7 +317,6 @@ const ProfilePage = () => {
     }));
   };
 
-  // ✅ NEW: Remove education entry
   const removeEducation = (index) => {
     if (formData.education.length > 1) {
       const newEducation = formData.education.filter((_, i) => i !== index);
@@ -212,7 +324,6 @@ const ProfilePage = () => {
     }
   };
 
-  // ========== SUBMIT FORM ==========
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -241,60 +352,66 @@ const ProfilePage = () => {
       setLoading(false);
     }
   };
-  const branches = [
-  'Computer Science and Engineering',
-  'Information Technology',
-  'Mechanical Engineering',
-  'Civil Engineering',
-  'Electrical Engineering',
-  'Electronics and Communication Engineering',
-  'Chemical Engineering',
-  'Biomedical Engineering',
-  'Aerospace Engineering',
-  'Environmental Engineering',
-  'Artificial Intelligence and Data Science',
-  'Electronics Engineering',
-  'Instrumentation Engineering',
-  'Automobile Engineering',
-  'Biotechnology Engineering',
-  'Mining Engineering',
-  'Production/Manufacturing Engineering',
-  'Industrial Engineering',
-  'Metallurgy and Materials Engineering',
-  'Other'
-];
 
-  // ✅ NEW: Data for interactive dropdowns
+  const branches = [
+    'Computer Science and Engineering',
+    'Information Technology',
+    'Mechanical Engineering',
+    'Civil Engineering',
+    'Electrical Engineering',
+    'Electronics and Communication Engineering',
+    'Chemical Engineering',
+    'Biomedical Engineering',
+    'Aerospace Engineering',
+    'Environmental Engineering',
+    'Artificial Intelligence and Data Science',
+    'Electronics Engineering',
+    'Instrumentation Engineering',
+    'Automobile Engineering',
+    'Biotechnology Engineering',
+    'Mining Engineering',
+    'Production/Manufacturing Engineering',
+    'Industrial Engineering',
+    'Metallurgy and Materials Engineering',
+    'Other'
+  ];
+
   const collegeData = {
     'Indore': [
-        'IIT Indore',
-        'SGSITS',
-        'IET-DAVV',
-        'Acropolis Institute of Technology and Research',
-        'Indore Institute of Science & Technology'
+      'IIT Indore',
+      'SGSITS',
+      'IET-DAVV',
+      'Acropolis Institute of Technology and Research',
+      'Indore Institute of Science & Technology'
     ],
     'Bhopal': [
-        'MANIT Bhopal',
-        'IIIT Bhopal',
-        'LNCT Bhopal',
-        'VIT Bhopal University',
-        'Radharaman Engineering College'
+      'MANIT Bhopal',
+      'IIIT Bhopal',
+      'LNCT Bhopal',
+      'VIT Bhopal University',
+      'Radharaman Engineering College'
     ],
     'Nagpur': [
-        'VNIT Nagpur',
-        'GHRCE Nagpur',
-        'RCOEM Nagpur',
-        'YCCE Nagpur',
-        'Priyadarshini College of Engineering'
+      'VNIT Nagpur',
+      'GHRCE Nagpur',
+      'RCOEM Nagpur',
+      'YCCE Nagpur',
+      'Priyadarshini College of Engineering'
     ],
     'Other': ['Other']
-};
+  };
+
   const cities = Object.keys(collegeData);
   const degrees = ['B.Tech', 'B.Sc', 'MBA', 'M.Tech', 'Other'];
   const years = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduated'];
 
   if (loading && !formData.username) {
-    return <div className="loading-container">Loading...</div>;
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading profile...</p>
+      </div>
+    );
   }
 
   return (
@@ -327,9 +444,102 @@ const ProfilePage = () => {
       {/* ========== PROFILE FORM SECTION ========== */}
       <div className="profile-form-container">
         <h2>My Profile</h2>
+
+        {/* ========== LOCATION SETUP SECTION ========== */}
+        <div className={`location-setup-section ${locationStatus === 'disabled' ? 'urgent' : ''}`}>
+          <div className="location-header">
+            <MapPin size={24} />
+            <h3>Location Setup</h3>
+            {locationStatus === 'enabled' && (
+              <span className="status-badge success">
+                <CheckCircle size={16} />
+                Active
+              </span>
+            )}
+            {locationStatus === 'disabled' && (
+              <span className="status-badge warning">
+                <AlertCircle size={16} />
+                Not Set
+              </span>
+            )}
+          </div>
+
+          {locationStatus === 'disabled' && showLocationPrompt && (
+            <div className="location-prompt-card">
+              <div className="prompt-icon">📍</div>
+              <h4>Enable Your Location</h4>
+              <p>
+                {user?.role === 'mentor' 
+                  ? 'To appear in nearby searches for students, enable location access.'
+                  : 'To find nearby mentors and connect with them, enable location access.'
+                }
+              </p>
+              <button 
+                onClick={enableLocation}
+                className="enable-location-btn"
+                disabled={locationStatus === 'updating'}
+              >
+                {locationStatus === 'updating' ? (
+                  <>
+                    <RefreshCw size={18} className="spinning" />
+                    Getting Location...
+                  </>
+                ) : (
+                  <>
+                    <MapPin size={18} />
+                    Enable Location
+                  </>
+                )}
+              </button>
+              {locationError && (
+                <div className="location-error-message">
+                  <AlertCircle size={16} />
+                  {locationError}
+                </div>
+              )}
+            </div>
+          )}
+
+          {locationStatus === 'enabled' && currentLocation && (
+            <div className="location-enabled-card">
+              <CheckCircle size={20} className="check-icon" />
+              <div className="location-details">
+                <p className="location-text">
+                  📍 <strong>{currentLocation.city || 'Location Set'}</strong>
+                  {currentLocation.state && `, ${currentLocation.state}`}
+                </p>
+                {/* ========== SHOW EXACT COORDINATES ========== */}
+                {currentLocation.coordinates && (
+                  <p className="coordinates-text">
+                    🗺️ Coordinates: {currentLocation.coordinates[1].toFixed(6)}, {currentLocation.coordinates[0].toFixed(6)}
+                  </p>
+                )}
+                {currentLocation.lastUpdated && (
+                  <p className="last-updated">
+                    Updated: {new Date(currentLocation.lastUpdated).toLocaleDateString()}
+                  </p>
+                )}
+                <p className="location-benefit">
+                  {user?.role === 'mentor' 
+                    ? '✨ Students can now find you in nearby searches'
+                    : '✨ You can now find mentors near your location'
+                  }
+                </p>
+              </div>
+              <button 
+                onClick={updateLocation}
+                className="update-location-btn-small"
+                disabled={locationStatus === 'updating'}
+              >
+                <RefreshCw size={14} />
+                Update
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ========== PROFILE FORM ========== */}
         <form onSubmit={handleSubmit}>
-          
-          {/* ========== BASIC INFORMATION ========== */}
           <h3>Basic Information</h3>
           
           <input
@@ -354,7 +564,7 @@ const ProfilePage = () => {
             onChange={handleChange}
             placeholder="LinkedIn Profile URL"
           />
-          {/* ✅ MODIFIED: EDUCATION SECTION (now interactive) */}
+
           <h3>Education</h3>
           <select
             name="city"
@@ -367,10 +577,9 @@ const ProfilePage = () => {
               <option key={city} value={city}>{city}</option>
             ))}
           </select>
+
           {formData.education.map((edu, index) => (
             <div key={index} className="education-group">
-              
-              {/* College Dropdown (filters based on city) */}
               <select
                 value={edu.institution}
                 onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
@@ -385,7 +594,6 @@ const ProfilePage = () => {
                 ))}
               </select>
               
-              {/* Show text input if city is 'Other' or college is 'Other' */}
               {(formData.city === 'Other' || edu.institution === 'Other') && (
                 <input
                   placeholder="Please specify your College/University"
@@ -395,7 +603,6 @@ const ProfilePage = () => {
                 />
               )}
 
-              {/* Degree Dropdown */}
               <select
                 value={edu.degree}
                 onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
@@ -407,7 +614,6 @@ const ProfilePage = () => {
                 ))}
               </select>
               
-              {/* Year Dropdown */}
               <select
                 value={edu.year}
                 onChange={(e) => handleEducationChange(index, 'year', e.target.value)}
@@ -419,18 +625,16 @@ const ProfilePage = () => {
                 ))}
               </select>
 
-            {/* Branch Dropdown (Engineering Branches) */}
-<select
-  value={edu.field}
-  onChange={(e) => handleEducationChange(index, 'field', e.target.value)}
-  required
->
-  <option value="" disabled>-- Select Branch --</option>
-  {branches.map(branch => (
-    <option key={branch} value={branch}>{branch}</option>
-  ))}
-</select>
-
+              <select
+                value={edu.field}
+                onChange={(e) => handleEducationChange(index, 'field', e.target.value)}
+                required
+              >
+                <option value="" disabled>-- Select Branch --</option>
+                {branches.map(branch => (
+                  <option key={branch} value={branch}>{branch}</option>
+                ))}
+              </select>
               
               {formData.education.length > 1 && (
                 <button 
@@ -448,14 +652,10 @@ const ProfilePage = () => {
             + Add Another Education
           </button>
 
-          {/* ========== ROLE-SPECIFIC FIELDS ========== */}
-          
-          {/* Student-specific fields */}
           {user?.role === 'user' && (
             <>
               <h3>Student Details</h3>
               
-              {/* ✅ CHIP-BASED INTEREST INPUT */}
               <div className="chip-input-container">
                 <div className="chips-wrapper">
                   {formData.interests.map((interest, index) => (
@@ -475,23 +675,21 @@ const ProfilePage = () => {
                     value={interestInput}
                     onChange={(e) => setInterestInput(e.target.value)}
                     onKeyDown={handleInterestKeyDown}
-                    placeholder={formData.interests.length === 0 ? "Type interest and press Enter (e.g., DSA, Coding, AI)" : "Add more..."}
+                    placeholder={formData.interests.length === 0 ? "Type interest and press Enter" : "Add more..."}
                     className="chip-input"
                   />
                 </div>
               </div>
               <small className="helper-text">
-                💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each interest • Press <kbd>Backspace</kbd> to remove
+                💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each interest
               </small>
             </>
           )}
 
-          {/* Mentor-specific fields */}
           {user?.role === 'mentor' && (
             <>
               <h3>Mentor Details</h3>
               
-              {/* ✅ CHIP-BASED EXPERTISE INPUT */}
               <div className="chip-input-container">
                 <div className="chips-wrapper">
                   {formData.expertise.map((skill, index) => (
@@ -511,23 +709,21 @@ const ProfilePage = () => {
                     value={expertiseInput}
                     onChange={(e) => setExpertiseInput(e.target.value)}
                     onKeyDown={handleExpertiseKeyDown}
-                    placeholder={formData.expertise.length === 0 ? "Type expertise and press Enter (e.g., React, Java)" : "Add more..."}
+                    placeholder={formData.expertise.length === 0 ? "Type expertise and press Enter" : "Add more..."}
                     className="chip-input"
                   />
                 </div>
               </div>
               <small className="helper-text">
-                💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each skill • Press <kbd>Backspace</kbd> to remove
+                💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each skill
               </small>
             </>
           )}
 
-          {/* ========== SUBMIT BUTTON ========== */}
           <button type="submit" disabled={loading}>
             {loading ? 'Saving...' : 'Save Profile'}
           </button>
 
-          {/* ========== MESSAGE DISPLAY ========== */}
           {message.text && (
             <p className={`form-message ${message.type}`}>
               {message.text}
