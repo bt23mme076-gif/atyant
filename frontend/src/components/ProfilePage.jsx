@@ -392,6 +392,7 @@ const ProfilePage = () => {
       'Radharaman Engineering College'
     ],
     'Nagpur': [
+      'IIIT Nagpur',
       'VNIT Nagpur',
       'GHRCE Nagpur',
       'RCOEM Nagpur',
