@@ -18,7 +18,7 @@ import searchRoutes from './routes/searchRoutes.js';
 import askRoutes from './routes/askRoutes.js';
 import mentorRoutes from './routes/mentorRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';  // ✅ YE LINE
-
+import aiChatRoutes from './routes/aiChatRoutes.js';
 
 // Import models
 import Feedback from './models/Feedback.js';
@@ -64,6 +64,8 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/ask', askRoutes);
 app.use('/api/users', mentorRoutes);
 app.use('/api/location', locationRoutes);  // ✅ YE LINE
+app.use('/api/ai', aiChatRoutes);
+console.log('✅ AI Chat routes registered at /api/ai/*');
 
 
 // --- Contact form route ---

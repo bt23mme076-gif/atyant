@@ -1,10 +1,13 @@
 // src/App.jsx
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthContext } from './AuthContext';
 import { Analytics } from '@vercel/analytics/react';
 import ErrorBoundary from './components/ErrorBoundary';
+import { Bot } from 'lucide-react';
+import AIChat from './components/AIChat';
+import './components/FloatingAIButton.css';
 
 // Import all components
 import Navbar from './components/Navbar';
@@ -25,7 +28,9 @@ import NearbyMentors from './components/NearbyMentors';
 function App() {
   const location = useLocation();
   const { user } = useContext(AuthContext);
+  const [showAIChat, setShowAIChat] = useState(false);
   const isChatPage = location.pathname === '/chat';
+  const isHomePage = location.pathname === '/'; // ✅ Add this line
 
   return (
     <div className={isChatPage && user ? 'App chat-active' : 'App'}>
@@ -57,7 +62,23 @@ function App() {
         </Routes>
       </main>
       {!isChatPage && <Footer />}
-      <Analytics /> {/* 2. Add the Analytics component here */}
+      <Analytics />
+      
+      {/* ✅ Only show AI button on home page */}
+      {isHomePage && (
+        <button 
+          className="ai-chat-fab"
+          onClick={() => setShowAIChat(true)}
+          title="Need help? Ask AI"
+        >
+          <Bot size={24} />
+          <span className="pulse-ring"></span>
+        </button>
+      )}
+
+      {showAIChat && (
+        <AIChat onClose={() => setShowAIChat(false)} />
+      )}
     </div>
   );
 }

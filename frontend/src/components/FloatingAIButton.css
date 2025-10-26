@@ -1,0 +1,141 @@
+/* Floating AI Chat Button */
+.ai-chat-fab {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  transition: transform 0.2s;
+  z-index: 9998;
+}
+
+.ai-chat-fab:hover {
+  transform: scale(1.1);
+}
+
+/* Pulse Animation Ring */
+.pulse-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 3px solid #667eea;
+  border-radius: 50%;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  opacity: 0;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Bounce Animation */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Tooltip on Hover */
+.ai-chat-fab::before {
+  content: 'Need Help? Ask AI 🤖';
+  position: absolute;
+  right: 75px;
+  background: #1e293b;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.ai-chat-fab::after {
+  content: '';
+  position: absolute;
+  right: 65px;
+  border: 8px solid transparent;
+  border-left-color: #1e293b;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.ai-chat-fab:hover::before,
+.ai-chat-fab:hover::after {
+  opacity: 1;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .ai-chat-fab {
+    width: 55px;
+    height: 55px;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .ai-chat-fab::before {
+    right: 65px;
+    font-size: 0.8rem;
+    padding: 8px 12px;
+  }
+  
+  .ai-chat-fab::after {
+    right: 55px;
+  }
+}
+
+/* Hide tooltip on mobile */
+@media (max-width: 480px) {
+  .ai-chat-fab::before,
+  .ai-chat-fab::after {
+    display: none;
+  }
+}
+
+/* Badge for new feature */
+.ai-chat-fab .badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  border: 2px solid white;
+  animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}

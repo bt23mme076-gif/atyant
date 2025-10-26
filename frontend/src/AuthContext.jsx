@@ -11,11 +11,11 @@ export const AuthProvider = ({ children }) => {
   const buildUserFromToken = (token) => {
     const decoded = jwtDecode(token);
     return {
-      token,
+      token, // ← Added for AI Chat
       role: decoded.role,
       id: decoded.userId,
       username: decoded.username,
-      profilePicture: decoded.profilePicture || null, // now supported
+      profilePicture: decoded.profilePicture || null,
     };
   };
 
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', token);
       const userData = buildUserFromToken(token);
       setUser(userData);
-      return userData; // Important: Return the user data
+      return userData;
     } catch (e) {
       console.error('Failed to decode token on login:', e);
       localStorage.removeItem('token');
