@@ -41,6 +41,65 @@ const ProToast = ({ avatarUrl, title, preview, when, onOpen, onClose }) => (
   </div>
 );
 
+// ✅ DATE HELPER FUNCTIONS
+const isSameDay = (date1, date2) => {
+  return date1.getDate() === date2.getDate() &&
+         date1.getMonth() === date2.getMonth() &&
+         date1.getFullYear() === date2.getFullYear();
+};
+
+const getDateLabel = (dateString) => {
+  if (!dateString) return 'Unknown Date';
+  
+  const messageDate = new Date(dateString);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  if (isSameDay(messageDate, today)) {
+    return 'Today';
+  } else if (isSameDay(messageDate, yesterday)) {
+    return 'Yesterday';
+  } else if (isSameDay(messageDate, tomorrow)) {
+    return 'Tomorrow';
+  } else {
+    // Format as "Oct 28" or "Oct 28, 2024"
+    const options = { month: 'short', day: 'numeric' };
+    if (messageDate.getFullYear() !== today.getFullYear()) {
+      options.year = 'numeric';
+    }
+    return messageDate.toLocaleDateString('en-US', options);
+  }
+};
+
+const groupMessagesByDate = (messages) => {
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return {};
+  }
+
+  const grouped = {};
+  
+  messages.forEach(message => {
+    if (!message || !message.createdAt) {
+      console.warn('Message missing createdAt:', message);
+      return;
+    }
+    
+    const dateLabel = getDateLabel(message.createdAt);
+    
+    if (!grouped[dateLabel]) {
+      grouped[dateLabel] = [];
+    }
+    
+    grouped[dateLabel].push(message);
+  });
+  
+  console.log('Grouped Messages:', grouped); // ✅ DEBUG
+  return grouped;
+};
+
 const ChatPage = ({ recipientId, recipientName }) => {
   const [contactList, setContactList] = useState([]);
   const [selectedContact, setSelectedContact] = useState(null);
