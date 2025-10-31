@@ -151,6 +151,7 @@ const MentorListPage = () => {
                           e.currentTarget.onerror = null;
                           e.currentTarget.src = '/default-profile-image.jpg';
                         }}
+                        loading="lazy"
                       />
                     ) : (
                       <div className="mentor-image-placeholder" />

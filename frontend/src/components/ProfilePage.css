@@ -766,3 +766,39 @@ h5 {
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* Location Loading Overlay */
+.location-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(245, 245, 255, 0.7);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+}
+
+.location-loading-spinner {
+  border: 5px solid #e0e7ff;
+  border-top: 5px solid #6366f1;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 18px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.location-loading-text {
+  font-size: 1.2rem;
+  color: #3730a3;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}

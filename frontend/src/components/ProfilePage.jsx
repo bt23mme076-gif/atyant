@@ -34,6 +34,9 @@ const ProfilePage = () => {
   const [interestInput, setInterestInput] = useState('');
   const [expertiseInput, setExpertiseInput] = useState('');
 
+  // Add this before the return statement:
+  const isLocationLoading = locationStatus === 'updating' || locationStatus === 'checking';
+
   // ========== FETCH PROFILE DATA ==========
   useEffect(() => {
     const fetchProfile = async () => {
@@ -416,323 +419,338 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="profile-page-layout">
-      {/* ========== PROFILE PICTURE SECTION ========== */}
-      <div className="profile-picture-container">
-        <h3>Profile Picture</h3>
-        <img
-          src={imagePreview || `https://ui-avatars.com/api/?name=${formData.username || 'User'}&background=random&size=150`}
-          alt="Profile"
-          className="profile-avatar"
-        />
-        <input
-          type="file"
-          id="imageUpload"
-          accept="image/*"
-          onChange={handleImageChange}
-          style={{ display: 'none' }}
-        />
-        <label htmlFor="imageUpload" className="upload-btn">
-          Choose Image
-        </label>
-        {imageFile && (
-          <button onClick={handleImageUpload} className="save-photo-btn" disabled={loading}>
-            {loading ? 'Uploading...' : 'Save Photo'}
-          </button>
-        )}
-      </div>
-
-      {/* ========== PROFILE FORM SECTION ========== */}
-      <div className="profile-form-container">
-        <h2>My Profile</h2>
-
-        {/* ========== LOCATION SETUP SECTION ========== */}
-        <div className={`location-setup-section ${locationStatus === 'disabled' ? 'urgent' : ''}`}>
-          <div className="location-header">
-            <MapPin size={24} />
-            <h3>Location Setup</h3>
-            {locationStatus === 'enabled' && (
-              <span className="status-badge success">
-                <CheckCircle size={16} />
-                Active
-              </span>
-            )}
-            {locationStatus === 'disabled' && (
-              <span className="status-badge warning">
-                <AlertCircle size={16} />
-                Not Set
-              </span>
-            )}
+    <>
+      {/* Location Loading Overlay */}
+      {isLocationLoading && (
+        <div className="location-loading-overlay">
+          <div className="location-loading-spinner"></div>
+          <div className="location-loading-text">
+            {locationStatus === 'checking'
+              ? 'Checking your location status...'
+              : 'Fetching your location, please wait...'}
           </div>
+        </div>
+      )}
 
-          {locationStatus === 'disabled' && showLocationPrompt && (
-            <div className="location-prompt-card">
-              <div className="prompt-icon">📍</div>
-              <h4>Enable Your Location</h4>
-              <p>
-                {user?.role === 'mentor' 
-                  ? 'To appear in nearby searches for students, enable location access.'
-                  : 'To find nearby mentors and connect with them, enable location access.'
-                }
-              </p>
-              <button 
-                onClick={enableLocation}
-                className="enable-location-btn"
-                disabled={locationStatus === 'updating'}
-              >
-                {locationStatus === 'updating' ? (
-                  <>
-                    <RefreshCw size={18} className="spinning" />
-                    Getting Location...
-                  </>
-                ) : (
-                  <>
-                    <MapPin size={18} />
-                    Enable Location
-                  </>
-                )}
-              </button>
-              {locationError && (
-                <div className="location-error-message">
-                  <AlertCircle size={16} />
-                  {locationError}
-                </div>
-              )}
-            </div>
-          )}
-
-          {locationStatus === 'enabled' && currentLocation && (
-            <div className="location-enabled-card">
-              <CheckCircle size={20} className="check-icon" />
-              <div className="location-details">
-                <p className="location-text">
-                  📍 <strong>{currentLocation.city || 'Location Set'}</strong>
-                  {currentLocation.state && `, ${currentLocation.state}`}
-                </p>
-                {/* ========== SHOW EXACT COORDINATES ========== */}
-                {currentLocation.coordinates && (
-                  <p className="coordinates-text">
-                    🗺️ Coordinates: {currentLocation.coordinates[1].toFixed(6)}, {currentLocation.coordinates[0].toFixed(6)}
-                  </p>
-                )}
-                {currentLocation.lastUpdated && (
-                  <p className="last-updated">
-                    Updated: {new Date(currentLocation.lastUpdated).toLocaleDateString()}
-                  </p>
-                )}
-                <p className="location-benefit">
-                  {user?.role === 'mentor' 
-                    ? '✨ Students can now find you in nearby searches'
-                    : '✨ You can now find mentors near your location'
-                  }
-                </p>
-              </div>
-              <button 
-                onClick={updateLocation}
-                className="update-location-btn-small"
-                disabled={locationStatus === 'updating'}
-              >
-                <RefreshCw size={14} />
-                Update
-              </button>
-            </div>
+      {/* Existing Profile Page */}
+      <div className="profile-page-layout">
+        {/* ========== PROFILE PICTURE SECTION ========== */}
+        <div className="profile-picture-container">
+          <h3>Profile Picture</h3>
+          <img
+            src={imagePreview || `https://ui-avatars.com/api/?name=${formData.username || 'User'}&background=random&size=150`}
+            alt="Profile"
+            className="profile-avatar"
+          />
+          <input
+            type="file"
+            id="imageUpload"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ display: 'none' }}
+          />
+          <label htmlFor="imageUpload" className="upload-btn">
+            Choose Image
+          </label>
+          {imageFile && (
+            <button onClick={handleImageUpload} className="save-photo-btn" disabled={loading}>
+              {loading ? 'Uploading...' : 'Save Photo'}
+            </button>
           )}
         </div>
 
-        {/* ========== PROFILE FORM ========== */}
-        <form onSubmit={handleSubmit}>
-          <h3>Basic Information</h3>
-          
-          <input
-            name="username"
-            value={formData.username}
-            onChange={handleChange}
-            placeholder="Username"
-            required
-          />
-          
-          <textarea
-            name="bio"
-            value={formData.bio}
-            onChange={handleChange}
-            placeholder="Write a short bio about yourself..."
-            rows="4"
-          />
-          
-          <input
-            name="linkedinProfile"
-            value={formData.linkedinProfile}
-            onChange={handleChange}
-            placeholder="LinkedIn Profile URL"
-          />
+        {/* ========== PROFILE FORM SECTION ========== */}
+        <div className="profile-form-container">
+          <h2>My Profile</h2>
 
-          <h3>Education</h3>
-          <select
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            required
-          >
-            <option value="" disabled>-- Select Your City --</option>
-            {cities.map(city => (
-              <option key={city} value={city}>{city}</option>
-            ))}
-          </select>
-
-          {formData.education.map((edu, index) => (
-            <div key={index} className="education-group">
-              <select
-                value={edu.institution}
-                onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
-                disabled={!formData.city || formData.city === 'Other'}
-                required
-              >
-                <option value="" disabled>
-                  {formData.city ? '-- Select Your College --' : 'Please select a city first'}
-                </option>
-                {formData.city && collegeData[formData.city] && collegeData[formData.city].map(college => (
-                  <option key={college} value={college}>{college}</option>
-                ))}
-              </select>
-              
-              {(formData.city === 'Other' || edu.institution === 'Other') && (
-                <input
-                  placeholder="Please specify your College/University"
-                  value={edu.institution === 'Other' ? '' : edu.institution}
-                  onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
-                  required
-                />
+          {/* ========== LOCATION SETUP SECTION ========== */}
+          <div className={`location-setup-section ${locationStatus === 'disabled' ? 'urgent' : ''}`}>
+            <div className="location-header">
+              <MapPin size={24} />
+              <h3>Location Setup</h3>
+              {locationStatus === 'enabled' && (
+                <span className="status-badge success">
+                  <CheckCircle size={16} />
+                  Active
+                </span>
               )}
-
-              <select
-                value={edu.degree}
-                onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
-                required
-              >
-                <option value="" disabled>-- Select Degree --</option>
-                {degrees.map(degree => (
-                  <option key={degree} value={degree}>{degree}</option>
-                ))}
-              </select>
-              
-              <select
-                value={edu.year}
-                onChange={(e) => handleEducationChange(index, 'year', e.target.value)}
-                required
-              >
-                <option value="" disabled>-- Select Year --</option>
-                {years.map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-
-              <select
-                value={edu.field}
-                onChange={(e) => handleEducationChange(index, 'field', e.target.value)}
-                required
-              >
-                <option value="" disabled>-- Select Branch --</option>
-                {branches.map(branch => (
-                  <option key={branch} value={branch}>{branch}</option>
-                ))}
-              </select>
-              
-              {formData.education.length > 1 && (
-                <button 
-                  type="button" 
-                  className="remove-btn" 
-                  onClick={() => removeEducation(index)}
-                >
-                  &times;
-                </button>
+              {locationStatus === 'disabled' && (
+                <span className="status-badge warning">
+                  <AlertCircle size={16} />
+                  Not Set
+                </span>
               )}
             </div>
-          ))}
-          
-          <button type="button" className="add-btn" onClick={addEducation}>
-            + Add Another Education
-          </button>
 
-          {user?.role === 'user' && (
-            <>
-              <h3>Student Details</h3>
-              
-              <div className="chip-input-container">
-                <div className="chips-wrapper">
-                  {formData.interests.map((interest, index) => (
-                    <span key={index} className="chip">
-                      {interest}
-                      <button 
-                        type="button" 
-                        className="chip-remove" 
-                        onClick={() => removeInterest(index)}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                  <input
-                    type="text"
-                    value={interestInput}
-                    onChange={(e) => setInterestInput(e.target.value)}
-                    onKeyDown={handleInterestKeyDown}
-                    placeholder={formData.interests.length === 0 ? "Type interest and press Enter" : "Add more..."}
-                    className="chip-input"
-                  />
-                </div>
+            {locationStatus === 'disabled' && showLocationPrompt && (
+              <div className="location-prompt-card">
+                <div className="prompt-icon">📍</div>
+                <h4>Enable Your Location</h4>
+                <p>
+                  {user?.role === 'mentor' 
+                    ? 'To appear in nearby searches for students, enable location access.'
+                    : 'To find nearby mentors and connect with them, enable location access.'
+                  }
+                </p>
+                <button 
+                  onClick={enableLocation}
+                  className="enable-location-btn"
+                  disabled={locationStatus === 'updating'}
+                >
+                  {locationStatus === 'updating' ? (
+                    <>
+                      <RefreshCw size={18} className="spinning" />
+                      Getting Location...
+                    </>
+                  ) : (
+                    <>
+                      <MapPin size={18} />
+                      Enable Location
+                    </>
+                  )}
+                </button>
+                {locationError && (
+                  <div className="location-error-message">
+                    <AlertCircle size={16} />
+                    {locationError}
+                  </div>
+                )}
               </div>
-              <small className="helper-text">
-                💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each interest
-              </small>
-            </>
-          )}
+            )}
 
-          {user?.role === 'mentor' && (
-            <>
-              <h3>Mentor Details</h3>
-              
-              <div className="chip-input-container">
-                <div className="chips-wrapper">
-                  {formData.expertise.map((skill, index) => (
-                    <span key={index} className="chip">
-                      {skill}
-                      <button 
-                        type="button" 
-                        className="chip-remove" 
-                        onClick={() => removeExpertise(index)}
-                      >
-                        ×
-                      </button>
-                    </span>
-                  ))}
-                  <input
-                    type="text"
-                    value={expertiseInput}
-                    onChange={(e) => setExpertiseInput(e.target.value)}
-                    onKeyDown={handleExpertiseKeyDown}
-                    placeholder={formData.expertise.length === 0 ? "Type expertise and press Enter" : "Add more..."}
-                    className="chip-input"
-                  />
+            {locationStatus === 'enabled' && currentLocation && (
+              <div className="location-enabled-card">
+                <CheckCircle size={20} className="check-icon" />
+                <div className="location-details">
+                  <p className="location-text">
+                    📍 <strong>{currentLocation.city || 'Location Set'}</strong>
+                    {currentLocation.state && `, ${currentLocation.state}`}
+                  </p>
+                  {/* ========== SHOW EXACT COORDINATES ========== */}
+                  {currentLocation.coordinates && (
+                    <p className="coordinates-text">
+                      🗺️ Coordinates: {currentLocation.coordinates[1].toFixed(6)}, {currentLocation.coordinates[0].toFixed(6)}
+                    </p>
+                  )}
+                  {currentLocation.lastUpdated && (
+                    <p className="last-updated">
+                      Updated: {new Date(currentLocation.lastUpdated).toLocaleDateString()}
+                    </p>
+                  )}
+                  <p className="location-benefit">
+                    {user?.role === 'mentor' 
+                      ? '✨ Students can now find you in nearby searches'
+                      : '✨ You can now find mentors near your location'
+                    }
+                  </p>
                 </div>
+                <button 
+                  onClick={updateLocation}
+                  className="update-location-btn-small"
+                  disabled={locationStatus === 'updating'}
+                >
+                  <RefreshCw size={14} />
+                  Update
+                </button>
               </div>
-              <small className="helper-text">
-                💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each skill
-              </small>
-            </>
-          )}
+            )}
+          </div>
 
-          <button type="submit" disabled={loading}>
-            {loading ? 'Saving...' : 'Save Profile'}
-          </button>
+          {/* ========== PROFILE FORM ========== */}
+          <form onSubmit={handleSubmit}>
+            <h3>Basic Information</h3>
+            
+            <input
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Username"
+              required
+            />
+            
+            <textarea
+              name="bio"
+              value={formData.bio}
+              onChange={handleChange}
+              placeholder="Write a short bio about yourself..."
+              rows="4"
+            />
+            
+            <input
+              name="linkedinProfile"
+              value={formData.linkedinProfile}
+              onChange={handleChange}
+              placeholder="LinkedIn Profile URL"
+            />
 
-          {message.text && (
-            <p className={`form-message ${message.type}`}>
-              {message.text}
-            </p>
-          )}
-        </form>
+            <h3>Education</h3>
+            <select
+              name="city"
+              value={formData.city}
+              onChange={handleChange}
+              required
+            >
+              <option value="" disabled>-- Select Your City --</option>
+              {cities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+
+            {formData.education.map((edu, index) => (
+              <div key={index} className="education-group">
+                <select
+                  value={edu.institution}
+                  onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
+                  disabled={!formData.city || formData.city === 'Other'}
+                  required
+                >
+                  <option value="" disabled>
+                    {formData.city ? '-- Select Your College --' : 'Please select a city first'}
+                  </option>
+                  {formData.city && collegeData[formData.city] && collegeData[formData.city].map(college => (
+                    <option key={college} value={college}>{college}</option>
+                  ))}
+                </select>
+                
+                {(formData.city === 'Other' || edu.institution === 'Other') && (
+                  <input
+                    placeholder="Please specify your College/University"
+                    value={edu.institution === 'Other' ? '' : edu.institution}
+                    onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
+                    required
+                  />
+                )}
+
+                <select
+                  value={edu.degree}
+                  onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
+                  required
+                >
+                  <option value="" disabled>-- Select Degree --</option>
+                  {degrees.map(degree => (
+                    <option key={degree} value={degree}>{degree}</option>
+                  ))}
+                </select>
+                
+                <select
+                  value={edu.year}
+                  onChange={(e) => handleEducationChange(index, 'year', e.target.value)}
+                  required
+                >
+                  <option value="" disabled>-- Select Year --</option>
+                  {years.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={edu.field}
+                  onChange={(e) => handleEducationChange(index, 'field', e.target.value)}
+                  required
+                >
+                  <option value="" disabled>-- Select Branch --</option>
+                  {branches.map(branch => (
+                    <option key={branch} value={branch}>{branch}</option>
+                  ))}
+                </select>
+                
+                {formData.education.length > 1 && (
+                  <button 
+                    type="button" 
+                    className="remove-btn" 
+                    onClick={() => removeEducation(index)}
+                  >
+                    &times;
+                  </button>
+                )}
+              </div>
+            ))}
+            
+            <button type="button" className="add-btn" onClick={addEducation}>
+              + Add Another Education
+            </button>
+
+            {user?.role === 'user' && (
+              <>
+                <h3>Student Details</h3>
+                
+                <div className="chip-input-container">
+                  <div className="chips-wrapper">
+                    {formData.interests.map((interest, index) => (
+                      <span key={index} className="chip">
+                        {interest}
+                        <button 
+                          type="button" 
+                          className="chip-remove" 
+                          onClick={() => removeInterest(index)}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                    <input
+                      type="text"
+                      value={interestInput}
+                      onChange={(e) => setInterestInput(e.target.value)}
+                      onKeyDown={handleInterestKeyDown}
+                      placeholder={formData.interests.length === 0 ? "Type interest and press Enter" : "Add more..."}
+                      className="chip-input"
+                    />
+                  </div>
+                </div>
+                <small className="helper-text">
+                  💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each interest
+                </small>
+              </>
+            )}
+
+            {user?.role === 'mentor' && (
+              <>
+                <h3>Mentor Details</h3>
+                
+                <div className="chip-input-container">
+                  <div className="chips-wrapper">
+                    {formData.expertise.map((skill, index) => (
+                      <span key={index} className="chip">
+                        {skill}
+                        <button 
+                          type="button" 
+                          className="chip-remove" 
+                          onClick={() => removeExpertise(index)}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                    <input
+                      type="text"
+                      value={expertiseInput}
+                      onChange={(e) => setExpertiseInput(e.target.value)}
+                      onKeyDown={handleExpertiseKeyDown}
+                      placeholder={formData.expertise.length === 0 ? "Type expertise and press Enter" : "Add more..."}
+                      className="chip-input"
+                    />
+                  </div>
+                </div>
+                <small className="helper-text">
+                  💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each skill
+                </small>
+              </>
+            )}
+
+            <button type="submit" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Profile'}
+            </button>
+
+            {message.text && (
+              <p className={`form-message ${message.type}`}>
+                {message.text}
+              </p>
+            )}
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -6,6 +6,7 @@ import './index.css';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './AuthContext'; // AuthProvider ko import kiya
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { HelmetProvider } from 'react-helmet-async';
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -15,7 +16,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <BrowserRouter>
         <AuthProvider>
-          <App />
+          <HelmetProvider>
+            <App />
+          </HelmetProvider>
         </AuthProvider>
       </BrowserRouter>
     </GoogleOAuthProvider>

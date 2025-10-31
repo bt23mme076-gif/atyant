@@ -1,0 +1,22 @@
+{
+  "name": "अत्यanT",
+  "short_name": "Atyant",
+  "description": "Atyant connects students with real mentors who’ve already solved the same problems — from academics to internships to career advice. Get real answers, not theories. Join India’s fastest-growing student network today!",
+  "keywords": "Atyant, student mentorship, college mentor, find seniors, academic help, career guidance, student solution network, VNIT Nagpur, college doubts, internship help",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+}
