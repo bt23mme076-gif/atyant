@@ -5,9 +5,11 @@ import { AuthContext } from '../AuthContext';
 import { GoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff } from 'lucide-react';
 import './AuthForm.css';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [isLoading, setIsLoading] = useState(false); // ✅ ADD THIS LINE
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,8 +22,10 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage('');
+    
+    setIsLoading(true); // ✅ ADD THIS LINE
+    console.time('frontend-login'); // ✅ ADD THIS LINE (optional)
+    
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const response = await fetch(`${API_URL}/api/auth/login`, {
@@ -41,9 +45,10 @@ const Login = () => {
         setMessage(data.message || 'Login failed.');
       }
     } catch (error) {
+      console.timeEnd('frontend-login'); // ✅ ADD THIS LINE (optional)
       setMessage('An error occurred during login.');
     } finally {
-      setLoading(false);
+      setIsLoading(false); // ✅ ADD THIS LINE
     }
   };
 
