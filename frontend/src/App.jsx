@@ -24,6 +24,8 @@ import ProfilePage from './components/ProfilePage';
 import PublicProfilePage from './components/PublicProfilePage';
 import AskQuestionPage from './components/AskQuestionPage';
 import NearbyMentors from './components/NearbyMentors';
+import ScrollToTop from './components/ScrollToTop';
+
 
 function App() {
   const location = useLocation();
@@ -36,6 +38,7 @@ function App() {
     <div className={isChatPage && user ? 'App chat-active' : 'App'}>
       <Navbar />
       <main>
+        <ScrollToTop />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<Home />} />

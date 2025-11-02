@@ -1,5 +1,12 @@
 // src/components/MentorCard.jsx
 import React from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import './MentorCards.css';
+import { useNavigate } from 'react-router-dom';
 
 const MentorCard = ({ mentor }) => {
   const openDirections = (mentorLocation) => {
@@ -34,4 +41,68 @@ const MentorCard = ({ mentor }) => {
   );
 };
 
-export default MentorCard;
+const MentorCards = ({ mentors }) => {
+  const navigate = useNavigate();
+
+  const handleViewProfile = (mentorId) => {
+    // ✅ Scroll to top before navigating
+    window.scrollTo(0, 0);
+    
+    // Then navigate
+    navigate(`/mentor/${mentorId}`);
+  };
+
+  return (
+    <div className="mentor-cards-container">
+      <Swiper
+        modules={[Navigation, Pagination, Autoplay]}
+        spaceBetween={20}
+        slidesPerView={1}
+        navigation
+        pagination={{ clickable: true }}
+        autoplay={{
+          delay: 3000,
+          disableOnInteraction: false,
+          pauseOnMouseEnter: true,
+        }}
+        loop={true}
+        speed={600}
+        // ✅ Mobile-specific breakpoints
+        breakpoints={{
+          320: {
+            slidesPerView: 1,
+            spaceBetween: 10,
+          },
+          480: {
+            slidesPerView: 1,
+            spaceBetween: 15,
+          },
+          768: {
+            slidesPerView: 2,
+            spaceBetween: 20,
+          },
+          1024: {
+            slidesPerView: 3,
+            spaceBetween: 30,
+          },
+        }}
+        // ✅ Touch events for mobile
+        touchRatio={1}
+        touchAngle={45}
+        grabCursor={true}
+        simulateTouch={true}
+        allowTouchMove={true}
+      >
+        {mentors.map((mentor) => (
+          <SwiperSlide key={mentor._id}>
+            <div className="mentor-card">
+              <MentorCard mentor={mentor} />
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
+  );
+};
+
+export default MentorCards;

@@ -6,6 +6,9 @@ import './index.css';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './AuthContext'; // AuthProvider ko import kiya
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { initCarouselFix } from './utils/carouselFix';
+// ✅ Initialize mobile fixes
+initCarouselFix();
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -15,7 +18,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <BrowserRouter>
         <AuthProvider>
-          <App />
+           <React.StrictMode>
+              <App />
+            </React.StrictMode>
         </AuthProvider>
       </BrowserRouter>
     </GoogleOAuthProvider>
