@@ -1003,3 +1003,103 @@
     padding: 10px 12px;
   }
 }
+
+/* ✅ Auto-reply message styles */
+.message.auto-reply {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border: 2px solid #5a67d8;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  position: relative;
+  padding: 16px;
+  border-radius: 12px;
+  max-width: 80%;
+}
+
+.message.auto-reply p {
+  color: white !important;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.auto-reply-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.message.auto-reply .message-meta {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.message.auto-reply .message-time,
+.message.auto-reply .message-status {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* ✅ Pulse animation for auto-reply */
+.message.auto-reply::before {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  background: #48bb78;
+  border-radius: 50%;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(72, 187, 120, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(72, 187, 120, 0);
+  }
+}
+
+/* ✅ Mobile responsive */
+@media (max-width: 768px) {
+  .message.auto-reply {
+    max-width: 90%;
+    padding: 12px;
+  }
+
+  .auto-reply-badge {
+    font-size: 10px;
+    padding: 3px 10px;
+  }
+
+  .message.auto-reply::before {
+    top: 12px;
+    right: 12px;
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* ✅ Ensure received messages aren't affected */
+.message.received:not(.auto-reply) {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.message.sent {
+  background: #3b82f6;
+  color: white;
+}

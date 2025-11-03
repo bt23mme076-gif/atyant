@@ -8,6 +8,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import { Resend } from 'resend';
 import paymentRoutes from './routes/paymentRoutes.js';
+import { sendAutoReply } from './controllers/messageController.js';
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -194,17 +195,6 @@ io.on("connection", (socket) => {
       const cleanedText = moderator.clean(data.text);
       data.text = cleanedText;
 
-      // Continue with the rest of the message handling
-      console.log("📩 Received message data:", data);
-    } catch (error) {
-      console.error("Error processing message:", error);
-      socket.emit('message_error', {
-        error: 'An error occurred while processing your message',
-        timestamp: new Date()
-      });
-      return;
-    }
-    try {
       console.log("📩 Received message data:", data);
 
       // Validate required fields
@@ -247,34 +237,40 @@ io.on("connection", (socket) => {
 
       // Populate message with user data for frontend
       const populatedMessage = await Message.findById(newMessage._id)
-        .populate('sender', 'username name email')
-        .populate('receiver', 'username name email');
+        .populate('sender', 'username name email profilePicture')
+        .populate('receiver', 'username name email profilePicture');
 
       // Prepare message for frontend
       const messageForFrontend = {
         _id: populatedMessage._id,
         sender: populatedMessage.sender._id,
         senderName: populatedMessage.sender.username || populatedMessage.sender.name,
+        senderAvatar: populatedMessage.sender.profilePicture,
         receiver: populatedMessage.receiver._id,
         receiverName: populatedMessage.receiver.username || populatedMessage.receiver.name,
+        receiverAvatar: populatedMessage.receiver.profilePicture,
         text: populatedMessage.text,
-        createdAt: populatedMessage.createdAt
+        createdAt: populatedMessage.createdAt,
+        isAutoReply: false
       };
-       // --- CREDIT CHECK LOGIC WITH NOTIFICATION ---
-    if (sender.role === 'user') {
-      if (sender.messageCredits <= 0) {
-        // If credits are zero, send an error signal and stop
-        return socket.emit("insufficient_credits", { 
-          message: "Your free message limit is over. Please buy credits to continue." 
-        });
-      }
-      // If credits are available, subtract one
-      sender.messageCredits -= 1;
-      await sender.save();
-    }
-    // Send the real-time message to the receiver
-    io.to(data.receiver).emit("receive_private_message", newMessage);
 
+      // --- CREDIT CHECK LOGIC WITH NOTIFICATION ---
+      if (sender.role === 'user') {
+        if (sender.messageCredits <= 0) {
+          // If credits are zero, send an error signal and stop
+          return socket.emit("insufficient_credits", { 
+            message: "Your free message limit is over. Please buy credits to continue." 
+          });
+        }
+        // If credits are available, subtract one
+        sender.messageCredits -= 1;
+        await sender.save();
+        console.log(`💳 User ${sender.username} credits remaining: ${sender.messageCredits}`);
+      }
+
+      // Send the real-time message to both users
+      io.to(data.receiver).emit("receive_private_message", messageForFrontend);
+      io.to(data.sender).emit("receive_private_message", messageForFrontend);
 
       // --- Real-time notification signal to receiver ---
       io.to(data.receiver).emit("chat_notification", {
@@ -283,9 +279,6 @@ io.on("connection", (socket) => {
         message: messageForFrontend.text,
         timestamp: messageForFrontend.createdAt
       });
-
-      io.to(data.receiver).emit("receive_private_message", messageForFrontend);
-      io.to(data.sender).emit("receive_private_message", messageForFrontend);
 
       io.to(data.sender).emit("chat_update", {
         type: 'new_message',
@@ -302,6 +295,41 @@ io.on("connection", (socket) => {
       });
 
       console.log(`💬 Message successfully sent from ${data.sender} to ${data.receiver}`);
+
+      // ✅ AUTO-REPLY LOGIC - FIXED VERSION
+      // Only send auto-reply if:
+      // 1. Sender is a user (not mentor)
+      // 2. Receiver is a mentor
+      // 3. This is the first message in the conversation
+      if (sender.role === 'user' && receiver.role === 'mentor') {
+        console.log('🤖 User messaged mentor, checking auto-reply conditions...');
+        
+        // ✅ Add small delay (1.5 seconds) for realistic feel
+        setTimeout(async () => {
+          try {
+            console.log('🤖 Attempting to send auto-reply...');
+            
+            const autoReplyMessage = await sendAutoReply(
+              io, 
+              data.sender, 
+              data.receiver, 
+              {
+                username: receiver.username,
+                profilePicture: receiver.profilePicture
+              }
+            );
+
+            if (autoReplyMessage) {
+              console.log('✅ Auto-reply sent successfully');
+            } else {
+              console.log('⚠️ Auto-reply not sent (not first message or already sent)');
+            }
+          } catch (autoReplyError) {
+            console.error('❌ Error sending auto-reply:', autoReplyError);
+            // Don't fail the main message if auto-reply fails
+          }
+        }, 1500); // 1.5 second delay
+      }
 
       // --- EMAIL NOTIFICATION LOGIC WITH RESEND ---
       try {

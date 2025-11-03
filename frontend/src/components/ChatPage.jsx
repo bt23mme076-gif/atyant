@@ -774,77 +774,117 @@ const ChatPage = ({ recipientId, recipientName }) => {
                 }
               }}
             >
-              {messages.length > 0 && messages.map((msg, index) => {
-                const senderId = String(msg.sender?._id || msg.senderId || msg.sender);
-                const isMine = senderId === String(currentUser.id);
-                const messageId = msg._id;
-                return (
-                  <div key={index} className={`message ${isMine ? 'sent' : 'received'}`}>
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      <p style={{ margin: 0, flex: 1 }}>{msg.text || msg.message}</p>
-                      {isMine && messageId && (
-                        <div style={{ position: "relative" }}>
-                          <span
-                            style={{
-                              cursor: "pointer",
-                              fontSize: "20px",
-                              marginLeft: "10px",
-                              color: "#999"
-                            }}
-                            onClick={() =>
-                              openMenuMsgId === messageId
-                                ? handleMenuClose()
-                                : handleMenuOpen(messageId)
-                            }
-                          >&#8230;</span>
-                          {openMenuMsgId === messageId && (
-                            <div
-                              style={{
-                                position: "absolute",
-                                right: 0,
-                                top: 24,
-                                background: "#fff",
-                                border: "1px solid #ddd",
-                                borderRadius: "8px",
-                                boxShadow: "0 2px 8px #0002",
-                                zIndex: 99,
-                                minWidth: "100px"
-                              }}
-                              onMouseLeave={handleMenuClose}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteMessage(messageId)}
-                                style={{
-                                  width: "100%",
-                                  padding: "7px 13px",
-                                  color: "#e11d48",
-                                  background: "none",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  textAlign: "left",
-                                  fontWeight: 500,
-                                }}
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          )}
+              {messages.length > 0 ? (
+                messages.map((msg, index) => {
+                  const senderId = String(msg.sender?._id || msg.sender);
+                  const isMine = senderId === String(currentUser.id);
+                  const messageId = msg._id;
+                  const isAutoReply = msg.isAutoReply === true; // ✅ Explicit check
+
+                  return (
+                    <div
+                      key={`${messageId}-${index}`} // ✅ Better key
+                      className={`message ${isMine ? 'sent' : 'received'} ${
+                        isAutoReply ? 'auto-reply' : ''
+                      }`}
+                    >
+                      {/* ✅ Auto-reply badge */}
+                      {isAutoReply && !isMine && (
+                        <div className="auto-reply-badge">
+                          🤖 AUTOMATED RESPONSE
                         </div>
                       )}
+
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <p style={{ margin: 0, flex: 1, whiteSpace: 'pre-wrap' }}>
+                          {msg.text || msg.message}
+                        </p>
+                        
+                        {/* Only show menu for user's own messages that aren't auto-replies */}
+                        {isMine && messageId && !isAutoReply && (
+                          <div style={{ position: 'relative' }}>
+                            <span
+                              style={{
+                                cursor: 'pointer',
+                                fontSize: '20px',
+                                marginLeft: '10px',
+                                color: '#999',
+                              }}
+                              onClick={() =>
+                                openMenuMsgId === messageId
+                                  ? handleMenuClose()
+                                  : handleMenuOpen(messageId)
+                              }
+                            >
+                              &#8230;
+                            </span>
+                            {openMenuMsgId === messageId && (
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  right: 0,
+                                  top: 24,
+                                  background: '#fff',
+                                  border: '1px solid #ddd',
+                                  borderRadius: '8px',
+                                  boxShadow: '0 2px 8px #0002',
+                                  zIndex: 99,
+                                  minWidth: '100px',
+                                }}
+                                onMouseLeave={handleMenuClose}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteMessage(messageId)}
+                                  style={{
+                                    width: '100%',
+                                    padding: '7px 13px',
+                                    color: '#e11d48',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    textAlign: 'left',
+                                    fontWeight: 500,
+                                  }}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+
+                      <div
+                        className="message-meta"
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          marginTop: 4,
+                        }}
+                      >
+                        <span className="message-time">
+                          {new Date(
+                            msg.timestamp || msg.createdAt || Date.now()
+                          ).toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                        <span className="message-status">
+                          {isMine ? (msg.seen ? 'Seen' : 'Sent') : ''}
+                        </span>
+                      </div>
                     </div>
-                    <div className="message-meta" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: 4 }}>
-                      <span className="message-time">
-                        {new Date(msg.timestamp || msg.createdAt || Date.now()).toLocaleTimeString()}
-                      </span>
-                      <span className="message-status">
-                        {isMine ? (msg.seen ? 'Seen' : 'Sent') : ''}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-              {loadingMoreMessages && <div>Loading more messages...</div>}
+                  );
+                })
+              ) : (
+                <div className="no-messages">No messages yet. Start the conversation!</div>
+              )}
+              {loadingMoreMessages && (
+                <div className="loading-more">Loading more messages...</div>
+              )}
               <div ref={messagesEndRef} />
             </div>
             {currentUser?.role === 'user' && (credits === 0 || credits < 0) ? (
