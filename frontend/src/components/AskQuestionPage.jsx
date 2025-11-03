@@ -46,42 +46,48 @@ const AskQuestionPage = () => {
     <div className="ask-question-container">
       <h1>Ask Your Question</h1>
       <p>Describe your problem, and we'll suggest Mentors who have solved similar issues.</p>
-
       <form className="ask-question-form" onSubmit={handleFindMentors}>
-        <textarea
-          placeholder="e.g., 'I am confused about choosing between GATE and a private job after my B.E...'"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          rows="6"
-        />
+        <div className="textarea-wrapper">
+          <textarea
+            placeholder="e.g., 'I am confused about choosing between GATE and a private job after my Engineering degree...'"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            maxLength={500}
+          />
+          <span className="char-counter">{question.length}/500</span>
+        </div>
+
         <button type="submit" disabled={loading}>
-          {loading ? 'Finding Mentors..' : 'Find a Mentor'}
+          {loading ? 'Finding Perfect Mentors...' : 'Find My Mentor 🚀'}
         </button>
       </form>
 
-      {hasSearched && (
-        <div className="results-section">
-          <h2>Suggested Mentors</h2>
-          {loading ? (
-            <div className="status-message">Loading...</div>
-          ) : (
-            <div className="mentor-grid">
-              {suggestedMentors.length > 0 ? (
-                suggestedMentors.map((mentor) => (
-                  <div className="mentor-card" key={mentor._id}>
-                    <img src={mentor.profilePicture || `https://api.pravatar.cc/150?u=${mentor._id}`} alt={mentor.username} className="mentor-image" />
-                    <h3 className="mentor-name">{mentor.username}</h3>
-                    <p className="mentor-interest">Mentor</p>
-                    <button className="chat-now-btn" onClick={() => startChatWithMentor(mentor)}>Chat Now</button>
-                  </div>
-                ))
-              ) : (
-                <p className="no-mentors-found">No Mentor found with this expertise. Try rephrasing your question.</p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+      <div className="results-section">
+        <h2>Recommended Mentors</h2>
+        
+        {loading ? (
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+          </div>
+        ) : suggestedMentors.length > 0 ? (
+          <div className="mentor-cards-grid">
+            {suggestedMentors.map((mentor) => (
+              <div className="mentor-card" key={mentor._id}>
+                <img src={mentor.profilePicture || `https://api.pravatar.cc/150?u=${mentor._id}`} alt={mentor.username} className="mentor-image" />
+                <h3 className="mentor-name">{mentor.username}</h3>
+                <p className="mentor-interest">Mentor</p>
+                <button className="chat-now-btn" onClick={() => startChatWithMentor(mentor)}>Chat Now</button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <div className="empty-state-icon">🔍</div>
+            <h3>No mentors found</h3>
+            <p>Try asking a different question or be more specific</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

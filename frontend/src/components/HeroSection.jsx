@@ -17,8 +17,8 @@ const HeroSection = () => {
           No guesswork. Just experienced real answers from people who faced the same problem in the same situation.
         </p>
  {/* 2. Add the SearchBar component here */}
-        <SearchBar />
-        
+      
+
         <div className="hero-rotator">
           Your gateway to answers in{' '}
           <TypeAnimation
