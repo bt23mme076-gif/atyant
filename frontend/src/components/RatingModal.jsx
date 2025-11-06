@@ -7,14 +7,21 @@ const RatingModal = ({ isOpen, onClose, mentor, chatSessionId, onSubmitSuccess }
   const [feedbackText, setFeedbackText] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [localSessionId, setLocalSessionId] = useState(null);
 
-  // ✅ ADD THIS - Debug logging
+  // ✅ GET API URL from environment
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && mentor) {
+      const sessionId = chatSessionId || `session_${mentor._id}_${Date.now()}`;
+      setLocalSessionId(sessionId);
+      
       console.log('🔍 Rating Modal Data:', {
         mentor: mentor?.username,
         mentorId: mentor?._id,
-        chatSessionId: chatSessionId,
+        sessionId: sessionId,
+        apiUrl: API_URL, // ✅ Log API URL
         hasToken: !!localStorage.getItem('token')
       });
     }
@@ -29,19 +36,19 @@ const RatingModal = ({ isOpen, onClose, mentor, chatSessionId, onSubmitSuccess }
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // ✅ Validate rating
     if (rating === 0) {
       setError('Please select a rating');
       return;
     }
 
-    // ✅ Validate mentor and session ID
     if (!mentor || !mentor._id) {
       setError('Mentor information is missing');
       return;
     }
 
-    if (!chatSessionId) {
+    const sessionIdToUse = localSessionId || chatSessionId;
+    
+    if (!sessionIdToUse) {
       setError('Chat session ID is missing');
       return;
     }
@@ -52,17 +59,18 @@ const RatingModal = ({ isOpen, onClose, mentor, chatSessionId, onSubmitSuccess }
     try {
       const token = localStorage.getItem('token');
       
-      // ✅ Log the data being sent for debugging
       const requestData = {
         mentorId: mentor._id,
-        chatSessionId: chatSessionId,
+        chatSessionId: sessionIdToUse,
         rating: rating,
         feedbackText: feedbackText.trim()
       };
       
       console.log('📤 Sending rating data:', requestData);
+      console.log('🌐 API URL:', `${API_URL}/api/ratings`);
 
-      const response = await fetch('http://localhost:5000/api/ratings', {
+      // ✅ USE DYNAMIC API URL
+      const response = await fetch(`${API_URL}/api/ratings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,7 +80,6 @@ const RatingModal = ({ isOpen, onClose, mentor, chatSessionId, onSubmitSuccess }
       });
 
       const data = await response.json();
-      
       console.log('📥 Response:', data);
 
       if (response.ok && data.success) {

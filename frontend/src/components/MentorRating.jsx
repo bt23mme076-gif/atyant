@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import './MentorRating.css';
 
 const MentorRating = ({ mentorId, showDetails = false }) => {
   const [ratingData, setRatingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // ✅ GET API URL from environment
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     if (mentorId) {
@@ -16,12 +18,20 @@ const MentorRating = ({ mentorId, showDetails = false }) => {
   const fetchRating = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        `http://localhost:5000/api/ratings/mentor/${mentorId}`
+      
+      // ✅ USE DYNAMIC API URL
+      const response = await fetch(
+        `${API_URL}/api/ratings/mentor/${mentorId}`
       );
       
-      if (response.data.success) {
-        setRatingData(response.data.data);
+      if (!response.ok) {
+        throw new Error('Failed to fetch rating');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setRatingData(data.data);
       }
     } catch (err) {
       console.error('❌ Error fetching rating:', err);
