@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import './AskQuestionPage.css';
 import './MentorListPage.css'; // Reuse mentor card styles
+import MentorRating from './MentorRating'; // ✅ ADD THIS IMPORT
 
 const AskQuestionPage = () => {
   const [question, setQuestion] = useState('');
@@ -76,6 +77,10 @@ const AskQuestionPage = () => {
                 <img src={mentor.profilePicture || `https://api.pravatar.cc/150?u=${mentor._id}`} alt={mentor.username} className="mentor-image" />
                 <h3 className="mentor-name">{mentor.username}</h3>
                 <p className="mentor-interest">Mentor</p>
+                
+                {/* ✅ ADD RATING COMPONENT HERE */}
+                <MentorRating mentorId={mentor._id} showDetails={false} />
+                
                 <button className="chat-now-btn" onClick={() => startChatWithMentor(mentor)}>Chat Now</button>
               </div>
             ))}

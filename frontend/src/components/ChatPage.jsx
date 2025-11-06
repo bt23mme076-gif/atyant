@@ -7,6 +7,7 @@ import './ChatPage.css';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthContext } from '../AuthContext';
+import RatingModal from './RatingModal'; // ✅ MAKE SURE THIS LINE EXISTS
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -112,6 +113,8 @@ const ChatPage = ({ recipientId, recipientName }) => {
   const [isTyping, setIsTyping] = useState(false);
   const [partnerTyping, setPartnerTyping] = useState(false);
   const typingTimeoutRef = useRef();
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [chatSessionId, setChatSessionId] = useState(null);
   const lastMessageRef = useRef(null);
   const messagesEndRef = useRef(null);
   const location = useLocation();
@@ -662,6 +665,57 @@ const ChatPage = ({ recipientId, recipientName }) => {
     
   }, [recipientId, recipientName]);
 
+  // ✅ ADD THIS useEffect
+  useEffect(() => {
+    // Prompt rating after 5 minutes of chat
+    const timer = setTimeout(() => {
+      if (selectedContact && messages.length > 5) {
+        // Check if user hasn't rated yet
+        const hasRated = localStorage.getItem(`rated_${chatSessionId}`);
+        if (!hasRated) {
+          setShowRatingModal(true);
+        }
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+
+    return () => clearTimeout(timer);
+  }, [selectedContact, messages]);
+
+  // ✅ UPDATE handleRatingSuccess
+  const handleRatingSuccess = (ratingData) => {
+    console.log('✅ Rating submitted:', ratingData);
+    localStorage.setItem(`rated_${chatSessionId}`, 'true');
+    toast.success('Thank you for your feedback! ⭐', {
+      position: "top-right",
+      autoClose: 3000,
+    });
+  };
+
+  const [modalSessionId, setModalSessionId] = useState(null);
+
+  const handleRateMentor = () => {
+    if (!selectedContact) {
+      toast.error('Please select a mentor first');
+      return;
+    }
+
+    // Get or create session ID
+    const sessionKey = `chat_session_${selectedContact._id}`;
+    let sessionId = localStorage.getItem(sessionKey);
+    
+    if (!sessionId) {
+      sessionId = `session_${selectedContact._id}_${Date.now()}`;
+      localStorage.setItem(sessionKey, sessionId);
+      console.log('✨ Created session ID:', sessionId);
+    } else {
+      console.log('📌 Using session ID:', sessionId);
+    }
+
+    // Store session ID for modal
+    setModalSessionId(sessionId);
+    setShowRatingModal(true);
+  };
+
   if (error && !loading) {
     return (
       <div className="chat-error">
@@ -697,12 +751,13 @@ const ChatPage = ({ recipientId, recipientName }) => {
           {currentUser && currentUser.role === 'user' && (
             <div className="credits-section">
               <p>Credits Remaining: {credits !== null ? credits : 'Loading...'}</p>
-              <button onClick={handlePayment} className="buy-credits-btn">Buy More Credits</button>
+              <button onClick={handlePayment} className="buy-credits-btn">Buy More Credits Rs 5 - 20 Credits</button>
             </div>
           )}
           {contactList.length === 0 ? (
             <p className="no-contacts">No contacts available</p>
-          ) : (
+          ) :
+          (
             <ul>
               {contactList.map((contact) => (
                 <li
@@ -761,10 +816,36 @@ const ChatPage = ({ recipientId, recipientName }) => {
                   {selectedContact.username}
                 </h4>
               </Link>
-              <div className="chat-header-status" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className={`status-indicator status-online`}></span>
-                <span style={{ fontWeight: 500, fontSize: '14px', color: '#4f46e5' }}>Online</span>
-              </div>
+              <div className="chat-header-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div className="chat-header-status" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <span className={`status-indicator status-online`}></span>
+      <span style={{ fontWeight: 500, fontSize: '14px', color: '#4f46e5' }}>Online</span>
+    </div>
+    
+    {/* ✅ ADD RATING BUTTON */}
+    <button 
+      className="rate-mentor-btn"
+      onClick={handleRateMentor}
+      title="Rate this mentor"
+      style={{
+        padding: '8px 16px',
+        background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+        color: 'white',
+        border: 'none',
+        borderRadius: '8px',
+        fontWeight: 600,
+        fontSize: '0.9rem',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        transition: 'all 0.2s ease',
+        boxShadow: '0 2px 8px rgba(251, 191, 36, 0.3)'
+      }}
+    >
+      ⭐ Rate
+    </button>
+  </div>
             </div>
             <div
               className="messages-area"
@@ -926,7 +1007,21 @@ const ChatPage = ({ recipientId, recipientName }) => {
           )
         )}
       </div>
-    </div>
+      
+      {/* ✅ ADD RATING MODAL HERE - BEFORE CLOSING </div> */}
+      {selectedContact && modalSessionId && (
+        <RatingModal
+          isOpen={showRatingModal}
+          onClose={() => {
+            setShowRatingModal(false);
+            setModalSessionId(null);
+          }}
+          mentor={selectedContact}
+          chatSessionId={modalSessionId}
+          onSubmitSuccess={handleRatingSuccess}
+        />
+      )}
+    </div> 
   );
 };
 

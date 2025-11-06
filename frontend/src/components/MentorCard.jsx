@@ -7,6 +7,7 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import './MentorCards.css';
 import { useNavigate } from 'react-router-dom';
+import MentorRating from './MentorRating'; // ✅ ADD THIS IMPORT
 
 const MentorCard = ({ mentor }) => {
   const openDirections = (mentorLocation) => {
@@ -33,6 +34,10 @@ const MentorCard = ({ mentor }) => {
       <img src={mentor.image} alt={mentor.name} className="mentor-image" />
       <h3 className="mentor-name">{mentor.name}</h3>
       <p className="mentor-interest">{mentor.interest}</p>
+      
+      {/* ✅ ADD RATING COMPONENT HERE */}
+      <MentorRating mentorId={mentor._id} showDetails={false} />
+      
       <button className="message-button" onClick={() => openDirections(mentor.location)}>
         <Navigation size={16} />
         Directions

@@ -20,6 +20,7 @@ import askRoutes from './routes/askRoutes.js';
 import mentorRoutes from './routes/mentorRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';  // ✅ YE LINE
 import aiChatRoutes from './routes/aiChatRoutes.js';
+import ratingRoutes from './routes/ratingRoutes.js'; // Importing rating routes
 
 // Import models
 import Feedback from './models/Feedback.js';
@@ -66,6 +67,7 @@ app.use('/api/ask', askRoutes);
 app.use('/api/users', mentorRoutes);
 app.use('/api/location', locationRoutes);  // ✅ YE LINE
 app.use('/api/ai', aiChatRoutes);
+app.use('/api/ratings', ratingRoutes); // Using the rating routes
 console.log('✅ AI Chat routes registered at /api/ai/*');
 
 
@@ -504,8 +506,37 @@ app.get('/api/profile/:username', async (req, res) => {
   }
 });
 
+// ✅ REPLACE THIS FUNCTION
+const handleRateMentor = () => {
+  if (!selectedContact) {
+    toast.error('Please select a mentor first');
+    return;
+  }
+
+  // ✅ Force create/get session ID before opening modal
+  let sessionId = chatSessionId;
+  
+  if (!sessionId) {
+    // Create new session ID if not exists
+    sessionId = `session_${selectedContact._id}_${Date.now()}`;
+    setChatSessionId(sessionId);
+    localStorage.setItem(`chat_session_${selectedContact._id}`, sessionId);
+    console.log('✨ Created new session ID:', sessionId);
+  }
+
+  console.log('🎯 Opening rating modal:', {
+    mentor: selectedContact.username,
+    mentorId: selectedContact._id,
+    sessionId: sessionId
+  });
+
+  // ✅ Open modal with session ID
+  setShowRatingModal(true);
+};
+
 // --- Start server ---
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 Socket.IO enabled with CORS for: ${allowedOrigins.join(', ')}`);
 });
+

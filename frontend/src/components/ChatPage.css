@@ -788,6 +788,35 @@
   display: none !important;
 }
 
+/* ========================================
+   RATE MENTOR BUTTON
+   ======================================== */
+
+.rate-mentor-btn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.rate-mentor-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+}
+
+.rate-mentor-btn:active {
+  transform: translateY(0);
+}
+
 /* ====== ANIMATIONS ====== */
 @keyframes fadeIn {
   from {
