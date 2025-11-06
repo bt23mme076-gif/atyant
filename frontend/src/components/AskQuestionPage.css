@@ -1,9 +1,11 @@
 /* ========================================
-   🎯 CLEAN & MODERN ASK QUESTION PAGE
+   🎯 ASK QUESTION PAGE - SCOPED STYLES
    ======================================== */
 
+/* ✅ All styles now scoped under .ask-question-container */
+
 .ask-question-container {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 60px auto;
   padding: 40px 20px;
   text-align: center;
@@ -24,7 +26,7 @@
   line-height: 1.2;
 }
 
-.ask-question-container p {
+.ask-question-container > p {
   font-size: 1.2rem;
   color: #64748b;
   margin-bottom: 40px;
@@ -35,7 +37,7 @@
    FORM SECTION
    ======================================== */
 
-.ask-question-form {
+.ask-question-container .ask-question-form {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -49,9 +51,16 @@
   border: 1px solid #e2e8f0;
 }
 
-.ask-question-form textarea {
+/* ✅ Textarea Wrapper for Character Counter */
+.textarea-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.ask-question-container .ask-question-form textarea {
   width: 100%;
   padding: 18px;
+  padding-bottom: 40px; /* Space for counter */
   font-size: 1.05rem;
   font-family: inherit;
   border: 2px solid #e2e8f0;
@@ -63,18 +72,29 @@
   box-sizing: border-box;
 }
 
-.ask-question-form textarea::placeholder {
+.ask-question-container .ask-question-form textarea::placeholder {
   color: #94a3b8;
 }
 
-.ask-question-form textarea:focus {
+.ask-question-container .ask-question-form textarea:focus {
   outline: none;
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   background: #fafbff;
 }
 
-.ask-question-form button {
+/* ✅ Character Counter */
+.char-counter {
+  position: absolute;
+  bottom: 12px;
+  right: 15px;
+  font-size: 0.85rem;
+  color: #94a3b8;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.ask-question-container .ask-question-form button {
   width: 100%;
   padding: 16px 32px;
   font-size: 1.1rem;
@@ -90,16 +110,16 @@
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
-.ask-question-form button:hover:not(:disabled) {
+.ask-question-container .ask-question-form button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
 }
 
-.ask-question-form button:active:not(:disabled) {
+.ask-question-container .ask-question-form button:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.ask-question-form button:disabled {
+.ask-question-container .ask-question-form button:disabled {
   background: #94a3b8;
   cursor: not-allowed;
   box-shadow: none;
@@ -109,13 +129,13 @@
    RESULTS SECTION
    ======================================== */
 
-.results-section {
+.ask-question-container .results-section {
   margin-top: 60px;
   padding-top: 50px;
   border-top: 2px solid #e2e8f0;
 }
 
-.results-section h2 {
+.ask-question-container .results-section h2 {
   font-size: 2.2rem;
   font-weight: 800;
   color: #1e293b;
@@ -124,104 +144,222 @@
 }
 
 /* ========================================
+   LOADING STATE
+   ======================================== */
+
+.ask-question-container .loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+}
+
+.ask-question-container .spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #e2e8f0;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: ask-spinner-spin 0.8s linear infinite;
+}
+
+@keyframes ask-spinner-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ========================================
    MENTOR CARDS GRID
    ======================================== */
 
-.mentor-cards-grid {
+.ask-question-container .mentor-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 25px;
   margin-top: 30px;
-  text-align: left;
+  padding: 0 10px;
 }
 
 /* ========================================
-   MENTOR CARD
+   MENTOR CARD - CLICKABLE
    ======================================== */
 
-.mentor-card {
+.ask-question-container .mentor-card.clickable-card {
   background: white;
   border-radius: 16px;
   padding: 25px;
   box-shadow: 
     0 2px 15px rgba(0, 0, 0, 0.06),
     0 1px 3px rgba(0, 0, 0, 0.03);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid #f1f5f9;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  min-height: 420px;
+  /* ✅ Anti-flicker properties */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
-.mentor-card:hover {
-  transform: translateY(-4px);
+.ask-question-container .mentor-card.clickable-card:hover {
+  transform: translateY(-8px) translateZ(0);
   box-shadow: 
     0 8px 30px rgba(99, 102, 241, 0.12),
     0 2px 8px rgba(0, 0, 0, 0.05);
   border-color: #e0e7ff;
 }
 
+.ask-question-container .mentor-card.clickable-card:active {
+  transform: translateY(-4px) translateZ(0);
+}
+
+.ask-question-container .mentor-card.clickable-card:focus {
+  outline: 3px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* ✅ Hover effect on name */
+.mentor-card.clickable-card:hover .mentor-name {
+  color: #6366f1;
+}
+
+/* ✅ Hover effect on image */
+.mentor-card.clickable-card:hover .mentor-image {
+  transform: scale(1.05) translateZ(0);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
 /* ========================================
-   MENTOR CARD CONTENT
+   CLICK INDICATOR
    ======================================== */
 
-.mentor-card-header {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
+.click-indicator {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(99, 102, 241, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 5;
+  pointer-events: none;
+  backface-visibility: hidden;
 }
 
-.mentor-avatar {
-  width: 60px;
-  height: 60px;
+.mentor-card.clickable-card:hover .click-indicator {
+  opacity: 1;
+}
+
+/* ========================================
+   MENTOR IMAGE
+   ======================================== */
+
+.mentor-image {
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #e0e7ff;
+  border: 4px solid #f1f5f9;
+  margin-bottom: 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* ✅ Anti-flicker properties */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+  font-size: 0;
+  text-indent: -9999px;
 }
 
-.mentor-info h3 {
+.mentor-image::before,
+.mentor-image::after {
+  display: none !important;
+}
+
+/* ========================================
+   MENTOR NAME
+   ======================================== */
+
+.mentor-name {
   font-size: 1.3rem;
   font-weight: 700;
   color: #1e293b;
-  margin: 0 0 5px 0;
-}
-
-.mentor-info p {
-  font-size: 0.95rem;
-  color: #64748b;
-  margin: 0;
-}
-
-.mentor-bio {
-  font-size: 1rem;
-  color: #475569;
-  line-height: 1.6;
-  margin-bottom: 15px;
-  flex-grow: 1;
-}
-
-.mentor-skills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.skill-tag {
-  padding: 6px 12px;
-  background: #f1f5f9;
-  color: #475569;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  margin: 8px 0;
+  transition: color 0.3s ease;
+  /* ✅ Anti-flicker properties */
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+  transform: translateZ(0);
 }
 
 /* ========================================
-   CHAT NOW BUTTON - PREMIUM STYLE
+   MENTOR INTEREST (Role)
    ======================================== */
 
-.mentor-card .chat-now-btn {
+.mentor-interest {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin: 4px 0 8px 0;
+  font-weight: 600;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========================================
+   MENTOR BIO
+   ======================================== */
+
+.mentor-bio {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 12px 0;
+  text-align: center;
+  min-height: 50px;
+  max-height: 70px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+  /* ✅ Anti-flicker properties */
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========================================
+   RATING
+   ======================================== */
+
+.mentor-card-rating {
+  margin: 12px 0;
+  display: flex;
+  justify-content: center;
   width: 100%;
+  backface-visibility: hidden;
+}
+
+.mentor-card-rating .mentor-rating {
+  transform: scale(0.9) translateZ(0);
+}
+
+/* ========================================
+   CHAT NOW BUTTON
+   ======================================== */
+
+.chat-now-btn {
+  width: 100%;
+  max-width: 220px;
   padding: 14px 24px;
   margin-top: auto;
   font-size: 1rem;
@@ -231,7 +369,7 @@
   border: none;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
@@ -239,56 +377,29 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  position: relative;
+  z-index: 10;
+  /* ✅ Anti-flicker properties */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
-.mentor-card .chat-now-btn::after {
-  content: '💬';
-  font-size: 1.1em;
-}
-
-.mentor-card .chat-now-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
+.chat-now-btn:hover:not(:disabled) {
+  transform: scale(1.05) translateZ(0);
   box-shadow: 0 6px 20px rgba(99, 102, 241, 0.35);
   background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
 }
 
-.mentor-card .chat-now-btn:active:not(:disabled) {
-  transform: translateY(0);
+.chat-now-btn:active:not(:disabled) {
+  transform: scale(1.02) translateZ(0);
 }
 
-.mentor-card .chat-now-btn:disabled {
+.chat-now-btn:disabled {
   background: #cbd5e1;
   cursor: not-allowed;
   box-shadow: none;
   opacity: 0.6;
-}
-
-.mentor-card .chat-now-btn:disabled::after {
-  content: '🔒';
-}
-
-/* ========================================
-   LOADING STATE
-   ======================================== */
-
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 60px 20px;
-}
-
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid #e2e8f0;
-  border-top-color: #6366f1;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 /* ========================================
@@ -297,13 +408,19 @@
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 80px 20px;
   color: #64748b;
 }
 
 .empty-state-icon {
   font-size: 4rem;
   margin-bottom: 20px;
+  animation: ask-bounce 2s infinite;
+}
+
+@keyframes ask-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
 }
 
 .empty-state h3 {
@@ -324,6 +441,12 @@
    RESPONSIVE DESIGN
    ======================================== */
 
+@media (max-width: 1024px) {
+  .ask-question-container .mentor-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .ask-question-container {
     margin: 40px auto;
@@ -334,49 +457,71 @@
     font-size: 2.2rem;
   }
 
-  .ask-question-container p {
+  .ask-question-container > p {
     font-size: 1.05rem;
     margin-bottom: 30px;
   }
 
-  .ask-question-form {
+  .ask-question-container .ask-question-form {
     padding: 25px 20px;
     gap: 18px;
   }
 
-  .ask-question-form textarea {
+  .ask-question-container .ask-question-form textarea {
     padding: 15px;
+    padding-bottom: 35px;
     font-size: 1rem;
     min-height: 140px;
   }
 
-  .ask-question-form button {
+  .ask-question-container .ask-question-form button {
     padding: 14px 28px;
     font-size: 1rem;
   }
 
-  .results-section {
+  .ask-question-container .results-section {
     margin-top: 50px;
     padding-top: 40px;
   }
 
-  .results-section h2 {
+  .ask-question-container .results-section h2 {
     font-size: 1.9rem;
     margin-bottom: 25px;
   }
 
-  .mentor-cards-grid {
+  .ask-question-container .mentor-cards-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
 
-  .mentor-card {
+  .ask-question-container .mentor-card.clickable-card {
     padding: 20px;
+    min-height: 400px;
   }
 
-  .mentor-card .chat-now-btn {
+  .ask-question-container .mentor-card.clickable-card:hover {
+    transform: translateY(-4px) translateZ(0);
+  }
+
+  .ask-question-container .mentor-image {
+    width: 100px;
+    height: 100px;
+  }
+
+  .ask-question-container .mentor-name {
+    font-size: 1.2rem;
+  }
+
+  .ask-question-container .mentor-bio {
+    font-size: 0.85rem;
+    -webkit-line-clamp: 2;
+    max-height: 50px;
+  }
+
+  .ask-question-container .chat-now-btn {
     padding: 12px 20px;
     font-size: 0.95rem;
+    max-width: 200px;
   }
 }
 
@@ -390,40 +535,48 @@
     font-size: 1.9rem;
   }
 
-  .ask-question-container p {
+  .ask-question-container > p {
     font-size: 1rem;
   }
 
-  .ask-question-form {
+  .ask-question-container .ask-question-form {
     padding: 20px 15px;
   }
 
-  .ask-question-form textarea {
+  .ask-question-container .ask-question-form textarea {
     padding: 12px;
+    padding-bottom: 30px;
     min-height: 130px;
   }
 
-  .ask-question-form button {
+  .ask-question-container .ask-question-form button {
     padding: 12px 24px;
     font-size: 0.95rem;
   }
 
-  .results-section h2 {
+  .ask-question-container .results-section h2 {
     font-size: 1.7rem;
   }
 
-  .mentor-card-header {
-    flex-direction: column;
-    text-align: center;
+  .ask-question-container .mentor-card.clickable-card {
+    min-height: 380px;
   }
 
-  .mentor-avatar {
-    width: 80px;
-    height: 80px;
+  .ask-question-container .mentor-image {
+    width: 90px;
+    height: 90px;
   }
 
-  .mentor-info h3 {
-    font-size: 1.2rem;
+  .ask-question-container .mentor-name {
+    font-size: 1.15rem;
+  }
+
+  .ask-question-container .empty-state {
+    padding: 60px 20px;
+  }
+
+  .ask-question-container .empty-state-icon {
+    font-size: 3rem;
   }
 }
 
@@ -431,35 +584,20 @@
    ACCESSIBILITY
    ======================================== */
 
-.ask-question-form textarea:focus-visible,
-.ask-question-form button:focus-visible,
-.mentor-card .chat-now-btn:focus-visible {
+.ask-question-container .ask-question-form textarea:focus-visible,
+.ask-question-container .ask-question-form button:focus-visible,
+.ask-question-container .chat-now-btn:focus-visible,
+.ask-question-container .mentor-card.clickable-card:focus-visible {
   outline: 3px solid #6366f1;
   outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  .ask-question-container * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* ========================================
-   UTILITY CLASSES
-   ======================================== */
-
-.text-center {
-  text-align: center;
-}
-
-.mt-20 {
-  margin-top: 20px;
-}
-
-.mb-20 {
-  margin-bottom: 20px;
 }
 
 /* ========================================
@@ -468,11 +606,13 @@
 
 @media print {
   .ask-question-form button,
-  .mentor-card .chat-now-btn {
+  .chat-now-btn,
+  .click-indicator {
     display: none;
   }
 
   .mentor-card {
     break-inside: avoid;
+    page-break-inside: avoid;
   }
 }

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import MentorRating from './MentorRating'; // ✅ ADD THIS IMPORT
 import './MentorListPage.css';
 
 const MentorListPage = () => {
@@ -56,27 +57,23 @@ const MentorListPage = () => {
   };
 
   const startChatWithMentor = (e, mentor) => {
-    e.stopPropagation(); // ✅ Prevent card click when clicking chat button
+    e.stopPropagation();
     navigate('/chat', {
       state: { selectedContact: mentor }
     });
   };
 
   const handleScheduleClick = (e, username) => {
-    e.stopPropagation(); // ✅ Prevent card click when clicking schedule button
+    e.stopPropagation();
     navigate(`/profile/${username}#schedule`);
   };
 
   const handleCardClick = (username) => {
-    // Play click sound
     const audio = new Audio('/click-sound.mp3');
-    audio.play().catch(() => {}); // Ignore if autoplay blocked
-  
+    audio.play().catch(() => {});
     navigate(`/profile/${username}`);
-   };
+  };
 
-  // ✅ NEW: Handle card click to navigate to profile
-  
   return (
     <div className="mentor-list-container">
       <h1>Meet Our Mentors</h1>
@@ -171,6 +168,11 @@ const MentorListPage = () => {
                       : "No bio available"
                     }
                   </p>
+
+                  {/* ✅ ADD RATING HERE - Below bio */}
+                  <div className="mentor-card-rating">
+                    <MentorRating mentorId={_id} showDetails={false} />
+                  </div>
 
                   {(title || company) && (
                     <p className="mentor-title">

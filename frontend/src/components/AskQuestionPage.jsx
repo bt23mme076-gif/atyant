@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import './AskQuestionPage.css';
 import './MentorListPage.css'; // Reuse mentor card styles
-import MentorRating from './MentorRating'; // ✅ ADD THIS IMPORT
+import MentorRating from './MentorRating';
 
 const AskQuestionPage = () => {
   const [question, setQuestion] = useState('');
@@ -39,7 +39,19 @@ const AskQuestionPage = () => {
     }
   };
 
-  const startChatWithMentor = (mentor) => {
+  // ✅ Navigate to mentor profile
+  const handleMentorCardClick = (username) => {
+    // Play click sound (optional)
+    const audio = new Audio('/click-sound.mp3');
+    audio.play().catch(() => {});
+    
+    // Navigate to profile
+    navigate(`/profile/${username}`);
+  };
+
+  // ✅ Prevent card click when clicking chat button
+  const startChatWithMentor = (e, mentor) => {
+    e.stopPropagation(); // Prevent card click
     navigate('/chat', { state: { selectedContact: mentor } });
   };
 
@@ -73,25 +85,70 @@ const AskQuestionPage = () => {
         ) : suggestedMentors.length > 0 ? (
           <div className="mentor-cards-grid">
             {suggestedMentors.map((mentor) => (
-              <div className="mentor-card" key={mentor._id}>
-                <img src={mentor.profilePicture || `https://api.pravatar.cc/150?u=${mentor._id}`} alt={mentor.username} className="mentor-image" />
+              <div 
+                className="mentor-card clickable-card" 
+                key={mentor._id}
+                onClick={() => handleMentorCardClick(mentor.username)}
+                role="button"
+                tabIndex={0}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    handleMentorCardClick(mentor.username);
+                  }
+                }}
+                title={`Click to view ${mentor.username}'s profile`}
+                style={{ cursor: 'pointer' }}
+              >
+                {/* ✅ View Profile Indicator */}
+                <div className="click-indicator">
+                  <span>👁️ View Profile</span>
+                </div>
+                
+                {/* Avatar */}
+                <img 
+                  src={mentor.profilePicture || `https://api.pravatar.cc/150?u=${mentor._id}`} 
+                  alt={mentor.username} 
+                  className="mentor-image" 
+                />
+                
+                {/* Name */}
                 <h3 className="mentor-name">{mentor.username}</h3>
+                
+                {/* Role */}
                 <p className="mentor-interest">Mentor</p>
                 
-                {/* ✅ ADD RATING COMPONENT HERE */}
-                <MentorRating mentorId={mentor._id} showDetails={false} />
+                {/* ✅ BIO - Moved inside JSX */}
+                <p className="mentor-bio">
+                  {mentor.bio && typeof mentor.bio === 'string' && mentor.bio.trim() !== ''
+                    ? (mentor.bio.length > 100
+                       ? `${mentor.bio.substring(0, 100)}...`
+                       : mentor.bio)
+                    : "No bio available"
+                  }
+                </p>
                 
-                <button className="chat-now-btn" onClick={() => startChatWithMentor(mentor)}>Chat Now</button>
+                {/* Rating */}
+                <div className="mentor-card-rating">
+                  <MentorRating mentorId={mentor._id} showDetails={false} />
+                </div>
+                
+                {/* Chat Button */}
+                <button 
+                  className="chat-now-btn" 
+                  onClick={(e) => startChatWithMentor(e, mentor)}
+                >
+                  Chat Now 💬
+                </button>
               </div>
             ))}
           </div>
-        ) : (
+        ) : hasSearched ? (
           <div className="empty-state">
             <div className="empty-state-icon">🔍</div>
             <h3>No mentors found</h3>
             <p>Try asking a different question or be more specific</p>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );
