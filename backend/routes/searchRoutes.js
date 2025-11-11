@@ -1,11 +1,10 @@
 // backend/routes/searchRoutes.js
 import express from 'express';
 import User from '../models/User.js';
-import { optionalAuth } from '../middleware/auth.js'; // ✅ Import optionalAuth
+import { optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// ✅ Use optionalAuth instead of auth - allows both logged-in and guest users
 router.get('/mentors', optionalAuth, async (req, res) => {
   try {
     const {
@@ -21,47 +20,34 @@ router.get('/mentors', optionalAuth, async (req, res) => {
     console.log('📥 Search Request:');
     console.log('  User:', req.user ? req.user.username : 'Guest');
     console.log('  Query params:', req.query);
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-    // ✅ Base filter - always show mentors
     let filter = { role: 'mentor' };
+    let sortOptions = {};
 
     // Text search
     if (q && q.trim()) {
       filter.$or = [
-        { name: { $regex: q, $options: 'i' } },
         { username: { $regex: q, $options: 'i' } },
-        { title: { $regex: q, $options: 'i' } },
-        { company: { $regex: q, $options: 'i' } },
         { bio: { $regex: q, $options: 'i' } },
-        { specialties: { $in: [new RegExp(q, 'i')] } }
+        { skills: { $regex: q, $options: 'i' } },
+        { expertise: { $regex: q, $options: 'i' } },
+        { 'education.institution': { $regex: q, $options: 'i' } }
       ];
     }
 
     // Category filter
     if (category && category !== 'All') {
-      switch (category) {
-        case 'Roadmap & Guidance':
-          filter.specialties = { $in: [/roadmap/i, /guidance/i, /career/i] };
-          break;
-        case 'Internships':
-          filter.specialties = { $in: [/internship/i] };
-          break;
-        case 'Placements':
-          filter.specialties = { $in: [/placement/i, /job/i] };
-          break;
-        case 'Higher Studies':
-          filter.specialties = { $in: [/higher studies/i, /ms/i, /mba/i] };
-          break;
-        case 'Startups / Entrepreneurship':
-          filter.specialties = { $in: [/startup/i, /entrepreneur/i] };
-          break;
-        case 'Top Rated Mentors':
-          filter.rating = { $gte: 4.5 };
-          break;
-        case 'Active Now':
-          filter.isOnline = true;
-          break;
+      const categoryMap = {
+        'Roadmap & Guidance': { expertise: { $in: [/roadmap/i, /guidance/i, /career/i] } },
+        'Internships': { expertise: { $in: [/internship/i, /intern/i] } },
+        'Placements': { expertise: { $in: [/placement/i, /job/i, /interview/i] } },
+        'Higher Studies': { expertise: { $in: [/higher studies/i, /ms/i, /mba/i] } },
+        'Startups / Entrepreneurship': { expertise: { $in: [/startup/i, /entrepreneur/i] } },
+        'Top Rated Mentors': { rating: { $gte: 4.5 } },
+        'Active Now': { isOnline: true }
+      };
+      if (categoryMap[category]) {
+        filter = { ...filter, ...categoryMap[category] };
       }
     }
 
@@ -71,13 +57,8 @@ router.get('/mentors', optionalAuth, async (req, res) => {
 
       if (mentorBackground === 'Senior from My College' || 
           mentorBackground === 'Alumni from My College') {
-        
         if (userCollege) {
           filter['education.institution'] = userCollege;
-          console.log('🎓 Filtering by college:', userCollege);
-        } else {
-          console.log('⚠️ College filter requires login - showing all mentors');
-          // Don't filter by college if user not logged in
         }
       } else {
         const backgroundMap = {
@@ -88,7 +69,7 @@ router.get('/mentors', optionalAuth, async (req, res) => {
             title: { $regex: /founder|ceo|entrepreneur/i } 
           },
           'Exam / Subject Expert': { 
-            specialties: { $in: [/exam/i, /gate/i, /gre/i, /cat/i] } 
+            expertise: { $in: [/exam/i, /gate/i, /gre/i, /cat/i] } 
           }
         };
         if (backgroundMap[mentorBackground]) {
@@ -97,38 +78,9 @@ router.get('/mentors', optionalAuth, async (req, res) => {
       }
     }
 
-    // Availability
-    if (availability && availability !== 'All') {
-      switch (availability) {
-        case 'Available Now':
-          filter.isOnline = true;
-          break;
-        case 'This Week':
-        case 'By Appointment':
-          filter.hasScheduling = true;
-          break;
-      }
-    }
-
-    // Price
-    if (price && price !== 'All') {
-      const priceMap = {
-        'Free': { price: 0 },
-        '₹0–200': { price: { $gte: 0, $lte: 200 } },
-        '₹200–500': { price: { $gte: 200, $lte: 500 } },
-        '₹500–1000': { price: { $gte: 500, $lte: 1000 } },
-        '₹1000+': { price: { $gte: 1000 } }
-      };
-      if (priceMap[price]) {
-        filter = { ...filter, ...priceMap[price] };
-      }
-    }
-
-    console.log('🔍 Filter:', JSON.stringify(filter, null, 2));
-
     // Sort
-    let sortOptions = {};
     switch (sort) {
+      case 'Most Helpful':
       case 'Highest Rated':
         sortOptions = { rating: -1 };
         break;
@@ -137,6 +89,9 @@ router.get('/mentors', optionalAuth, async (req, res) => {
         break;
       case 'Lowest Price':
         sortOptions = { price: 1 };
+        break;
+      case 'Most Experienced':
+        sortOptions = { yearsOfExperience: -1 };
         break;
       case 'Newest Mentors':
         sortOptions = { createdAt: -1 };
@@ -147,20 +102,14 @@ router.get('/mentors', optionalAuth, async (req, res) => {
         break;
     }
 
-    // Execute query
+    // Execute query with all necessary fields
     const mentors = await User.find(filter)
       .sort(sortOptions)
       .limit(50)
-      .select('-password -email')
+      .select('username name email profilePicture bio title company rating reviewsCount tags specialties badges expertise skills education location createdAt')
       .lean();
 
     console.log('✅ Found mentors:', mentors.length);
-    
-    if (mentors.length === 0) {
-      const totalMentors = await User.countDocuments({ role: 'mentor' });
-      console.log('📊 Total mentors in DB:', totalMentors);
-    }
-
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     res.json(mentors);
