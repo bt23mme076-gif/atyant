@@ -1,11 +1,12 @@
 // backend/routes/searchRoutes.js
 import express from 'express';
 import User from '../models/User.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { optionalAuth } from '../middleware/auth.js'; // ✅ Import optionalAuth
 
 const router = express.Router();
 
-router.get('/mentors', authenticateToken, async (req, res) => {
+// ✅ Use optionalAuth instead of auth - allows both logged-in and guest users
+router.get('/mentors', optionalAuth, async (req, res) => {
   try {
     const {
       q,
@@ -18,11 +19,11 @@ router.get('/mentors', authenticateToken, async (req, res) => {
 
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('📥 Search Request:');
+    console.log('  User:', req.user ? req.user.username : 'Guest');
     console.log('  Query params:', req.query);
-    console.log('  Authenticated user:', req.user?.username || 'Guest');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-    // ✅ Start with base filter - ALWAYS find mentors
+    // ✅ Base filter - always show mentors
     let filter = { role: 'mentor' };
 
     // Text search
@@ -70,11 +71,13 @@ router.get('/mentors', authenticateToken, async (req, res) => {
 
       if (mentorBackground === 'Senior from My College' || 
           mentorBackground === 'Alumni from My College') {
+        
         if (userCollege) {
           filter['education.institution'] = userCollege;
           console.log('🎓 Filtering by college:', userCollege);
         } else {
-          console.log('⚠️ No college found, skipping college filter');
+          console.log('⚠️ College filter requires login - showing all mentors');
+          // Don't filter by college if user not logged in
         }
       } else {
         const backgroundMap = {
@@ -107,29 +110,27 @@ router.get('/mentors', authenticateToken, async (req, res) => {
       }
     }
 
-    // Price filter
+    // Price
     if (price && price !== 'All') {
       const priceMap = {
         'Free': { price: 0 },
         '₹0–200': { price: { $gte: 0, $lte: 200 } },
         '₹200–500': { price: { $gte: 200, $lte: 500 } },
         '₹500–1000': { price: { $gte: 500, $lte: 1000 } },
-        '₹1000+': { price: { $gte: 1000 } },
-        'Use Atyant Credits': { acceptsCredits: true }
+        '₹1000+': { price: { $gte: 1000 } }
       };
       if (priceMap[price]) {
         filter = { ...filter, ...priceMap[price] };
       }
     }
 
-    console.log('🔍 MongoDB Filter:', JSON.stringify(filter, null, 2));
+    console.log('🔍 Filter:', JSON.stringify(filter, null, 2));
 
-    // ✅ Sort options
+    // Sort
     let sortOptions = {};
     switch (sort) {
-      case 'Most Helpful':
       case 'Highest Rated':
-        sortOptions = { rating: -1, reviewsCount: -1 };
+        sortOptions = { rating: -1 };
         break;
       case 'Most Active':
         sortOptions = { lastActive: -1 };
@@ -137,22 +138,16 @@ router.get('/mentors', authenticateToken, async (req, res) => {
       case 'Lowest Price':
         sortOptions = { price: 1 };
         break;
-      case 'Most Experienced':
-        sortOptions = { yearsOfExperience: -1 };
-        break;
       case 'Newest Mentors':
         sortOptions = { createdAt: -1 };
         break;
       case 'Recommended':
       default:
-        // ✅ Default sort: rating desc, then created date
         sortOptions = { rating: -1, createdAt: -1 };
         break;
     }
 
-    console.log('📊 Sort options:', sortOptions);
-
-    // ✅ Execute query
+    // Execute query
     const mentors = await User.find(filter)
       .sort(sortOptions)
       .limit(50)
@@ -161,19 +156,9 @@ router.get('/mentors', authenticateToken, async (req, res) => {
 
     console.log('✅ Found mentors:', mentors.length);
     
-    if (mentors.length > 0) {
-      console.log('First mentor:', {
-        name: mentors[0].name,
-        username: mentors[0].username,
-        role: mentors[0].role,
-        hasEducation: !!mentors[0].education?.length
-      });
-    } else {
-      console.log('⚠️ NO MENTORS FOUND with filter:', filter);
-      
-      // ✅ Debug: Count total mentors in DB
+    if (mentors.length === 0) {
       const totalMentors = await User.countDocuments({ role: 'mentor' });
-      console.log('📊 Total mentors in database:', totalMentors);
+      console.log('📊 Total mentors in DB:', totalMentors);
     }
 
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

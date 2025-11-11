@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
-const auth = (req, res, next) => {
+// ✅ Required authentication (for protected routes like profile, messages)
+const auth = async (req, res, next) => {
   try {
-    // Get token from Authorization header
     const authHeader = req.header('Authorization');
     
     if (!authHeader) {
@@ -12,7 +13,6 @@ const auth = (req, res, next) => {
       });
     }
 
-    // Extract token (remove 'Bearer ' prefix)
     const token = authHeader.replace('Bearer ', '');
 
     if (!token) {
@@ -22,20 +22,23 @@ const auth = (req, res, next) => {
       });
     }
 
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    // Attach user info to request object
-    req.user = {
-      userId: decoded.userId || decoded.id,
-      id: decoded.userId || decoded.id,
-      role: decoded.role,
-      username: decoded.username
-    };
+    // ✅ Fetch full user data including education
+    const user = await User.findById(decoded.userId || decoded.id)
+      .select('-password')
+      .lean();
 
-    console.log('🔐 Authenticated user:', req.user.userId);
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
 
-    // Continue to next middleware/route
+    req.user = user;
+    console.log('🔐 Authenticated user:', user.username);
+
     next();
 
   } catch (error) {
@@ -59,6 +62,53 @@ const auth = (req, res, next) => {
       success: false,
       message: 'Authentication error'
     });
+  }
+};
+
+// ✅ Optional authentication (for public routes like mentor search)
+export const optionalAuth = async (req, res, next) => {
+  try {
+    const authHeader = req.header('Authorization');
+    
+    // ✅ No token? Continue as guest
+    if (!authHeader) {
+      req.user = null;
+      console.log('👤 Guest user');
+      return next();
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    if (!token) {
+      req.user = null;
+      console.log('👤 No valid token - guest user');
+      return next();
+    }
+
+    // Try to verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Fetch full user data
+    const user = await User.findById(decoded.userId || decoded.id)
+      .select('-password')
+      .lean();
+
+    if (user) {
+      req.user = user;
+      console.log('🔐 Authenticated user:', user.username);
+      console.log('🎓 User college:', user.education?.[0]?.institution);
+    } else {
+      req.user = null;
+      console.log('⚠️ User not found - continuing as guest');
+    }
+
+    next();
+
+  } catch (error) {
+    // ✅ On any auth error, just continue as guest (don't block request)
+    console.log('⚠️ Auth error, continuing as guest:', error.message);
+    req.user = null;
+    next();
   }
 };
 
