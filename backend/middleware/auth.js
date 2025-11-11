@@ -1,10 +1,9 @@
 import jwt from 'jsonwebtoken';
+import User from '../models/User.js';
 
-const auth = (req, res, next) => {
+const auth = async (req, res, next) => {
   try {
-    // Get token from Authorization header
     const authHeader = req.header('Authorization');
-    
     if (!authHeader) {
       return res.status(401).json({
         success: false,
@@ -12,9 +11,7 @@ const auth = (req, res, next) => {
       });
     }
 
-    // Extract token (remove 'Bearer ' prefix)
     const token = authHeader.replace('Bearer ', '');
-
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -22,20 +19,22 @@ const auth = (req, res, next) => {
       });
     }
 
-    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // Attach user info to request object
-    req.user = {
-      userId: decoded.userId || decoded.id,
-      id: decoded.userId || decoded.id,
-      role: decoded.role,
-      username: decoded.username
-    };
 
-    console.log('🔐 Authenticated user:', req.user.userId);
+    // Fetch user from DB
+    const userId = decoded.userId || decoded.id;
+    const user = await User.findById(userId).lean();
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
 
-    // Continue to next middleware/route
+    req.user = user; // Attach full user doc (including education!) to req.user
+
+    console.log('🔐 Authenticated user:', req.user._id);
+
     next();
 
   } catch (error) {

@@ -113,7 +113,28 @@ const userSchema = new mongoose.Schema({
     country: { type: String, default: 'India' },
     lastUpdated: { type: Date, default: null }
   },
-  
+   // ✅ Add these for filtering
+  price: {
+    type: Number,
+    default: 0,
+    min: 0
+  },
+  acceptsCredits: {
+    type: Boolean,
+    default: false
+  },
+  isOnline: {
+    type: Boolean,
+    default: false
+  },
+  lastActive: {
+    type: Date,
+    default: Date.now
+  },
+  yearsOfExperience: {
+    type: Number,
+    default: 0
+  },
   // ========== MESSAGE CREDITS ==========
   messageCredits: {
     type: Number,
