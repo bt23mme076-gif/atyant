@@ -1,10 +1,11 @@
 import dotenv from 'dotenv';
 dotenv.config();
-// backend/server.js - COMPLETE FIXED VERSION
+
 import express from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import compression from 'compression'; // ✅ ADDED
 import mongoose from 'mongoose';
 import { Resend } from 'resend';
 import paymentRoutes from './routes/paymentRoutes.js';
@@ -18,43 +19,88 @@ import feedbackRoutes from './routes/feedbackRoutes.js';
 import searchRoutes from './routes/searchRoutes.js';
 import askRoutes from './routes/askRoutes.js';
 import mentorRoutes from './routes/mentorRoutes.js';
-import locationRoutes from './routes/locationRoutes.js';  // ✅ YE LINE
+import locationRoutes from './routes/locationRoutes.js';
 import aiChatRoutes from './routes/aiChatRoutes.js';
-import ratingRoutes from './routes/ratingRoutes.js'; // Importing rating routes
+import ratingRoutes from './routes/ratingRoutes.js';
 
 // Import models
 import Feedback from './models/Feedback.js';
 import Message from './models/Message.js';
 import User from './models/User.js';
 import { moderator } from './utils/ContentModerator.js';
-// import Contact from './models/Contact.js'; 
 
-// Initialize Resend with your API key
+// Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ✅ PERFORMANCE: Enable Gzip Compression (70% size reduction)
+app.use(compression({
+  filter: (req, res) => {
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  },
+  level: 6, // Balance between speed and compression
+  threshold: 1024 // Only compress responses > 1KB
+}));
+
 // --- Middleware ---
 const allowedOrigins = [
   process.env.FRONTEND_URL || "https://www.atyant.in",
+  "https://atyant.in",
   "http://localhost:5173"
 ];
+
 app.use(cors({
   origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
+
+// ✅ PERFORMANCE: Limit JSON payload size
+app.use(express.json({ limit: '10mb' }));
+
+// Cache control headers
+app.use((req, res, next) => {
+  // Cache images for 1 year
+  if (req.path.match(/\.(jpg|jpeg|png|gif|webp|svg)$/)) {
+    res.set('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+  
+  // Cache CSS/JS for 1 week
+  else if (req.path.match(/\.(css|js)$/)) {
+    res.set('Cache-Control', 'public, max-age=604800');
+  }
+  
+  // Don't cache API responses
+  else if (req.path.startsWith('/api/')) {
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+  
+  next();
+});
 
 // --- Database Connection ---
 const MONGO_URI = process.env.MONGO_URI ||
   "mongodb+srv://atyantuser:qf5CWLbdoKKzQlpL@cluster0.vutlgpa.mongodb.net/atyant?retryWrites=true&w=majority";
 
-mongoose.connect(MONGO_URI)
+// ✅ PERFORMANCE: Optimize MongoDB connection
+mongoose.connect(MONGO_URI, {
+  maxPoolSize: 10, // Connection pooling for better performance
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
   .then(() => console.log("✅ MongoDB connected successfully!"))
   .catch(err => console.error("❌ MongoDB connection error:", err));
+
+// ✅ PERFORMANCE: Disable mongoose debug in production
+if (process.env.NODE_ENV === 'production') {
+  mongoose.set('debug', false);
+}
 
 // --- API Routes ---
 app.use('/api/auth', authRoutes);
@@ -65,11 +111,11 @@ app.use('/api/search', searchRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/ask', askRoutes);
 app.use('/api/users', mentorRoutes);
-app.use('/api/location', locationRoutes);  // ✅ YE LINE
+app.use('/api/location', locationRoutes);
 app.use('/api/ai', aiChatRoutes);
-app.use('/api/ratings', ratingRoutes); // Using the rating routes
-console.log('✅ AI Chat routes registered at /api/ai/*');
+app.use('/api/ratings', ratingRoutes);
 
+console.log('✅ AI Chat routes registered at /api/ai/*');
 
 // --- Contact form route ---
 app.post("/api/contact", async (req, res) => {
@@ -110,9 +156,8 @@ app.post("/api/validate-mentor", async (req, res) => {
 const server = http.createServer(app);
 
 // --- Socket.IO Configuration ---
-// Track active users and their current chat partners
-const activeUsers = new Map(); // stores userId -> Set of active chat partner IDs
-const userSockets = new Map(); // stores userId -> socket.id
+const activeUsers = new Map();
+const userSockets = new Map();
 
 const io = new Server(server, {
   cors: {
@@ -121,16 +166,20 @@ const io = new Server(server, {
     credentials: true
   },
   transports: ['websocket', 'polling'],
+  // ✅ PERFORMANCE: Optimize Socket.IO settings
   pingTimeout: 60000,
-  pingInterval: 25000
+  pingInterval: 25000,
+  maxHttpBufferSize: 1e6, // 1MB
+  perMessageDeflate: {
+    threshold: 1024 // Compress messages > 1KB
+  }
 });
 
-// Socket.IO handlers (single connection block)
+// Socket.IO handlers (existing logic)
 io.on("connection", (socket) => {
   console.log(`✅ User connected via WebSocket: ${socket.id}`);
   let currentUserId = null;
 
-  // Join user to their private room
   socket.on("join_user_room", (userId) => {
     currentUserId = userId;
     socket.join(userId);
@@ -141,7 +190,6 @@ io.on("connection", (socket) => {
     console.log(`👤 User ${socket.id} joined room: ${userId}`);
   });
 
-  // Handle active chat
   socket.on("enter_chat", ({ partnerId }) => {
     if (currentUserId) {
       const userChats = activeUsers.get(currentUserId) || new Set();
@@ -151,7 +199,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Handle leaving chat
   socket.on("leave_chat", ({ partnerId }) => {
     if (currentUserId) {
       const userChats = activeUsers.get(currentUserId);
@@ -162,7 +209,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Handle disconnection
   socket.on("disconnect", () => {
     if (currentUserId) {
       userSockets.delete(currentUserId);
@@ -171,10 +217,8 @@ io.on("connection", (socket) => {
     }
   });
 
-  // ONLY ONE private_message handler with Resend logic
   socket.on("private_message", async (data) => {
     try {
-      // Content moderation
       if (!data.text) {
         socket.emit('message_error', {
           error: 'Message cannot be empty',
@@ -183,7 +227,6 @@ io.on("connection", (socket) => {
         return;
       }
 
-      // Check for inappropriate content
       const validationResult = moderator.validateMessage(data.text);
       if (!validationResult.isValid) {
         socket.emit('message_error', {
@@ -193,13 +236,11 @@ io.on("connection", (socket) => {
         return;
       }
       
-      // Remove any potential bad words or inappropriate content
       const cleanedText = moderator.clean(data.text);
       data.text = cleanedText;
 
       console.log("📩 Received message data:", data);
 
-      // Validate required fields
       if (!data.sender || !data.receiver || !data.text) {
         socket.emit("message_error", {
           error: "Missing required fields",
@@ -208,7 +249,6 @@ io.on("connection", (socket) => {
         return;
       }
       
-      // Validate that both users exist
       const [sender, receiver] = await Promise.all([
         User.findById(data.sender),
         User.findById(data.receiver)
@@ -228,7 +268,6 @@ io.on("connection", (socket) => {
         return;
       }
 
-      // Create and save the message
       const newMessage = new Message({
         sender: data.sender,
         receiver: data.receiver,
@@ -237,12 +276,10 @@ io.on("connection", (socket) => {
       await newMessage.save();
       console.log(`💾 Message saved to MongoDB: ${newMessage._id}`);
 
-      // Populate message with user data for frontend
       const populatedMessage = await Message.findById(newMessage._id)
         .populate('sender', 'username name email profilePicture')
         .populate('receiver', 'username name email profilePicture');
 
-      // Prepare message for frontend
       const messageForFrontend = {
         _id: populatedMessage._id,
         sender: populatedMessage.sender._id,
@@ -256,25 +293,20 @@ io.on("connection", (socket) => {
         isAutoReply: false
       };
 
-      // --- CREDIT CHECK LOGIC WITH NOTIFICATION ---
       if (sender.role === 'user') {
         if (sender.messageCredits <= 0) {
-          // If credits are zero, send an error signal and stop
           return socket.emit("insufficient_credits", { 
             message: "Your free message limit is over. Please buy credits to continue." 
           });
         }
-        // If credits are available, subtract one
         sender.messageCredits -= 1;
         await sender.save();
         console.log(`💳 User ${sender.username} credits remaining: ${sender.messageCredits}`);
       }
 
-      // Send the real-time message to both users
       io.to(data.receiver).emit("receive_private_message", messageForFrontend);
       io.to(data.sender).emit("receive_private_message", messageForFrontend);
 
-      // --- Real-time notification signal to receiver ---
       io.to(data.receiver).emit("chat_notification", {
         from: messageForFrontend.sender,
         fromName: messageForFrontend.senderName,
@@ -298,15 +330,9 @@ io.on("connection", (socket) => {
 
       console.log(`💬 Message successfully sent from ${data.sender} to ${data.receiver}`);
 
-      // ✅ AUTO-REPLY LOGIC - FIXED VERSION
-      // Only send auto-reply if:
-      // 1. Sender is a user (not mentor)
-      // 2. Receiver is a mentor
-      // 3. This is the first message in the conversation
       if (sender.role === 'user' && receiver.role === 'mentor') {
         console.log('🤖 User messaged mentor, checking auto-reply conditions...');
         
-        // ✅ Add small delay (1.5 seconds) for realistic feel
         setTimeout(async () => {
           try {
             console.log('🤖 Attempting to send auto-reply...');
@@ -328,20 +354,16 @@ io.on("connection", (socket) => {
             }
           } catch (autoReplyError) {
             console.error('❌ Error sending auto-reply:', autoReplyError);
-            // Don't fail the main message if auto-reply fails
           }
-        }, 1500); // 1.5 second delay
+        }, 1500);
       }
 
-      // --- EMAIL NOTIFICATION LOGIC WITH RESEND ---
       try {
-        // Check if receiver is actively chatting with sender
         const receiverChats = activeUsers.get(data.receiver);
         const isReceiverActive = receiverChats && receiverChats.has(data.sender);
         const receiverSocketId = userSockets.get(data.receiver);
         const isReceiverOnline = !!receiverSocketId;
         
-        // Only send email if receiver is offline or not actively chatting with sender
         if (!isReceiverActive && !isReceiverOnline) {
           await resend.emails.send({
             from: 'notification@atyant.in',
@@ -356,7 +378,6 @@ io.on("connection", (socket) => {
         }
       } catch (error) {
         console.error("❌ Error sending email notification:", error);
-        // Don't emit error to client as message was already sent successfully
       }
     } catch (error) {
       console.error("❌ Error saving/sending private message:", error);
@@ -366,22 +387,16 @@ io.on("connection", (socket) => {
       });
     }
   });
-    // --- YEH NAYA HANDLER ADD KAREIN ---
+
   socket.on("delete_message", async (data) => {
     try {
       const { messageId, userId } = data;
-      
       const message = await Message.findById(messageId);
 
-      // Security Check: Sirf message bhejne wala hi delete kar sakta hai
       if (message && message.sender.toString() === userId) {
-        // Database se message delete karein
         await Message.deleteOne({ _id: messageId });
-
-        // Dono users (sender aur receiver) ko batayein ki message delete ho gaya hai
         io.to(message.sender.toString()).emit("message_deleted", { messageId });
         io.to(message.receiver.toString()).emit("message_deleted", { messageId });
-        
         console.log(`🗑️ Message ${messageId} deleted by user ${userId}`);
       }
     } catch (error) {
@@ -389,7 +404,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Handle message delivery status
   socket.on("message_delivered", (data) => {
     console.log(`✓ Message delivered: ${data.messageId}`);
     io.to(data.sender).emit("message_status", {
@@ -404,7 +418,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// --- Message History Endpoint - FIXED ---
+// --- Message History Endpoint ---
 app.get('/api/messages/:userId1/:userId2', async (req, res) => {
   try {
     const { userId1, userId2 } = req.params;
@@ -459,7 +473,6 @@ app.get('/api/debug/user/:userId/connected', (req, res) => {
   });
 });
 
-// Check message history for debugging
 app.get('/api/debug/messages', async (req, res) => {
   try {
     const messages = await Message.find()
@@ -480,7 +493,7 @@ app.get('/api/debug/messages', async (req, res) => {
   }
 });
 
-// --- Health Check Endpoint ---
+// ✅ PERFORMANCE: Health Check Endpoint
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
@@ -506,37 +519,11 @@ app.get('/api/profile/:username', async (req, res) => {
   }
 });
 
-// ✅ REPLACE THIS FUNCTION
-const handleRateMentor = () => {
-  if (!selectedContact) {
-    toast.error('Please select a mentor first');
-    return;
-  }
-
-  // ✅ Force create/get session ID before opening modal
-  let sessionId = chatSessionId;
-  
-  if (!sessionId) {
-    // Create new session ID if not exists
-    sessionId = `session_${selectedContact._id}_${Date.now()}`;
-    setChatSessionId(sessionId);
-    localStorage.setItem(`chat_session_${selectedContact._id}`, sessionId);
-    console.log('✨ Created new session ID:', sessionId);
-  }
-
-  console.log('🎯 Opening rating modal:', {
-    mentor: selectedContact.username,
-    mentorId: selectedContact._id,
-    sessionId: sessionId
-  });
-
-  // ✅ Open modal with session ID
-  setShowRatingModal(true);
-};
-
 // --- Start server ---
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📡 Socket.IO enabled with CORS for: ${allowedOrigins.join(', ')}`);
 });
+
+export default server;
 

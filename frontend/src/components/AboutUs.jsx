@@ -2,7 +2,7 @@
 
 import React from 'react';
 import './AboutUs.css'; // Iski CSS file abhi banayenge
-import aboutImage from '../assets/about-us-image.jpg'; // Hum is image ko abhi add karenge
+const aboutImage = 'https://res.cloudinary.com/dny6dtmox/image/upload/v1762945548/about-us-image_ppsptx.jpg';
 
 const AboutUs = () => {
   return (

@@ -1,73 +1,103 @@
 // src/App.jsx
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, Suspense, lazy } from 'react'; // ✅ ADD lazy, Suspense
 import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthContext } from './AuthContext';
 import { Analytics } from '@vercel/analytics/react';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Bot } from 'lucide-react';
-import AIChat from './components/AIChat';
 import './components/FloatingAIButton.css';
 
-// Import all components
+// ✅ KEEP THESE (Need immediately)
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Home from './components/Home';
-import Login from './components/Login';
-import Signup from './components/signup'; // Corrected capitalization
-import ChatPage from './components/ChatPage';
-import MentorListPage from './components/MentorListPage';
-import ForgotPassword from './components/ForgotPassword';
-import ResetPassword from './components/ResetPassword';
-import ProtectedRoute from './components/ProtectedRoute';
-import ProfilePage from './components/ProfilePage';
-import PublicProfilePage from './components/PublicProfilePage';
-import AskQuestionPage from './components/AskQuestionPage';
-import NearbyMentors from './components/NearbyMentors';
 import ScrollToTop from './components/ScrollToTop';
+import ProtectedRoute from './components/ProtectedRoute';
 
+// ✅ LAZY LOAD HEAVY COMPONENTS
+const Home = lazy(() => import('./components/Home'));
+const Login = lazy(() => import('./components/Login'));
+const Signup = lazy(() => import('./components/signup'));
+const ChatPage = lazy(() => import('./components/ChatPage'));
+const MentorListPage = lazy(() => import('./components/MentorListPage'));
+const ForgotPassword = lazy(() => import('./components/ForgotPassword'));
+const ResetPassword = lazy(() => import('./components/ResetPassword'));
+const ProfilePage = lazy(() => import('./components/ProfilePage'));
+const PublicProfilePage = lazy(() => import('./components/PublicProfilePage'));
+const AskQuestionPage = lazy(() => import('./components/AskQuestionPage'));
+const NearbyMentors = lazy(() => import('./components/NearbyMentors'));
+const AIChat = lazy(() => import('./components/AIChat'));
+
+// ✅ LOADING COMPONENT
+const LoadingFallback = () => (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '60vh',
+    fontSize: '1.2rem',
+    color: '#6366f1'
+  }}>
+    <div className="spinner">Loading...</div>
+  </div>
+);
 
 function App() {
   const location = useLocation();
   const { user } = useContext(AuthContext);
   const [showAIChat, setShowAIChat] = useState(false);
   const isChatPage = location.pathname === '/chat';
-  const isHomePage = location.pathname === '/'; // ✅ Add this line
+  const isHomePage = location.pathname === '/';
 
   return (
     <div className={isChatPage && user ? 'App chat-active' : 'App'}>
       <Navbar />
       <main>
         <ScrollToTop />
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Suspense fallback={<LoadingFallback />}> {/* ✅ WRAP ROUTES */}
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-          {/* Protected Routes (only accessible when logged in) */}
-          <Route path="/mentors" element={<ProtectedRoute><MentorListPage /></ProtectedRoute>} />
-          <Route path="/chat" element={
-            <ProtectedRoute>
-              <ErrorBoundary>
-                <ChatPage />
-              </ErrorBoundary>
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-          <Route path="/profile/:username" element={<PublicProfilePage />} />
-          <Route path="/ask" element={<ProtectedRoute><AskQuestionPage /></ProtectedRoute>} />
-          
-          {/* ✅ NEW: Nearby Mentors Route */}
-          <Route path="/nearby-mentors" element={<ProtectedRoute><NearbyMentors /></ProtectedRoute>} />
-        </Routes>
+            {/* Protected Routes */}
+            <Route path="/mentors" element={
+              <ProtectedRoute>
+                <MentorListPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/chat" element={
+              <ProtectedRoute>
+                <ErrorBoundary>
+                  <ChatPage />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile/:username" element={<PublicProfilePage />} />
+            <Route path="/ask" element={
+              <ProtectedRoute>
+                <AskQuestionPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/nearby-mentors" element={
+              <ProtectedRoute>
+                <NearbyMentors />
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </Suspense>
       </main>
       {!isChatPage && <Footer />}
       <Analytics />
       
-      {/* ✅ Only show AI button on home page */}
       {isHomePage && (
         <button 
           className="ai-chat-fab"
@@ -80,7 +110,9 @@ function App() {
       )}
 
       {showAIChat && (
-        <AIChat onClose={() => setShowAIChat(false)} />
+        <Suspense fallback={null}>
+          <AIChat onClose={() => setShowAIChat(false)} />
+        </Suspense>
       )}
     </div>
   );
