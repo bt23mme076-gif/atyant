@@ -105,7 +105,7 @@ router.get('/mentors', optionalAuth, async (req, res) => {
     // Execute query with all necessary fields
     const mentors = await User.find(filter)
       .sort(sortOptions)
-      .limit(50)
+      .limit(100)
       .select('username name email profilePicture bio title company rating reviewsCount tags specialties badges expertise skills education location createdAt')
       .lean();
 
