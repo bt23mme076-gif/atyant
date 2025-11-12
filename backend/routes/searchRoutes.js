@@ -97,9 +97,9 @@ router.get('/mentors', optionalAuth, async (req, res) => {
         sortOptions = { createdAt: -1 };
         break;
       case 'Recommended':
-      default:
-        sortOptions = { rating: -1, createdAt: -1 };
-        break;
+       default:
+    sortOptions = { createdAt: 1 };  // ✅ Default: Oldest first
+    break;
     }
 
     // Execute query with all necessary fields
