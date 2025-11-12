@@ -14,8 +14,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
-    lowercase: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please fill a valid email address']
+    lowercase: true
   },
   password: {
     type: String,
@@ -97,7 +96,7 @@ const userSchema = new mongoose.Schema({
     type: Date
   },
 
-  // ========== LOCATION SCHEMA - CHECK THIS ==========
+  // ========== LOCATION SCHEMA ==========
   location: {
     type: {
       type: String,
@@ -106,14 +105,15 @@ const userSchema = new mongoose.Schema({
     },
     coordinates: {
       type: [Number],  // [longitude, latitude]
-      default: []
+      default: undefined  // ✅ Changed from [] to undefined for proper GeoJSON
     },
     city: { type: String, default: null },
     state: { type: String, default: null },
     country: { type: String, default: 'India' },
     lastUpdated: { type: Date, default: null }
   },
-   // ✅ Add these for filtering
+  
+  // ========== MENTOR SPECIFIC FIELDS ==========
   price: {
     type: Number,
     default: 0,
@@ -135,6 +135,7 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  
   // ========== MESSAGE CREDITS ==========
   messageCredits: {
     type: Number,
@@ -149,6 +150,7 @@ const userSchema = new mongoose.Schema({
 userSchema.index({ email: 1 });
 userSchema.index({ username: 1 });
 userSchema.index({ role: 1 });
+userSchema.index({ 'location.coordinates': '2dsphere' }); // ✅ Geospatial index
 
 // ========== HELPER METHODS ==========
 userSchema.methods.isProfileComplete = function() {
@@ -178,7 +180,6 @@ userSchema.methods.getPublicProfile = function() {
   };
 };
 
-userSchema.index({ 'location.coordinates': '2dsphere' });
 const User = mongoose.model('User', userSchema);
 
 export default User;

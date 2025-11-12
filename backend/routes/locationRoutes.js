@@ -1,10 +1,10 @@
 import express from 'express';
 const router = express.Router();
 import User from '../models/User.js';
-import auth from '../middleware/auth.js';
+import protect from '../middleware/authMiddleware.js';  // File exists!
 
 // ========== UPDATE USER LOCATION - FIXED FOR VILLAGES ==========
-router.post('/update-location', auth, async (req, res) => {
+router.post('/update-location', protect, async (req, res) => {
   try {
     const { latitude, longitude, city, state, country } = req.body;
 
@@ -168,7 +168,7 @@ router.post('/update-location', auth, async (req, res) => {
 });
 
 // ========== GET USER LOCATION ==========
-router.get('/my-location', auth, async (req, res) => {
+router.get('/my-location', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user.userId).select('location username');
     
@@ -199,7 +199,7 @@ router.get('/my-location', auth, async (req, res) => {
 });
 
 // ========== NEARBY MENTORS ==========
-router.post('/nearby', auth, async (req, res) => {
+router.post('/nearby', protect, async (req, res) => {
   try {
     const { latitude, longitude, maxDistance = 100000 } = req.body;
 
