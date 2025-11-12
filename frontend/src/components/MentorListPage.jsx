@@ -80,14 +80,13 @@ const MentorListPage = () => {
     ]
   };
 
-  // ✅ FIXED fetchMentors - Using CORRECT filter keys
+  // ✅ FIXED fetchMentors - Remove all console.logs
   const fetchMentors = async (query = '') => {
     setLoading(true);
     setError(null);
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       
-      // ✅ Build query with CORRECT filter keys
       const params = new URLSearchParams();
       if (query) params.append('q', query);
       if (selectedCategory !== 'All') params.append('category', selectedCategory);
@@ -100,7 +99,7 @@ const MentorListPage = () => {
         ? `${API_URL}/api/search/mentors?${params.toString()}`
         : `${API_URL}/api/users/mentors`;
       
-      console.log('Fetching from URL:', url);
+      // ❌ REMOVE: console.log('Fetching from URL:', url);
 
       const response = await fetch(url);
       if (!response.ok) {
@@ -108,17 +107,21 @@ const MentorListPage = () => {
       }
       const data = await response.json();
       
-      console.log('API Response:', data);
-      if (data && data.length > 0) {
-        console.log('First mentor structure:', data[0]);
-        console.log('First mentor bio field:', data[0].bio);
-        console.log('All mentor fields:', Object.keys(data[0]));
-      }
+      // ❌ REMOVE all these console.logs:
+      // console.log('API Response:', data);
+      // if (data && data.length > 0) {
+      //   console.log('First mentor structure:', data[0]);
+      //   console.log('First mentor bio field:', data[0].bio);
+      //   console.log('All mentor fields:', Object.keys(data[0]));
+      // }
       
       setMentors(Array.isArray(data) ? data : []);
     } catch (err) {
       setError('Could not load Mentors. Please try again later.');
-      console.error('Failed to fetch Mentors:', err);
+      // Only log error message in development
+      if (import.meta.env.DEV) {
+        console.error('Failed to fetch Mentors:', err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -303,8 +306,9 @@ const MentorListPage = () => {
           )}
 
           {mentors.map((mentor) => {
-            console.log('Processing mentor:', mentor);
-            console.log('Mentor bio:', mentor?.bio);
+            // ❌ REMOVE these:
+            // console.log('Processing mentor:', mentor);
+            // console.log('Mentor bio:', mentor?.bio);
             
             if (!mentor) {
               return null;
