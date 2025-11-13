@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useContext, useState, Suspense, lazy } from 'react'; // ✅ ADD lazy, Suspense
+import React, { useContext, useState, Suspense, lazy } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthContext } from './AuthContext';
@@ -13,6 +13,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
+import LoadingSpinner from './components/LoadingSpinner'; // ✅ ADD THIS LINE
 
 // ✅ LAZY LOAD HEAVY COMPONENTS
 const Home = lazy(() => import('./components/Home'));
@@ -28,20 +29,6 @@ const AskQuestionPage = lazy(() => import('./components/AskQuestionPage'));
 const NearbyMentors = lazy(() => import('./components/NearbyMentors'));
 const AIChat = lazy(() => import('./components/AIChat'));
 
-// ✅ LOADING COMPONENT
-const LoadingFallback = () => (
-  <div style={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '60vh',
-    fontSize: '1.2rem',
-    color: '#6366f1'
-  }}>
-    <div className="spinner">Loading...</div>
-  </div>
-);
-
 function App() {
   const location = useLocation();
   const { user } = useContext(AuthContext);
@@ -54,45 +41,47 @@ function App() {
       <Navbar />
       <main>
         <ScrollToTop />
-        <Suspense fallback={<LoadingFallback />}> {/* ✅ WRAP ROUTES */}
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Suspense fallback={<LoadingSpinner />}> {/* ✅ USE LoadingSpinner component */}
+          <ErrorBoundary>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-            {/* Protected Routes */}
-            <Route path="/mentors" element={
-              <ProtectedRoute>
-                <MentorListPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/chat" element={
-              <ProtectedRoute>
-                <ErrorBoundary>
-                  <ChatPage />
-                </ErrorBoundary>
-              </ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } />
-            <Route path="/profile/:username" element={<PublicProfilePage />} />
-            <Route path="/ask" element={
-              <ProtectedRoute>
-                <AskQuestionPage />
-              </ProtectedRoute>
-            } />
-            <Route path="/nearby-mentors" element={
-              <ProtectedRoute>
-                <NearbyMentors />
-              </ProtectedRoute>
-            } />
-          </Routes>
+              {/* Protected Routes */}
+              <Route path="/mentors" element={
+                <ProtectedRoute>
+                  <MentorListPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/chat" element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <ChatPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } />
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
+              <Route path="/profile/:username" element={<PublicProfilePage />} />
+              <Route path="/ask" element={
+                <ProtectedRoute>
+                  <AskQuestionPage />
+                </ProtectedRoute>
+              } />
+              <Route path="/nearby-mentors" element={
+                <ProtectedRoute>
+                  <NearbyMentors />
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </ErrorBoundary>
         </Suspense>
       </main>
       {!isChatPage && <Footer />}

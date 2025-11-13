@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { MapPin, Navigation, Users, MessageCircle, Search, X, ChevronRight, RefreshCw, AlertCircle } from 'lucide-react';
 import './NearbyMentors.css';
+import './shared.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 

@@ -1,0 +1,28 @@
+/* Shared mentor card styles */
+.mentor-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.mentor-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* Shared pill/badge styles */
+.pill, .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  background: #f0f0f0;
+}
+
+/* Shared layout utilities */
+.flex-center { display: flex; justify-content: center; align-items: center; }
+.grid-auto { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }

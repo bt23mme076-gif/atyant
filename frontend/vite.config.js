@@ -6,23 +6,38 @@ export default defineConfig({
   plugins: [
     react(),
     compression({ algorithm: 'gzip', ext: '.gz' }),
-    compression({ algorithm: 'brotliCompress', ext: '.br' }),
+    compression({ algorithm: 'brotliCompress', ext: '.br' })
   ],
-  
   build: {
-    minify: 'esbuild', // ✅ USE THIS
+    target: 'es2015',
+    minify: 'esbuild',
     sourcemap: false,
     cssCodeSplit: true,
-    assetsInlineLimit: 4096,
+    chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react','react-dom','react-router-dom'],
-          socket: ['socket.io-client']
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            // Split React libraries separately
+            if (id.includes('react/')) return 'react-core';
+            if (id.includes('react-dom/')) return 'react-dom';
+            if (id.includes('react-router')) return 'react-router';
+            if (id.includes('@tanstack/react-query')) return 'react-query';
+            if (id.includes('socket.io-client')) return 'socket';
+            if (id.includes('lucide-react')) return 'icons';
+            // Everything else
+            return 'vendor';
+          }
         }
       }
     }
   },
-  
-  esbuild: { drop: ['console','debugger'] }
+  esbuild: {
+    drop: ['console', 'debugger'],
+    legalComments: 'none'
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom'],
+    exclude: ['lucide-react']
+  }
 });

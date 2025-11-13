@@ -4,7 +4,7 @@
   background: #0D1117; /* GitHub Dark Color */
   background-image:
     linear-gradient(rgba(13, 17, 23, 0.95), rgba(13, 17, 23, 0.8)),
-    url('https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto,w_2070/v1762949592/hero_dooexp.jpg');
+    url('https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto,w_800/v1762949592/hero_dooexp.jpg');
   background-size: cover;
   background-position: center;
   min-height: 100vh;
@@ -141,10 +141,18 @@
   .hero-rotator { font-size: 1.5rem; }
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .hero-section {
     background-image:
-      linear-gradient(rgba(13,17,23,0.95), rgba(13,17,23,0.8)),
+      linear-gradient(rgba(13, 17, 23, 0.95), rgba(13, 17, 23, 0.8)),
       url('https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto,w_1200/v1762949592/hero_dooexp.jpg');
+  }
+}
+
+@media (min-width: 1920px) {
+  .hero-section {
+    background-image:
+      linear-gradient(rgba(13, 17, 23, 0.95), rgba(13, 17, 23, 0.8)),
+      url('https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto,w_2070/v1762949592/hero_dooexp.jpg');
   }
 }

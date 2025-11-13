@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useContext, useMemo } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import io from 'socket.io-client';
 import { useAuth } from '../AuthContext';
 import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
+import './shared.css';
 import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthContext } from '../AuthContext';
@@ -261,49 +261,57 @@ const ChatPage = ({ recipientId, recipientName }) => {
         const userData = { id: decoded.userId || decoded.id, role: decoded.role };
         setCurrentUser(userData);
 
-        const newSocket = io(API_URL, {
-          auth: { token },
-          transports: ['websocket', 'polling'],
-        });
-
-        newSocket.on('connect', () => {
-          setSocketStatus('connected');
-          newSocket.emit('join_user_room', userData.id);
-        });
-        newSocket.on('disconnect', () => setSocketStatus('disconnected'));
-        newSocket.on('connect_error', () => {
-          setError('Failed to connect to chat server');
-          setSocketStatus('error');
-        });
-        newSocket.on('reconnect', () => {
-          setSocketStatus('connected');
-          if (userData && userData.id) newSocket.emit('join_user_room', userData.id);
-        });
-        newSocket.on('reconnect_error', () => setSocketStatus('error'));
-        newSocket.on('reconnect_failed', () => {
-          setSocketStatus('error');
-          setError('Failed to reconnect to chat server. Please refresh the page.');
-        });
-
-        newSocket.on('insufficient_credits', (data) => {
-          toast.error(data.message || "You are out of credits. Please purchase more.");
-        });
-
-        newSocket.on('message_error', (data) => {
-          toast.error(data.error || 'Message blocked: Inappropriate content detected', {
-            position: "top-right",
-            autoClose: 5000,
-            hideProgressBar: false,
-            closeOnClick: true,
-            pauseOnHover: true,
-            draggable: true,
+        let socket;
+        (async () => {
+          const { io } = await import('socket.io-client');
+          socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
+            auth: { token },
+            transports: ['websocket', 'polling'],
           });
-        });
 
-        setSocket(newSocket);
+          socket.on('connect', () => {
+            setSocketStatus('connected');
+            socket.emit('join_user_room', userData.id);
+          });
+          socket.on('disconnect', () => setSocketStatus('disconnected'));
+          socket.on('connect_error', () => {
+            setError('Failed to connect to chat server');
+            setSocketStatus('error');
+          });
+          socket.on('reconnect', () => {
+            setSocketStatus('connected');
+            if (userData && userData.id) socket.emit('join_user_room', userData.id);
+          });
+          socket.on('reconnect_error', () => setSocketStatus('error'));
+          socket.on('reconnect_failed', () => {
+            setSocketStatus('error');
+            setError('Failed to reconnect to chat server. Please refresh the page.');
+          });
+
+          socket.on('insufficient_credits', (data) => {
+            toast.error(data.message || "You are out of credits. Please purchase more.");
+          });
+
+          socket.on('message_error', (data) => {
+            toast.error(data.error || 'Message blocked: Inappropriate content detected', {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+            });
+          });
+
+          setSocket(socket);
+
+          return () => {
+            socket.disconnect();
+          };
+        })();
 
         return () => {
-          newSocket.disconnect();
+          socket?.disconnect();
         };
       } catch (error) {
         setError('Authentication error');
@@ -751,7 +759,7 @@ const ChatPage = ({ recipientId, recipientName }) => {
           {currentUser && currentUser.role === 'user' && (
             <div className="credits-section">
               <p>Credits Remaining: {credits !== null ? credits : 'Loading...'}</p>
-              <button onClick={handlePayment} className="buy-credits-btn">Buy More Credits Rs 5 - 20 Credits</button>
+              <button onClick={handlePayment} className="buy-credits-btn">Buy More Credits Rs 5 - 2 Questions</button>
             </div>
           )}
           {contactList.length === 0 ? (
