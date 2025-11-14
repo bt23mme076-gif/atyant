@@ -215,7 +215,7 @@ router.get('/my-location', protect, async (req, res) => {
 // ========== NEARBY MENTORS ==========
 router.post('/nearby', protect, async (req, res) => {
   try {
-    const { latitude, longitude, radius = 50000 } = req.body;
+    const { latitude, longitude, maxDistance = 50000 } = req.body; // ✅ Use maxDistance
     const userId = req.user.userId || req.user.id;
 
     if (!latitude || !longitude) {
@@ -224,6 +224,12 @@ router.post('/nearby', protect, async (req, res) => {
         message: 'Latitude and longitude required'
       });
     }
+
+    console.log('\n========================================');
+    console.log('🔍 BACKEND: Finding nearby mentors');
+    console.log('📍 Search Center:', { latitude, longitude });
+    console.log('🔍 Max Distance:', maxDistance / 1000, 'km');
+    console.log('========================================\n');
 
     // ✅ PERFORMANCE: Use geospatial query with lean()
     const nearbyMentors = await User.find({
@@ -235,26 +241,49 @@ router.post('/nearby', protect, async (req, res) => {
             type: 'Point',
             coordinates: [parseFloat(longitude), parseFloat(latitude)]
           },
-          $maxDistance: radius
+          $maxDistance: maxDistance // ✅ Use the passed radius
         }
       }
     })
     .select('username profilePicture bio city expertise location isOnline')
-    .lean() // ✅ Faster
-    .limit(50); // ✅ Limit results
+    .lean()
+    .limit(50);
 
-    // Calculate distances
+    console.log(`✅ Found ${nearbyMentors.length} mentors in ${maxDistance / 1000}km radius`);
+
+    // ✅ Calculate distances with proper distanceText
     const mentorsWithDistance = nearbyMentors.map(mentor => {
       if (mentor.location && mentor.location.coordinates) {
         const [lon, lat] = mentor.location.coordinates;
-        const distance = calculateDistance(latitude, longitude, lat, lon);
+        const distanceInMeters = calculateDistance(latitude, longitude, lat, lon);
+        
+        // ✅ Format distance text properly
+        let distanceText;
+        if (distanceInMeters < 1000) {
+          distanceText = `${Math.round(distanceInMeters)}m away`;
+        } else if (distanceInMeters < 10000) {
+          distanceText = `${(distanceInMeters / 1000).toFixed(1)} km away`;
+        } else {
+          distanceText = `${Math.round(distanceInMeters / 1000)} km away`;
+        }
+
+        console.log(`- ${mentor.username}: ${distanceText}`);
+
         return {
           ...mentor,
-          distance: formatDistance(distance)
+          distance: distanceInMeters, // Raw distance in meters
+          distanceText: distanceText  // ✅ Formatted text
         };
       }
-      return mentor;
+      return {
+        ...mentor,
+        distance: null,
+        distanceText: 'Location not set'
+      };
     });
+
+    // Sort by distance (nearest first)
+    mentorsWithDistance.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
 
     res.json({
       success: true,
@@ -263,7 +292,7 @@ router.post('/nearby', protect, async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error finding nearby mentors:', error.message);
+    console.error('❌ Error finding nearby mentors:', error.message);
     res.status(500).json({
       success: false,
       message: 'Failed to find nearby mentors'
@@ -271,27 +300,24 @@ router.post('/nearby', protect, async (req, res) => {
   }
 });
 
+// ✅ Haversine formula - Calculate distance between two points
 function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371000;
+  const R = 6371000; // Earth's radius in meters
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
+  
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
             Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  const distance = R * c; // Distance in meters
+  
+  return distance;
 }
 
 function toRad(degrees) {
   return degrees * (Math.PI / 180);
-}
-
-function formatDistance(meters) {
-  if (meters < 1000) {
-    return `${Math.round(meters)}m`;
-  } else {
-    return `${(meters / 1000).toFixed(1)}km`;
-  }
 }
 
 export default router;

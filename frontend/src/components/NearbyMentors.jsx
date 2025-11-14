@@ -385,6 +385,24 @@ const NearbyMentors = () => {
     }
   }, [maxDistance]);
 
+  // Get user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          console.log('✅ User location:', position.coords);
+        },
+        (error) => {
+          console.error('❌ Location error:', error);
+        }
+      );
+    }
+  }, []);
+
   // Loading state
   if (loading && !mentors.length) {
     return (

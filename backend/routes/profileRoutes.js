@@ -12,7 +12,6 @@ router.get('/me', protect, async (req, res) => {
   try {
     console.log('🔍 Fetching profile for user ID:', req.user.id || req.user.userId);
     
-    // ✅ Try both possible user ID fields
     const userId = req.user.id || req.user.userId;
     
     const user = await User.findById(userId).select('-password -verificationToken -passwordResetToken');
@@ -22,8 +21,16 @@ router.get('/me', protect, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
+    // ✅ Add location status to response
+    const hasLocation = !!(user.location?.coordinates && user.location.coordinates.length === 2);
+    
     console.log('✅ User found:', user.username);
-    res.json(user);
+    console.log(hasLocation ? '✅ Location set' : '⚠️ Location not set');
+    
+    res.json({
+      ...user.toObject(),
+      hasLocation // ✅ Frontend can use this
+    });
     
   } catch (error) {
     console.error('❌ Error fetching profile:', error);

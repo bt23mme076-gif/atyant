@@ -101,16 +101,34 @@ const userSchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ['Point'],
-      default: 'Point'
+      required: false // ✅ Optional
     },
     coordinates: {
-      type: [Number],  // [longitude, latitude]
-      default: undefined  // ✅ Changed from [] to undefined for proper GeoJSON
+      type: [Number], // [longitude, latitude]
+      required: false, // ✅ Optional - no default
+      validate: {
+        validator: function(v) {
+          return !v || (Array.isArray(v) && v.length === 2);
+        },
+        message: 'Coordinates must be [longitude, latitude]'
+      }
     },
-    city: { type: String, default: null },
-    state: { type: String, default: null },
-    country: { type: String, default: 'India' },
-    lastUpdated: { type: Date, default: null }
+    city: {
+      type: String,
+      default: null
+    },
+    state: {
+      type: String,
+      default: null
+    },
+    country: {
+      type: String,
+      default: 'India'
+    },
+    lastUpdated: {
+      type: Date,
+      default: null
+    }
   },
   
   // ========== MENTOR SPECIFIC FIELDS ==========
@@ -146,39 +164,12 @@ const userSchema = new mongoose.Schema({
   timestamps: true 
 });
 
-// ========== INDEXES ==========
-userSchema.index({ email: 1 });
-userSchema.index({ username: 1 });
-userSchema.index({ role: 1 });
-userSchema.index({ 'location.coordinates': '2dsphere' }); // ✅ Geospatial index
+// ✅ Sparse index - only indexes documents where coordinates exist
+userSchema.index({ 'location.coordinates': '2dsphere' }, { sparse: true });
 
-// ========== HELPER METHODS ==========
-userSchema.methods.isProfileComplete = function() {
-  const hasInterests = this.interests && this.interests.length > 0;
-  const hasEducation = this.education && this.education.length > 0;
-  const hasCity = this.city && this.city.trim() !== '';
-  
-  return hasInterests && hasEducation && hasCity;
-};
-
-userSchema.methods.getPublicProfile = function() {
-  return {
-    _id: this._id,
-    username: this.username,
-    role: this.role,
-    profilePicture: this.profilePicture,
-    bio: this.bio,
-    city: this.city,
-    expertise: this.expertise,
-    interests: this.interests,
-    domainExperience: this.domainExperience,
-    education: this.education,
-    linkedinProfile: this.linkedinProfile,
-    skills: this.skills,
-    isVerified: this.isVerified,
-    createdAt: this.createdAt
-  };
-};
+// Remove duplicate indexes if any:
+// userSchema.index({ email: 1 }); // Remove if using unique: true in field definition
+// userSchema.index({ username: 1 }); // Remove if using unique: true in field definition
 
 const User = mongoose.model('User', userSchema);
 

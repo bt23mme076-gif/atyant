@@ -1,5 +1,5 @@
 // src/components/MentorCard.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
@@ -7,55 +7,139 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import './MentorCards.css';
 import { useNavigate } from 'react-router-dom';
-import MentorRating from './MentorRating'; // ✅ ADD THIS IMPORT
+import MentorRating from './MentorRating';
+import { Navigation as NavigationIcon, MapPin } from 'lucide-react';
 
-const MentorCard = ({ mentor }) => {
-  const openDirections = (mentorLocation) => {
-    if (!userLocation || !mentorLocation) {
+// ✅ HAVERSINE FORMULA - Calculate distance between two coordinates
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c; // Distance in km
+  
+  return distance;
+}
+
+// ========== SINGLE MENTOR CARD COMPONENT ==========
+const MentorCard = ({ mentor, userLocation }) => {
+  
+  // ✅ Get distance from backend or calculate if needed
+  const getDistanceText = () => {
+    // If backend already provided distance (from NearbyMentors)
+    if (mentor.distanceText) {
+      return mentor.distanceText;
+    }
+
+    // Otherwise calculate manually
+    if (!userLocation?.lat || !userLocation?.lng || !mentor.location?.coordinates) {
+      return 'undefined away';
+    }
+
+    const mentorLat = mentor.location.coordinates[1];
+    const mentorLng = mentor.location.coordinates[0];
+    
+    const dist = calculateDistance(
+      userLocation.lat,
+      userLocation.lng,
+      mentorLat,
+      mentorLng
+    );
+
+    if (dist < 1) {
+      return `${Math.round(dist * 1000)}m away`;
+    } else if (dist < 10) {
+      return `${dist.toFixed(1)} km away`;
+    } else {
+      return `${Math.round(dist)} km away`;
+    }
+  };
+
+  const openDirections = () => {
+    if (!userLocation || !mentor.location?.coordinates) {
       alert('Location information not available');
       return;
     }
 
-    // ========== USE EXACT COORDINATES, NOT "Your location" ==========
     const origin = `${userLocation.lat},${userLocation.lng}`;
-    const destination = `${mentorLocation.coordinates[1]},${mentorLocation.coordinates[0]}`;
+    const destination = `${mentor.location.coordinates[1]},${mentor.location.coordinates[0]}`;
     
     const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
-    
-    console.log('🗺️ Opening Google Maps:');
-    console.log('   From:', origin);
-    console.log('   To:', destination);
     
     window.open(directionsUrl, '_blank');
   };
 
   return (
     <div className="mentor-card">
-      <img src={mentor.image} alt={mentor.name} className="mentor-image" />
-      <h3 className="mentor-name">{mentor.name}</h3>
-      <p className="mentor-interest">{mentor.interest}</p>
+      {/* Profile Picture */}
+      <img 
+        src={mentor.profilePicture || mentor.image || '/default-avatar.png'} 
+        alt={mentor.name || mentor.username}
+        className="mentor-image"
+        loading="lazy"
+      />
       
-      {/* ✅ ADD RATING COMPONENT HERE */}
+      {/* Name */}
+      <h3 className="mentor-name">
+        {mentor.name || mentor.username}
+      </h3>
+      
+      {/* Bio */}
+      <p className="mentor-interest">
+        {mentor.bio || mentor.interest || 'Passionate mentor ready to guide you'}
+      </p>
+
+      {/* ✅ DISTANCE BADGE - Use backend's distanceText */}
+      <div className="location-badge">
+        <MapPin size={16} />
+        {getDistanceText()}
+      </div>
+
+      {/* ✅ CITY/STATE */}
+      {mentor.location?.city && (
+        <div className="mentor-location">
+          <MapPin size={18} />
+          <span>{mentor.location.city}, {mentor.location.state || 'India'}</span>
+        </div>
+      )}
+      
+      {/* Rating */}
       <MentorRating mentorId={mentor._id} showDetails={false} />
       
-      <button className="message-button" onClick={() => openDirections(mentor.location)}>
-        <Navigation size={16} />
-        Directions
+      {/* Directions Button */}
+      <button 
+        className="message-button" 
+        onClick={openDirections}
+      >
+        <NavigationIcon size={18} />
+        Get Directions
       </button>
     </div>
   );
 };
 
-const MentorCards = ({ mentors }) => {
+// ========== MENTOR CARDS CAROUSEL ==========
+const MentorCards = ({ mentors, userLocation }) => { // ✅ Receive userLocation
   const navigate = useNavigate();
 
-  const handleViewProfile = (mentorId) => {
-    // ✅ Scroll to top before navigating
-    window.scrollTo(0, 0);
-    
-    // Then navigate
-    navigate(`/mentor/${mentorId}`);
-  };
+  if (!mentors || mentors.length === 0) {
+    return (
+      <div className="mentor-cards-container">
+        <p style={{ textAlign: 'center', color: '#64748b' }}>
+          No mentors found
+        </p>
+      </div>
+    );
+  }
+
+  console.log('👤 User Location:', userLocation); // ✅ Debug
+  console.log('👥 Mentors:', mentors.length);
 
   return (
     <div className="mentor-cards-container">
@@ -64,15 +148,17 @@ const MentorCards = ({ mentors }) => {
         spaceBetween={20}
         slidesPerView={1}
         navigation
-        pagination={{ clickable: true }}
+        pagination={{ 
+          clickable: true,
+          dynamicBullets: true
+        }}
         autoplay={{
-          delay: 3000,
+          delay: 4000,
           disableOnInteraction: false,
           pauseOnMouseEnter: true,
         }}
-        loop={true}
+        loop={mentors.length > 1}
         speed={600}
-        // ✅ Mobile-specific breakpoints
         breakpoints={{
           320: {
             slidesPerView: 1,
@@ -91,18 +177,16 @@ const MentorCards = ({ mentors }) => {
             spaceBetween: 30,
           },
         }}
-        // ✅ Touch events for mobile
-        touchRatio={1}
+        touchRatio={1.5}
         touchAngle={45}
         grabCursor={true}
-        simulateTouch={true}
-        allowTouchMove={true}
       >
         {mentors.map((mentor) => (
           <SwiperSlide key={mentor._id}>
-            <div className="mentor-card">
-              <MentorCard mentor={mentor} />
-            </div>
+            <MentorCard 
+              mentor={mentor} 
+              userLocation={userLocation} // ✅ Pass userLocation
+            />
           </SwiperSlide>
         ))}
       </Swiper>
