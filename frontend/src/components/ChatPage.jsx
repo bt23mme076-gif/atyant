@@ -264,11 +264,27 @@ const ChatPage = ({ recipientId, recipientName }) => {
         let socket;
         (async () => {
           const { io } = await import('socket.io-client');
-          socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
+          
+          // ✅ FIX: Use production URL if VITE_SOCKET_URL not set
+          const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 
+                            import.meta.env.VITE_API_URL || 
+                            (import.meta.env.PROD ? 'https://atyant-backend.onrender.com' : 'http://localhost:3000');
+          
+          console.log('🔌 Connecting to:', SOCKET_URL);
+          console.log('🌍 Environment:', import.meta.env.MODE);
+          console.log('🔑 Production?', import.meta.env.PROD);
+          
+          socket = io(SOCKET_URL, {
             auth: { token },
             transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            timeout: 20000,
+            autoConnect: true,
+            withCredentials: true
           });
-
+          
           socket.on('connect', () => {
             setSocketStatus('connected');
             socket.emit('join_user_room', userData.id);
