@@ -24,49 +24,53 @@ const signUserToken = (user) => {
 };
 
 router.post('/signup', async (req, res) => {
-  console.time('signup-operation');
   try {
     const { username, email, password, role } = req.body;
-    if (!username || !email || !password || !role) {
-      console.timeEnd('signup-operation');
-      return res.status(400).json({ message: 'Please enter all fields.' });
+    
+    // ✅ Add validation
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: 'All fields required' });
     }
-
-    // ✅ OPTIMIZED: Use lean() for faster query
-    const existingUser = await User.findOne({ email }).lean();
-
+    
+    // Check existing user
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-      console.timeEnd('signup-operation');
-      return res.status(400).json({ message: 'User with this email already exists.' });
+      return res.status(400).json({ message: 'User already exists' });
     }
-
-    // ✅ OPTIMIZED: Reduced bcrypt cost from 10 to 8 (60-70% faster)
-    const hashedPassword = await bcrypt.hash(password, 8);
-
-    const newUser = new User({ username, email, password: hashedPassword, role });
+    
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Create user
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+      role: role || 'student'
+    });
+    
     await newUser.save();
-
-    const token = signUserToken(newUser);
     
-    console.timeEnd('signup-operation');
+    // Generate token
+    const token = jwt.sign(
+      { userId: newUser._id, role: newUser.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
     
-    // ✅ Return full user object for frontend
-    return res.status(201).json({ 
-      token, 
-      role: newUser.role,
+    res.status(201).json({
+      message: 'User created successfully',
+      token,
       user: {
-        _id: newUser._id,
+        id: newUser._id,
         username: newUser.username,
         email: newUser.email,
-        role: newUser.role,
-        profilePicture: newUser.profilePicture,
-        credits: newUser.credits,
+        role: newUser.role
       }
     });
   } catch (error) {
-    console.timeEnd('signup-operation');
-    console.error('Signup error:', error);
-    return res.status(500).json({ message: 'Server error during user creation.' });
+    console.error('Signup error:', error); // ✅ Check this in terminal
+    res.status(500).json({ message: 'Error creating user', error: error.message });
   }
 });
 
