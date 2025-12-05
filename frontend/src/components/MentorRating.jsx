@@ -102,8 +102,15 @@ const MentorRating = ({ mentorId, showDetails = false }) => {
 
   if (loading) {
     return (
-      <div className="mentor-rating loading">
-        <div className="loading-spinner"></div>
+      <div className="rating-skeleton">
+        <div className="skeleton-stars">
+          <span className="skeleton-star"></span>
+          <span className="skeleton-star"></span>
+          <span className="skeleton-star"></span>
+          <span className="skeleton-star"></span>
+          <span className="skeleton-star"></span>
+        </div>
+        <span className="skeleton-text-rating"></span>
       </div>
     );
   }

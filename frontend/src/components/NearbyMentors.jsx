@@ -4,6 +4,7 @@ import { useAuth } from '../AuthContext';
 import { MapPin, Navigation, Users, MessageCircle, Search, X, ChevronRight, RefreshCw, AlertCircle } from 'lucide-react';
 import './NearbyMentors.css';
 import './shared.css';
+import LoadingSpinner from './LoadingSpinner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -405,14 +406,7 @@ const NearbyMentors = () => {
 
   // Loading state
   if (loading && !mentors.length) {
-    return (
-      <div className="nearby-mentors-page">
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Finding nearby mentors...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Finding nearby mentors..." fullScreen={true} />;
   }
 
   // Location error state

@@ -8,6 +8,7 @@ import { ToastContainer, toast, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthContext } from '../AuthContext';
 import RatingModal from './RatingModal'; // ✅ MAKE SURE THIS LINE EXISTS
+import LoadingSpinner from './LoadingSpinner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
@@ -752,7 +753,7 @@ const ChatPage = ({ recipientId, recipientName }) => {
   }
 
   if (loading) {
-    return <div className="loading">Loading chats...</div>;
+    return <LoadingSpinner message="Loading chat..." fullScreen={true} />;
   }
 
   return (
