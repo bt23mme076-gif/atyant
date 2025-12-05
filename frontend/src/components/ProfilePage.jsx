@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../AuthContext';
 import { MapPin, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
 import './ProfilePage.css';
+import LoadingSpinner from './LoadingSpinner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -409,13 +410,8 @@ const ProfilePage = () => {
   const degrees = ['B.Tech', 'B.Sc', 'MBA', 'M.Tech', 'Other'];
   const years = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduated'];
 
-  if (loading && !formData.username) {
-    return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <p>Loading profile...</p>
-      </div>
-    );
+  if (loading) {
+    return <LoadingSpinner message="Loading profile..." fullScreen={true} />;
   }
 
   return (

@@ -131,11 +131,7 @@ const Profile = () => {
   );
 
   if (loading) {
-    return (
-      <div className="profile-page">
-        <ProfileSkeleton />
-      </div>
-    );
+    return <LoadingSpinner message="Loading your profile..." fullScreen={true} />;
   }
 
   return (
