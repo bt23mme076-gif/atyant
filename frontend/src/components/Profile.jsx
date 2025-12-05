@@ -4,6 +4,8 @@ import { useAuth } from '../AuthContext';
 // ========== NEW: ADD THESE IMPORTS ==========
 import { MapPin, RefreshCw } from 'lucide-react';
 // ========== END NEW IMPORTS ==========
+// ✅ ADD THIS IMPORT AT TOP
+import LoadingSpinner from './LoadingSpinner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -16,6 +18,7 @@ const Profile = () => {
   const [updatingLocation, setUpdatingLocation] = useState(false);
   const [locationStatus, setLocationStatus] = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [loading, setLoading] = useState(true); // New loading state
   // ========== END NEW STATE VARIABLES ==========
 
   // ...all your existing useEffect and functions remain same...
@@ -34,6 +37,8 @@ const Profile = () => {
       }
     } catch (error) {
       console.error('Error fetching location:', error);
+    } finally {
+      setLoading(false); // Set loading to false after fetching
     }
   };
 
@@ -104,6 +109,34 @@ const Profile = () => {
     }
   }, [user]);
   // ========== END NEW FUNCTION ==========
+
+  // ✅ ADD THIS AFTER IMPORTS
+  const ProfileSkeleton = () => (
+    <div className="profile-skeleton">
+      <div className="skeleton skeleton-avatar" style={{ width: '120px', height: '120px', margin: '0 auto 20px' }}></div>
+      <div className="skeleton skeleton-title" style={{ width: '60%', margin: '0 auto 12px' }}></div>
+      <div className="skeleton skeleton-text" style={{ width: '40%', margin: '0 auto 24px' }}></div>
+      
+      <div className="form-skeleton">
+        <div className="skeleton skeleton-text" style={{ marginBottom: '8px' }}></div>
+        <div className="skeleton skeleton-card" style={{ height: '45px', marginBottom: '16px' }}></div>
+        
+        <div className="skeleton skeleton-text" style={{ marginBottom: '8px' }}></div>
+        <div className="skeleton skeleton-card" style={{ height: '45px', marginBottom: '16px' }}></div>
+        
+        <div className="skeleton skeleton-text" style={{ marginBottom: '8px' }}></div>
+        <div className="skeleton skeleton-card" style={{ height: '100px', marginBottom: '16px' }}></div>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="profile-page">
+        <ProfileSkeleton />
+      </div>
+    );
+  }
 
   return (
     <div className="profile-container">

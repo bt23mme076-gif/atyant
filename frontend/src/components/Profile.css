@@ -129,4 +129,54 @@
   to { transform: rotate(360deg); }
 }
 
-/* ...rest of existing styles... */
+/* ========== PROFILE SKELETON ========== */
+.profile-skeleton {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-avatar {
+  border-radius: 50%;
+}
+
+.skeleton-title {
+  height: 24px;
+}
+
+.skeleton-text {
+  height: 16px;
+}
+
+.skeleton-card {
+  height: 45px;
+}
+
+.form-skeleton {
+  margin-top: 24px;
+}
+
+/* ========== MOBILE RESPONSIVE ========== */
+@media (max-width: 480px) {
+  .profile-skeleton {
+    padding: 16px;
+    margin: 20px auto;
+  }
+
+  .skeleton-avatar {
+    width: 100px !important;
+    height: 100px !important;
+  }
+}
