@@ -299,8 +299,14 @@ Summer Internship Opportunity Under Your Guidance.
 Subject: Inquiry Regarding Summer Research Opportunity (June–July 202*)
 Respected Prof. <Name>
 I hope this email finds you well. My name is <Your Name>, second-year B.Tech student at <College Name>. I am writing to express my keen interest in working under your guidance during the Summer term (June–July) of 202*.
-I am particularly interested in your research on <Research interest from the professor profile from college website>. The study of these materials and their tunable properties fascinates me, and I am eager to gain hands-on experience in this field.
-I have attached my CV for your reference. I would be grateful for the opportunity to discuss any potential openings in your lab. Thank you for your time and consideration. I look forward to your response.
+I am particularly interested in your research on <Research interest from the professor profile from college website>. 
+The study of these Topic and their tunable properties fascinates me, and I am eager to gain hands-on experience in this field.
+
+I have attached my CV for your reference.
+<Drive link>
+
+I would be grateful for the opportunity to discuss any potential openings in your lab. Thank you for your time and consideration. I look forward to your response.
+
 Warm Regards,
 <Name>
 Visvesvaraya National Institute of Technology
