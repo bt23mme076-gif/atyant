@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import { Menu, User as UserIcon } from 'lucide-react';
+import { Menu, User as UserIcon, GraduationCap } from 'lucide-react'; // ✅ ADD GraduationCap
 import './Navbar.css';
 
 const Navbar = () => {
@@ -28,7 +28,7 @@ const Navbar = () => {
 
   useEffect(() => {
     // ... your useEffect for closing the profile dropdown
-  const handleClickOutside = (event) => {
+    const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target) && isDropdownOpen) {
         setIsDropdownOpen(false);
       }
@@ -40,6 +40,7 @@ const Navbar = () => {
 
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isDropdownOpen]);
+
   const renderLinks = (isMobile = false) => {
     const linkAction = () => isMobile && setOpen(false);
     
@@ -47,17 +48,27 @@ const Navbar = () => {
       return user.role === 'mentor' ? (
         <>
           <Link to="/chat" className="nav-link" onClick={linkAction}>Student Chats</Link>
+          <Link to="/internships" className="nav-link" onClick={linkAction}>
+            {/* ✅ ADD ICON for desktop */}
+            {!isMobile && <GraduationCap size={18} />}
+            Internships
+          </Link>
           <Link to="/profile" className="nav-link" onClick={linkAction}>Profile</Link>
         </>
       ) : (
         <>
           <Link to="/mentors" className="nav-link" onClick={linkAction}>Find Mentor</Link>
           
-          {/* ✅ ADD: nearby-mentors class */}
           <Link to="/nearby-mentors" className="nav-link nearby-mentors" onClick={linkAction}>
             Nearby Achievers
           </Link>
-          
+
+          {/* ✅ ADD INTERNSHIP LINK */}
+          <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
+            {!isMobile && <GraduationCap size={18} />}
+            Internships
+          </Link>
+
           <Link to="/chat" className="nav-link" onClick={linkAction}>My Chats</Link>
           <Link to="/profile" className="nav-link" onClick={linkAction}>Profile</Link>
         </>
@@ -67,6 +78,13 @@ const Navbar = () => {
     return (
       <>
         <Link to="/mentors" className="nav-link" onClick={linkAction}>Mentors</Link>
+        
+        {/* ✅ ADD INTERNSHIP LINK FOR NON-LOGGED IN USERS */}
+        <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
+          {!isMobile && <GraduationCap size={18} />}
+          Internships
+        </Link>
+
         <Link to="/login" className="nav-button" onClick={linkAction}>Login</Link>
         <Link to="/signup" className="nav-button primary" onClick={linkAction}>Sign Up</Link>
       </>
@@ -108,4 +126,5 @@ const Navbar = () => {
     </header>
   );
 };
+
 export default Navbar;

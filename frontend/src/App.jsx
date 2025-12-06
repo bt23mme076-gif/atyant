@@ -13,6 +13,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
+import InternshipPage from './components/InternshipPage';
 import LoadingSpinner from './components/LoadingSpinner'; // ✅ ADD THIS LINE
 
 // ✅ LAZY LOAD HEAVY COMPONENTS
@@ -50,6 +51,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/internships" element={<InternshipPage />} />
 
               {/* Protected Routes */}
               <Route path="/mentors" element={

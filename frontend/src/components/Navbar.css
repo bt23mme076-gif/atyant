@@ -378,6 +378,28 @@
   color: #e0f1ff;
 }
 
+/* ========== INTERNSHIP LINK STYLING ========== */
+.nav-link.internship-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-link.internship-link svg {
+  color: #667eea;
+}
+
+.nav-link.internship-link:hover svg {
+  color: #764ba2;
+}
+
+/* Mobile - no icon needed */
+@media (max-width: 768px) {
+  .nav-link.internship-link svg {
+    display: none;
+  }
+}
+
 /* Responsive behavior */
 @media (max-width: 800px) {
   .desktop-only { display: none; }
