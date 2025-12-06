@@ -11,10 +11,12 @@ export const AuthProvider = ({ children }) => {
   const buildUserFromToken = (token) => {
     const decoded = jwtDecode(token);
     return {
-      token, // ← Added for AI Chat
+      token,
       role: decoded.role,
       id: decoded.userId,
       username: decoded.username,
+      name: decoded.name || decoded.username,
+      email: decoded.email,
       profilePicture: decoded.profilePicture || null,
     };
   };
@@ -25,12 +27,24 @@ export const AuthProvider = ({ children }) => {
       try {
         const decoded = jwtDecode(token);
 
-        // Token expiry check
         if (decoded.exp * 1000 < Date.now()) {
           localStorage.removeItem('token');
           setUser(null);
         } else {
-          setUser(buildUserFromToken(token));
+          // ✅ Check if we have updated user data in localStorage
+          const storedUser = localStorage.getItem('userData');
+          if (storedUser) {
+            try {
+              const parsedUser = JSON.parse(storedUser);
+              setUser(parsedUser);
+              console.log('✅ Loaded user from localStorage:', parsedUser);
+            } catch (e) {
+              // Fallback to token
+              setUser(buildUserFromToken(token));
+            }
+          } else {
+            setUser(buildUserFromToken(token));
+          }
         }
       } catch (e) {
         console.error('Invalid token:', e);
@@ -45,7 +59,12 @@ export const AuthProvider = ({ children }) => {
     try {
       localStorage.setItem('token', token);
       const userData = buildUserFromToken(token);
+      
+      // ✅ Store user data separately
+      localStorage.setItem('userData', JSON.stringify(userData));
+      
       setUser(userData);
+      console.log('✅ User logged in:', userData);
       return userData;
     } catch (e) {
       console.error('Failed to decode token on login:', e);
@@ -57,17 +76,36 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('userData'); // ✅ Clear user data
     setUser(null);
   };
 
+  // ✅ FIXED updateUser function
+  const updateUser = (updatedData) => {
+    if (!user) {
+      console.warn('⚠️ No user to update');
+      return;
+    }
+    
+    const updatedUser = { ...user, ...updatedData };
+    
+    // Update state
+    setUser(updatedUser);
+    
+    // Update localStorage
+    localStorage.setItem('userData', JSON.stringify(updatedUser));
+    
+    console.log('✅ User updated in context:', updatedUser);
+    console.log('✅ Profile Picture:', updatedUser.profilePicture);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Fixed: context null check करें undefined नहीं
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === null) {

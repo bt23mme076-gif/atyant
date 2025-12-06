@@ -6,6 +6,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff } from 'lucide-react';
 import './AuthForm.css';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -22,33 +23,32 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    setIsLoading(true); // ✅ ADD THIS LINE
-    console.time('frontend-login'); // ✅ ADD THIS LINE (optional)
-    
+    setError('');
+    setLoading(true);
+
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email: formData.email,
+        password: formData.password,
       });
-      const data = await response.json();
-      if (response.ok) {
-        setMessage('Login successful! Redirecting...');
-        login(data.token);
-        setTimeout(() => {
-          if (data.role === 'mentor') navigate('/chat');
-          else navigate('/');
-        }, 200);
-      } else {
-        setMessage(data.message || 'Login failed.');
-      }
-    } catch (error) {
-      console.timeEnd('frontend-login'); // ✅ ADD THIS LINE (optional)
-      setMessage('An error occurred during login.');
+
+      console.log('✅ Login response:', response.data);
+
+      // ✅ Use context login function
+      login(response.data.user, response.data.token);
+
+      toast.success(`Welcome back, ${response.data.user.name}! 🎉`);
+
+      // Redirect
+      const from = location.state?.from || '/';
+      navigate(from);
+
+    } catch (err) {
+      console.error('❌ Login error:', err);
+      setError(err.response?.data?.message || 'Login failed');
+      toast.error(err.response?.data?.message || 'Login failed');
     } finally {
-      setIsLoading(false); // ✅ ADD THIS LINE
+      setLoading(false);
     }
   };
 

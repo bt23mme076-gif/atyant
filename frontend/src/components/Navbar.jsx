@@ -1,45 +1,40 @@
 // src/components/Navbar.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
-import { Menu, User as UserIcon, GraduationCap } from 'lucide-react'; // ✅ ADD GraduationCap
+import { AuthContext } from '../AuthContext';
+import UserAvatar from './UserAvatar'; // ✅ Already imported
+import { Menu, User as UserIcon, GraduationCap, LogOut, Settings } from 'lucide-react';
 import './Navbar.css';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
   const panelRef = useRef(null);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const avatarBtnRef = useRef(null);
 
+  console.log('🔍 Navbar - Current User:', user);
+
   const handleLogout = () => {
     logout();
-    alert('You have been logged out.');
     navigate('/login');
-    setOpen(false);
-    setIsDropdownOpen(false);
   };
 
   useEffect(() => {
-    // ... your useEffect for closing the mobile panel
-  }, [open]);
-
-  useEffect(() => {
-    // ... your useEffect for closing the profile dropdown
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && isDropdownOpen) {
-        setIsDropdownOpen(false);
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && showDropdown) {
+        setShowDropdown(false);
       }
     };
 
-    if (isDropdownOpen) {
+    if (showDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isDropdownOpen]);
+  }, [showDropdown]);
 
   const renderLinks = (isMobile = false) => {
     const linkAction = () => isMobile && setOpen(false);
@@ -49,7 +44,6 @@ const Navbar = () => {
         <>
           <Link to="/chat" className="nav-link" onClick={linkAction}>Student Chats</Link>
           <Link to="/internships" className="nav-link" onClick={linkAction}>
-            {/* ✅ ADD ICON for desktop */}
             {!isMobile && <GraduationCap size={18} />}
             Internships
           </Link>
@@ -63,12 +57,11 @@ const Navbar = () => {
             Nearby Achievers
           </Link>
 
-          {/* ✅ ADD INTERNSHIP LINK */}
           <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
             {!isMobile && <GraduationCap size={18} />}
             Internships
           </Link>
-
+          
           <Link to="/chat" className="nav-link" onClick={linkAction}>My Chats</Link>
           <Link to="/profile" className="nav-link" onClick={linkAction}>Profile</Link>
         </>
@@ -79,7 +72,6 @@ const Navbar = () => {
       <>
         <Link to="/mentors" className="nav-link" onClick={linkAction}>Mentors</Link>
         
-        {/* ✅ ADD INTERNSHIP LINK FOR NON-LOGGED IN USERS */}
         <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
           {!isMobile && <GraduationCap size={18} />}
           Internships
@@ -100,20 +92,39 @@ const Navbar = () => {
         {renderLinks()}
         {user && (
           <div className="profile-menu-container">
-            <button ref={avatarBtnRef} onClick={() => setIsDropdownOpen(v => !v)} className="profile-avatar-btn">
-              {user.profilePicture ? <img src={user.profilePicture} alt="Profile" /> : <UserIcon size={24} />}
+            <button 
+              ref={avatarBtnRef} 
+              onClick={() => setShowDropdown(v => !v)} 
+              className="profile-avatar-btn"
+            >
+              {/* ✅ REPLACE THIS LINE - Use UserAvatar instead of img/UserIcon */}
+              <UserAvatar user={user} size={40} />
             </button>
-            {isDropdownOpen && (
+            {showDropdown && (
               <div ref={dropdownRef} className="profile-dropdown">
-                <div className="dropdown-header">Signed in as <strong>{user.username}</strong></div>
-                <button onClick={handleLogout} className="dropdown-item">Logout</button>
+                <div className="dropdown-header">
+                  {/* ✅ ADD UserAvatar in dropdown header too */}
+                  <UserAvatar user={user} size={48} />
+                  <div className="dropdown-user-info">
+                    <span>Signed in as</span>
+                    <strong>{user.username}</strong>
+                  </div>
+                </div>
+                <Link to="/profile" className="dropdown-item">
+                  <UserIcon size={18} />
+                  My Profile
+                </Link>
+                
+                <button onClick={handleLogout} className="dropdown-item logout-btn">
+                  <LogOut size={18} />
+                  Logout
+                </button>
               </div>
             )}
           </div>
         )}
       </nav>
       
-
       {/* --- Mobile Hamburger & Panel --- */}
       <button className="hamburger mobile-only" onClick={() => setOpen(v => !v)}>
         <Menu size={22} />

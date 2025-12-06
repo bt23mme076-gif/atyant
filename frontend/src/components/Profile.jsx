@@ -1,8 +1,9 @@
-// ...all your existing imports...
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../AuthContext';
+import React, { useState, useEffect, useContext } from 'react';
+import { useAuth, AuthContext } from '../AuthContext';
 // ========== NEW: ADD THESE IMPORTS ==========
 import { MapPin, RefreshCw } from 'lucide-react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 // ========== END NEW IMPORTS ==========
 // ✅ ADD THIS IMPORT AT TOP
 import LoadingSpinner from './LoadingSpinner';
@@ -10,7 +11,7 @@ import LoadingSpinner from './LoadingSpinner';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, updateUser } = useContext(AuthContext); // ✅ Get updateUser function
   
   // ...all your existing state variables remain same...
   
@@ -130,6 +131,47 @@ const Profile = () => {
     </div>
   );
 
+  const handleProfilePictureUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('profilePicture', file);
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        'http://localhost:5000/api/users/upload-profile-picture',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      console.log('✅ Upload Response:', response.data);
+
+      // ✅ UPDATE USER IN CONTEXT
+      if (response.data.profilePicture) {
+        updateUser({ profilePicture: response.data.profilePicture });
+        
+        // Also update local state if you have it
+        setProfileData(prev => ({
+          ...prev,
+          profilePicture: response.data.profilePicture
+        }));
+        
+        toast.success('Profile picture updated! ✅');
+      }
+
+    } catch (error) {
+      console.error('❌ Upload error:', error);
+      toast.error('Failed to upload profile picture');
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner message="Loading your profile..." fullScreen={true} />;
   }
@@ -144,8 +186,7 @@ const Profile = () => {
       </div>
 
       <div className="profile-content">
-        {/* ...all your existing sections... */}
-        
+        {/* ...all your existing sections... */        
         {/* ========== NEW: ADD THIS SECTION ANYWHERE ========== */}
         <div className="location-section">
           <h3>

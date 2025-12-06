@@ -13,8 +13,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
-import InternshipPage from './components/InternshipPage';
-import LoadingSpinner from './components/LoadingSpinner'; // ✅ ADD THIS LINE
+import LoadingSpinner from './components/LoadingSpinner';
 
 // ✅ LAZY LOAD HEAVY COMPONENTS
 const Home = lazy(() => import('./components/Home'));
@@ -29,6 +28,7 @@ const PublicProfilePage = lazy(() => import('./components/PublicProfilePage'));
 const AskQuestionPage = lazy(() => import('./components/AskQuestionPage'));
 const NearbyMentors = lazy(() => import('./components/NearbyMentors'));
 const AIChat = lazy(() => import('./components/AIChat'));
+const InternshipPage = lazy(() => import('./components/InternshipPage'));
 
 function App() {
   const location = useLocation();
@@ -42,18 +42,20 @@ function App() {
       <Navbar />
       <main>
         <ScrollToTop />
-        <Suspense fallback={<LoadingSpinner />}> {/* ✅ USE LoadingSpinner component */}
+        <Suspense fallback={<LoadingSpinner />}>
           <ErrorBoundary>
             <Routes>
-              {/* Public Routes */}
+              {/* ========== PUBLIC ROUTES ========== */}
               <Route path="/" element={<Home />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
+              
+              {/* ✅ INTERNSHIP PAGE - PUBLIC (but links are protected) */}
               <Route path="/internships" element={<InternshipPage />} />
 
-              {/* Protected Routes */}
+              {/* ========== PROTECTED ROUTES ========== */}
               <Route path="/mentors" element={
                 <ProtectedRoute>
                   <MentorListPage />

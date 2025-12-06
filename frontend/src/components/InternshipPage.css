@@ -638,16 +638,7 @@
   color: #764ba2;
 }
 
-.departments-list {
-  margin-bottom: 16px;
-}
-
-.departments-list h4 {
-  color: #475569;
-  font-size: 0.95rem;
-  margin-bottom: 12px;
-}
-
+/* Department Link Protected State */
 .department-link {
   display: flex;
   align-items: center;
@@ -667,6 +658,17 @@
   transform: translateX(4px);
 }
 
+/* Locked state for department links */
+.department-link svg[data-lucide="lock"] {
+  color: #f59e0b;
+}
+
+/* View All Button Locked State */
+.view-all-btn svg[data-lucide="lock"] {
+  color: #f59e0b;
+}
+
+/* Card Footer Text */
 .card-footer {
   display: flex;
   align-items: center;

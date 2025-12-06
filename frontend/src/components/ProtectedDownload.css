@@ -1,0 +1,49 @@
+.download-template-btn {
+  background: white;
+  color: #667eea;
+  border: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.download-template-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.download-template-btn:active {
+  transform: translateY(0);
+}
+
+/* Locked state */
+.download-template-btn.locked {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  color: white;
+}
+
+.download-template-btn.locked:hover {
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .download-template-btn {
+    padding: 14px 28px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .download-template-btn {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+  }
+}

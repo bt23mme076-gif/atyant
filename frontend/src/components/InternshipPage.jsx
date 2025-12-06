@@ -1,12 +1,115 @@
-import React, { useState } from 'react';
-import { Download, Mail, ExternalLink, Search, Filter, Building2, GraduationCap, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
+import React, { useState, useContext } from 'react';
+import { Download, Mail, ExternalLink, Search, Filter, Building2, GraduationCap, ChevronLeft, ChevronRight, Quote, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../AuthContext'; // ✅ Import AuthContext
 import './InternshipPage.css';
 
 const InternshipPage = () => {
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext); // ✅ Get user from context
+  const isLoggedIn = !!user; // ✅ Simple check
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInstitute, setSelectedInstitute] = useState('all');
   const [institutionType, setInstitutionType] = useState('all');
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+
+  // ========== PROTECTED LINK HANDLER ==========
+  const handleProtectedLink = (url, e) => {
+    e.preventDefault();
+    
+    if (!isLoggedIn) {
+      const shouldLogin = window.confirm(
+        '🔒 Login Required!\n\nYou need to login to access faculty links.\n\nClick OK to go to login page.'
+      );
+      
+      if (shouldLogin) {
+        navigate('/login', { 
+          state: { from: '/internships' } 
+        });
+      }
+      return;
+    }
+
+    // If logged in, open link
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  // ========== PROTECTED DOWNLOAD ==========
+  const handleDownloadTemplate = () => {
+    if (!isLoggedIn) {
+      const shouldLogin = window.confirm(
+        '🔒 Login Required!\n\nYou need to login to download email template.\n\nClick OK to go to login page.'
+      );
+      
+      if (shouldLogin) {
+        navigate('/login', { 
+          state: { from: '/internships' } 
+        });
+      }
+      return;
+    }
+
+    // Download template code...
+    const emailTemplate = `For IIM Internship 
+
+Subject - Request for Summer/Winter Internship Opportunity in <Prof Domain>.
+
+Subject: Inquiry Regarding Summer Internship Opportunity (June–July 202*)
+
+Respected Prof. <Name>
+I hope you are doing well. I am <your name>, a <your> -year B.Tech student at VNIT Nagpur, pursuing <Department> Engineering. with a strong interest in entrepreneurship, applying data-driven strategies to real-world problems.
+
+I am writing to express my interest in a Summer/Winter Research Internship under your guidance in the <Research interest from the professor profile from college website>. I am particularly interested in <specific research topic only two-three>.
+
+At 180 Degrees Consulting VNIT("Use Your College Club if not use this, it is universal club"), I have worked on projects involving organizational analysis, behavioral research, and data-driven decision-making. I am also skilled in Python, Power BI, and analytics.
+
+I am available for the internship anytime between *th May to *th July 2026.
+
+My resume is available here for your reference:
+<Use Drive link >
+I would be grateful for the opportunity to contribute to your research. Looking forward to your response.
+
+Best regards,
+<Your Name>
+B.Tech, VNIT Nagpur
+Contact: +91 987654321
+LinkedIn: www.linkedin.com/in/**yourlink**283    
+
+
+For IIT Internship 
+
+Summer Internship Opportunity Under Your Guidance.
+
+Subject: Inquiry Regarding Summer Research Opportunity (June–July 202*)
+Respected Prof. <Name>
+I hope this email finds you well. My name is <Your Name>, second-year B.Tech student at <College Name>. I am writing to express my keen interest in working under your guidance during the Summer term (June–July) of 202*.
+I am particularly interested in your research on <Research interest from the professor profile from college website>. 
+The study of these Topic and their tunable properties fascinates me, and I am eager to gain hands-on experience in this field.
+
+I have attached my CV for your reference.
+<Drive link>
+
+I would be grateful for the opportunity to discuss any potential openings in your lab. Thank you for your time and consideration. I look forward to your response.
+
+Warm Regards,
+<Name>
+Visvesvaraya National Institute of Technology
+S. Ambazari Rd, Nagpur 440010
+Contact: +91 987654321
+Resume link [ Drive Link ]
+`;
+
+    const blob = new Blob([emailTemplate], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Internship_Email_Template_Atyant.txt';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
 
   // ========== ALUMNI TESTIMONIALS DATA ==========
   const testimonials = [
@@ -81,10 +184,10 @@ const InternshipPage = () => {
     setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   };
 
-  // ========== IIT & IIM FACULTY DATA (LOWER BRANCHES FOCUSED) ==========
+  // ========== IIT & IIM FACULTY DATA =========
   const institutions = {
     'IIT Bombay': {
-      url: 'https://www.iitb.ac.in/en/about-iit-bombay/people/faculty-lists',
+      url: 'https://www.scribd.com/document/345976450/IIT-Bombay-Faculties-List',
       departments: {
         'Metallurgical Engineering': 'https://www.iitb.ac.in/mems/en/people/faculty',
         'Chemical Engineering': 'https://www.che.iitb.ac.in/faculty-directory',
@@ -97,8 +200,8 @@ const InternshipPage = () => {
     'IIT Delhi': {
       url: 'https://home.iitd.ac.in/faculty.php',
       departments: {
-        'Textile Technology': 'https://textile.iitd.ac.in/people/faculty',
-        'Chemical Engineering': 'https://chemical.iitd.ac.in/people/faculty',
+        'Textile Technology': 'https://textile.iitd.ac.in/faculty',
+        'Chemical Engineering': 'https://chemistry.iitd.ac.in/faculty',
         'Civil Engineering': 'https://civil.iitd.ac.in/index.php?lmenuid=faculty',
         'Materials Science': 'https://mse.iitd.ac.in/faculty',
         'Applied Mechanics': 'https://am.iitd.ac.in/faculty',
@@ -130,12 +233,12 @@ const InternshipPage = () => {
     'IIT Kharagpur': {
       url: 'https://www.iitkgp.ac.in/faclistbydepartment',
       departments: {
-        'Metallurgical Engineering': 'https://www.iitkgp.ac.in/department/MT/faculty',
-        'Mining Engineering': 'https://www.iitkgp.ac.in/department/MN/faculty',
-        'Chemical Engineering': 'https://www.iitkgp.ac.in/department/CH/faculty',
-        'Civil Engineering': 'https://www.iitkgp.ac.in/department/CE/faculty',
+        'Metallurgical Engineering': 'https://www.iitkgp.ac.in/department/MT',
+        'Mining Engineering': 'https://iitkgp.irins.org/faculty/index/Department+of+Mining+Engineering',
+        'Chemical Engineering': 'https://www.iitkgp.ac.in/department/CH/faculty/ch-bhaskar',
+        'Civil Engineering': 'https://www.iitkgp.ac.in/department/CE/faculty/ce-lsr',
         'Agricultural Engineering': 'https://www.iitkgp.ac.in/department/AG/faculty',
-        'Biotechnology': 'https://www.iitkgp.ac.in/department/BT/faculty',
+        'Biotechnology': 'https://www.iitkgp.ac.in/department/BT/faculty/bt-amitk',
       }
     },
     'IIT Roorkee': {
@@ -248,7 +351,7 @@ const InternshipPage = () => {
         'Finance': 'https://www.iiml.ac.in/faculty-list-by-specilization?n=Ng==',
         'Marketing': 'https://www.iiml.ac.in/faculty-list-by-specilization?n=MTA=',
         'Operations Management': 'https://www.iiml.ac.in/faculty-list-by-specilization?n=MTE=',
-        'Economics': 'https://www.iiml.ac.in/faculty-list-by-specilization?n=Mg=',
+        'Economics': 'https://www.iiml.ac.in/faculty-list-by-specilization?n=Mg==',
         'Information Systems': 'https://www.iiml.ac.in/faculty-list-by-specilization?n=OA==',
       }
     },
@@ -262,68 +365,6 @@ const InternshipPage = () => {
         'Organizational Behaviour': 'https://www.iimnagpur.ac.in/faculty.php?area=Organizational%20Behaviour',
       }
     },
-  };
-
-  // ========== EMAIL TEMPLATE DOWNLOAD ==========
-  const downloadEmailTemplate = () => {
-    const emailTemplate = `For IIM Internship 
-
-Subject - Request for Summer/Winter Internship Opportunity in <Prof Domain>.
-
-Subject: Inquiry Regarding Summer Internship Opportunity (June–July 202*)
-
-Respected Prof. <Name>
-I hope you are doing well. I am <your name>, a <your> -year B.Tech student at VNIT Nagpur, pursuing <Department> Engineering. with a strong interest in entrepreneurship, applying data-driven strategies to real-world problems.
-
-I am writing to express my interest in a Summer/Winter Research Internship under your guidance in the <Research interest from the professor profile from college website>. I am particularly interested in <specific research topic only two-three>.
-
-At 180 Degrees Consulting VNIT("Use Your College Club if not use this, it is universal club"), I have worked on projects involving organizational analysis, behavioral research, and data-driven decision-making. I am also skilled in Python, Power BI, and analytics.
-
-I am available for the internship anytime between *th May to *th July 2026.
-
-My resume is available here for your reference:
-<Use Drive link >
-I would be grateful for the opportunity to contribute to your research. Looking forward to your response.
-
-Best regards,
-<Your Name>
-B.Tech, VNIT Nagpur
-Contact: +91 987654321
-LinkedIn: www.linkedin.com/in/**yourlink**283    
-
-
-For IIT Internship 
-
-Summer Internship Opportunity Under Your Guidance.
-
-Subject: Inquiry Regarding Summer Research Opportunity (June–July 202*)
-Respected Prof. <Name>
-I hope this email finds you well. My name is <Your Name>, second-year B.Tech student at <College Name>. I am writing to express my keen interest in working under your guidance during the Summer term (June–July) of 202*.
-I am particularly interested in your research on <Research interest from the professor profile from college website>. 
-The study of these Topic and their tunable properties fascinates me, and I am eager to gain hands-on experience in this field.
-
-I have attached my CV for your reference.
-<Drive link>
-
-I would be grateful for the opportunity to discuss any potential openings in your lab. Thank you for your time and consideration. I look forward to your response.
-
-Warm Regards,
-<Name>
-Visvesvaraya National Institute of Technology
-S. Ambazari Rd, Nagpur 440010
-Contact: +91 987654321
-Resume link [ Drive Link ]
-`;
-
-    const blob = new Blob([emailTemplate], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'Internship_Email_Template_Atyant.txt';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
   };
 
   // ========== FILTER INSTITUTIONS ==========
@@ -346,12 +387,34 @@ Resume link [ Drive Link ]
         <div className="hero-content">
           <GraduationCap size={64} className="hero-icon" />
           <h1>Research Internship Portal</h1>
-          <p>Connect with faculty at IITs & IIMs - Focus on Core & Lower Branches</p>
+          <p>Connect with faculty at IITs & IIMs - Focus on Core & Non-Core Branches</p>
           
-          <button className="download-template-btn" onClick={downloadEmailTemplate}>
-            <Download size={20} />
-            Download Email Template
+          {/* ✅ Use user from context */}
+          {isLoggedIn && user && (
+            <div style={{ 
+              marginBottom: '16px', 
+              color: '#4ade80', 
+              fontSize: '1rem',
+              fontWeight: '600' 
+            }}>
+              ✅ Welcome, {user.name}!
+            </div>
+          )}
+          
+          {/* Download Button */}
+          <button 
+            onClick={handleDownloadTemplate}
+            className={`download-template-btn ${!isLoggedIn ? 'locked' : ''}`}
+          >
+            {isLoggedIn ? <Download size={20} /> : <Lock size={20} />}
+            <span>{isLoggedIn ? 'Download Email Template' : 'Login to Download Template'}</span>
           </button>
+
+          {!isLoggedIn && (
+            <p style={{ marginTop: '12px', color: 'rgba(255,255,255,0.85)', fontSize: '0.9rem' }}>
+              🔒 Login required to download template and access faculty links
+            </p>
+          )}
         </div>
       </div>
 
@@ -527,11 +590,11 @@ Resume link [ Drive Link ]
                 <h3>{name}</h3>
                 <a 
                   href={data.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="view-all-btn"
+                  onClick={(e) => handleProtectedLink(data.url, e)}
+                  className={`view-all-btn ${!isLoggedIn ? 'locked' : ''}`}
                 >
-                  View All Faculty <ExternalLink size={16} />
+                  {isLoggedIn ? 'View All Faculty' : 'Login to View'}
+                  {isLoggedIn ? <ExternalLink size={16} /> : <Lock size={16} />}
                 </a>
               </div>
 
@@ -541,19 +604,18 @@ Resume link [ Drive Link ]
                   <a
                     key={dept}
                     href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="department-link"
+                    onClick={(e) => handleProtectedLink(url, e)}
+                    className={`department-link ${!isLoggedIn ? 'locked' : ''}`}
                   >
                     <span>{dept}</span>
-                    <ExternalLink size={14} />
+                    {isLoggedIn ? <ExternalLink size={14} /> : <Lock size={14} />}
                   </a>
                 ))}
               </div>
 
               <div className="card-footer">
                 <Mail size={16} />
-                <span>Use email template to reach out</span>
+                <span>{isLoggedIn ? 'Use email template to reach out' : 'Login to access links'}</span>
               </div>
             </div>
           ))}
@@ -567,13 +629,13 @@ Resume link [ Drive Link ]
         )}
       </div>
 
-       {/* ========== ALUMNI TESTIMONIALS SLIDER ========== */}
+      {/* ========== TESTIMONIALS ========== */}
       <div className="testimonials-section">
         <h2>🎓 Success Stories from Our Alumni</h2>
         <p className="testimonials-subtitle">Real students, Real internships, Real advice</p>
         
         <div className="testimonial-slider">
-          <button className="slider-btn prev" onClick={prevTestimonial} aria-label="Previous testimonial">
+          <button className="slider-btn prev" onClick={prevTestimonial}>
             <ChevronLeft size={24} />
           </button>
 
@@ -581,7 +643,7 @@ Resume link [ Drive Link ]
             <div className="testimonial-header">
               <img 
                 src={testimonials[currentTestimonial].image} 
-                alt={`${testimonials[currentTestimonial].name} - ${testimonials[currentTestimonial].gender}`}
+                alt={testimonials[currentTestimonial].name}
                 className="testimonial-avatar"
               />
               <div className="testimonial-info">
@@ -606,24 +668,23 @@ Resume link [ Drive Link ]
             </div>
           </div>
 
-          <button className="slider-btn next" onClick={nextTestimonial} aria-label="Next testimonial">
+          <button className="slider-btn next" onClick={nextTestimonial}>
             <ChevronRight size={24} />
           </button>
         </div>
 
         <div className="slider-dots">
-          {testimonials.map((testimonial, index) => (
+          {testimonials.map((_, index) => (
             <button
               key={index}
               className={`dot ${index === currentTestimonial ? 'active' : ''}`}
               onClick={() => setCurrentTestimonial(index)}
-              aria-label={`View testimonial from ${testimonial.name}`}
             />
           ))}
         </div>
       </div>
 
-      {/* ========== EXAMPLE SECTION AT END ========== */}
+      {/* ========== EXAMPLE SECTION ========== */}
       <div className="example-section">
         <div className="example-box">
           <h4>💡 Example: Personalization</h4>
