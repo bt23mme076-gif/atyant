@@ -141,32 +141,32 @@ const InternshipPage = () => {
     'IIT Roorkee': {
       url: 'https://www.iitr.ac.in/academics/faculty.html',
       departments: {
-        'Metallurgical Engineering': 'https://www.iitr.ac.in/departments/MT/pages/People+Faculty_List.html',
-        'Chemical Engineering': 'https://www.iitr.ac.in/departments/CH/pages/People+Faculty_List.html',
-        'Civil Engineering': 'https://www.iitr.ac.in/departments/CE/pages/People+Faculty_List.html',
-        'Paper Technology': 'https://www.iitr.ac.in/departments/PT/pages/People+Faculty_List.html',
-        'Architecture': 'https://www.iitr.ac.in/departments/AR/pages/People+Faculty_List.html',
-        'Earth Sciences': 'https://www.iitr.ac.in/departments/ES/pages/People+Faculty_List.html',
+        'Metallurgical Engineering': 'https://iitr.ac.in/Departments/Metallurgical%20and%20Materials%20Engineering%20Department/People/Faculty/index.html',
+        'Chemical Engineering': 'https://iitr.ac.in/Departments/Chemical%20Engineering%20Department/People/Faculty/index.html',
+        'Civil Engineering': 'https://civil.iitr.ac.in/faculty.aspx',
+        'Bioscience and Bio Eng': 'https://iitr.ac.in/Departments/Biosciences%20and%20Bioengineering%20Department/People/Faculty/index.html',
+        'Architecture': 'https://iitr.ac.in/Departments/Architecture%20and%20Planning%20Department/People/Faculty/index.html',
+        'Earth Sciences': 'https://iitr.ac.in/Departments/Earth%20Sciences%20Department/People/Faculty/index.html',
       }
     },
     'IIT Guwahati': {
-      url: 'https://www.iitg.ac.in/people/faculty',
+      url: 'https://www.iitg.ac.in/iitg_faculty_all',
       departments: {
-        'Chemical Engineering': 'https://www.iitg.ac.in/che/faculty.html',
-        'Civil Engineering': 'https://www.iitg.ac.in/civil/faculty.html',
-        'Biosciences': 'https://www.iitg.ac.in/biotech/faculty.html',
-        'Chemistry': 'https://www.iitg.ac.in/chem/faculty.html',
-        'Design': 'https://www.iitg.ac.in/design/faculty.html',
+        'Chemical Engineering': 'https://www.iitg.ac.in/iitg_faculty_all',
+        'Civil Engineering': 'https://www.iitg.ac.in/iitg_faculty_all',
+        'Biosciences': 'https://www.iitg.ac.in/iitg_faculty_all',
+        'Chemistry': 'https://www.iitg.ac.in/iitg_faculty_all',
+        'Design': 'https://www.iitg.ac.in/iitg_faculty_all',
       }
     },
     'IIT Indore': {
-      url: 'https://www.iiti.ac.in/page/faculty',
+      url: 'https://www.iiti.ac.in',
       departments: {
-        'Metallurgy Engineering': 'https://www.iiti.ac.in/page/mme-faculty',
-        'Civil Engineering': 'https://www.iiti.ac.in/page/ce-faculty',
-        'Chemistry': 'https://www.iiti.ac.in/page/chemistry-faculty',
-        'Astronomy': 'https://www.iiti.ac.in/page/astronomy-faculty',
-        'Biosciences': 'https://www.iiti.ac.in/page/bio-faculty',
+        'Metallurgy Engineering': 'https://mems.iiti.ac.in/faculty',
+        'Civil Engineering': 'https://ce.iiti.ac.in/faculty.php',
+        'Chemistry': 'https://chemistry.iiti.ac.in/faculty',
+        'Astronomy': 'https://iiti.irins.org/faculty/index/Department+of+Astronomy%2C+Astrophysics+and+Space+Engineering',
+        'Biosciences': 'https://bsbe.iiti.ac.in/main/faculty',
       }
     },
     'IIT Hyderabad': {
