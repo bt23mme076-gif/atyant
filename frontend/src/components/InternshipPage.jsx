@@ -117,7 +117,7 @@ const InternshipPage = () => {
       }
     },
     'IIT Kanpur': {
-      url: 'https://www.iitk.ac.in/new/faculty',
+      url: 'https://www.iitk.ac.in/dofa/current-faculty',
       departments: {
         'Materials Science': 'https://www.iitk.ac.in/mse/faculty',
         'Chemical Engineering': 'https://www.iitk.ac.in/che/faculty',
@@ -139,7 +139,7 @@ const InternshipPage = () => {
       }
     },
     'IIT Roorkee': {
-      url: 'https://www.iitr.ac.in/academics/faculty.html',
+      url: 'https://iitr.ac.in/Administration/List%20of%20Faculty.html',
       departments: {
         'Metallurgical Engineering': 'https://iitr.ac.in/Departments/Metallurgical%20and%20Materials%20Engineering%20Department/People/Faculty/index.html',
         'Chemical Engineering': 'https://iitr.ac.in/Departments/Chemical%20Engineering%20Department/People/Faculty/index.html',
@@ -225,7 +225,7 @@ const InternshipPage = () => {
       }
     },
     'IIM Calcutta': {
-      url: 'https://www.iimcal.ac.in/users/faculty',
+      url: 'https://www.iimcal.ac.in/faculty/faculty-directory',
       departments: {
         'Finance': 'https://www.iimcal.ac.in/faculty/finance-and-control',
         'Marketing': 'https://www.iimcal.ac.in/faculty/marketing',
