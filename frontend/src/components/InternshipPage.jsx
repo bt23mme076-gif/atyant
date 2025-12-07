@@ -51,53 +51,100 @@ const InternshipPage = () => {
     }
 
     // Download template code...
-    const emailTemplate = `For IIM Internship 
+    const emailTemplate = `(1) GENERALIZED IIM EMAIL 
 
-Subject - Request for Summer/Winter Internship Opportunity in <Prof Domain>.
+Subject: Request for Summer/Winter Internship Opportunity in [Professor’s Domain]
 
-Subject: Inquiry Regarding Summer Internship Opportunity (June–July 202*)
+Respected Prof. [Name],
 
-Respected Prof. <Name>
-I hope you are doing well. I am <your name>, a <your> -year B.Tech student at VNIT Nagpur, pursuing <Department> Engineering. with a strong interest in entrepreneurship, applying data-driven strategies to real-world problems.
+I hope you are doing well. I am [Your Name], a 2nd yr B.Tech MME student.
 
-I am writing to express my interest in a Summer/Winter Research Internship under your guidance in the <Research interest from the professor profile from college website>. I am particularly interested in <specific research topic only two-three>.
+I am writing to express my interest in a Summer/Winter Research Internship (May–July 2026) in [Professor’s Domain]. I have explored your work on [2–3 specific topics], and I find your perspective on [one concept] particularly insightful. I would be grateful for the opportunity to learn from your approach and contribute to your research.
 
-At 180 Degrees Consulting VNIT("Use Your College Club if not use this, it is universal club"), I have worked on projects involving organizational analysis, behavioral research, and data-driven decision-making. I am also skilled in Python, Power BI, and analytics.
+Through [Your Club / 180 Degrees Consulting], I have gained experience in organizational analysis, behavioural insights, structured problem-solving, and data-driven decision-making. I also use analytical tools like Python and Power BI to support research-oriented tasks.
 
-I am available for the internship anytime between *th May to *th July 2026.
+My resume is attached here: [Drive Link]
 
-My resume is available here for your reference:
-<Use Drive link >
-I would be grateful for the opportunity to contribute to your research. Looking forward to your response.
+I would appreciate the opportunity to contribute to your work.
+Looking forward to your response.
 
 Best regards,
-<Your Name>
-B.Tech, VNIT Nagpur
-Contact: +91 987654321
-LinkedIn: www.linkedin.com/in/**yourlink**283    
+[Your Name]
+Contact: [Contact Number]
+LinkedIn: [LinkedIn Profile]
 
 
-For IIT Internship 
+---
 
-Summer Internship Opportunity Under Your Guidance.
+(2) GENERALIZED IIT EMAIL
 
-Subject: Inquiry Regarding Summer Research Opportunity (June–July 202*)
-Respected Prof. <Name>
-I hope this email finds you well. My name is <Your Name>, second-year B.Tech student at <College Name>. I am writing to express my keen interest in working under your guidance during the Summer term (June–July) of 202*.
-I am particularly interested in your research on <Research interest from the professor profile from college website>. 
-The study of these Topic and their tunable properties fascinates me, and I am eager to gain hands-on experience in this field.
+Subject: Inquiry Regarding Summer Research Internship (June–July 2026)
 
-I have attached my CV for your reference.
-<Drive link>
+Respected Prof. [Name],
 
-I would be grateful for the opportunity to discuss any potential openings in your lab. Thank you for your time and consideration. I look forward to your response.
+I hope you are doing well. I am [Your Name], a 2nd yr B.Tech MME student.
 
-Warm Regards,
-<Name>
-Visvesvaraya National Institute of Technology
-S. Ambazari Rd, Nagpur 440010
-Contact: +91 987654321
-Resume link [ Drive Link ]
+I am writing to express my interest in a Summer Research Internship (June–July 2026) under your guidance. I have explored your research in [Professor’s Domain], especially [1–2 specific topics], and I am fascinated by the scientific depth and experimental approaches involved. I am eager to gain hands-on research exposure in your group.
+
+I have been strengthening my fundamentals in [thermo/transport/materials/data analysis/modelling etc.], and I am motivated to contribute to meaningful research in your lab.
+
+My resume is attached here: [Drive Link]
+
+Thank you for your time and consideration.
+I look forward to your response.
+
+Warm regards,
+[Your Name]
+Contact: [Contact Number]
+
+
+---
+
+(3) EXAMPLE IIM EMAIL — AMAN 
+
+Subject: Research Internship Inquiry for Summer 2025
+
+Respected Prof. Agarwal,
+
+I hope you are doing well. I am Aman, a 2nd yr B.Tech Metallurgical and Materials Engineering student at Visvesvaraya National Institute of Technology (VNIT), Nagpur.
+
+I am writing to express my interest in a Summer Research Internship (June–July 2025) under your guidance. I am deeply interested in your research on International Business Dispute Resolution and Arbitration, and your work in International Commercial Arbitration and Corporate Governance particularly resonates with me. I would be grateful for the opportunity to explore this field further under your mentorship.
+
+I have experience in research, data analysis (SQL, Power BI, Python), and consulting, and I am currently an Associate at 180 Degrees Consulting VNIT, where I have worked on projects involving business strategy, organizational assessment, and market research. I believe this experience aligns well with the structured and analytical approach needed in your research area.
+
+My resume is attached for your reference. I would appreciate the opportunity to discuss how I can contribute to your ongoing work.
+Thank you for your time and consideration.
+
+Yours sincerely,
+Aman
+B.Tech, MME
+Visvesvaraya National Institute of Technology, Nagpur
+Email: [Email ID]
+Contact: [Contact Number]
+Resume Link: [Resume Link]
+
+
+---
+
+(4) EXAMPLE IIT EMAIL — ANSH
+
+Subject: Inquiry Regarding Summer Research Opportunity (June–July 2025)
+
+Respected Prof. Tanushree H. Choudhury,
+
+I hope you are doing well. I am Ansh, a 2nd yr B.Tech Chemical Engineering student at Visvesvaraya National Institute of Technology (VNIT), Nagpur. I am writing to express my interest in a Summer Research Internship (June–July 2025) under your guidance.
+
+I am particularly interested in your research on synthesizing oxide nanostructures through solution-based techniques, especially the development of tailored morphologies with enhanced thermal stability. The science behind these materials and their tunable properties fascinates me, and I am eager to gain hands-on experience in this field.
+
+My resume is attached for your reference. I would be grateful for any opportunity to contribute to your ongoing research activities.
+Thank you for your time and consideration. I look forward to your response.
+
+Warm regards,
+Ansh
+B.Tech, MME
+Visvesvaraya National Institute of Technology, Nagpur
+Contact: [Contact Number]
+Resume Link: [Resume Link]
 `;
 
     const blob = new Blob([emailTemplate], { type: 'text/plain' });
