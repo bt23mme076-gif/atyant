@@ -13,6 +13,16 @@ const InternshipPage = () => {
   const [selectedInstitute, setSelectedInstitute] = useState('all');
   const [institutionType, setInstitutionType] = useState('all');
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
+  
+  // ✅ ADD THESE NEW STATES FOR SWIPE
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+
+  // Add this to remove the "Swipe" hint after first swipe:
+  const [swiped, setSwiped] = useState(false);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
 
   // ========== PROTECTED LINK HANDLER ==========
   const handleProtectedLink = (url, e) => {
@@ -222,13 +232,45 @@ Resume Link: [Resume Link]
     }
   ];
 
-  // ========== TESTIMONIAL NAVIGATION ==========
+  // ✅ ADD THESE SWIPE HANDLERS
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe || isRightSwipe) {
+      setSwiped(true); // ✅ Hide swipe hint
+    }
+    
+    if (isLeftSwipe) {
+      nextTestimonial();
+    }
+    if (isRightSwipe) {
+      prevTestimonial();
+    }
+  };
+
   const nextTestimonial = () => {
-    setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);
+    setCurrentTestimonial((prev) => 
+      prev === testimonials.length - 1 ? 0 : prev + 1
+    );
   };
 
   const prevTestimonial = () => {
-    setCurrentTestimonial((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    setCurrentTestimonial((prev) => 
+      prev === 0 ? testimonials.length - 1 : prev - 1
+    );
   };
 
   // ========== IIT & IIM FACULTY DATA =========
@@ -702,54 +744,82 @@ Resume Link: [Resume Link]
 
       {/* ========== TESTIMONIALS ========== */}
       <div className="testimonials-section">
-        <h2>🎓 Success Stories from Our Alumni</h2>
-        <p className="testimonials-subtitle">Real students, Real internships, Real advice</p>
-        
+        <h2>🎓 Success Stories from Real Students</h2>
+        <p className="testimonials-subtitle">
+          Learn from students who successfully secured internships at top institutions
+        </p>
+
         <div className="testimonial-slider">
-          <button className="slider-btn prev" onClick={prevTestimonial}>
+          {/* Previous Button */}
+          <button 
+            className="slider-btn"
+            onClick={prevTestimonial}
+            aria-label="Previous testimonial"
+          >
             <ChevronLeft size={24} />
           </button>
 
-          <div className="testimonial-card-active">
+          {/* ✅ ADD SWIPE HANDLERS HERE */}
+          <div 
+            className={`testimonial-card-active ${swiped ? 'swiped' : ''}`}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+          >
             <div className="testimonial-header">
-              <img 
-                src={testimonials[currentTestimonial].image} 
+              <img
+                src={testimonials[currentTestimonial].image}
                 alt={testimonials[currentTestimonial].name}
                 className="testimonial-avatar"
               />
               <div className="testimonial-info">
                 <h3>{testimonials[currentTestimonial].name}</h3>
-                <p className="college-tag">{testimonials[currentTestimonial].college}</p>
-                <p className="branch-tag">{testimonials[currentTestimonial].branch}</p>
-                <div className="intern-badge">
-                  <GraduationCap size={16} />
-                  <span>Interned at: {testimonials[currentTestimonial].internAt}</span>
-                </div>
+                <p className="college-tag">
+                  {testimonials[currentTestimonial].college}
+                </p>
+                <p className="branch-tag">
+                  {testimonials[currentTestimonial].branch}
+                </p>
+                <span className="intern-badge">
+                  <GraduationCap size={14} />
+                  Interned at {testimonials[currentTestimonial].internAt}
+                </span>
               </div>
             </div>
 
             <div className="testimonial-content">
-              <Quote className="quote-icon" size={32} />
-              <p className="review-text">{testimonials[currentTestimonial].review}</p>
+              <Quote className="quote-icon" size={40} />
+              <p className="review-text">
+                {testimonials[currentTestimonial].review}
+              </p>
               
               <div className="tips-box">
-                <h4>💡 Pro Tip:</h4>
+                <h4>
+                  💡 Pro Tip:
+                </h4>
                 <p>{testimonials[currentTestimonial].tips}</p>
               </div>
             </div>
           </div>
 
-          <button className="slider-btn next" onClick={nextTestimonial}>
+          {/* Next Button */}
+          <button 
+            className="slider-btn"
+            onClick={nextTestimonial}
+            aria-label="Next testimonial"
+          >
             <ChevronRight size={24} />
           </button>
         </div>
 
+        {/* Dots Navigation */}
         <div className="slider-dots">
           {testimonials.map((_, index) => (
             <button
               key={index}
               className={`dot ${index === currentTestimonial ? 'active' : ''}`}
               onClick={() => setCurrentTestimonial(index)}
+              aria-label={`Go to testimonial ${index + 1}`}
             />
           ))}
         </div>
