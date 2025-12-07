@@ -1222,181 +1222,235 @@
   transform: scale(1.15);
 }
 
-/* ========== RESPONSIVE DESIGN ========== */
-@media (max-width: 968px) {
-  .testimonials-section {
-    padding: 50px 15px;
-  }
+/* ========== SKILLS SECTION ========== */
+.skills-section {
+  max-width: 1400px;
+  margin: 60px auto;
+  padding: 40px 20px;
+}
 
-  .testimonials-section h2 {
-    font-size: 1.9rem;
-  }
+.skills-section h2 {
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-  .testimonial-slider {
-    flex-direction: column;
-    gap: 20px;
-  }
+.skills-subtitle {
+  text-align: center;
+  color: #718096;
+  font-size: 1.1rem;
+  margin-bottom: 50px;
+}
 
-  .slider-btn {
-    width: 45px;
-    height: 45px;
-  }
+.skills-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+  gap: 40px;
+  margin-bottom: 50px;
+}
 
-  .filters-container {
+/* Category Headers */
+.skills-category {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.skills-category:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.category-header {
+  padding: 24px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iit-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.iim-header {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.category-header h3 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+/* Skills Grid */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 24px;
+}
+
+.skill-card {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.skill-card:hover {
+  background: white;
+  border-color: #667eea;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.15);
+}
+
+.skill-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.skill-card:hover .skill-icon {
+  animation: none;
+  transform: scale(1.2);
+}
+
+.skill-card h4 {
+  font-size: 1.1rem;
+  color: #2d3748;
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+.skill-card p {
+  font-size: 0.9rem;
+  color: #718096;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Category Footer */
+.category-footer {
+  background: #f7fafc;
+  padding: 16px 24px;
+  border-top: 2px dashed #e2e8f0;
+}
+
+.category-footer p {
+  margin: 0;
+  color: #4a5568;
+  font-size: 0.95rem;
+}
+
+.category-footer strong {
+  color: #667eea;
+}
+
+/* Skills Enhancement Tips */
+.skills-tips {
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+  border-radius: 16px;
+  padding: 40px;
+  margin-top: 50px;
+}
+
+.skills-tips h3 {
+  text-align: center;
+  font-size: 1.8rem;
+  color: #2d3748;
+  margin-bottom: 30px;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.tip-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-left: 4px solid #667eea;
+}
+
+.tip-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+  border-left-color: #764ba2;
+}
+
+.tip-card h4 {
+  font-size: 1.2rem;
+  color: #2d3748;
+  margin-bottom: 10px;
+}
+
+.tip-card p {
+  color: #718096;
+  font-size: 0.95rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1200px) {
+  .skills-container {
     grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .type-filter-buttons {
-    order: 1;
-  }
-
-  .search-bar {
-    order: 2;
-  }
-
-  .filter-select {
-    order: 3;
-  }
-
-  .results-count {
-    order: 4;
-    justify-content: center;
   }
 }
 
 @media (max-width: 768px) {
-  .testimonials-section {
-    padding: 45px 12px;
-    margin: 50px 0;
+  .skills-section {
+    padding: 30px 15px;
   }
 
-  .testimonials-section h2 {
-    font-size: 1.75rem;
+  .skills-section h2 {
+    font-size: 1.8rem;
   }
 
-  .testimonials-subtitle {
-    font-size: 1rem;
-    margin-bottom: 30px;
-  }
-
-  .testimonial-card-active {
-    padding: 25px 22px;
-  }
-
-  .testimonial-header {
-    gap: 15px;
-    margin-bottom: 16px;
-  }
-
-  .testimonial-avatar {
-    width: 70px;
-    height: 70px;
-  }
-
-  .testimonial-info h3 {
-    font-size: 1.25rem;
-  }
-
-  .college-tag {
-    font-size: 0.92rem;
-  }
-
-  .branch-tag {
-    font-size: 0.82rem;
-  }
-
-  .review-text {
-    font-size: 0.95rem;
-    margin: 15px 0;
-  }
-
-  .tips-box {
-    padding: 16px 18px;
-    margin-top: 16px;
-  }
-
-  .tips-box h4 {
-    font-size: 0.95rem;
-  }
-
-  .tips-box p {
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .testimonials-section {
-    padding: 40px 10px;
-    margin: 40px 0;
-  }
-
-  .testimonials-section h2 {
-    font-size: 1.6rem;
-  }
-
-  .testimonial-card-active {
-    padding: 22px 18px;
-  }
-
-  .testimonial-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+  .skills-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 12px;
+    padding: 16px;
   }
 
-  .testimonial-info {
-    text-align: center;
+  .skill-card {
+    padding: 16px;
   }
 
-  .testimonial-avatar {
-    width: 65px;
-    height: 65px;
+  .skill-icon {
+    font-size: 2rem;
   }
 
-  .testimonial-info h3 {
-    font-size: 1.2rem;
+  .skill-card h4 {
+    font-size: 1rem;
   }
 
-  .slider-btn {
-    width: 42px;
-    height: 42px;
+  .skill-card p {
+    font-size: 0.85rem;
   }
 
-  .slider-btn svg {
-    width: 20px;
-    height: 20px;
+  .tips-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
-  .tips-box {
-    padding: 14px 16px;
-  }
-
-  .review-text {
-    font-size: 0.92rem;
-    line-height: 1.6;
-  }
-}
-
-/* ========== ALTERNATIVE HORIZONTAL LAYOUT FOR SMALL MOBILE ========== */
-@media (max-width: 480px) {
-  /* If you prefer horizontal buttons on very small screens */
-  .type-filter-buttons.horizontal {
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 8px;
-    padding: 8px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .type-filter-buttons.horizontal .type-btn {
-    flex-shrink: 0;
-    min-width: 100px;
-  }
-
-  /* Hide scrollbar but keep functionality */
-  .type-filter-buttons.horizontal::-webkit-scrollbar {
-    display: none;
+  .skills-tips {
+    padding: 24px 20px;
   }
 }

@@ -427,6 +427,30 @@ Resume Link: [Resume Link]
     return matchesSearch && matchesInstitute && matchesType;
   });
 
+  // ========== SKILLS REQUIRED DATA ==========
+  const skillsData = {
+    IIT: [
+      { skill: 'Python/MATLAB', icon: '🐍', description: 'Data analysis & simulation' },
+      { skill: 'Lab Techniques', icon: '🔬', description: 'Hands-on experimental skills' },
+      { skill: 'CAD/SolidWorks', icon: '📐', description: 'Design & modeling tools' },
+      { skill: 'Research Aptitude', icon: '📚', description: 'Literature review & critical thinking' },
+      { skill: 'Technical Writing', icon: '✍️', description: 'Reports & documentation' },
+      { skill: 'Problem Solving', icon: '🧩', description: 'Analytical & logical reasoning' },
+      { skill: 'Domain Knowledge', icon: '🎓', description: 'Core subject fundamentals' },
+      { skill: 'Excel/Origin', icon: '📊', description: 'Data visualization & analysis' }
+    ],
+    IIM: [
+      { skill: 'Excel/Power BI', icon: '📊', description: 'Data analysis & dashboards' },
+      { skill: 'SQL/Python', icon: '💻', description: 'Database & scripting' },
+      { skill: 'Case Analysis', icon: '📋', description: 'Business problem solving' },
+      { skill: 'Research Methods', icon: '🔍', description: 'Qualitative & quantitative' },
+      { skill: 'Presentation Skills', icon: '🎤', description: 'Communicate insights effectively' },
+      { skill: 'Business Acumen', icon: '💼', description: 'Market & strategy understanding' },
+      { skill: 'Analytical Thinking', icon: '🧠', description: 'Data-driven decision making' },
+      { skill: 'Communication', icon: '💬', description: 'Written & verbal proficiency' }
+    ]
+  };
+
   return (
     <div className="internship-page">
       {/* ========== HERO SECTION ========== */}
@@ -444,7 +468,7 @@ Resume Link: [Resume Link]
               fontSize: '1rem',
               fontWeight: '600' 
             }}>
-              ✅ Welcome, {user.name}!
+              ✅ Welcome {user.name}!
             </div>
           )}
           
@@ -728,6 +752,79 @@ Resume Link: [Resume Link]
               onClick={() => setCurrentTestimonial(index)}
             />
           ))}
+        </div>
+      </div>
+
+      {/* ========== SKILLS REQUIRED SECTION ========== */}
+      <div className="skills-section">
+        <h2>🎯 Skills Required for Internships</h2>
+        <p className="skills-subtitle">
+          Essential skills that increase your chances of getting selected
+        </p>
+
+        <div className="skills-container">
+          {/* IIT Skills */}
+          <div className="skills-category">
+            <div className="category-header iit-header">
+              <GraduationCap size={28} />
+              <h3>For IIT Research Internships</h3>
+            </div>
+            <div className="skills-grid">
+              {skillsData.IIT.map((item, index) => (
+                <div key={index} className="skill-card">
+                  <div className="skill-icon">{item.icon}</div>
+                  <h4>{item.skill}</h4>
+                  <p>{item.description}</p>
+                </div>
+              ))}
+            </div>
+            <div className="category-footer">
+              <p>💡 <strong>Pro Tip:</strong> Mention relevant coursework, projects, or certifications in your email</p>
+            </div>
+          </div>
+
+          {/* IIM Skills */}
+          <div className="skills-category">
+            <div className="category-header iim-header">
+              <Building2 size={28} />
+              <h3>For IIM Management Internships</h3>
+            </div>
+            <div className="skills-grid">
+              {skillsData.IIM.map((item, index) => (
+                <div key={index} className="skill-card">
+                  <div className="skill-icon">{item.icon}</div>
+                  <h4>{item.skill}</h4>
+                  <p>{item.description}</p>
+                </div>
+              ))}
+            </div>
+            <div className="category-footer">
+              <p>💡 <strong>Pro Tip:</strong> Highlight consulting club experience, case competitions, and business projects</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Skills Enhancement Tips */}
+        <div className="skills-tips">
+          <h3>📚 How to Build These Skills?</h3>
+          <div className="tips-grid">
+            <div className="tip-card">
+              <h4>🎓 Online Courses</h4>
+              <p>Coursera, edX, NPTEL for technical skills</p>
+            </div>
+            <div className="tip-card">
+              <h4>🏆 Competitions</h4>
+              <p>Hackathons, case competitions, research events</p>
+            </div>
+            <div className="tip-card">
+              <h4>🔬 College Projects</h4>
+              <p>Work on real-world problems in your domain</p>
+            </div>
+            <div className="tip-card">
+              <h4>👥 Clubs & Teams</h4>
+              <p>Join technical/consulting clubs, contribute actively</p>
+            </div>
+          </div>
         </div>
       </div>
 
