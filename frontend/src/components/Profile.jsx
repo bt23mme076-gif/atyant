@@ -11,18 +11,12 @@ import LoadingSpinner from './LoadingSpinner';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Profile = () => {
-  const { user, updateUser } = useContext(AuthContext); // ✅ Get updateUser function
+  const { user, updateUser, login } = useContext(AuthContext); // ✅ Get updateUser and login functions
   
-  // ...all your existing state variables remain same...
-  
-  // ========== NEW: ADD THESE STATE VARIABLES ==========
   const [updatingLocation, setUpdatingLocation] = useState(false);
   const [locationStatus, setLocationStatus] = useState('');
   const [currentLocation, setCurrentLocation] = useState(null);
   const [loading, setLoading] = useState(true); // New loading state
-  // ========== END NEW STATE VARIABLES ==========
-
-  // ...all your existing useEffect and functions remain same...
 
   // ========== NEW: ADD THIS FUNCTION ==========
   const fetchCurrentLocation = async () => {
@@ -131,6 +125,7 @@ const Profile = () => {
     </div>
   );
 
+  // ✅ UPDATE THIS FUNCTION
   const handleProfilePictureUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -153,17 +148,15 @@ const Profile = () => {
 
       console.log('✅ Upload Response:', response.data);
 
-      // ✅ UPDATE USER IN CONTEXT
-      if (response.data.profilePicture) {
-        updateUser({ profilePicture: response.data.profilePicture });
-        
-        // Also update local state if you have it
-        setProfileData(prev => ({
-          ...prev,
-          profilePicture: response.data.profilePicture
-        }));
-        
+      // ✅ USE NEW TOKEN WITH PROFILE PICTURE
+      if (response.data.token) {
+        login(response.data.token); // Updates user context
         toast.success('Profile picture updated! ✅');
+        
+        // Reload after 1 second
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
 
     } catch (error) {

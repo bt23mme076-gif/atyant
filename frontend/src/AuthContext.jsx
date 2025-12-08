@@ -10,6 +10,8 @@ export const AuthProvider = ({ children }) => {
 
   const buildUserFromToken = (token) => {
     const decoded = jwtDecode(token);
+    console.log('🔍 Building user from token:', decoded);
+    
     return {
       token,
       role: decoded.role,
@@ -17,7 +19,7 @@ export const AuthProvider = ({ children }) => {
       username: decoded.username,
       name: decoded.name || decoded.username,
       email: decoded.email,
-      profilePicture: decoded.profilePicture || null,
+      profilePicture: decoded.profilePicture || null, // ✅ GET FROM TOKEN
     };
   };
 
@@ -29,26 +31,31 @@ export const AuthProvider = ({ children }) => {
 
         if (decoded.exp * 1000 < Date.now()) {
           localStorage.removeItem('token');
+          localStorage.removeItem('userData');
           setUser(null);
         } else {
-          // ✅ Check if we have updated user data in localStorage
           const storedUser = localStorage.getItem('userData');
           if (storedUser) {
             try {
               const parsedUser = JSON.parse(storedUser);
+              console.log('✅ User loaded from localStorage:', parsedUser);
               setUser(parsedUser);
-              console.log('✅ Loaded user from localStorage:', parsedUser);
             } catch (e) {
-              // Fallback to token
-              setUser(buildUserFromToken(token));
+              console.warn('⚠️ Failed to parse stored user');
+              const userData = buildUserFromToken(token);
+              setUser(userData);
+              localStorage.setItem('userData', JSON.stringify(userData));
             }
           } else {
-            setUser(buildUserFromToken(token));
+            const userData = buildUserFromToken(token);
+            setUser(userData);
+            localStorage.setItem('userData', JSON.stringify(userData));
           }
         }
       } catch (e) {
         console.error('Invalid token:', e);
         localStorage.removeItem('token');
+        localStorage.removeItem('userData');
         setUser(null);
       }
     }
@@ -60,11 +67,10 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', token);
       const userData = buildUserFromToken(token);
       
-      // ✅ Store user data separately
       localStorage.setItem('userData', JSON.stringify(userData));
       
       setUser(userData);
-      console.log('✅ User logged in:', userData);
+      console.log('✅ User logged in with profilePicture:', userData.profilePicture);
       return userData;
     } catch (e) {
       console.error('Failed to decode token on login:', e);
@@ -76,11 +82,11 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('userData'); // ✅ Clear user data
+    localStorage.removeItem('userData');
     setUser(null);
   };
 
-  // ✅ FIXED updateUser function
+  // ✅ UPDATE USER FUNCTION
   const updateUser = (updatedData) => {
     if (!user) {
       console.warn('⚠️ No user to update');
@@ -89,13 +95,10 @@ export const AuthProvider = ({ children }) => {
     
     const updatedUser = { ...user, ...updatedData };
     
-    // Update state
     setUser(updatedUser);
-    
-    // Update localStorage
     localStorage.setItem('userData', JSON.stringify(updatedUser));
     
-    console.log('✅ User updated in context:', updatedUser);
+    console.log('✅ User updated:', updatedUser);
     console.log('✅ Profile Picture:', updatedUser.profilePicture);
   };
 

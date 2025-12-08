@@ -1,98 +1,106 @@
-import React, { useState } from 'react';
-import { User } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-const UserAvatar = ({ user, size = 40 }) => {
-  const [imageError, setImageError] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-  React.useEffect(() => {
-    console.log('🖼️ UserAvatar Props:', {
-      user: user,
-      hasUser: !!user,
-      name: user?.name,
-      username: user?.username,
-      profilePicture: user?.profilePicture,
-      imageError: imageError,
-      imageLoaded: imageLoaded
-    });
-  }, [user, imageError, imageLoaded]);
+function optimizeCloudinary(url, size) {
+  try {
+    if (!url) return null;
+    if (!url.includes('cloudinary.com')) return url;
+    const transform = `w_${size},h_${size},c_fill,g_face,q_auto,f_auto`;
+    return url.replace('/upload/', `/upload/${transform}/`);
+  } catch {
+    return url;
+  }
+}
 
-  const getInitials = (name) => {
-    if (!name) return 'U';
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+const UserAvatar = ({ user, size = 48, className = '' }) => {
+  // Try common fields where photo may exist
+  const initialPhoto =
+    user?.profilePicture ||
+    user?.photo ||
+    user?.avatar ||
+    user?.profile?.profilePicture ||
+    '';
 
-  const getAvatarColor = (name) => {
-    if (!name) return '#667eea';
-    
-    const colors = [
-      '#667eea', '#764ba2', '#f093fb', '#4facfe',
-      '#43e97b', '#fa709a', '#fee140', '#30cfd0',
-      '#a8edea', '#ff6b6b', '#4ecdc4', '#45b7d1'
-    ];
-    
-    const index = name.charCodeAt(0) % colors.length;
-    return colors[index];
-  };
+  const [photo, setPhoto] = useState(initialPhoto);
 
-  const userName = user?.name || user?.username || 'User';
+  const name = user?.name || user?.username || user?.email || 'User';
 
-  const avatarStyle = {
-    width: `${size}px`,
-    height: `${size}px`,
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: `${size * 0.4}px`,
-    fontWeight: '600',
-    color: 'white',
-    backgroundColor: getAvatarColor(userName),
-    transition: 'all 0.3s ease',
-    position: 'relative',
-    overflow: 'hidden',
-    border: '2px solid rgba(255,255,255,0.3)',
-    flexShrink: 0,
-  };
+  const initials = useMemo(() => {
+    const parts = String(name).trim().split(' ');
+    const letters = (parts[0]?.[0] || 'U') + (parts[1]?.[0] || '');
+    return letters.toUpperCase();
+  }, [name]);
 
-  const imgStyle = {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    opacity: imageLoaded ? 1 : 0,
-    transition: 'opacity 0.3s ease',
-  };
+  // Fetch profile photo once if not present in context
+  useEffect(() => {
+    if (photo) return;
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
-  const profilePicture = user?.profilePicture || user?.avatar || user?.image || user?.photo;
-  const hasProfilePicture = profilePicture && !imageError;
+    let cancelled = false;
+
+    const headers = { Authorization: `Bearer ${token}` };
+
+    const tryFetch = async (path) => {
+      try {
+        const res = await fetch(`${API_URL}${path}`, { headers });
+        if (!res.ok) return null;
+        return res.json();
+      } catch {
+        return null;
+      }
+    };
+
+    (async () => {
+      const data =
+        (await tryFetch('/api/profile/me')) ||
+        (await tryFetch('/api/profile')) ||
+        (await tryFetch('/api/users/me'));
+
+      const url =
+        data?.profilePicture ||
+        data?.user?.profilePicture ||
+        data?.data?.profilePicture;
+
+      if (!cancelled && url) setPhoto(url);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [photo]);
+
+  const src = optimizeCloudinary(photo, size);
 
   return (
-    <div style={avatarStyle}>
-      {!imageLoaded && <span>{getInitials(userName)}</span>}
-      
-      {hasProfilePicture && (
+    <div
+      className={`ua-wrapper ${className}`}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg,#667eea,#764ba2)',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#fff',
+        fontWeight: 600,
+        fontSize: Math.max(12, Math.floor(size / 2.7)),
+        border: '2px solid rgba(255,255,255,0.3)',
+      }}
+      title={name}
+    >
+      {src ? (
         <img
-          src={profilePicture}
-          alt={userName}
-          style={imgStyle}
-          onLoad={() => {
-            console.log('✅ Avatar image loaded:', profilePicture);
-            setImageLoaded(true);
-          }}
-          onError={(e) => {
-            console.error('❌ Avatar image failed:', profilePicture, e);
-            setImageError(true);
-          }}
-          loading="lazy"
+          src={src}
+          alt={name}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          onError={() => setPhoto('')}
         />
+      ) : (
+        <span>{initials}</span>
       )}
     </div>
   );

@@ -74,47 +74,51 @@ router.post('/signup', async (req, res) => {
   }
 });
 
+// ✅ UPDATE LOGIN ROUTE
 router.post('/login', async (req, res) => {
-  console.time('login-operation');
   try {
     const { email, password } = req.body;
-
-    // ✅ OPTIMIZED: Use lean() is not used here because we need full document for password comparison
+    
     const user = await User.findOne({ email });
-
     if (!user) {
-      console.timeEnd('login-operation');
-      return res.status(400).json({ message: 'Invalid credentials.' });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
-      console.timeEnd('login-operation');
-      return res.status(400).json({ message: 'Invalid credentials.' });
+      return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = signUserToken(user);
-    
-    console.timeEnd('login-operation');
-    
-    // ✅ Return full user object for frontend
-    return res.json({ 
-      token, 
-      role: user.role,
+    // ✅ GENERATE TOKEN WITH PROFILE PICTURE
+    const token = jwt.sign(
+      {
+        userId: user._id,
+        role: user.role,
+        username: user.username,        // ✅ ADD
+        name: user.name,                // ✅ ADD
+        email: user.email,              // ✅ ADD
+        profilePicture: user.profilePicture || null, // ✅ ADD
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    console.log('✅ Login token generated with profilePicture:', user.profilePicture);
+
+    res.json({
+      token,
       user: {
-        _id: user._id,
+        id: user._id,
         username: user.username,
+        name: user.name,
         email: user.email,
         role: user.role,
-        profilePicture: user.profilePicture,
-        credits: user.credits,
-      }
+        profilePicture: user.profilePicture, // ✅ ADD THIS
+      },
     });
   } catch (error) {
-    console.timeEnd('login-operation');
     console.error('Login error:', error);
-    return res.status(500).json({ message: 'Server error during login.' });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

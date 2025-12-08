@@ -2,20 +2,20 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff } from 'lucide-react';
 import './AuthForm.css';
-import { toast } from 'react-toastify';
-import axios from 'axios';
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [isLoading, setIsLoading] = useState(false); // ✅ ADD THIS LINE
+  const [isLoading, setIsLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,30 +23,22 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
-        email: formData.email,
-        password: formData.password,
-      });
+      const response = await axios.post('http://localhost:5000/api/auth/login', formData);
 
       console.log('✅ Login response:', response.data);
 
-      // ✅ Use context login function
-      login(response.data.user, response.data.token);
+      // ✅ USE LOGIN FROM CONTEXT
+      const userData = login(response.data.token);
+      
+      console.log('✅ User data after login:', userData);
 
-      toast.success(`Welcome back, ${response.data.user.name}! 🎉`);
-
-      // Redirect
-      const from = location.state?.from || '/';
-      navigate(from);
-
-    } catch (err) {
-      console.error('❌ Login error:', err);
-      setError(err.response?.data?.message || 'Login failed');
-      toast.error(err.response?.data?.message || 'Login failed');
+      toast.success('Login successful! 🎉');
+      navigate('/');
+    } catch (error) {
+      console.error('❌ Login error:', error);
+      toast.error(error.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -122,4 +114,5 @@ const Login = () => {
     </div>
   );
 };
+
 export default Login;
