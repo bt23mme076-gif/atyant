@@ -85,42 +85,67 @@ const MentorListPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      
+      // Always use VITE_API_URL, fallback to 5000 (your backend default)
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
       const params = new URLSearchParams();
-      if (query) params.append('q', query);
-      if (selectedCategory !== 'All') params.append('category', selectedCategory);
-      if (filters.mentorBackground !== 'All') params.append('mentorBackground', filters.mentorBackground);
-      if (filters.availability !== 'All') params.append('availability', filters.availability);
-      if (filters.price !== 'All') params.append('price', filters.price);
-      params.append('sort', filters.sort);
 
-      const url = params.toString()
-        ? `${API_URL}/api/search/mentors?${params.toString()}`
-        : `${API_URL}/api/users/mentors`;
-      
-      // ❌ REMOVE: console.log('Fetching from URL:', url);
+      // q search
+      const q = query.trim();
+      if (q) params.append('q', q);
 
-      const response = await fetch(url);
+      // category: trim leading/trailing spaces to match backend values
+      const cleanCategory = (selectedCategory || '').trim();
+      if (cleanCategory && cleanCategory !== 'All') {
+        params.append('category', cleanCategory);
+      }
+
+      // mentorBackground: likely supported; send only if not 'All'
+      if (filters.mentorBackground && filters.mentorBackground !== 'All') {
+        params.append('mentorBackground', filters.mentorBackground);
+      }
+
+      // availability, price: send only if backend supports; if not, comment these out
+      // if (filters.availability && filters.availability !== 'All') {
+      //   params.append('availability', filters.availability);
+      // }
+      // if (filters.price && filters.price !== 'All') {
+      //   params.append('price', filters.price);
+      // }
+
+      // sort: normalize to backend keys if required
+      if (filters.sort) {
+        // Map UI labels to backend sort keys if needed
+        const sortMap = {
+          Recommended: 'recommended',
+          'Most Helpful': 'helpful',
+          'Most Active': 'active',
+          'Lowest Price': 'price_low',
+          'Most Experienced': 'experience_high',
+          'Highest Rated': 'rating_high',
+          'Newest Mentors': 'newest',
+        };
+        params.append('sort', sortMap[filters.sort] || filters.sort);
+      }
+
+      // Build URL: prefer dedicated search endpoint
+      const url = `${API_URL}/api/search/mentors${params.toString() ? `?${params.toString()}` : ''}`;
+
+      // Add auth header if user exists
+      const headers = {};
+      const token = localStorage.getItem('token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const response = await fetch(url, { headers });
       if (!response.ok) {
-        throw new Error('Data could not be fetched!');
+        throw new Error(`Failed to fetch mentors (${response.status})`);
       }
       const data = await response.json();
-      
-      // ❌ REMOVE all these console.logs:
-      // console.log('API Response:', data);
-      // if (data && data.length > 0) {
-      //   console.log('First mentor structure:', data[0]);
-      //   console.log('First mentor bio field:', data[0].bio);
-      //   console.log('All mentor fields:', Object.keys(data[0]));
-      // }
-      
       setMentors(Array.isArray(data) ? data : []);
     } catch (err) {
       setError('Could not load Mentors. Please try again later.');
-      // Only log error message in development
       if (import.meta.env.DEV) {
-        console.error('Failed to fetch Mentors:', err.message);
+        console.error('Failed to fetch Mentors:', err);
       }
     } finally {
       setLoading(false);
