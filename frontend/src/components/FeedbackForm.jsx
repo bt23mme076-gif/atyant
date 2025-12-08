@@ -31,10 +31,10 @@ const FeedbackForm = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage('Thank you for your valuable feedback!');
+        setMessage('Thank you for your valuable Review!');
         setFormData({ name: '', email: '', rating: '', feedback: '' }); // Clear form
       } else {
-        setMessage(data.message || 'Failed to submit feedback.');
+        setMessage(data.message || 'Failed to submit Review.');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -48,7 +48,7 @@ const FeedbackForm = () => {
     <section id="feedback" className="feedback-section">
       <div className="feedback-container">
         <div className="feedback-header">
-            <h2>We Value Your Feedback</h2>
+            <h2>We Value Your Review</h2>
             <p>Your thoughts help us improve Atyant and serve you better.</p>
         </div>
         
@@ -90,7 +90,7 @@ const FeedbackForm = () => {
                 required
               ></textarea>
               <button type="submit" className="submit-btn" disabled={loading}>
-                {loading ? 'Submitting...' : 'Submit Feedback'}
+                {loading ? 'Submitting...' : 'Submit Review'}
               </button>
               {message && <p className="form-message">{message}</p>}
             </form>
