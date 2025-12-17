@@ -215,8 +215,16 @@ const AskQuestionPage = () => {
         <h2>Recommended Mentors</h2>
         
         {loading ? (
-          <div className="loading-spinner">
-            <div className="spinner"></div>
+          <div className="mentor-cards-grid">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="mentor-card skeleton-card">
+                <div className="skeleton skeleton-image"></div>
+                <div className="skeleton skeleton-title"></div>
+                <div className="skeleton skeleton-text"></div>
+                <div className="skeleton skeleton-text"></div>
+                <div className="skeleton skeleton-button"></div>
+              </div>
+            ))}
           </div>
         ) : suggestedMentors.length > 0 ? (
           <div className="mentor-cards-grid">
