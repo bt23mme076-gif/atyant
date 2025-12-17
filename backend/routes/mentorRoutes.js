@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import User from '../models/User.js';
+import Message from '../models/Message.js';
 import protect from '../middleware/authMiddleware.js';
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -48,6 +49,11 @@ router.get('/mentors/:id', async (req, res) => {
     if (!mentor || mentor.role !== 'mentor') {
       return res.status(404).json({ message: 'Mentor not found' });
     }
+
+    // ✅ Increment profile views asynchronously (don't wait)
+    User.findByIdAndUpdate(req.params.id, { $inc: { profileViews: 1 } }).catch(err => 
+      console.error('Error updating profile views:', err)
+    );
 
     res.json(mentor);
   } catch (error) {
@@ -100,6 +106,74 @@ router.post('/clear-cache', protect, async (req, res) => {
   cacheTime = null;
   
   res.json({ message: 'Cache cleared successfully' });
+});
+
+// ========== GET MENTOR STATISTICS (Dashboard) ==========
+router.get('/stats', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'mentor') {
+      return res.status(403).json({ message: 'Only mentors can access this' });
+    }
+
+    const mentorId = req.user.id || req.user.userId;
+    const mentor = await User.findById(mentorId)
+      .select('profileViews totalChats username')
+      .lean();
+
+    if (!mentor) {
+      return res.status(404).json({ message: 'Mentor not found' });
+    }
+
+    // Get active chats (last 7 days) - count unique conversations
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // Convert string ID to ObjectId for aggregation
+    const mongoose = await import('mongoose');
+    const mentorObjectId = new mongoose.default.Types.ObjectId(mentorId);
+
+    const activeConversations = await Message.aggregate([
+      {
+        $match: {
+          $or: [
+            { sender: mentorObjectId, createdAt: { $gte: sevenDaysAgo } },
+            { receiver: mentorObjectId, createdAt: { $gte: sevenDaysAgo } }
+          ]
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $cond: [
+              { $eq: ['$sender', mentorObjectId] },
+              '$receiver',
+              '$sender'
+            ]
+          }
+        }
+      },
+      { $count: 'total' }
+    ]);
+
+    const activeChats = activeConversations.length > 0 ? activeConversations[0].total : 0;
+
+    console.log(`📊 Stats for ${mentor.username}:`, {
+      mentorId: mentorId,
+      profileViews: mentor.profileViews || 0,
+      totalChats: mentor.totalChats || 0,
+      activeChats
+    });
+
+    res.json({
+      profileViews: mentor.profileViews || 0,
+      totalChats: mentor.totalChats || 0,
+      activeChats: activeChats || 0
+    });
+
+  } catch (error) {
+    console.error('Error fetching mentor stats:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 export default router;

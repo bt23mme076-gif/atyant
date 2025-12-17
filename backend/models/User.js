@@ -101,16 +101,20 @@ const userSchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ['Point'],
-      required: false // ✅ Optional
+      required: function() {
+        // Only require type if coordinates exist
+        return this.location && this.location.coordinates && this.location.coordinates.length === 2;
+      }
     },
     coordinates: {
       type: [Number], // [longitude, latitude]
       required: false, // ✅ Optional - no default
       validate: {
         validator: function(v) {
-          return !v || (Array.isArray(v) && v.length === 2);
+          // Allow empty/null or valid [lng, lat] array
+          return !v || v.length === 0 || (Array.isArray(v) && v.length === 2 && !isNaN(v[0]) && !isNaN(v[1]));
         },
-        message: 'Coordinates must be [longitude, latitude]'
+        message: 'Coordinates must be [longitude, latitude] with valid numbers'
       }
     },
     city: {
@@ -150,6 +154,16 @@ const userSchema = new mongoose.Schema({
     default: Date.now
   },
   yearsOfExperience: {
+    type: Number,
+    default: 0
+  },
+  
+  // ========== MENTOR STATISTICS ==========
+  profileViews: {
+    type: Number,
+    default: 0
+  },
+  totalChats: {
     type: Number,
     default: 0
   },

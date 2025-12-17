@@ -17,6 +17,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 
 // ✅ LAZY LOAD HEAVY COMPONENTS
 const Home = lazy(() => import('./components/Home'));
+const Dashboard = lazy(() => import('./components/Dashboard'));
 const Login = lazy(() => import('./components/Login'));
 const Signup = lazy(() => import('./components/signup'));
 const ChatPage = lazy(() => import('./components/ChatPage'));
@@ -56,6 +57,11 @@ function App() {
               <Route path="/internships" element={<InternshipPage />} />
 
               {/* ========== PROTECTED ROUTES ========== */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
               <Route path="/mentors" element={
                 <ProtectedRoute>
                   <MentorListPage />

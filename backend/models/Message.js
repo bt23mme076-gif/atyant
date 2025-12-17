@@ -20,9 +20,23 @@ const messageSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    // Message status tracking (WhatsApp/Instagram style)
+    status: {
+      type: String,
+      enum: ['sent', 'delivered', 'read'],
+      default: 'sent'
+    },
     seen: {
       type: Boolean,
       default: false,
+    },
+    deliveredAt: {
+      type: Date,
+      default: null
+    },
+    readAt: {
+      type: Date,
+      default: null
     },
     isAutoReply: {
       type: Boolean,
@@ -31,5 +45,9 @@ const messageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Index for better query performance
+messageSchema.index({ sender: 1, receiver: 1, createdAt: -1 });
+messageSchema.index({ status: 1 });
 
 export default mongoose.model('Message', messageSchema);

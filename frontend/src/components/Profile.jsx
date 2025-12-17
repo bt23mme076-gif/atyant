@@ -187,11 +187,11 @@ const Profile = () => {
             Your Location
           </h3>
           
-          {currentLocation?.city && (
+          {currentLocation?.city && typeof currentLocation.city === 'string' && (
             <div className="current-location-display">
               <p>
                 📍 Current Location: <strong>{currentLocation.city}</strong>
-                {currentLocation.state && `, ${currentLocation.state}`}
+                {currentLocation.state && typeof currentLocation.state === 'string' && `, ${currentLocation.state}`}
               </p>
               <p className="location-updated">
                 Last updated: {currentLocation.lastUpdated 

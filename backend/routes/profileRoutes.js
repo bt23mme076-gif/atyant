@@ -58,11 +58,50 @@ router.put('/me', protect, async (req, res) => {
       skills
     } = req.body;
     
-    const user = await User.findById(userId);
+    // ✅ FIX CORRUPTED DATA: Fetch user with lean to avoid validation on corrupted data
+    const userDoc = await User.findById(userId).lean();
     
-    if (!user) {
+    if (!userDoc) {
       console.log('❌ User not found for update');
       return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // ✅ Clean corrupted data before updating
+    const cleanData = { ...userDoc };
+    
+    // Fix city field if it's an object instead of string
+    if (cleanData.city && typeof cleanData.city === 'object') {
+      console.log('⚠️ Fixing corrupted city field');
+      if (cleanData.city.city && typeof cleanData.city.city === 'string') {
+        cleanData.city = cleanData.city.city;
+      } else {
+        cleanData.city = '';
+      }
+    }
+    
+    // Fix location.city field if it's an object
+    if (cleanData.location && cleanData.location.city && typeof cleanData.location.city === 'object') {
+      console.log('⚠️ Fixing corrupted location.city field');
+      if (cleanData.location.city.city && typeof cleanData.location.city.city === 'string') {
+        cleanData.location.city = cleanData.location.city.city;
+      } else {
+        cleanData.location.city = null;
+      }
+    }
+    
+    // ✅ Now get the actual Mongoose document and update it
+    const user = await User.findById(userId);
+    
+    // Apply cleaned data
+    if (cleanData.city !== userDoc.city) {
+      user.city = cleanData.city;
+      console.log('✅ Cleaned city:', user.city);
+    }
+    
+    if (cleanData.location && cleanData.location.city !== userDoc.location?.city) {
+      if (!user.location) user.location = {};
+      user.location.city = cleanData.location.city;
+      console.log('✅ Cleaned location.city:', user.location.city);
     }
     
     // ✅ Update fields properly (handle undefined vs empty arrays)
@@ -96,8 +135,17 @@ router.put('/me', protect, async (req, res) => {
       console.log('✅ Education updated:', user.education);
     }
     
+    // ✅ Ensure location object is valid before saving
+    if (user.location && typeof user.location === 'object') {
+      // If location exists but coordinates are invalid, set to undefined
+      if (!user.location.coordinates || !Array.isArray(user.location.coordinates) || user.location.coordinates.length !== 2) {
+        user.location = undefined;
+        console.log('⚠️ Invalid location removed');
+      }
+    }
+    
     // ✅ Save with validation
-    const updatedUser = await user.save();
+    const updatedUser = await user.save({ validateBeforeSave: true });
     
     console.log('✅ User updated successfully');
     console.log('📤 Final interests:', updatedUser.interests);
@@ -112,6 +160,9 @@ router.put('/me', protect, async (req, res) => {
     
   } catch (error) {
     console.error('❌ Error updating profile:', error);
+    console.error('❌ Error name:', error.name);
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error stack:', error.stack);
     
     if (error.code === 11000) {
       return res.status(400).json({ 
@@ -119,9 +170,18 @@ router.put('/me', protect, async (req, res) => {
       });
     }
     
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(e => e.message);
+      return res.status(400).json({ 
+        message: 'Validation Error',
+        errors: messages
+      });
+    }
+    
     res.status(500).json({ 
       message: 'Server Error', 
-      error: error.message 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
@@ -185,6 +245,30 @@ router.get('/:username', async (req, res) => {
     if (!user) {
       console.log('❌ User not found:', req.params.username);
       return res.status(404).json({ message: 'User not found' });
+    }
+    
+    // ✅ Increment profile views for mentors ONLY if viewer is different user
+    // Get viewer's ID from Authorization header if present
+    const authHeader = req.headers.authorization;
+    let viewerId = null;
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      try {
+        const token = authHeader.split(' ')[1];
+        const jwt = await import('jsonwebtoken');
+        const decoded = jwt.default.verify(token, process.env.JWT_SECRET);
+        viewerId = decoded.id || decoded.userId;
+      } catch (err) {
+        // Token invalid or expired, continue without viewer ID
+      }
+    }
+    
+    // Only count if: 1) user is mentor, 2) viewer is not the mentor themselves
+    if (user.role === 'mentor' && viewerId && viewerId !== user._id.toString()) {
+      User.findByIdAndUpdate(user._id, { $inc: { profileViews: 1 } }).catch(err => 
+        console.error('Error updating profile views:', err)
+      );
+      console.log(`📊 Profile view counted for mentor: ${user.username} (viewer: ${viewerId})`);
     }
     
     console.log('✅ Public profile sent for:', user.username);

@@ -340,8 +340,11 @@
 
 /* Mobile-specific menu link styles inside slide panel reusing aesthetics */
 .menu-panel .nav-link,
-.menu-panel .nav-button {
-  display: block;
+.menu-panel .nav-button,
+.menu-panel .menu-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   text-align: left;
   padding: 15px 13px;
@@ -352,6 +355,15 @@
   color: var(--nav-text);
   background: transparent;
   box-shadow: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.menu-panel .menu-button:hover {
+  background: #232942;
+  color: #39e7fa;
+  transform: translateX(4px);
 }
 
 /* ✅ NEW: Mobile nearby mentors styling */

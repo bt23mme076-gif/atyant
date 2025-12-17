@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../AuthContext';
 import './PublicProfilePage.css'; // Import CSS file
 
 const PublicProfilePage = () => {
   const { username } = useParams();
+  const { user } = useContext(AuthContext);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -15,7 +17,14 @@ const PublicProfilePage = () => {
       setError('');
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        const response = await fetch(`${API_URL}/api/profile/${username}`);
+        
+        // ✅ Send Authorization header to track profile views
+        const headers = {};
+        if (user?.token) {
+          headers['Authorization'] = `Bearer ${user.token}`;
+        }
+        
+        const response = await fetch(`${API_URL}/api/profile/${username}`, { headers });
 
         if (!response.ok) {
           const errorData = await response.json(); // Try to get JSON error

@@ -1,5 +1,5 @@
 // backend/models/Conversation.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const conversationSchema = new mongoose.Schema({
   participants: [{
@@ -9,4 +9,4 @@ const conversationSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const Conversation = mongoose.model('Conversation', conversationSchema);
-module.exports = Conversation;
+export default Conversation;

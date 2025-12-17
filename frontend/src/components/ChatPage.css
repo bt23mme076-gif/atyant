@@ -125,10 +125,10 @@
 }
 
 .sidebar li {
-  padding: 14px;
-  border-radius: var(--border-radius);
+  padding: 12px 14px;
+  border-radius: 10px;
   cursor: pointer;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   transition: var(--transition);
   border: 1px solid transparent;
   position: relative;
@@ -136,7 +136,7 @@
 
 .sidebar li:hover {
   background: rgba(238, 242, 255, 0.6);
-  transform: translateX(4px);
+  transform: translateX(2px);
   border-color: #E0E7FF;
 }
 
@@ -145,7 +145,7 @@
   color: var(--text-white);
   box-shadow: var(--shadow-lg);
   border: none;
-  transform: translateX(4px);
+  transform: translateX(2px);
 }
 
 .sidebar li.highlighted {
@@ -153,17 +153,88 @@
   transition: background 0.6s;
 }
 
+.sidebar li.selected .contact-name,
+.sidebar li.selected .contact-role {
+  color: white;
+}
+
 .sidebar li.selected .last-message-preview {
   color: rgba(255, 255, 255, 0.8);
 }
 
-.contact-name {
-  font-weight: 600;
-  margin-bottom: 4px;
-  font-size: 0.95rem;
+/* Contact Item Layout */
+.contact-item-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.contact-avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.contact-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #E0E7FF;
+}
+
+.sidebar li.selected .contact-avatar {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.contact-online-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: #10B981;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+
+.sidebar li.selected .contact-online-indicator {
+  border-color: #6366F1;
+}
+
+.contact-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contact-name-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
+}
+
+.contact-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.contact-role {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  text-transform: capitalize;
+}
+
+.sidebar li.selected .contact-role {
+  color: rgba(255, 255, 255, 0.85);
+  opacity: 1;
 }
 
 .contact-name .time {
@@ -185,15 +256,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
+  min-width: 20px;
+  height: 20px;
   padding: 0 6px;
-  background: #e11d48;
+  background: #FF3B30;
   color: #fff;
   font-size: 11px;
   font-weight: 700;
   border-radius: 50px;
-  margin-left: auto;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(255, 59, 48, 0.3);
+}
+
+.sidebar li.selected .unread-badge {
+  background: white;
+  color: #6366F1;
 }
 
 /* ====== CHAT WINDOW ====== */
@@ -351,42 +428,28 @@
   stroke-width: 2.5;
 }
 
-/* ✅ NEW: DATE SEPARATOR */
+/* ✅ DATE SEPARATOR - WhatsApp Style */
 .date-separator {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 20px 0 16px 0;
+  margin: 24px 0 20px 0;
   position: relative;
-}
-
-.date-separator::before,
-.date-separator::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(to right, transparent, #E5E7EB 50%, transparent);
+  clear: both;
 }
 
 .date-label {
-  background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
-  color: #6B7280;
-  padding: 6px 16px;
-  border-radius: 20px;
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  color: #1976D2;
+  padding: 6px 14px;
+  border-radius: 8px;
   font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(229, 231, 235, 0.8);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 6px rgba(25, 118, 210, 0.15);
+  border: 1px solid rgba(25, 118, 210, 0.1);
   white-space: nowrap;
-}
-
-/* Special styling for Today */
-.date-separator:has(.date-label:contains("Today")) .date-label {
-  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-  color: #6366F1;
-  border-color: rgba(99, 102, 241, 0.2);
+  text-transform: uppercase;
 }
 
 /* ====== MESSAGES AREA ====== */
@@ -483,18 +546,45 @@
   font-size: 11px;
   display: inline-flex;
   align-items: center;
+  gap: 2px;
+  margin-left: 6px;
 }
 
+.message-status svg {
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+/* WhatsApp-style status colors */
 .single-tick {
-  color: var(--single-tick);
+  color: #8696A0;
 }
 
 .double-tick {
-  color: var(--double-tick);
+  color: #8696A0;
 }
 
 .double-tick-blue {
-  color: var(--double-tick-blue);
+  color: #53BDEB;
+}
+
+/* Improve checkmark contrast on sent messages */
+.sent .message-status svg {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+}
+
+/* Animation for status change */
+@keyframes statusUpdate {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .message-delete-btn {

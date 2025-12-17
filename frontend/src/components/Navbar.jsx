@@ -42,6 +42,9 @@ const Navbar = () => {
     if (user) {
       return user.role === 'mentor' ? (
         <>
+          <Link to="/dashboard" className="nav-link" onClick={linkAction}>
+            Dashboard
+          </Link>
           <Link to="/chat" className="nav-link" onClick={linkAction}>Student Chats</Link>
           <Link to="/internships" className="nav-link" onClick={linkAction}>
             {!isMobile && <GraduationCap size={18} />}
@@ -105,7 +108,7 @@ const Navbar = () => {
                   <UserAvatar user={user} size={48} />
                   <div className="dropdown-user-info">
                     <span>Signed in as</span>
-                    <strong>{user.username}</strong>
+                    <strong>{typeof user.username === 'string' ? user.username : (user.name || user.email || 'User')}</strong>
                   </div>
                 </div>
                 <Link to="/profile" className="dropdown-item">
@@ -130,7 +133,18 @@ const Navbar = () => {
       <div ref={panelRef} className={`menu-panel mobile-only ${open ? 'open' : ''}`}>
         {renderLinks(true)}
         {user && <hr />}
-        {user && <button onClick={handleLogout} className="menu-button">Logout</button>}
+        {user && (
+          <>
+            <Link to="/profile" className="menu-button" onClick={() => setOpen(false)}>
+              <UserIcon size={18} />
+              My Profile
+            </Link>
+            <button onClick={handleLogout} className="menu-button">
+              <LogOut size={18} />
+              Logout
+            </button>
+          </>
+        )}
       </div>
     </header>
   );

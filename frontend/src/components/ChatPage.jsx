@@ -363,15 +363,42 @@ const ChatPage = ({ recipientId, recipientName }) => {
     const handler = (statusUpdate) => {
       setMessages(prev =>
         prev.map(msg =>
-          msg._id === statusUpdate.messageId && statusUpdate.status === 'seen'
-            ? { ...msg, seen: true }
+          msg._id === statusUpdate.messageId
+            ? { 
+                ...msg, 
+                status: statusUpdate.status,
+                seen: statusUpdate.seen !== undefined ? statusUpdate.seen : msg.seen,
+                deliveredAt: statusUpdate.deliveredAt || msg.deliveredAt,
+                readAt: statusUpdate.readAt || msg.readAt
+              }
             : msg
         )
       );
     };
+    
+    const statusUpdateHandler = (statusUpdate) => {
+      console.log('📡 Message status update received:', statusUpdate);
+      setMessages(prev =>
+        prev.map(msg =>
+          msg._id === statusUpdate.messageId
+            ? { 
+                ...msg, 
+                status: statusUpdate.status,
+                seen: statusUpdate.seen !== undefined ? statusUpdate.seen : msg.seen,
+                deliveredAt: statusUpdate.deliveredAt || msg.deliveredAt,
+                readAt: statusUpdate.readAt || msg.readAt
+              }
+            : msg
+        )
+      );
+    };
+    
     socket.on('message_status', handler);
+    socket.on('message_status_update', statusUpdateHandler);
+    
     return () => {
       socket.off('message_status', handler);
+      socket.off('message_status_update', statusUpdateHandler);
       // If in a chat when unmounting, notify server we're leaving
       if (selectedContact) {
         socket.emit('leave_chat', { partnerId: selectedContact._id });
@@ -405,8 +432,22 @@ const ChatPage = ({ recipientId, recipientName }) => {
       ) {
         setMessages(prevMessages => {
           const isDuplicate = prevMessages.some(msg => msg._id === newMessage._id);
-          return isDuplicate ? prevMessages : [...prevMessages, newMessage];
+          return isDuplicate ? prevMessages : [...prevMessages, {
+            ...newMessage,
+            status: newMessage.status || 'sent',
+            seen: newMessage.seen || false,
+            deliveredAt: newMessage.deliveredAt,
+            readAt: newMessage.readAt
+          }];
         });
+        
+        // If message is received by current user, mark as delivered
+        if (newMessage.receiver === currentUser?.id && socket) {
+          socket.emit('message_delivered', {
+            messageId: newMessage._id,
+            sender: newMessage.sender
+          });
+        }
       } else {
         setUnreadMap(prev => {
           const prevSet = prev[chatPartnerId] || new Set();
@@ -793,15 +834,28 @@ const ChatPage = ({ recipientId, recipientName }) => {
                     highlightedContactId === contact._id ? 'highlighted' : ''
                   ].join(' ').trim()}
                 >
-                  <div className="contact-name" style={{ position: "relative" }}>
-                    {contact.username || contact.name}
-                    {
-                      unreadMap[contact._id] && unreadMap[contact._id].size > 0 && (
-                        <span className="unread-badge">{unreadMap[contact._id].size}</span>
-                      )
-                    }
+                  <div className="contact-item-wrapper">
+                    <div className="contact-avatar-wrapper">
+                      <img
+                        src={
+                          contact.profilePicture
+                          || `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.username || contact.name || 'User')}&background=4f46e5&color=fff&size=48`
+                        }
+                        alt={contact.username || contact.name}
+                        className="contact-avatar"
+                      />
+                      <span className="contact-online-indicator"></span>
+                    </div>
+                    <div className="contact-info">
+                      <div className="contact-name-row">
+                        <span className="contact-name">{contact.username || contact.name || 'Unknown'}</span>
+                        {unreadMap[contact._id] && unreadMap[contact._id].size > 0 && (
+                          <span className="unread-badge">{unreadMap[contact._id].size}</span>
+                        )}
+                      </div>
+                      <div className="contact-role">{typeof contact.role === 'string' ? contact.role : 'user'}</div>
+                    </div>
                   </div>
-                  <div className="contact-role">{contact.role}</div>
                 </li>
               ))}
             </ul>
@@ -881,19 +935,29 @@ const ChatPage = ({ recipientId, recipientName }) => {
               }}
             >
               {messages.length > 0 ? (
-                messages.map((msg, index) => {
-                  const senderId = String(msg.sender?._id || msg.sender);
-                  const isMine = senderId === String(currentUser.id);
-                  const messageId = msg._id;
-                  const isAutoReply = msg.isAutoReply === true; // ✅ Explicit check
+                (() => {
+                  const groupedMessages = groupMessagesByDate(messages);
+                  return Object.keys(groupedMessages).map((dateLabel) => (
+                    <React.Fragment key={dateLabel}>
+                      {/* Date Separator */}
+                      <div className="date-separator">
+                        <span className="date-label">{dateLabel}</span>
+                      </div>
+                      
+                      {/* Messages for this date */}
+                      {groupedMessages[dateLabel].map((msg, index) => {
+                        const senderId = String(msg.sender?._id || msg.sender);
+                        const isMine = senderId === String(currentUser.id);
+                        const messageId = msg._id;
+                        const isAutoReply = msg.isAutoReply === true;
 
-                  return (
-                    <div
-                      key={`${messageId}-${index}`} // ✅ Better key
-                      className={`message ${isMine ? 'sent' : 'received'} ${
-                        isAutoReply ? 'auto-reply' : ''
-                      }`}
-                    >
+                        return (
+                          <div
+                            key={`${messageId}-${index}`}
+                            className={`message ${isMine ? 'sent' : 'received'} ${
+                              isAutoReply ? 'auto-reply' : ''
+                            }`}
+                          >
                       {/* ✅ Auto-reply badge */}
                       {isAutoReply && !isMine && (
                         <div className="auto-reply-badge">
@@ -978,13 +1042,32 @@ const ChatPage = ({ recipientId, recipientName }) => {
                             minute: '2-digit',
                           })}
                         </span>
-                        <span className="message-status">
-                          {isMine ? (msg.seen ? 'Seen' : 'Sent') : ''}
-                        </span>
+                        {isMine && (
+                          <span className="message-status" style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                            {msg.status === 'read' || msg.seen ? (
+                              <svg width="16" height="11" viewBox="0 0 16 11" fill="#53BDEB" style={{ marginLeft: '4px' }}>
+                                <path d="M11.071.653a.499.499 0 0 0-.707-.016L5.5 5.153 2.354 2.009a.5.5 0 0 0-.708.707l3.5 3.5a.5.5 0 0 0 .708 0l5.217-5.217a.5.5 0 0 0-.001-.346zm.708 5.746l-5.217 5.217a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.707L5.5 9.847l4.865-4.516a.499.499 0 0 1 .707.016.5.5 0 0 1 .001.346z"/>
+                                <path d="M15.071.653a.499.499 0 0 0-.707-.016L9.5 5.153l-.646-.646a.5.5 0 0 0-.708.707l1 1a.5.5 0 0 0 .708 0l5.217-5.217a.5.5 0 0 0-.001-.346z"/>
+                              </svg>
+                            ) : msg.status === 'delivered' ? (
+                              <svg width="16" height="11" viewBox="0 0 16 11" fill="#8696A0" style={{ marginLeft: '4px' }}>
+                                <path d="M11.071.653a.499.499 0 0 0-.707-.016L5.5 5.153 2.354 2.009a.5.5 0 0 0-.708.707l3.5 3.5a.5.5 0 0 0 .708 0l5.217-5.217a.5.5 0 0 0-.001-.346zm.708 5.746l-5.217 5.217a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.707L5.5 9.847l4.865-4.516a.499.499 0 0 1 .707.016.5.5 0 0 1 .001.346z"/>
+                                <path d="M15.071.653a.499.499 0 0 0-.707-.016L9.5 5.153l-.646-.646a.5.5 0 0 0-.708.707l1 1a.5.5 0 0 0 .708 0l5.217-5.217a.5.5 0 0 0-.001-.346z"/>
+                              </svg>
+                            ) : (
+                              <svg width="12" height="11" viewBox="0 0 12 11" fill="#8696A0" style={{ marginLeft: '4px' }}>
+                                <path d="M11.071.653a.499.499 0 0 0-.707-.016L5.5 5.153 2.354 2.009a.5.5 0 0 0-.708.707l3.5 3.5a.5.5 0 0 0 .708 0l5.217-5.217a.5.5 0 0 0-.001-.346z"/>
+                              </svg>
+                            )}
+                          </span>
+                        )}
                       </div>
                     </div>
-                  );
-                })
+                        );
+                      })}
+                    </React.Fragment>
+                  ));
+                })()
               ) : (
                 <div className="no-messages">No messages yet. Start the conversation!</div>
               )}

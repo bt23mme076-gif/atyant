@@ -58,7 +58,10 @@ const Login = () => {
       login(response.data.token);
 
       toast.success('Login successful! 🎉');
-      navigate('/');
+      
+      // Redirect mentors to dashboard, students to home
+      const userRole = response.data.user?.role || 'user';
+      navigate(userRole === 'mentor' ? '/dashboard' : '/');
     } catch (error) {
       const friendly = mapLoginError(error);
       setMessage(friendly);
@@ -81,7 +84,10 @@ const Login = () => {
       if (res.ok) {
         login(data.token);
         toast.success('Logged in with Google!');
-        navigate('/');
+        
+        // Redirect mentors to dashboard, students to home
+        const userRole = data.user?.role || 'user';
+        navigate(userRole === 'mentor' ? '/dashboard' : '/');
       } else {
         const msg = data?.message || 'Google login failed.';
         setMessage(msg);

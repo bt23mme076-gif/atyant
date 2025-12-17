@@ -77,6 +77,7 @@ export const sendAutoReply = async (io, senderId, receiverId, mentorData) => {
       timestamp: new Date(),
       isAutoReply: true,
       seen: false,
+      status: 'sent'
     });
 
     await autoReplyMessage.save();
@@ -102,7 +103,10 @@ export const sendAutoReply = async (io, senderId, receiverId, mentorData) => {
       createdAt: populatedMessage.createdAt,
       timestamp: populatedMessage.timestamp,
       isAutoReply: true, // ✅ Important flag
-      seen: false
+      seen: false,
+      status: 'sent',
+      deliveredAt: null,
+      readAt: null
     };
 
     // ✅ Emit to BOTH users via socket (real-time, no refresh needed)

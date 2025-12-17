@@ -110,7 +110,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/ask', askRoutes);
-app.use('/api/users', mentorRoutes);
+app.use('/api/mentor', mentorRoutes);
 app.use('/api/location', locationRoutes);
 app.use('/api/ai', aiChatRoutes);
 app.use('/api/ratings', ratingRoutes);
@@ -272,9 +272,30 @@ io.on("connection", (socket) => {
         sender: data.sender,
         receiver: data.receiver,
         text: data.text,
+        status: 'sent',
+        seen: false
       });
       await newMessage.save();
       console.log(`💾 Message saved to MongoDB: ${newMessage._id}`);
+
+      // ✅ Check if this is first message and update totalChats for mentor
+      const previousMessages = await Message.countDocuments({
+        $or: [
+          { sender: data.sender, receiver: data.receiver },
+          { sender: data.receiver, receiver: data.sender }
+        ]
+      });
+
+      if (previousMessages === 1) {
+        // This is the first message, increment totalChats for mentor
+        if (receiver.role === 'mentor') {
+          await User.findByIdAndUpdate(receiver._id, { $inc: { totalChats: 1 } });
+          console.log(`📊 Incremented totalChats for mentor: ${receiver.username}`);
+        } else if (sender.role === 'mentor') {
+          await User.findByIdAndUpdate(sender._id, { $inc: { totalChats: 1 } });
+          console.log(`📊 Incremented totalChats for mentor: ${sender.username}`);
+        }
+      }
 
       const populatedMessage = await Message.findById(newMessage._id)
         .populate('sender', 'username name email profilePicture')
@@ -290,6 +311,10 @@ io.on("connection", (socket) => {
         receiverAvatar: populatedMessage.receiver.profilePicture,
         text: populatedMessage.text,
         createdAt: populatedMessage.createdAt,
+        status: populatedMessage.status || 'sent',
+        seen: populatedMessage.seen || false,
+        deliveredAt: populatedMessage.deliveredAt,
+        readAt: populatedMessage.readAt,
         isAutoReply: false
       };
 
@@ -306,6 +331,22 @@ io.on("connection", (socket) => {
 
       io.to(data.receiver).emit("receive_private_message", messageForFrontend);
       io.to(data.sender).emit("receive_private_message", messageForFrontend);
+
+      // Check if receiver is online and mark as delivered
+      const receiverSocketId = userSockets.get(data.receiver);
+      if (receiverSocketId) {
+        await Message.findByIdAndUpdate(newMessage._id, {
+          status: 'delivered',
+          deliveredAt: new Date()
+        });
+        
+        // Emit delivery status to sender
+        io.to(data.sender).emit("message_status_update", {
+          messageId: newMessage._id,
+          status: 'delivered',
+          deliveredAt: new Date().toISOString()
+        });
+      }
 
       io.to(data.receiver).emit("chat_notification", {
         from: messageForFrontend.sender,
@@ -401,6 +442,38 @@ io.on("connection", (socket) => {
       }
     } catch (error) {
       console.error("❌ Error deleting message:", error);
+    }
+  });
+
+  // Handle when user reads a message
+  socket.on("message_read", async (data) => {
+    try {
+      const { messageId, sender, receiver } = data;
+      
+      // Update message status to read
+      const updatedMessage = await Message.findByIdAndUpdate(
+        messageId,
+        {
+          status: 'read',
+          seen: true,
+          readAt: new Date()
+        },
+        { new: true }
+      );
+
+      if (updatedMessage) {
+        console.log(`✓✓ Message read: ${messageId}`);
+        
+        // Notify sender that message was read
+        io.to(sender).emit("message_status_update", {
+          messageId: messageId,
+          status: 'read',
+          seen: true,
+          readAt: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error marking message as read:', error);
     }
   });
 

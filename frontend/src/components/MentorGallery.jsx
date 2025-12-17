@@ -10,7 +10,7 @@ const MentorGallery = () => {
     const fetchMentors = async () => {
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-        const response = await fetch(`${API_URL}/api/users/mentors`);
+        const response = await fetch(`${API_URL}/api/mentor/mentors`);
         const data = await response.json();
         setMentors(data || []);
       } catch (error) {

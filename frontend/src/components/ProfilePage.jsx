@@ -519,8 +519,8 @@ const ProfilePage = () => {
                 <CheckCircle size={20} className="check-icon" />
                 <div className="location-details">
                   <p className="location-text">
-                    📍 <strong>{currentLocation.city || 'Location Set'}</strong>
-                    {currentLocation.state && `, ${currentLocation.state}`}
+                    📍 <strong>{typeof currentLocation.city === 'string' ? currentLocation.city : (typeof currentLocation === 'string' ? currentLocation : 'Location Set')}</strong>
+                    {currentLocation.state && typeof currentLocation.state === 'string' && `, ${currentLocation.state}`}
                   </p>
                   {/* ========== SHOW EXACT COORDINATES ========== */}
                   {currentLocation.coordinates && (
