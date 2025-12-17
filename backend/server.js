@@ -110,7 +110,8 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/ask', askRoutes);
-app.use('/api/mentor', mentorRoutes);
+app.use('/api/mentor', mentorRoutes); // New route
+app.use('/api/users', mentorRoutes); // Old route for backward compatibility
 app.use('/api/location', locationRoutes);
 app.use('/api/ai', aiChatRoutes);
 app.use('/api/ratings', ratingRoutes);
