@@ -42,15 +42,19 @@ const Navbar = () => {
     if (user) {
       return user.role === 'mentor' ? (
         <>
-          <Link to="/dashboard" className="nav-link" onClick={linkAction}>
+          <Link to="/dashboard" className="nav-link dashboard-link" onClick={linkAction}>
+            {!isMobile && ''}
             Dashboard
           </Link>
-          <Link to="/chat" className="nav-link" onClick={linkAction}>Student Chats</Link>
-          <Link to="/internships" className="nav-link" onClick={linkAction}>
+          <Link to="/chat" className="nav-link mentor-chat-link" onClick={linkAction}>
+            {!isMobile && ''}
+            Student Chats
+          </Link>
+          <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
             {!isMobile && <GraduationCap size={18} />}
             Internships
           </Link>
-          <Link to="/profile" className="nav-link" onClick={linkAction}>Profile</Link>
+         
         </>
       ) : (
         <>

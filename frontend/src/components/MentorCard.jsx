@@ -30,6 +30,40 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 // ========== SINGLE MENTOR CARD COMPONENT ==========
 const MentorCard = ({ mentor, userLocation }) => {
   
+  // Generate avatar placeholder
+  const getAvatarPlaceholder = () => {
+    const gradients = [
+      'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+      'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+      'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+      'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+      'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+      'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+      'linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%)'
+    ];
+    const nameStr = (mentor.name || mentor.username || 'M');
+    const hash = nameStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const gradientIndex = hash % gradients.length;
+    const isFemale = hash % 2 === 0;
+    
+    return (
+      <div className="mentor-image-placeholder" style={{ background: gradients[gradientIndex], width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
+        {isFemale ? (
+          <svg className="avatar-icon" style={{ width: '60%', height: '60%' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="white" fillOpacity="0.95"/>
+            <path d="M12 14C7.58172 14 4 17.5817 4 22H20C20 17.5817 16.4183 14 12 14Z" fill="white" fillOpacity="0.95"/>
+          </svg>
+        ) : (
+          <svg className="avatar-icon" style={{ width: '60%', height: '60%' }} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="7" r="4" fill="white" fillOpacity="0.95"/>
+            <path d="M5 21C5 16.5817 8.13401 13 12 13C15.866 13 19 16.5817 19 21H5Z" fill="white" fillOpacity="0.95"/>
+          </svg>
+        )}
+      </div>
+    );
+  };
+  
   // ✅ Get distance from backend or calculate if needed
   const getDistanceText = () => {
     // If backend already provided distance (from NearbyMentors)
@@ -78,12 +112,19 @@ const MentorCard = ({ mentor, userLocation }) => {
   return (
     <div className="mentor-card">
       {/* Profile Picture */}
-      <img 
-        src={mentor.profilePicture || mentor.image || '/default-avatar.png'} 
-        alt={mentor.name || mentor.username}
-        className="mentor-image"
-        loading="lazy"
-      />
+      <div className="mentor-image-wrapper" style={{ width: '110px', height: '110px', borderRadius: '50%', overflow: 'hidden', margin: '0 auto' }}>
+        {(mentor.profilePicture || mentor.image) ? (
+          <img 
+            src={mentor.profilePicture || mentor.image} 
+            alt={mentor.name || mentor.username}
+            className="mentor-image"
+            loading="lazy"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : (
+          getAvatarPlaceholder()
+        )}
+      </div>
       
       {/* Name */}
       <h3 className="mentor-name">

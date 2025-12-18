@@ -1,6 +1,6 @@
 // src/pages/AskQuestionPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import './AskQuestionPage.css';
 import './MentorListPage.css';
@@ -16,6 +16,41 @@ const AskQuestionPage = () => {
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // ✅ Check for query parameter and auto-search
+  useEffect(() => {
+    const queryFromUrl = searchParams.get('q');
+    if (queryFromUrl) {
+      setQuestion(queryFromUrl);
+      // Auto-trigger search
+      if (user?.token) {
+        handleFindMentorsFromUrl(queryFromUrl);
+      }
+    }
+  }, [searchParams, user]);
+
+  const handleFindMentorsFromUrl = async (queryText) => {
+    setLoading(true);
+    setHasSearched(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const response = await fetch(`${API_URL}/api/ask/suggest-mentors`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
+        },
+        body: JSON.stringify({ question: queryText })
+      });
+      const data = await response.json();
+      setSuggestedMentors(data);
+    } catch (error) {
+      console.error('Failed to find Mentor:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ✅ Fetch AI-generated questions on component mount
   useEffect(() => {

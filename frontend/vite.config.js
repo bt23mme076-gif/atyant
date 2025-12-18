@@ -10,10 +10,16 @@ export default defineConfig({
   ],
   build: {
     target: 'es2015',
-    minify: 'esbuild',
+    minify: 'terser',
     sourcemap: false,
     cssCodeSplit: true,
-    chunkSizeWarningLimit: 500,
+    chunkSizeWarningLimit: 1000,
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    },
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -25,6 +31,7 @@ export default defineConfig({
             if (id.includes('@tanstack/react-query')) return 'react-query';
             if (id.includes('socket.io-client')) return 'socket';
             if (id.includes('lucide-react')) return 'icons';
+            if (id.includes('swiper')) return 'swiper';
             // Everything else
             return 'vendor';
           }

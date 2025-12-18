@@ -5,6 +5,74 @@ import { useAuth } from '../AuthContext';
 import MentorRating from './MentorRating';
 import './MentorListPage.css';
 
+// ✅ CACHE CONSTANTS
+const CACHE_TIME = 5 * 60 * 1000; // 5 minutes
+const CACHE_KEY = 'mentors_cache';
+
+// ✅ Memoized Avatar Component to prevent re-renders
+const MentorAvatar = React.memo(({ name, username, profilePicture }) => {
+  const gradients = [
+    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+    'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+    'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+    'linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%)'
+  ];
+  
+  const nameStr = (name || username || 'M');
+  const hash = nameStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const gradientIndex = hash % gradients.length;
+
+  if (profilePicture) {
+    return (
+      <img
+        src={profilePicture}
+        alt={name || username}
+        className="mentor-image"
+        onError={(e) => {
+          e.currentTarget.style.display = 'none';
+          e.currentTarget.parentElement.innerHTML = `
+            <div class="mentor-image-placeholder" style="width: 110px; height: 110px;">
+              <div class="placeholder-avatar" style="background: ${gradients[gradientIndex]}; width: 110px; height: 110px;">
+                <span style="font-size: 3.5rem; line-height: 1; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));">👤</span>
+              </div>
+            </div>
+          `;
+        }}
+        loading="lazy"
+      />
+    );
+  }
+
+  return (
+    <div className="mentor-image-placeholder" style={{ width: '110px', height: '110px' }}>
+      <div 
+        className="placeholder-avatar" 
+        style={{ 
+          background: gradients[gradientIndex],
+          width: '110px',
+          height: '110px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <span style={{ 
+          fontSize: '3.5rem',
+          lineHeight: '1',
+          display: 'block',
+          filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.25))'
+        }}>👤</span>
+      </div>
+    </div>
+  );
+});
+
+MentorAvatar.displayName = 'MentorAvatar';
+
 const MentorListPage = () => {
   const [mentors, setMentors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,7 +81,6 @@ const MentorListPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // ✅ State Management - CORRECTED
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [filters, setFilters] = useState({
     mentorBackground: 'All',
@@ -21,127 +88,111 @@ const MentorListPage = () => {
     price: 'All',
     sort: 'Recommended'
   });
-
-  // ✅ Category Buttons (Main User Intention)
   const categories = [
-    ' All',
-    ' Roadmap & Guidance',
-    ' Internships',
-    ' Placements',
-    ' Higher Studies',
-    ' Startups / Entrepreneurship',
-    'Top Rated Mentors',
-    'Active Now'
+    'All',
+    'SDE Internships',
+    'Product Internships',
+    'Off-Campus Placements',
+    'PPO Strategy',
+    'Resume & Interview Prep',
+    'Referral Help',
+    'Top Rated'
   ];
 
   // ✅ Dropdown Filter Options (Clear & Simple for Students)
   const filterOptions = {
-    // 🎯 What kind of help are you looking for?
-   
-
-    // 👨‍🏫 What kind of mentor do you prefer?
     mentorBackground: [
       'All',
-      'Senior from My College',
-      'Alumni from My College',
-      'Industry Professional',
-      'Founder / Entrepreneur',
-      'Exam / Subject Expert'
+      'Product Company (FAANG, Unicorn)',
+      'Service Company (TCS, Wipro, etc.)',
+      'Startup (funded)',
+      'From Tier-3 College',
+      'Has Multiple Internships',
+      'Got PPO Successfully'
     ],
-
-    // 🕓 When do you want to connect?
     availability: [
       'All',
       'Available Now',
       'This Week',
-      'By Appointment'
+      'Flexible Schedule'
     ],
-
-    // 💰 Pricing or Reward Preference
     price: [
       'All',
       'Free',
       '₹0–200',
       '₹200–500',
       '₹500–1000',
-      '₹1000+',
-      'Use Atyant Credits'
+      '₹1000+'
     ],
-
-    // ⚡ Sort Mentors By
     sort: [
       'Recommended',
-      'Most Helpful',
+      'Most Students Helped',
+      'Highest Success Rate',
       'Most Active',
       'Lowest Price',
-      'Most Experienced',
-      'Highest Rated',
       'Newest Mentors'
     ]
   };
 
-  // ✅ FIXED fetchMentors - Remove all console.logs
-  const fetchMentors = async (query = '') => {
+  const [allMentors, setAllMentors] = useState([]);
+  const getCachedData = () => {
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_TIME) {
+          return data;
+        }
+      }
+    } catch (err) {
+      console.error('Cache read error:', err);
+    }
+    return null;
+  };
+
+  const setCachedData = (data) => {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+        data,
+        timestamp: Date.now()
+      }));
+    } catch (err) {
+      console.error('Cache write error:', err);
+    }
+  };
+
+  const fetchMentors = async () => {
+    const cached = getCachedData();
+    if (cached) {
+      setAllMentors(cached);
+      setMentors(cached); // Set mentors immediately
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      // Always use VITE_API_URL, fallback to 5000 (your backend default)
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const url = `${API_URL}/api/search/mentors?limit=100`;
 
-      const params = new URLSearchParams();
-
-      // q search
-      const q = query.trim();
-      if (q) params.append('q', q);
-
-      // category: trim leading/trailing spaces to match backend values
-      const cleanCategory = (selectedCategory || '').trim();
-      if (cleanCategory && cleanCategory !== 'All') {
-        params.append('category', cleanCategory);
-      }
-
-      // mentorBackground: likely supported; send only if not 'All'
-      if (filters.mentorBackground && filters.mentorBackground !== 'All') {
-        params.append('mentorBackground', filters.mentorBackground);
-      }
-
-      // availability, price: send only if backend supports; if not, comment these out
-      // if (filters.availability && filters.availability !== 'All') {
-      //   params.append('availability', filters.availability);
-      // }
-      // if (filters.price && filters.price !== 'All') {
-      //   params.append('price', filters.price);
-      // }
-
-      // sort: normalize to backend keys if required
-      if (filters.sort) {
-        // Map UI labels to backend sort keys if needed
-        const sortMap = {
-          Recommended: 'recommended',
-          'Most Helpful': 'helpful',
-          'Most Active': 'active',
-          'Lowest Price': 'price_low',
-          'Most Experienced': 'experience_high',
-          'Highest Rated': 'rating_high',
-          'Newest Mentors': 'newest',
-        };
-        params.append('sort', sortMap[filters.sort] || filters.sort);
-      }
-
-      // Build URL: prefer dedicated search endpoint
-      const url = `${API_URL}/api/search/mentors${params.toString() ? `?${params.toString()}` : ''}`;
-
-      // Add auth header if user exists
       const headers = {};
       const token = localStorage.getItem('token');
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const response = await fetch(url, { headers });
+      const response = await fetch(url, { 
+        headers,
+        cache: 'no-store'
+      });
       if (!response.ok) {
         throw new Error(`Failed to fetch mentors (${response.status})`);
       }
-      const data = await response.json();
-      setMentors(Array.isArray(data) ? data : []);
+      const result = await response.json();
+      const data = result.mentors || (Array.isArray(result) ? result : []);
+      
+      setAllMentors(data);
+      setMentors(data); // Set mentors immediately
+      setCachedData(data); // Cache the data
     } catch (err) {
       setError('Could not load Mentors. Please try again later.');
       if (import.meta.env.DEV) {
@@ -152,10 +203,108 @@ const MentorListPage = () => {
     }
   };
 
-  // ✅ Re-fetch when filters change
+  const getFilteredMentors = () => {
+    let filtered = [...allMentors];
+    if (searchTerm.trim()) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(mentor => {
+        const searchableText = [
+          mentor.name,
+          mentor.username,
+          mentor.bio,
+          mentor.title,
+          mentor.company,
+          ...(mentor.specialties || []),
+          ...(mentor.tags || []),
+        ].join(' ').toLowerCase();
+        return searchableText.includes(search);
+      });
+    }
+
+    if (selectedCategory !== 'All') {
+      const categoryKeywords = {
+        'SDE Internships': ['sde', 'software', 'developer', 'engineering', 'internship', 'coding', 'programming', 'java', 'python', 'dsa', 'algorithm'],
+        'Product Internships': ['product', 'pm', 'manager', 'product management', 'roadmap', 'strategy', 'user', 'case study'],
+        'Off-Campus Placements': ['off campus', 'off-campus', 'placement', 'job', 'hiring', 'career', 'opportunity'],
+        'PPO Strategy': ['ppo', 'pre placement', 'pre-placement', 'full time', 'convert', 'offer', 'internship to job'],
+        'Resume & Interview Prep': ['resume', 'cv', 'interview', 'preparation', 'mock', 'question', 'rounds', 'coding round', 'hr round'],
+        'Referral Help': ['referral', 'refer', 'reference', 'connect', 'network', 'introduction'],
+        'Top Rated': []
+      };
+
+      if (selectedCategory === 'Top Rated') {
+        filtered = filtered.filter(m => (m.rating || 0) >= 4.5);
+      } else {
+        const keywords = categoryKeywords[selectedCategory] || [];
+        filtered = filtered.filter(mentor => {
+          const searchableText = [
+            mentor.bio,
+            mentor.title,
+            mentor.company,
+            ...(mentor.specialties || []),
+            ...(mentor.tags || []),
+          ].join(' ').toLowerCase();
+
+          return keywords.some(keyword => searchableText.includes(keyword));
+        });
+      }
+    }
+
+    if (filters.mentorBackground !== 'All') {
+      const bgKeywords = {
+        'Product Company (FAANG, Unicorn)': ['google', 'amazon', 'microsoft', 'apple', 'meta', 'facebook', 'netflix', 'faang', 'unicorn', 'flipkart', 'uber', 'swiggy', 'zomato'],
+        'Service Company (TCS, Wipro, etc.)': ['tcs', 'wipro', 'infosys', 'cognizant', 'accenture', 'capgemini', 'tech mahindra', 'hcl'],
+        'Startup (funded)': ['startup', 'early stage', 'seed', 'series', 'funded'],
+        'From Tier-3 College': ['tier 3', 'tier-3', 'tier3', 'non-iit', 'unknown college', 'small college'],
+        'Has Multiple Internships': ['internship', 'intern'],
+        'Got PPO Successfully': ['ppo', 'pre placement', 'converted']
+      };
+
+      const keywords = bgKeywords[filters.mentorBackground] || [];
+      if (keywords.length > 0) {
+        filtered = filtered.filter(mentor => {
+          const searchableText = [
+            mentor.bio,
+            mentor.title,
+            mentor.company,
+            ...(mentor.specialties || []),
+            ...(mentor.tags || []),
+          ].join(' ').toLowerCase();
+
+          return keywords.some(keyword => searchableText.includes(keyword));
+        });
+      }
+    }
+
+    if (filters.sort) {
+      switch(filters.sort) {
+        case 'Most Students Helped':
+          filtered.sort((a, b) => (b.reviewsCount || 0) - (a.reviewsCount || 0));
+          break;
+        case 'Highest Success Rate':
+        case 'Recommended':
+          filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+          break;
+        case 'Most Active':
+          // Keep default order (most recently added first)
+          break;
+        case 'Lowest Price':
+          filtered.sort((a, b) => (a.sessionPrice || 0) - (b.sessionPrice || 0));
+          break;
+        case 'Newest Mentors':
+          filtered.reverse();
+          break;
+      }
+    }
+
+    return filtered;
+  };
+
   useEffect(() => {
-    fetchMentors(searchTerm);
-  }, [selectedCategory, filters]);
+    if (allMentors.length > 0 && !loading) {
+      setMentors(getFilteredMentors());
+    }
+  }, [selectedCategory, filters, searchTerm]);
 
   useEffect(() => {
     fetchMentors();
@@ -163,10 +312,9 @@ const MentorListPage = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchMentors(searchTerm.trim());
+    setMentors(getFilteredMentors());
   };
 
-  // ✅ Filter change handler
   const handleFilterChange = (filterType, value) => {
     setFilters(prev => ({
       ...prev,
@@ -174,7 +322,6 @@ const MentorListPage = () => {
     }));
   };
 
-  // ✅ FIXED Clear all filters - Using CORRECT keys
   const clearAllFilters = () => {
     setSelectedCategory('All');
     setFilters({
@@ -185,7 +332,6 @@ const MentorListPage = () => {
     });
   };
 
-  // ✅ EXISTING functions - No changes
   const startChatWithMentor = (e, mentor) => {
     e.stopPropagation();
     navigate('/chat', {
@@ -206,14 +352,14 @@ const MentorListPage = () => {
 
   return (
     <div className="mentor-list-container">
-      {/* ✅ NEW: Enhanced Hero Section with Filters */}
+
       <div className="mentor-hero-section">
-        <h1>Find a Mentor</h1>
+        <h1>Find Your Placement Mentor</h1>
         <p className="hero-subtitle">
-          They’ve done what you’re trying to do — now they’re here to help you do it faster.
+          Connect with mentors who cracked the exact internship or placement you're targeting. Filter by company, role, and experience.
         </p>
 
-        {/* ✅ Search Bar with Category Buttons */}
+
         <div className="search-bar-with-categories">
           <form className="search-bar-enhanced" onSubmit={handleSearch}>
             <div className="search-input-container">
@@ -231,7 +377,7 @@ const MentorListPage = () => {
               </svg>
               <input
                 type="text"
-                placeholder="Search mentor, company, role, city"
+                placeholder="Search by company, role, mentor name, or location"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -243,7 +389,7 @@ const MentorListPage = () => {
             </button>
           </form>
 
-          {/* ✅ Category Buttons */}
+
           <div className="category-buttons-container">
             <div className="category-buttons">
               {categories.map(cat => (
@@ -259,10 +405,10 @@ const MentorListPage = () => {
           </div>
         </div>
 
-        {/* ✅ Dropdown Filters - FIXED */}
+
         <div className="filters-row">
           <div className="filter-dropdowns">
-            {/* Sort By */}
+
             <select
               value={filters.sort}
               onChange={(e) => handleFilterChange('sort', e.target.value)}
@@ -274,31 +420,31 @@ const MentorListPage = () => {
               ))}
             </select>
 
-            {/* 👨‍🏫 Mentor Background */}
+
             <select
               value={filters.mentorBackground}
               onChange={(e) => handleFilterChange('mentorBackground', e.target.value)}
               className="filter-dropdown"
             >
-              <option value="All">Mentor Background</option>
+              <option value="All">Company Type</option>
               {filterOptions.mentorBackground.filter(m => m !== 'All').map(opt => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
 
-            {/* 🕓 Availability */}
+
             <select
               value={filters.availability}
               onChange={(e) => handleFilterChange('availability', e.target.value)}
               className="filter-dropdown"
             >
-              <option value="All">Availability</option>
+              <option value="All">When to Connect</option>
               {filterOptions.availability.filter(a => a !== 'All').map(opt => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
 
-            {/* 💰 Price */}
+
             <select
               value={filters.price}
               onChange={(e) => handleFilterChange('price', e.target.value)}
@@ -311,30 +457,26 @@ const MentorListPage = () => {
             </select>
           </div>
 
-          {/* Clear Filters Button */}
+
           <button className="clear-filters-btn" onClick={clearAllFilters}>
             Clear all filters
           </button>
         </div>
       </div>
 
-      {/* ✅ REST ALL SAME - Keep existing loading, error, and cards */}
-      {loading && <div className="status-message">Loading Mentors...</div>}
-      {error && <div className="status-message error">{error}</div>}
+
+      {loading && <div className="status-message">Finding mentors who match your criteria...</div>}
+      {error && <div className="status-message error">Couldn't load mentors right now. Please try again in a moment.</div>}
 
       {!loading && !error && (
         <div className="mentor-grid">
           {mentors.length === 0 && (
             <div className="no-mentors-found">
-              No Mentors found. Try a different search.
+              No mentors match your filters. Try adjusting company type, role focus, or check back soon—we're adding new placement mentors every week.
             </div>
           )}
 
           {mentors.map((mentor) => {
-            // ❌ REMOVE these:
-            // console.log('Processing mentor:', mentor);
-            // console.log('Mentor bio:', mentor?.bio);
-            
             if (!mentor) {
               return null;
             }
@@ -370,20 +512,11 @@ const MentorListPage = () => {
               >
                 <div className="mentor-card-content">
                   <div className="mentor-image-container">
-                    {profilePicture ? (
-                      <img
-                        src={profilePicture}
-                        alt={name || username}
-                        className="mentor-image"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = '/default-profile-image.jpg';
-                        }}
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="mentor-image-placeholder" />
-                    )}
+                    <MentorAvatar 
+                      name={name}
+                      username={username}
+                      profilePicture={profilePicture}
+                    />
                     <span className="mentor-status" />
                   </div>
 
@@ -457,7 +590,7 @@ const MentorListPage = () => {
                       onClick={(e) => startChatWithMentor(e, mentor)}
                       className="chat-button"
                     >
-                      Start Chat
+                      Ask About My Plan
                     </button>
                     {hasScheduling && (
                       <button
@@ -465,7 +598,7 @@ const MentorListPage = () => {
                         className="secondary-button"
                         onClick={(e) => handleScheduleClick(e, username)}
                       >
-                        Schedule Call
+                        Book 1:1 Session
                       </button>
                     )}
                   </div>

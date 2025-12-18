@@ -1,7 +1,3 @@
-/* ========================================
-   NEW: HERO SECTION WITH PURPLE GRADIENT
-   ======================================== */
-
 .mentor-hero-section {
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   padding: 80px 20px 100px;
@@ -69,10 +65,6 @@
   max-width: 600px;
   line-height: 1.6;
 }
-
-/* ========================================
-   NEW: ENHANCED SEARCH BAR
-   ======================================== */
 
 .search-bar-enhanced {
   max-width: 700px;
@@ -147,10 +139,6 @@
   transform: translateY(0);
 }
 
-/* ========================================
-   SEARCH BAR WITH CATEGORIES (WHITE STYLE)
-   ======================================== */
-
 .search-bar-with-categories {
   max-width: 900px;
   margin: 0 auto;
@@ -158,7 +146,6 @@
   z-index: 1;
 }
 
-/* ✅ WHITE SEARCH BAR - Like Photo */
 .search-bar-enhanced {
   display: flex;
   align-items: center;
@@ -199,7 +186,6 @@
   color: #94a3b8;
 }
 
-/* ✅ BLACK SEARCH BUTTON - Like Photo */
 .search-submit-btn {
   padding: 16px 24px;
   background: #1e293b;
@@ -222,10 +208,6 @@
   width: 20px;
   height: 20px;
 }
-
-/* ========================================
-   CATEGORY BUTTONS - TRANSPARENT WITH BORDERS
-   ======================================== */
 
 .category-buttons-container {
   display: flex;
@@ -276,10 +258,6 @@
   box-shadow: 0 4px 15px rgba(30, 58, 138, 0.4);
 }
 
-/* ========================================
-   FILTERS ROW - WHITE DROPDOWNS
-   ======================================== */
-
 .filters-row {
   display: flex;
   align-items: center;
@@ -322,7 +300,6 @@
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-/* Dropdown arrow */
 .filter-dropdown {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
@@ -331,10 +308,6 @@
   background-size: 20px;
   padding-right: 40px;
 }
-
-/* ========================================
-   CLEAR FILTERS BUTTON
-   ======================================== */
 
 .clear-filters-btn {
   padding: 12px 24px;
@@ -353,10 +326,6 @@
   color: rgba(255, 255, 255, 0.8);
   text-decoration-thickness: 2px;
 }
-
-/* ========================================
-   RESPONSIVE - SEARCH & FILTERS
-   ======================================== */
 
 @media (max-width: 1024px) {
   .filters-row {
@@ -490,11 +459,6 @@
   }
 }
 
-/* ========================================
-   KEEP ALL EXISTING CSS BELOW THIS
-   ======================================== */
-
-/* Theme tokens */
 :root{
   --bg:#f7f7fb;
   --card:#fff;
@@ -511,17 +475,15 @@
   --bd:#eceff5;
 }
 
-/* Page - UPDATE: Remove gradient since hero has it */
 .mentor-list-container{
   max-width:1200px;
   margin:32px auto;
   padding:8px 16px 72px;
   text-align:center;
   min-height:100vh;
-  background: #fff; /* Changed from gradient */
+  background: #fff;
 }
 
-/* ✅ HIDE OLD h1 and p styles - Now in hero section */
 .mentor-list-container > h1 {
   display: none;
 }
@@ -530,63 +492,22 @@
   display: none;
 }
 
-/* ✅ HIDE OLD SEARCH BAR - Using enhanced version */
 .search-bar {
   display: none;
 }
-
-/* Search */
-.search-bar-enhanced {
-  display:flex; align-items:center; gap:0;
-  max-width:640px; margin:0 auto 22px;
-  background:#fff; border:1px solid #e9eef5; border-radius:999px;
-  box-shadow:var(--shadow); overflow:hidden; transition:.25s ease;
-}
-.search-bar-enhanced:focus-within{ transform:translateY(-2px); box-shadow:var(--shadow-lg); border-color:#dbe5f2;}
-.search-bar-enhanced input{
-  flex:1; border:0; outline:0; background:transparent; padding:16px 22px; font-size:16px; color:var(--ink);
-}
-.search-bar-enhanced input::placeholder{ color:#9aa3af; }
-.search-button-enhanced{
-  padding: 18px 40px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #6366f1;
-  background: #ffffff;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  white-space: nowrap;
-}
-.search-button-enhanced:hover {
-  background: #f8f9ff;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(99, 102, 241, 0.25);
-}
-.search-button-enhanced:active {
-  transform: translateY(0);
-}
-
-/* Grid */
 .mentor-grid{
   display:grid; gap:26px;
   grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   margin-top:12px;
 }
 
-/* Card - Fixed for uniform button alignment */
 .mentor-card{
   position:relative; background:var(--card); border:1px solid #efe7c2;
   border-radius:var(--br); box-shadow:0 8px 26px rgba(17,24,39,.08);
   overflow:hidden; transform:translateZ(0);
-  animation:fadeInUp .45s ease both;
-  display:flex; /* Add flex for uniform height */
-  flex-direction:column; /* Stack content vertically */
-  height:100%; /* Full height of grid cell */
+  display:flex;
+  flex-direction:column;
+  height:100%;
 }
 .mentor-card::before{
   content:''; position:absolute; inset:0 0 auto 0; height:5px;
@@ -600,49 +521,129 @@
 .mentor-card-content{
   padding:20px 20px 18px;
   display:flex; flex-direction:column; align-items:center;
-  flex:1; /* Take remaining space */
-  justify-content:space-between; /* Distribute content evenly */
+  flex:1;
+  justify-content:space-between;
 }
 
-/* Content wrapper for better spacing */
 .mentor-info{
-  flex:1; /* Take available space */
+  flex:1;
   display:flex;
   flex-direction:column;
   justify-content:flex-start;
   width:100%;
 }
-
-/* Avatar */
 .mentor-image-container{ position:relative; margin-bottom:12px; }
 .mentor-image, .mentor-image-placeholder{
-  width:110px; height:110px; border-radius:50%; object-fit:cover; display:block; background:#ede9fe;
+  width:110px; height:110px; border-radius:50%; object-fit:cover; display:block;
   border:4px solid #fff; box-shadow:0 0 0 6px rgba(251,191,36,.28);
+}
+
+.mentor-image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible;
+  background: transparent;
+  width: 110px;
+  height: 110px;
+  box-shadow: 
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.placeholder-avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 12px 32px rgba(0, 0, 0, 0.15),
+    0 6px 16px rgba(0, 0, 0, 0.1),
+    inset 0 -2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 2px 8px rgba(255, 255, 255, 0.25);
+}
+
+.placeholder-avatar::before {
+  display: none;
+}
+
+.placeholder-avatar::after {
+  content: '';
+  position: absolute;
+  bottom: -10%;
+  right: -10%;
+  width: 50%;
+  height: 50%;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.15) 0%, transparent 70%);
+  filter: blur(8px);
+  z-index: 0;
+}
+
+.avatar-icon {
+  width: 60%;
+  height: 60%;
+  z-index: 3;
+  filter: 
+    drop-shadow(0 4px 12px rgba(0,0,0,0.2))
+    drop-shadow(0 2px 6px rgba(0,0,0,0.15));
+}
+
+.avatar-emoji {
+  z-index: 3;
+  line-height: 1;
+  user-select: none;
+  display: block;
+  color: white;
+  text-align: center;
+}
+
+.mentor-card:hover .placeholder-avatar {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 
+    0 16px 40px rgba(0, 0, 0, 0.2),
+    0 8px 20px rgba(0, 0, 0, 0.15),
+    inset 0 -2px 10px rgba(0, 0, 0, 0.12),
+    inset 0 3px 10px rgba(255, 255, 255, 0.3);
+}
+
+.mentor-card:hover .avatar-icon {
+  transform: scale(1.1) translateY(-2px);
+  filter: 
+    drop-shadow(0 6px 16px rgba(0,0,0,0.25))
+    drop-shadow(0 3px 8px rgba(0,0,0,0.2));
+}
+
+.mentor-card:hover .avatar-emoji {
+  transform: scale(1.15) translateY(-2px);
 }
 .mentor-card:hover .mentor-image{ transform:scale(1.03); transition:.25s; }
 .mentor-status{ position:absolute; right:6px; bottom:6px; width:12px; height:12px; border-radius:50%; background:var(--ok); border:2px solid #fff; }
 
-/* Titles */
 .mentor-name{ font-size:22px; font-weight:800; color:var(--ink); margin:6px 0 6px; }
 .mentor-name a{ color:inherit; text-decoration:none; }
 .mentor-name a:hover{ text-decoration:underline; }
 .mentor-title{ color:#6b7280; font-weight:600; font-size:14px; margin-bottom:2px; }
 .mentor-interest{ color:#6b7280; font-size:14px; margin-bottom:12px; }
 
-/* Bio - Fixed height to maintain consistency */
 .mentor-bio{
   color:#6b7280; 
   font-size:14px; 
   line-height:1.5;
   margin:8px 0 12px;
-  min-height:42px; /* Fixed minimum height for 3 lines */
+  min-height:42px;
   display:-webkit-box;
-  -webkit-line-clamp:3; /* Limit to 3 lines */
+  -webkit-line-clamp:3;
   -webkit-box-orient:vertical;
   overflow:hidden;
 }
-
-/* Stats */
 .mentor-stats{
   display:flex; gap:14px; width:100%; justify-content:center;
   border-top:1px solid #f0f2f6; border-bottom:1px solid #f0f2f6;
@@ -652,31 +653,28 @@
 .stat-value{ font-weight:800; color:var(--ink); font-size:15px; padding:6px 12px; border-radius:999px; background:#fff; border:1.5px solid #fde68a; }
 .stat-label{ font-size:12.5px; color:var(--muted); }
 
-/* Badges & tags */
 .mentor-badges, .mentor-tags{ 
   display:flex; gap:8px; flex-wrap:wrap; justify-content:center; 
   margin:6px 0 4px;
-  min-height:32px; /* Consistent height even when empty */
+  min-height:32px;
 }
 .mentor-badge{ font-size:12px; padding:6px 10px; border-radius:12px; border:1px solid #e9eef5; background:#fff; }
 .mentor-tag{ font-size:11.5px; padding:5px 10px; border-radius:999px; background:#f3f4f6; color:#374151; }
 
-/* Specialties */
 .mentor-specialties{ 
   display:flex; gap:8px; flex-wrap:wrap; justify-content:center; 
   margin:6px 0 4px;
-  min-height:32px; /* Consistent height */
+  min-height:32px;
 }
 .specialty-tag{ 
   font-size:11.5px; padding:5px 10px; border-radius:999px; 
   background:#e0e7ff; color:#3730a3; 
 }
 
-/* Actions - Always at bottom */
 .mentor-actions{ 
   display:flex; gap:12px; width:100%; 
-  margin-top:auto; /* Push to bottom */
-  padding-top:14px; /* Add spacing from content above */
+  margin-top:auto;
+  padding-top:14px;
 }
 .chat-button{
   flex:1; height:44px; padding:12px 14px; border-radius:12px; border:0; color:#fff;
@@ -690,14 +688,10 @@
 }
 .secondary-button:hover{ transform:translateY(-2px); box-shadow:0 6px 14px rgba(17,24,39,.08); border-color:#d8deea; }
 
-/* Empty / loading */
 .status-message{ min-height:40vh; display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:20px; flex-direction:column; }
 .no-mentors-found{ grid-column:1/-1; text-align:center; color:var(--muted); padding:40px 20px; }
 
-/* Animations */
 @keyframes fadeInUp{ from{ opacity:0; transform:translateY(14px) } to{ opacity:1; transform:translateY(0) } }
-
-/* CLICKABLE CARD STYLES */
 .clickable-card {
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -754,7 +748,6 @@
   height: 300px;
 }
 
-/* MENTOR NAME HOVER (No longer clickable separately) */
 .mentor-name {
   color: #333;
   transition: color 0.3s ease;
@@ -766,16 +759,14 @@
   color: #667eea;
 }
 
-/* Remove underline from Link if it exists */
 .mentor-name a {
   color: inherit;
   text-decoration: none;
 }
 
-/* BUTTON HOVER (Prevent card click) */
 .mentor-actions {
   position: relative;
-  z-index: 10; /* Ensure buttons are above card click */
+  z-index: 10;
   margin-top: auto;
   padding-top: 1rem;
 }
@@ -798,7 +789,6 @@
   transform: translateY(0);
 }
 
-/* IMAGE CONTAINER HOVER */
 .clickable-card:hover .mentor-image {
   transform: scale(1.1);
 }
@@ -807,7 +797,6 @@
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ACCESSIBILITY (Focus state) */
 .clickable-card:focus {
   outline: 3px solid #667eea;
   outline-offset: 4px;
@@ -817,7 +806,6 @@
   outline: none;
 }
 
-/* STATUS INDICATOR PULSE (on hover) */
 .clickable-card:hover .mentor-status {
   animation: statusPulse 1.5s ease-in-out infinite;
 }
@@ -831,18 +819,6 @@
   }
 }
 
-/* CARD GRID (ensure proper spacing) */
-.mentor-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-  padding: 2rem 0;
-}
-
-/* ========================================
-   ✅ MENTOR GRID - 3 CARDS CENTERED
-   ======================================== */
-
 .mentor-list-container {
   max-width: 100%;
   margin: 0;
@@ -853,22 +829,16 @@
   overflow-x: hidden;
 }
 
-/* ✅ Grid - CENTERED with padding on sides */
 .mentor-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
-  padding: 40px 80px; /* ✅ Added side padding */
+  padding: 40px 80px;
   margin: 0 auto;
-  max-width: 1600px; /* ✅ Max width for centering */
-  justify-content: center; /* ✅ Center the grid */
+  max-width: 1600px;
+  justify-content: center;
 }
 
-/* ========================================
-   RESPONSIVE BREAKPOINTS
-   ======================================== */
-
-/* Small Mobile (< 480px) - 1 column */
 @media (max-width: 479px) {
   .mentor-grid {
     grid-template-columns: 1fr;
@@ -877,7 +847,6 @@
   }
 }
 
-/* Mobile (480px - 767px) - 1 column */
 @media (min-width: 480px) and (max-width: 767px) {
   .mentor-grid {
     grid-template-columns: 1fr;
@@ -886,7 +855,6 @@
   }
 }
 
-/* Tablet (768px - 899px) - 2 columns centered */
 @media (min-width: 768px) and (max-width: 899px) {
   .mentor-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -896,7 +864,6 @@
   }
 }
 
-/* ✅ Desktop (900px - 1199px) - EXACTLY 3 COLUMNS CENTERED */
 @media (min-width: 900px) and (max-width: 1199px) {
   .mentor-grid {
     grid-template-columns: repeat(3, minmax(280px, 360px)) !important;
@@ -908,7 +875,6 @@
   }
 }
 
-/* ✅ Large Desktop (1200px - 1439px) - 3 columns with more space */
 @media (min-width: 1200px) and (max-width: 1439px) {
   .mentor-grid {
     grid-template-columns: repeat(3, minmax(300px, 380px)) !important;
@@ -920,7 +886,6 @@
   }
 }
 
-/* ✅ Extra Large (1440px - 1919px) - 3 columns with max space */
 @media (min-width: 1440px) and (max-width: 1919px) {
   .mentor-grid {
     grid-template-columns: repeat(3, minmax(320px, 400px)) !important;
@@ -932,7 +897,6 @@
   }
 }
 
-/* ✅ Ultra Wide (1920px+) - 3 columns with maximum space */
 @media (min-width: 1920px) {
   .mentor-grid {
     grid-template-columns: repeat(3, minmax(340px, 420px)) !important;

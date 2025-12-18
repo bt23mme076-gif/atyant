@@ -129,6 +129,54 @@
   transform: scaleX(1.08);
 }
 
+/* ✅ Mentor Dashboard Link Styling */
+.nav-link.dashboard-link {
+  position: relative;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-link.dashboard-link:hover {
+  background: linear-gradient(135deg, #667eea22, #764ba233);
+  color: #66faff;
+  box-shadow: 0 4px 20px #667eea44;
+  transform: scale(1.08) translateY(-1px);
+}
+
+/* ✅ Mentor Chat Link Styling */
+.nav-link.mentor-chat-link {
+  position: relative;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-link.mentor-chat-link:hover {
+  background: linear-gradient(135deg, #f093fb22, #f5576c33);
+  color: #ffd6ff;
+  box-shadow: 0 4px 20px #f093fb44;
+  transform: scale(1.08) translateY(-1px);
+}
+
+/* ✅ Profile Link Styling */
+.nav-link.profile-link {
+  position: relative;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-link.profile-link:hover {
+  background: linear-gradient(135deg, #ffd89b22, #19547b33);
+  color: #ffd89b;
+  box-shadow: 0 4px 20px #ffd89b44;
+  transform: scale(1.08) translateY(-1px);
+}
+
 /* ✅ NEW: Special styling for Nearby Mentors link */
 .nav-link.nearby-mentors {
   position: relative;
@@ -364,6 +412,15 @@
   background: #232942;
   color: #39e7fa;
   transform: translateX(4px);
+}
+
+/* ✅ Mobile mentor links styling */
+.menu-panel .nav-link.dashboard-link,
+.menu-panel .nav-link.mentor-chat-link,
+.menu-panel .nav-link.profile-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 /* ✅ NEW: Mobile nearby mentors styling */

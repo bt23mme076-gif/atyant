@@ -1,10 +1,10 @@
 // src/components/HeroSection.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import { TypeAnimation } from 'react-type-animation';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './HeroSection.css';
 
-const HeroSection = () => {
+export default function HeroSection() {
+  const [problem, setProblem] = useState('');
   const [counters, setCounters] = useState({
     students: 0,
     mentors: 0,
@@ -12,6 +12,7 @@ const HeroSection = () => {
   });
   const [hasAnimated, setHasAnimated] = useState(false);
   const statsRef = useRef(null);
+  const navigate = useNavigate();
 
   // Counter animation
   const animateCounter = (start, end, duration, key) => {
@@ -36,7 +37,7 @@ const HeroSection = () => {
         if (entries[0].isIntersecting && !hasAnimated) {
           setHasAnimated(true);
           animateCounter(0, 1000, 2000, 'students');
-          animateCounter(0, 50, 1800, 'mentors');
+          animateCounter(0, 80, 1800, 'mentors');
           animateCounter(0, 24, 1500, 'support');
         }
       },
@@ -47,76 +48,73 @@ const HeroSection = () => {
     return () => observer.disconnect();
   }, [hasAnimated]);
 
+  const problems = [
+    'Resume not getting shortlisted',
+    'Off-campus vs on-campus confusion',
+    'What projects actually matter',
+    'How to get referrals',
+    'Is CGPA important?',
+  ];
+
+  const handleSelect = (p) => setProblem(p);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!problem.trim()) return;
+
+    // Navigate to ask page with the problem as query parameter
+    navigate(`/ask?q=${encodeURIComponent(problem)}`);
+  };
+
   return (
     <section className="hero-section">
       <div className="hero-content">
-
-        {/* ⭐ Cleaner headline ⭐ */}
         <h1 className="hero-title">
-          Talk to Someone <span className="highlight">Who Has Already Solved</span> Your Problem
+          Get unstuck in{' '}
+          <span className="highlight">placements and internships</span>
         </h1>
 
         <p className="hero-subtitle">
-          Practical, real-life solutions from people who've faced the same challenge before you.
+          Talk to seniors from your branch / background who{" "}
+          cracked the same company you’re targeting.
+        <span className="subtitle-highlight">
+           
+          </span>
         </p>
 
-        {/* ⭐ NEW streamlined CTA box ⭐ */}
-        <div className="ask-box" style={{
-          width: '60%',
-          margin: '25px auto',
-          display: 'flex',
-          gap: '12px'
-        }}>
-          <input
-            type="text"
-            placeholder="What's the problem you're facing right now?"
-            style={{
-              flex: 1,
-              padding: '15px',
-              fontSize: '17px',
-              borderRadius: '10px',
-              border: 'none',
-              outline: 'none'
-            }}
-          />
-
-          <Link
-            to="/ask"
-            style={{
-              padding: '15px 20px',
-              borderRadius: '10px',
-              background: '#4b82ff',
-              color: 'white',
-              fontSize: '17px',
-              textDecoration: 'none',
-              whiteSpace: 'nowrap',
-              fontWeight: 600
-            }}
-          >
-            Find Mentor →
-          </Link>
+        <div className="problem-categories">
+          {problems.map((p) => (
+            <button
+              key={p}
+              type="button"
+              className={`problem-pill ${problem === p ? 'active' : ''}`}
+              onClick={() => handleSelect(p)}
+            >
+              {p}
+            </button>
+          ))}
         </div>
 
-        {/* ⭐ Rotating categories ⭐ */}
-        <div className="hero-rotator">
-          Your gateway to answers in{' '}
-          <TypeAnimation
-            sequence={[
-              'Internships', 1500,
-              'College Life', 1500,
-              'Competitive Exams', 1500,
-              'Career Growth', 1500,
-              'Placements', 1500,
-            ]}
-            wrapper="span"
-            speed={50}
-            className="typed-text"
-            repeat={Infinity}
-          />
-        </div>
+        <p className="hero-helper-text">
+          You’ll be matched with a senior who already cracked your target company.
+        </p>
 
-        {/* ⭐ Removed duplicate CTA BUTTON — avoids confusion ⭐ */}
-
+        <form className="ask-box-container" onSubmit={handleSubmit}>
+          <div className="ask-box">
+            <input
+              type="text"
+              className="ask-input"
+              placeholder="Describe your placement / internship problem in one line…"
+              value={problem}
+              onChange={(e) => setProblem(e.target.value)}
+              required
+            />
+            <button type="submit" className="ask-button">
+              Get my answer
+            </button>
+          </div>
+        </form>
+         
         {/* ⭐ Stats Section ⭐ */}
         <div className="stats-container" ref={statsRef}>
           <div className="stat-item">
@@ -142,8 +140,6 @@ const HeroSection = () => {
         </div>
 
       </div>
-    </section>
+    </section>           
   );
-};
-
-export default HeroSection;
+}

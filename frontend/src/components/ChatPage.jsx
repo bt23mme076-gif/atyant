@@ -266,43 +266,54 @@ const ChatPage = ({ recipientId, recipientName }) => {
         (async () => {
           const { io } = await import('socket.io-client');
           
-          // ✅ FIX: Use production URL if VITE_SOCKET_URL not set
           const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 
                             import.meta.env.VITE_API_URL || 
-                            (import.meta.env.PROD ? 'https://atyant-backend.onrender.com' : 'http://localhost:3000');
-          
-          console.log('🔌 Connecting to:', SOCKET_URL);
-          console.log('🌍 Environment:', import.meta.env.MODE);
-          console.log('🔑 Production?', import.meta.env.PROD);
+                            (import.meta.env.PROD ? 'https://atyant-backend.onrender.com' : 'http://localhost:5000');
           
           socket = io(SOCKET_URL, {
             auth: { token },
             transports: ['websocket', 'polling'],
             reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000,
+            reconnectionAttempts: 3,
+            reconnectionDelay: 2000,
+            reconnectionDelayMax: 5000,
             timeout: 20000,
             autoConnect: true,
-            withCredentials: true
+            withCredentials: true,
+            forceNew: false
           });
           
           socket.on('connect', () => {
             setSocketStatus('connected');
             socket.emit('join_user_room', userData.id);
           });
-          socket.on('disconnect', () => setSocketStatus('disconnected'));
-          socket.on('connect_error', () => {
-            setError('Failed to connect to chat server');
+          
+          socket.on('disconnect', (reason) => {
+            setSocketStatus('disconnected');
+            // Only log intentional disconnects
+            if (reason === 'io server disconnect' || reason === 'io client disconnect') {
+              console.log('Socket disconnected intentionally');
+            }
+          });
+          
+          socket.on('connect_error', (error) => {
             setSocketStatus('error');
+            // Don't show error for initial connection attempts
+            if (socket.connected) {
+              setError('Failed to connect to chat server');
+            }
           });
-          socket.on('reconnect', () => {
+          
+          socket.on('reconnect', (attemptNumber) => {
             setSocketStatus('connected');
-            if (userData && userData.id) socket.emit('join_user_room', userData.id);
+            if (userData && userData.id) {
+              socket.emit('join_user_room', userData.id);
+            }
           });
-          socket.on('reconnect_error', () => setSocketStatus('error'));
+          
           socket.on('reconnect_failed', () => {
             setSocketStatus('error');
-            setError('Failed to reconnect to chat server. Please refresh the page.');
+            setError('Failed to reconnect. Please refresh the page.');
           });
 
           socket.on('insufficient_credits', (data) => {

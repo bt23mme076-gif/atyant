@@ -5,18 +5,18 @@ import './HowItWorks.css'; // This line has been corrected
 const steps = [
   {
     icon: '❓',
-    title: 'Ask Your Question',
-    description: 'Got a doubt about academics, career, or personal growth? Just type it out. No confusing forms, no long wait.'
+    title: 'Tell us your problem',
+    description: 'Resume shortlist? Internship strategy? Roadmap confused? Just tell us what you\'re stuck on.'
   },
   {
     icon: '🤝',
-    title: 'Get Matched Instantly',
-    description: 'Our AI finds the best mentor—someone who has already solved the exact challenge you are facing'
+    title: 'We connect you with a senior who solved it recently',
+    description: 'Not a random mentor. Someone who cracked your exact problem.'
   },
   {
     icon: '💬',
-    title: 'Chat Directly with Mentors',
-    description: 'No one-way advice. You can talk to mentors in real time, ask follow-up questions, and get practical solutions that actually work.'
+    title: 'Get the actual steps they used',
+    description: 'What they did. What failed. What worked. No theory.'
   }
 ];
 
