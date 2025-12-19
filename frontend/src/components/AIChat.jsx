@@ -5,6 +5,36 @@ import './AIChat.css';
 
 const AIChat = ({ onClose }) => {
   const { user } = useContext(AuthContext); // Get user from context
+
+// ✅ Utility function to convert URLs to clickable links
+const linkifyText = (text) => {
+  if (!text) return null;
+  
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: 'inherit',
+            textDecoration: 'underline',
+            wordBreak: 'break-all'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [conversationId, setConversationId] = useState(null);
@@ -225,7 +255,9 @@ const AIChat = ({ onClose }) => {
                     )}
                   </div>
                   <div className="message-content">
-                    <p>{msg.content}</p>
+                    <p style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+                      {linkifyText(msg.content)}
+                    </p>
                     <span className="message-time">
                       {new Date(msg.timestamp).toLocaleTimeString('en-IN', {
                         hour: '2-digit',

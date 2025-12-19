@@ -486,13 +486,37 @@
   border-radius: 16px;
   max-width: 65%;
   word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
   position: relative;
   font-size: 0.92rem;
-  line-height: 1.5;
+  line-height: 1.6;
   animation: fadeInUp 0.35s ease;
   box-shadow: var(--shadow-sm);
   display: inline-block;
   width: fit-content;
+}
+
+/* ✅ Link styling in messages */
+.message a {
+  color: inherit;
+  text-decoration: underline;
+  word-break: break-all;
+  transition: opacity 0.2s;
+}
+
+.message a:hover {
+  opacity: 0.8;
+}
+
+.message.sent a {
+  color: #fff;
+  font-weight: 500;
+}
+
+.message.received a {
+  color: #4f46e5;
+  font-weight: 500;
 }
 
 .sent {
@@ -649,9 +673,11 @@
   backdrop-filter: blur(8px);
   gap: 12px;
   flex-shrink: 0;
+  align-items: flex-end;
 }
 
-.message-form input {
+.message-form input,
+.message-form textarea {
   flex: 1;
   padding: 11px 16px;
   border: 1px solid #E5E7EB;
@@ -659,9 +685,44 @@
   font-size: 0.92rem;
   transition: var(--transition);
   background: var(--input-bg);
+  font-family: inherit;
+  line-height: 1.5;
 }
 
-.message-form input:focus {
+/* ✅ WhatsApp style textarea with visible scrollbar */
+.message-form .message-textarea {
+  resize: none;
+  overflow-y: auto;
+  max-height: 120px;
+  min-height: 60px;
+  scrollbar-width: thin;
+  scrollbar-color: #9CA3AF #F3F4F6;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ✅ Webkit scrollbar styling for better visibility */
+.message-form .message-textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+.message-form .message-textarea::-webkit-scrollbar-track {
+  background: #F3F4F6;
+  border-radius: 10px;
+  margin: 4px 0;
+}
+
+.message-form .message-textarea::-webkit-scrollbar-thumb {
+  background: #9CA3AF;
+  border-radius: 10px;
+  border: 2px solid #F3F4F6;
+}
+
+.message-form .message-textarea::-webkit-scrollbar-thumb:hover {
+  background: #6B7280;
+}
+
+.message-form input:focus,
+.message-form textarea:focus {
   border-color: #6366F1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
   outline: none;

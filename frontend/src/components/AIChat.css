@@ -304,6 +304,9 @@
   gap: 3px;
   max-width: calc(100% - 44px);
   min-width: 0;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .ai-chat-modal .message.user .message-content {
@@ -323,7 +326,7 @@
   word-wrap: break-word;
   word-break: break-word;
   margin: 0;
-  line-height: 1.45;
+  line-height: 1.6;
   font-size: 0.88rem;
   white-space: pre-wrap;
   width: fit-content;
@@ -340,6 +343,28 @@
   background: white;
   color: #1e293b;
   border-bottom-left-radius: 4px;
+}
+
+/* ✅ Link styling in AI chat messages */
+.ai-chat-modal .message-content a {
+  color: inherit;
+  text-decoration: underline;
+  word-break: break-all;
+  transition: opacity 0.2s;
+}
+
+.ai-chat-modal .message-content a:hover {
+  opacity: 0.8;
+}
+
+.ai-chat-modal .message.user .message-content a {
+  color: #fff;
+  font-weight: 500;
+}
+
+.ai-chat-modal .message.assistant .message-content a {
+  color: #4f46e5;
+  font-weight: 500;
 }
 
 /* Timestamp - AI Chat Specific */

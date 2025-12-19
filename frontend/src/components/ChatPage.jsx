@@ -12,6 +12,36 @@ import LoadingSpinner from './LoadingSpinner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+// ✅ Utility function to convert URLs to clickable links
+const linkifyText = (text) => {
+  if (!text) return null;
+  
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: 'inherit',
+            textDecoration: 'underline',
+            wordBreak: 'break-all'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
 const formatWhen = (t) => {
   const d = new Date(t || Date.now());
   const s = Math.floor((Date.now() - d.getTime()) / 1000);
@@ -977,8 +1007,8 @@ const ChatPage = ({ recipientId, recipientName }) => {
                       )}
 
                       <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <p style={{ margin: 0, flex: 1, whiteSpace: 'pre-wrap' }}>
-                          {msg.text || msg.message}
+                        <p style={{ margin: 0, flex: 1, whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
+                          {linkifyText(msg.text || msg.message)}
                         </p>
                         
                         {/* Only show menu for user's own messages that aren't auto-replies */}
@@ -1094,12 +1124,19 @@ const ChatPage = ({ recipientId, recipientName }) => {
               </div>
             ) : (
               <form onSubmit={handleSendMessage} className="message-form">
-                <input
-                  type="text"
+                <textarea
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your message..."
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage(e);
+                    }
+                  }}
+                  placeholder="Type your message... (Shift+Enter for new line)"
                   disabled={!selectedContact || socketStatus !== 'connected'}
+                  rows={3}
+                  className="message-textarea"
                 />
                 <button
                   type="submit"
