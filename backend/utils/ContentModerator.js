@@ -44,8 +44,8 @@ class ContentModerator {
         }
 
         // Check for excessive length
-        if (message.length > 1000) {
-            return { isValid: false, reason: 'Message is too long (maximum 1000 characters)' };
+        if (message.length > 10000) {
+            return { isValid: false, reason: 'Message is too long (maximum 10000 characters)' };
         }
 
         // Check for spam-like patterns
