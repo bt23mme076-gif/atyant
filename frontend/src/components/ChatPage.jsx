@@ -168,6 +168,7 @@ const ChatPage = ({ recipientId, recipientName }) => {
   const [showSidebarOnMobile, setShowSidebarOnMobile] = useState(isMobile && !selectedContact);
 
   const activeToastsRef = useRef(new Map());
+  const readMessagesRef = useRef(new Set()); // ✅ Track messages already marked as read
   
   // Only one instance!
   const [unreadMap, setUnreadMap] = useState({}); // { contactId: Set<msgId> }
@@ -209,6 +210,7 @@ const ChatPage = ({ recipientId, recipientName }) => {
       return;
     }
     setUnreadMap(prev => ({ ...prev, [contact._id]: new Set() })); // reset Set
+    readMessagesRef.current.clear(); // ✅ Clear read tracking when switching contacts
     try {
       setSelectedContact(contact);
       setShowSidebarOnMobile(false);
@@ -382,19 +384,23 @@ const ChatPage = ({ recipientId, recipientName }) => {
 
   useEffect(() => {
     if (!socket || !selectedContact || !currentUser) return;
+    
     const unreadMsgIds = messages
-      .filter(msg => (String(msg.receiver?._id || msg.receiver) === String(currentUser.id)) && !msg.seen)
+      .filter(msg => 
+        (String(msg.receiver?._id || msg.receiver) === String(currentUser.id)) && 
+        !msg.seen &&
+        !readMessagesRef.current.has(msg._id) // ✅ Skip already processed messages
+      )
       .map(msg => msg._id);
+      
     if (unreadMsgIds.length) {
       unreadMsgIds.forEach(messageId => {
-        const message = messages.find(msg => msg._id === messageId);
-        if (message && !message.seen) {
-          socket.emit('message_read', {
-            messageId,
-            sender: selectedContact._id,
-            receiver: currentUser.id,
-          });
-        }
+        socket.emit('message_read', {
+          messageId,
+          sender: selectedContact._id,
+          receiver: currentUser.id,
+        });
+        readMessagesRef.current.add(messageId); // ✅ Mark as processed
       });
     }
   }, [messages, selectedContact, socket, currentUser]);
@@ -458,7 +464,7 @@ const ChatPage = ({ recipientId, recipientName }) => {
       }
     };
     fetchUserProfile();
-  }, [user, messages]);
+  }, [user]);
 
   useEffect(() => {
     if (!socket || !currentUser) return;
@@ -880,10 +886,15 @@ const ChatPage = ({ recipientId, recipientName }) => {
                       <img
                         src={
                           contact.profilePicture
-                          || `https://ui-avatars.com/api/?name=${encodeURIComponent(contact.username || contact.name || 'User')}&background=4f46e5&color=fff&size=48`
+                          || `https://ui-avatars.com/api/?name=${encodeURIComponent((contact.username || contact.name || 'User').split(' ')[0])}&background=6366f1&color=fff&size=96&length=1`
                         }
                         alt={contact.username || contact.name}
                         className="contact-avatar"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          const firstName = (contact.username || contact.name || 'U').split(' ')[0];
+                          e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}&background=6366f1&color=fff&size=96&length=1`;
+                        }}
                       />
                       <span className="contact-online-indicator"></span>
                     </div>
@@ -926,11 +937,16 @@ const ChatPage = ({ recipientId, recipientName }) => {
                 <img
                   src={
                     selectedContact.profilePicture
-                    || `https://api.pravatar.cc/150?u=${selectedContact.username || selectedContact._id}`
+                    || `https://ui-avatars.com/api/?name=${encodeURIComponent((selectedContact.username || selectedContact.name || 'User').split(' ')[0])}&background=6366f1&color=fff&size=96&length=1`
                   }
                   alt={selectedContact.username}
                   className="chat-header-avatar"
-                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #eee' }}
+                  style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    const firstName = (selectedContact.username || selectedContact.name || 'U').split(' ')[0];
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}&background=6366f1&color=fff&size=96&length=1`;
+                  }}
                 />
                 <h4 style={{ margin: 0, color: '#222', fontWeight: 600 }}>
                   {selectedContact.username}
@@ -1133,17 +1149,20 @@ const ChatPage = ({ recipientId, recipientName }) => {
                       handleSendMessage(e);
                     }
                   }}
-                  placeholder="Type your message... (Shift+Enter for new line)"
+                  placeholder="Type a message"
                   disabled={!selectedContact || socketStatus !== 'connected'}
-                  rows={3}
+                  rows={1}
                   className="message-textarea"
                 />
                 <button
                   type="submit"
                   disabled={!selectedContact || !newMessage.trim() || socketStatus !== 'connected'}
-                  className={socketStatus !== 'connected' ? 'disabled' : ''}
+                  className="send-button"
+                  aria-label="Send message"
                 >
-                  {socketStatus === 'connected' ? 'Send' : 'Connecting...'}
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M1.101 21.757L23.8 12.028 1.101 2.3l.011 7.912 13.623 1.816-13.623 1.817-.011 7.912z"/>
+                  </svg>
                 </button>
               </form>
             )}

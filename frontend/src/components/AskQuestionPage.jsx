@@ -278,9 +278,14 @@ const AskQuestionPage = () => {
                 </div>
                 
                 <img 
-                  src={mentor.profilePicture || `https://api.pravatar.cc/150?u=${mentor._id}`} 
+                  src={mentor.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent((mentor.username || mentor.name || 'M').split(' ')[0])}&background=6366f1&color=fff&size=150&length=1`} 
                   alt={mentor.username} 
-                  className="mentor-image" 
+                  className="mentor-image"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    const firstName = (mentor.username || mentor.name || 'M').split(' ')[0];
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}&background=6366f1&color=fff&size=150&length=1`;
+                  }}
                 />
                 
                 <h3 className="mentor-name">{mentor.username}</h3>

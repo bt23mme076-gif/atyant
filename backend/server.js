@@ -90,12 +90,16 @@ const MONGO_URI = process.env.MONGO_URI ||
 
 // ✅ PERFORMANCE: Optimize MongoDB connection
 mongoose.connect(MONGO_URI, {
-  maxPoolSize: 10, // Connection pooling for better performance
-  serverSelectionTimeoutMS: 5000,
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 30000,
   socketTimeoutMS: 45000,
+  connectTimeoutMS: 30000,
 })
   .then(() => console.log("✅ MongoDB connected successfully!"))
-  .catch(err => console.error("❌ MongoDB connection error:", err));
+  .catch(err => {
+    console.error("❌ MongoDB connection error:", err.message);
+    // Don't exit, let app run without DB for debugging
+  });
 
 // ✅ PERFORMANCE: Disable mongoose debug in production
 if (process.env.NODE_ENV === 'production') {
@@ -159,6 +163,7 @@ const server = http.createServer(app);
 // --- Socket.IO Configuration ---
 const activeUsers = new Map();
 const userSockets = new Map();
+const pendingNotifications = new Map(); // ✅ Track sent notifications to prevent duplicates
 
 const io = new Server(server, {
   cors: {
@@ -178,7 +183,6 @@ const io = new Server(server, {
 
 // Socket.IO handlers (existing logic)
 io.on("connection", (socket) => {
-  console.log(`✅ User connected via WebSocket: ${socket.id}`);
   let currentUserId = null;
 
   socket.on("join_user_room", (userId) => {
@@ -188,7 +192,6 @@ io.on("connection", (socket) => {
     if (!activeUsers.has(userId)) {
       activeUsers.set(userId, new Set());
     }
-    console.log(`👤 User ${socket.id} joined room: ${userId}`);
   });
 
   socket.on("enter_chat", ({ partnerId }) => {
@@ -196,7 +199,18 @@ io.on("connection", (socket) => {
       const userChats = activeUsers.get(currentUserId) || new Set();
       userChats.add(partnerId);
       activeUsers.set(currentUserId, userChats);
-      console.log(`👥 User ${currentUserId} entered chat with ${partnerId}`);
+      
+      // ✅ Clear notification flags when user opens chat
+      const notifKey = `${partnerId}-${currentUserId}`;
+      const emailNotifKey = `email-${partnerId}-${currentUserId}`;
+      if (pendingNotifications.has(notifKey)) {
+        pendingNotifications.delete(notifKey);
+        console.log(`🔔 Cleared notification flag: ${notifKey}`);
+      }
+      if (pendingNotifications.has(emailNotifKey)) {
+        pendingNotifications.delete(emailNotifKey);
+        console.log(`📧 Cleared email notification flag: ${emailNotifKey}`);
+      }
     }
   });
 
@@ -205,16 +219,15 @@ io.on("connection", (socket) => {
       const userChats = activeUsers.get(currentUserId);
       if (userChats) {
         userChats.delete(partnerId);
-        console.log(`👥 User ${currentUserId} left chat with ${partnerId}`);
       }
     }
   });
 
-  socket.on("disconnect", () => {
+  // Single disconnect handler
+  socket.on("disconnect", (reason) => {
     if (currentUserId) {
       userSockets.delete(currentUserId);
       activeUsers.delete(currentUserId);
-      console.log(`❌ User disconnected: ${currentUserId}`);
     }
   });
 
@@ -349,12 +362,20 @@ io.on("connection", (socket) => {
         });
       }
 
-      io.to(data.receiver).emit("chat_notification", {
-        from: messageForFrontend.sender,
-        fromName: messageForFrontend.senderName,
-        message: messageForFrontend.text,
-        timestamp: messageForFrontend.createdAt
-      });
+      // ✅ Only send notification if user hasn't been notified yet for this conversation
+      const notifKey = `${data.sender}-${data.receiver}`;
+      if (!pendingNotifications.has(notifKey)) {
+        io.to(data.receiver).emit("chat_notification", {
+          from: messageForFrontend.sender,
+          fromName: messageForFrontend.senderName,
+          message: messageForFrontend.text,
+          timestamp: messageForFrontend.createdAt
+        });
+        pendingNotifications.set(notifKey, true);
+        console.log(`🔔 Socket notification sent (${notifKey})`);
+      } else {
+        console.log(`🔔 Socket notification skipped (already notified: ${notifKey})`);
+      }
 
       io.to(data.sender).emit("chat_update", {
         type: 'new_message',
@@ -400,13 +421,16 @@ io.on("connection", (socket) => {
         }, 1500);
       }
 
+      // ✅ Send email notification only once per conversation
       try {
         const receiverChats = activeUsers.get(data.receiver);
         const isReceiverActive = receiverChats && receiverChats.has(data.sender);
         const receiverSocketId = userSockets.get(data.receiver);
         const isReceiverOnline = !!receiverSocketId;
         
-        if (!isReceiverActive && !isReceiverOnline) {
+        const emailNotifKey = `email-${data.sender}-${data.receiver}`;
+        
+        if (!isReceiverActive && !isReceiverOnline && !pendingNotifications.has(emailNotifKey)) {
           await resend.emails.send({
             from: 'notification@atyant.in',
             to: receiver.email,
@@ -414,9 +438,11 @@ io.on("connection", (socket) => {
             text: `You have a new message from ${sender.username}.\n\nMessage: "${data.text}"\n\nPlease log in to your Atyant account to reply.`,
             html: `<p>You have a new message from <strong>${sender.username}</strong>.</p><p>Message: <em>"${data.text}"</em></p><p>Please log in to your Atyant account to reply [https://www.atyant.in].</p>`
           });
-          console.log(`📧 Email notification sent via Resend to ${receiver.email}`);
+          pendingNotifications.set(emailNotifKey, true);
+          console.log(`📧 Email notification sent (${emailNotifKey})`);
         } else {
-          console.log(`📧 Email notification skipped - receiver is ${isReceiverActive ? 'actively chatting' : 'online'}`);
+          const reason = isReceiverActive ? 'actively chatting' : isReceiverOnline ? 'online' : 'already notified';
+          console.log(`📧 Email notification skipped - receiver is ${reason}`);
         }
       } catch (error) {
         console.error("❌ Error sending email notification:", error);
@@ -479,16 +505,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("message_delivered", (data) => {
-    console.log(`✓ Message delivered: ${data.messageId}`);
     io.to(data.sender).emit("message_status", {
       messageId: data.messageId,
       status: 'delivered',
       timestamp: new Date().toISOString()
     });
-  });
-
-  socket.on("disconnect", (reason) => {
-    console.log(`❌ User disconnected: ${socket.id}, reason: ${reason}`);
   });
 });
 

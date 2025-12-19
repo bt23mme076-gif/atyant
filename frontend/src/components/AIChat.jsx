@@ -288,9 +288,14 @@ const linkifyText = (text) => {
                     {suggestedMentors.map(mentor => (
                       <div key={mentor._id} className="mentor-item">
                         <img 
-                          src={mentor.profilePicture || '/default-avatar.png'} 
+                          src={mentor.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent((mentor.username || mentor.name || 'M').split(' ')[0])}&background=6366f1&color=fff&size=96&length=1`} 
                           alt={mentor.username}
                           className="mentor-avatar"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            const firstName = (mentor.username || mentor.name || 'M').split(' ')[0];
+                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}&background=6366f1&color=fff&size=96&length=1`;
+                          }}
                         />
                         <div className="mentor-info">
                           <strong>{mentor.username}</strong>
