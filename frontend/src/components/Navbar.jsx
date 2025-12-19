@@ -16,6 +16,12 @@ const Navbar = () => {
   const avatarBtnRef = useRef(null);
 
   console.log('🔍 Navbar - Current User:', user);
+  console.log('📋 User Details:', {
+    name: user?.name,
+    username: user?.username,
+    email: user?.email,
+    role: user?.role
+  });
 
   const handleLogout = () => {
     logout();
@@ -112,7 +118,7 @@ const Navbar = () => {
                   <UserAvatar user={user} size={48} />
                   <div className="dropdown-user-info">
                     <span>Signed in as</span>
-                    <strong>{typeof user.username === 'string' ? user.username : (user.name || user.email || 'User')}</strong>
+                    <strong>{user.name || user.username || user.email || 'User'}</strong>
                   </div>
                 </div>
                 <Link to="/profile" className="dropdown-item">
