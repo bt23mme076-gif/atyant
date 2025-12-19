@@ -69,7 +69,7 @@ const UserAvatar = ({ user, size = 48, className = '' }) => {
     return () => {
       cancelled = true;
     };
-  }, [photo]);
+  }, []); // ✅ Empty array - fetch only once on mount
 
   const src = optimizeCloudinary(photo, size);
 
