@@ -34,7 +34,9 @@ const UserAvatar = ({ user, size = 48, className = '' }) => {
 
   // Fetch profile photo once if not present in context
   useEffect(() => {
-    if (photo) return;
+    // ✅ Skip fetch if we already have photo from user prop
+    if (photo || initialPhoto) return;
+    
     const token = localStorage.getItem('token');
     if (!token) return;
 

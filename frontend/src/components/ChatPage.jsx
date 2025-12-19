@@ -169,6 +169,7 @@ const ChatPage = ({ recipientId, recipientName }) => {
 
   const activeToastsRef = useRef(new Map());
   const readMessagesRef = useRef(new Set()); // ✅ Track messages already marked as read
+  const profileFetchedRef = useRef(false); // ✅ Track if profile already fetched
   
   // Only one instance!
   const [unreadMap, setUnreadMap] = useState({}); // { contactId: Set<msgId> }
@@ -455,12 +456,18 @@ const ChatPage = ({ recipientId, recipientName }) => {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
+      // ✅ Skip if already fetched
+      if (profileFetchedRef.current) return;
+      
       if (user && user.role === 'user') {
         const response = await fetch(`${API_URL}/api/profile/me`, {
           headers: { 'Authorization': `Bearer ${user.token}` },
         });
         const data = await response.json();
-        if (response.ok) setCredits(data.messageCredits);
+        if (response.ok) {
+          setCredits(data.messageCredits);
+          profileFetchedRef.current = true; // ✅ Mark as fetched
+        }
       }
     };
     fetchUserProfile();

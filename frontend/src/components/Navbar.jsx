@@ -14,6 +14,7 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const avatarBtnRef = useRef(null);
+  const [userPhoto, setUserPhoto] = useState(null); // ✅ Shared photo state
 
   console.log('🔍 Navbar - Current User:', user);
   console.log('📋 User Details:', {
@@ -22,6 +23,36 @@ const Navbar = () => {
     email: user?.email,
     role: user?.role
   });
+
+  // ✅ Fetch profile photo once for both avatars
+  useEffect(() => {
+    const fetchPhoto = async () => {
+      if (user?.profilePicture) {
+        setUserPhoto(user.profilePicture);
+        return;
+      }
+      
+      const token = localStorage.getItem('token');
+      if (!token || !user) return;
+
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/profile/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.profilePicture) {
+            setUserPhoto(data.profilePicture);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching profile photo:', error);
+      }
+    };
+
+    fetchPhoto();
+  }, [user?.id]); // Only when user ID changes
 
   const handleLogout = () => {
     logout();
@@ -108,14 +139,14 @@ const Navbar = () => {
               onClick={() => setShowDropdown(v => !v)} 
               className="profile-avatar-btn"
             >
-              {/* ✅ REPLACE THIS LINE - Use UserAvatar instead of img/UserIcon */}
-              <UserAvatar user={user} size={40} />
+              {/* ✅ Use shared userPhoto */}
+              <UserAvatar user={{...user, profilePicture: userPhoto}} size={40} />
             </button>
             {showDropdown && (
               <div ref={dropdownRef} className="profile-dropdown">
                 <div className="dropdown-header">
-                  {/* ✅ ADD UserAvatar in dropdown header too */}
-                  <UserAvatar user={user} size={48} />
+                  {/* ✅ Use shared userPhoto */}
+                  <UserAvatar user={{...user, profilePicture: userPhoto}} size={48} />
                   <div className="dropdown-user-info">
                     <span>Signed in as</span>
                     <strong>{user.name || user.username || user.email || 'User'}</strong>
