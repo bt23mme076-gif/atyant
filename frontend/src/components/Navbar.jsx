@@ -94,8 +94,8 @@ const Navbar = () => {
          
         </>
       ) : (
-        <>
-          <Link to="/mentors" className="nav-link" onClick={linkAction}>Find Mentor</Link>
+        <>         
+          <Link to="/my-questions" className="nav-link" onClick={linkAction}>My Questions</Link>
 
           <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
             {!isMobile && <GraduationCap size={18} />}

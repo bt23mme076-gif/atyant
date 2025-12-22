@@ -236,6 +236,122 @@
   animation: fadeInUp 0.8s ease-out 0.6s both;
 }
 
+/* ========== PENDING QUESTIONS SECTION ========== */
+.pending-questions-section {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  margin-bottom: 30px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.section-header h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.section-subtitle {
+  color: #718096;
+  font-size: 1rem;
+  margin-bottom: 25px;
+}
+
+.questions-list {
+  display: grid;
+  gap: 20px;
+}
+
+.question-card {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.question-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+  transform: translateY(-4px);
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.question-badge {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.question-time {
+  color: #a0aec0;
+  font-size: 0.85rem;
+}
+
+.question-text {
+  color: #2d3748;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin: 0 0 16px 0;
+  line-height: 1.6;
+}
+
+.question-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.answer-prompt {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.no-questions-banner {
+  background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+  border: 2px solid #81e6d9;
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.no-questions-banner p {
+  color: #234e52;
+  font-size: 1.1rem;
+  margin: 0;
+  font-weight: 500;
+}
+
 .tips-header {
   display: flex;
   align-items: center;

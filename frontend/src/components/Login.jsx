@@ -59,9 +59,34 @@ const Login = () => {
 
       toast.success('Login successful! 🎉');
       
-      // Redirect mentors to dashboard, students to home
-      const userRole = response.data.user?.role || 'user';
-      navigate(userRole === 'mentor' ? '/dashboard' : '/');
+      // Check for pending question from home page
+      const pendingQuestion = localStorage.getItem('pendingQuestion');
+      if (pendingQuestion) {
+        localStorage.removeItem('pendingQuestion');
+        // Submit the question after a short delay to ensure auth is ready
+        setTimeout(async () => {
+          try {
+            const submitResponse = await axios.post(
+              `${API_URL}/api/engine/submit-question`,
+              { questionText: pendingQuestion },
+              { headers: { Authorization: `Bearer ${response.data.token}` } }
+            );
+            if (submitResponse.data.success) {
+              navigate(`/engine/${submitResponse.data.questionId}`);
+              return;
+            }
+          } catch (err) {
+            console.error('Failed to submit pending question:', err);
+          }
+          // Fallback to normal navigation if question submission fails
+          const userRole = response.data.user?.role || 'user';
+          navigate(userRole === 'mentor' ? '/dashboard' : '/');
+        }, 500);
+      } else {
+        // Normal redirect
+        const userRole = response.data.user?.role || 'user';
+        navigate(userRole === 'mentor' ? '/dashboard' : '/');
+      }
     } catch (error) {
       const friendly = mapLoginError(error);
       setMessage(friendly);
@@ -85,9 +110,41 @@ const Login = () => {
         login(data.token);
         toast.success('Logged in with Google!');
         
-        // Redirect mentors to dashboard, students to home
-        const userRole = data.user?.role || 'user';
-        navigate(userRole === 'mentor' ? '/dashboard' : '/');
+        // Check for pending question from home page
+        const pendingQuestion = localStorage.getItem('pendingQuestion');
+        if (pendingQuestion) {
+          localStorage.removeItem('pendingQuestion');
+          // Submit the question after a short delay to ensure auth is ready
+          setTimeout(async () => {
+            try {
+              const submitResponse = await fetch(
+                `${API_URL}/api/engine/submit-question`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${data.token}`
+                  },
+                  body: JSON.stringify({ questionText: pendingQuestion })
+                }
+              );
+              const submitData = await submitResponse.json();
+              if (submitData.success) {
+                navigate(`/engine/${submitData.questionId}`);
+                return;
+              }
+            } catch (err) {
+              console.error('Failed to submit pending question:', err);
+            }
+            // Fallback to normal navigation if question submission fails
+            const userRole = data.user?.role || 'user';
+            navigate(userRole === 'mentor' ? '/dashboard' : '/');
+          }, 500);
+        } else {
+          // Normal redirect
+          const userRole = data.user?.role || 'user';
+          navigate(userRole === 'mentor' ? '/dashboard' : '/');
+        }
       } else {
         const msg = data?.message || 'Google login failed.';
         setMessage(msg);

@@ -26,10 +26,12 @@ const ForgotPassword = lazy(() => import('./components/ForgotPassword'));
 const ResetPassword = lazy(() => import('./components/ResetPassword'));
 const ProfilePage = lazy(() => import('./components/ProfilePage'));
 const PublicProfilePage = lazy(() => import('./components/PublicProfilePage'));
-const AskQuestionPage = lazy(() => import('./components/AskQuestionPage'));
 const NearbyMentors = lazy(() => import('./components/NearbyMentors'));
 const AIChat = lazy(() => import('./components/AIChat'));
 const InternshipPage = lazy(() => import('./components/InternshipPage'));
+const EngineView = lazy(() => import('./components/EngineView')); // ✅ ATYANT ENGINE
+const MentorDashboard = lazy(() => import('./components/MentorDashboard')); // ✅ MENTOR DASHBOARD
+const MyQuestions = lazy(() => import('./components/MyQuestions')); // ✅ USER QUESTIONS LIST
 
 function App() {
   const location = useLocation();
@@ -74,20 +76,42 @@ function App() {
                   </ErrorBoundary>
                 </ProtectedRoute>
               } />
+              <Route path="/chat/:mentorId" element={
+                <ProtectedRoute>
+                  <ErrorBoundary>
+                    <ChatPage />
+                  </ErrorBoundary>
+                </ProtectedRoute>
+              } />
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <ProfilePage />
                 </ProtectedRoute>
               } />
               <Route path="/profile/:username" element={<PublicProfilePage />} />
-              <Route path="/ask" element={
-                <ProtectedRoute>
-                  <AskQuestionPage />
-                </ProtectedRoute>
-              } />
               <Route path="/nearby-mentors" element={
                 <ProtectedRoute>
                   <NearbyMentors />
+                </ProtectedRoute>
+              } />
+              
+              {/* ✅ ATYANT ENGINE ROUTES */}
+              <Route path="/engine/:questionId" element={
+                <ProtectedRoute>
+                  <EngineView />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/my-questions" element={
+                <ProtectedRoute>
+                  <MyQuestions />
+                </ProtectedRoute>
+              } />
+              
+              {/* ✅ MENTOR DASHBOARD */}
+              <Route path="/mentor-dashboard" element={
+                <ProtectedRoute>
+                  <MentorDashboard />
                 </ProtectedRoute>
               } />
             </Routes>

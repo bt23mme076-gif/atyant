@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext, useMemo } from 'react';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { jwtDecode } from 'jwt-decode';
 import './ChatPage.css';
@@ -133,6 +133,13 @@ const groupMessagesByDate = (messages) => {
 };
 
 const ChatPage = ({ recipientId, recipientName }) => {
+  const { mentorId } = useParams(); // Get mentor ID from URL
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const authCtx = useContext(AuthContext) || {};
+  const ctxUser = authCtx?.user || {};
+  
   const [contactList, setContactList] = useState([]);
   const [selectedContact, setSelectedContact] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -148,11 +155,6 @@ const ChatPage = ({ recipientId, recipientName }) => {
   const [chatSessionId, setChatSessionId] = useState(null);
   const lastMessageRef = useRef(null);
   const messagesEndRef = useRef(null);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const authCtx = useContext(AuthContext) || {};
-  const ctxUser = authCtx?.user || {};
 
   const [highlightedContactId, setHighlightedContactId] = useState(null);
   const [socket, setSocket] = useState(null);
@@ -602,7 +604,84 @@ const ChatPage = ({ recipientId, recipientName }) => {
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           const data = await response.json();
           setContactList(data);
-          if (location.state?.selectedContact) {
+          
+          // Auto-select mentor if mentorId is in URL (from payment redirect)
+          if (mentorId) {
+            console.log('🎯 Auto-selecting mentor with ID:', mentorId);
+            console.log('📋 Available contacts:', data.map(c => ({ id: c._id, name: c.name || c.username })));
+            
+            // Try to find mentor in existing contacts
+            const mentor = data.find(contact => 
+              contact._id === mentorId || 
+              contact.userId === mentorId ||
+              contact.id === mentorId
+            );
+            
+            if (mentor) {
+              console.log('✅ Mentor found in contact list:', mentor.name || mentor.username);
+              setSelectedContact(mentor);
+              setHighlightedContactId(mentor._id || mentor.userId);
+              
+              toast.success(`💬 Connected with ${mentor.name || mentor.username}! Start chatting now.`, {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: false,
+              });
+            } else {
+              console.log('⚠️ Mentor not in existing contacts. Fetching mentor details...');
+              // Mentor not in contact list, fetch mentor details
+              try {
+                const mentorResponse = await fetch(`${API_URL}/api/users/${mentorId}`, {
+                  headers: { 'Authorization': `Bearer ${token}` },
+                });
+                
+                if (mentorResponse.ok) {
+                  const mentorData = await mentorResponse.json();
+                  console.log('✅ Mentor data fetched:', mentorData);
+                  
+                  // Format mentor as contact
+                  const mentorContact = {
+                    _id: mentorData._id || mentorData.id,
+                    userId: mentorData._id || mentorData.id,
+                    username: mentorData.username || mentorData.name,
+                    name: mentorData.name || mentorData.username,
+                    profilePicture: mentorData.profilePicture,
+                    role: mentorData.role || 'mentor',
+                    bio: mentorData.bio || '',
+                    lastMessage: null,
+                    lastMessageTime: null
+                  };
+                  
+                  console.log('✅ Formatted mentor contact:', mentorContact);
+                  
+                  // Add mentor to contact list at the top
+                  setContactList(prev => [mentorContact, ...prev]);
+                  
+                  // Select the mentor
+                  setSelectedContact(mentorContact);
+                  setHighlightedContactId(mentorContact._id);
+                  
+                  toast.success(`💬 Connected with ${mentorContact.name}! Start chatting now.`, {
+                    position: "top-center",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                  });
+                } else {
+                  console.error('❌ Failed to fetch mentor. Status:', mentorResponse.status);
+                  toast.error('Could not load mentor. Please refresh the page.', {
+                    position: "top-center",
+                    autoClose: 5000,
+                  });
+                }
+              } catch (fetchError) {
+                console.error('❌ Error fetching mentor:', fetchError);
+                toast.error('Failed to connect with mentor. Please try again.', {
+                  position: "top-center",
+                  autoClose: 5000,
+                });
+              }
+            }
+          } else if (location.state?.selectedContact) {
             handleSelectContact(location.state.selectedContact);
           }
         }
@@ -613,7 +692,7 @@ const ChatPage = ({ recipientId, recipientName }) => {
       }
     };
     fetchContacts();
-  }, [currentUser, location.state]);
+  }, [currentUser, location.state, mentorId]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();

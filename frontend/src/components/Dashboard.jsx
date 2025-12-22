@@ -15,18 +15,31 @@ const Dashboard = () => {
     profileViews: 0
   });
   const [loading, setLoading] = useState(true);
+  const [pendingQuestions, setPendingQuestions] = useState([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
     
     if (user?.role === 'mentor' && user?.token) {
       fetchMentorStats(isMounted);
+      fetchPendingQuestions();
+      
+      // Auto-refresh pending questions every 10 seconds
+      const interval = setInterval(() => {
+        fetchPendingQuestions();
+      }, 10000);
+      
+      return () => {
+        isMounted = false;
+        clearInterval(interval);
+      };
     }
     
     return () => {
       isMounted = false;
     };
-  }, []); // Empty dependency - only run once
+  }, [user]); // Re-run if user changes
 
   const fetchMentorStats = async (isMounted = true) => {
     try {
@@ -48,6 +61,28 @@ const Dashboard = () => {
       if (isMounted) {
         setLoading(false);
       }
+    }
+  };
+
+  const fetchPendingQuestions = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/engine/mentor/pending-questions`, {
+        headers: { 'Authorization': `Bearer ${user.token}` }
+      });
+      
+      const data = await res.json();
+      console.log('🔔 Dashboard - Pending questions:', data);
+      
+      if (data.success) {
+        setPendingQuestions(data.questions || []);
+        console.log('✅ Loaded', data.questions?.length || 0, 'pending questions');
+      } else {
+        console.error('❌ Failed to load questions:', data.error);
+      }
+    } catch (error) {
+      console.error('❌ Error fetching pending questions:', error);
+    } finally {
+      setLoadingQuestions(false);
     }
   };
 
@@ -97,6 +132,44 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* 🔥 NEW: Atyant Engine Pending Questions */}
+        {!loadingQuestions && pendingQuestions.length > 0 && (
+          <div className="pending-questions-section">
+            <div className="section-header">
+              <h2>🔔 Pending Questions from Atyant Engine</h2>
+              <span className="badge">{pendingQuestions.length} waiting</span>
+            </div>
+            <p className="section-subtitle">Students have submitted questions that match your expertise. Share your experience!</p>
+            
+            <div className="questions-list">
+              {pendingQuestions.map((question) => (
+                <Link 
+                  key={question.id} 
+                  to={`/mentor-dashboard?question=${question.id}`}
+                  className="question-card"
+                >
+                  <div className="question-header">
+                    <span className="question-badge">New Question</span>
+                    <span className="question-time">
+                      {new Date(question.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="question-text">{question.text}</p>
+                  <div className="question-footer">
+                    <span className="answer-prompt">→ Share Your Experience</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!loadingQuestions && pendingQuestions.length === 0 && (
+          <div className="no-questions-banner">
+            <p>✨ No pending questions right now. You'll be notified when students ask questions matching your expertise!</p>
+          </div>
+        )}
 
         <div className="action-cards">
           <Link to="/chat" className="action-card primary">

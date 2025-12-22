@@ -14,16 +14,28 @@ const upload = multer({
   },
 });
 
-// ✅ NEW: Get user by ID (for fetching profile picture in chat)
-router.get('/:id', protect, async (req, res) => {
+// ✅ NEW: Get user by ID (for fetching profile in chat)
+router.get('/:id', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('username profilePicture bio');
+    const user = await User.findById(req.params.id).select('username name email profilePicture bio role');
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
-    res.json(user);
+    console.log('✅ User fetched for chat:', user.username);
+    
+    res.json({
+      _id: user._id,
+      id: user._id,
+      userId: user._id,
+      username: user.username,
+      name: user.name || user.username,
+      email: user.email,
+      profilePicture: user.profilePicture,
+      bio: user.bio,
+      role: user.role
+    });
   } catch (error) {
     console.error('Error fetching user:', error);
     res.status(500).json({ message: 'Server error' });

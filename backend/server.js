@@ -22,6 +22,7 @@ import mentorRoutes from './routes/mentorRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
 import aiChatRoutes from './routes/aiChatRoutes.js';
 import ratingRoutes from './routes/ratingRoutes.js';
+import engineRoutes from './routes/engineRoutes.js'; // ✅ ATYANT ENGINE
 
 // Import models
 import Feedback from './models/Feedback.js';
@@ -113,13 +114,13 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/payments', paymentRoutes); // Also register under /api/payments for payment status checks
 app.use('/api/ask', askRoutes);
 app.use('/api/mentor', mentorRoutes); // New route
 app.use('/api/users', mentorRoutes); // Old route for backward compatibility
 app.use('/api/location', locationRoutes);
 app.use('/api/ai', aiChatRoutes);
-app.use('/api/ratings', ratingRoutes);
-
+app.use('/api/ratings', ratingRoutes);app.use('/api/engine', engineRoutes); // ✅ ATYANT ENGINE
 console.log('✅ AI Chat routes registered at /api/ai/*');
 
 // --- Contact form route ---
