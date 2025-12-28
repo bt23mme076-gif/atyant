@@ -1,396 +1,228 @@
-// Atyant Engine - Core logic for selecting best-fit mentor
 import User from '../models/User.js';
 import Question from '../models/Question.js';
-import MentorExperience from '../models/MentorExperience.js';
 import AnswerCard from '../models/AnswerCard.js';
-import { extractKeywords } from '../utils/keywordExtractor.js';
 import { sendMentorNewQuestionNotification } from '../utils/emailNotifications.js';
+import { getQuestionEmbedding } from './AIService.js';
 
 class AtyantEngine {
-  
+
   /**
-   * Extract better keywords from question text
+   * 🎯 Helper: Intent Detection
+   * Centralized logic to classify placement vs internship.
    */
-  extractBetterKeywords(text) {
-    if (!text) return [];
-    
-    const stopWords = ['how', 'what', 'when', 'where', 'why', 'who', 'which', 'the', 'a', 'an', 'and', 'or', 'for', 'to', 'in', 'on', 'at', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'do', 'does', 'did', 'will', 'can', 'should', 'kaise', 'kya', 'kab', 'kahan', 'kyun'];
-    
-    const words = text
-      .toLowerCase()
-      .replace(/[^\w\s]/g, ' ')
-      .split(/\s+/)
-      .filter(w => w.length > 2 && !stopWords.includes(w));
-    
-    const extracted = extractKeywords ? extractKeywords(text) : [];
-    const combined = [...new Set([...words, ...extracted])];
-    
-    return combined.slice(0, 15);
+  detectIntent(text) {
+    const t = text.toLowerCase();
+    if (t.includes('internship') || t.includes('intern')) return 'internship';
+    if (t.includes('placement') || t.includes('job') || t.includes('role')) return 'placement';
+    return null;
   }
 
   /**
-   * Find best-fit mentor for a question
-   * This is INTERNAL - user never sees this
+   * 🏆 Semantic Match with Authority Gate
+   * Best-of-K selection ensures highest quality recall.
    */
-  async findBestMentor(questionText, keywords) {
+  async findBestSemanticMatch(studentId, vector, questionText) {
     try {
-      console.log('🔍 Atyant Engine: Finding best mentor for keywords:', keywords);
+      const student = await User.findById(studentId).select('education');
+      const sEdu = student?.education?.[0] || {};
+      const intent = this.detectIntent(questionText);
       
-      // Build search strategies
-      const searchQueries = [];
-      
-      // Strategy 1: Expertise match (highest priority)
-      searchQueries.push({
-        role: 'mentor',
-        expertise: { 
-          $in: keywords.map(k => new RegExp(k, 'i'))
-        }
-      });
-      
-      // Strategy 2: Bio contains keywords
-      searchQueries.push({
-        role: 'mentor',
-        bio: { 
-          $regex: keywords.join('|'), 
-          $options: 'i' 
-        }
-      });
-      
-      // Find matching mentors
-      const mentors = await User.find({
-        $or: searchQueries
-      })
-      .select('username name expertise bio ratings location')
-      .limit(20);
-      
-      if (mentors.length === 0) {
-        console.log('⚠️ No mentors found, using fallback');
-        // Fallback: Get any experienced mentor
-        const fallbackMentors = await User.find({ role: 'mentor' })
-          .sort({ 'ratings.average': -1 })
-          .limit(5);
+      const candidates = await AnswerCard.aggregate([
+        {
+          "$vectorSearch": {
+            "index": "vector_index",
+            "path": "embedding",
+            "queryVector": vector,
+            "numCandidates": 20,
+            "limit": 10
+          }
+        },
+        { "$project": { "answerContent": 1, "mentorId": 1, "score": { "$meta": "vectorSearchScore" } } }
+      ]);
+
+      let bestMatch = null;
+
+      for (let match of candidates) {
+        // 🚀 1. STRICT AI FLOOR (Min 85%)
+        if (match.score < 0.85) continue;
+
+        const mentor = await User.findById(match.mentorId).select('education expertise bio');
+        const mExpertise = ((mentor?.expertise || []).join(' ') + ' ' + (mentor?.bio || '')).toLowerCase();
         
-        if (fallbackMentors.length > 0) {
-          return {
-            mentor: fallbackMentors[0],
-            reason: 'Fallback: Top-rated mentor',
-            score: 1
-          };
+        // 🚀 2. AUTHORITY GATE: Good writing ≠ Authority. 
+        // Experience must be battle-tested for instant delivery.
+        let authority = 0;
+        if (mExpertise.includes('internship')) authority += 120;
+        if (mExpertise.includes('placement')) authority += 120;
+        if (mExpertise.includes('ppo')) authority += 50;
+        if (mExpertise.includes('job')) authority += 40;
+
+        if (authority < 120) continue; // Hard Gate
+
+        // 🚀 3. INTENT ALIGNMENT
+        if (intent === 'internship' && !mExpertise.includes('intern')) continue;
+        if (intent === 'placement' && !(mExpertise.includes('placement') || mExpertise.includes('job'))) continue;
+
+        const mEdu = mentor?.education?.[0] || {};
+        const isSameCollege = sEdu.institution?.toLowerCase() === mEdu.institution?.toLowerCase();
+        const isSameBranch = sEdu.field?.toLowerCase() === mEdu.field?.toLowerCase();
+
+        // Background = Tie-breaker Only
+        const hybridScore = match.score + (isSameBranch ? 0.05 : 0) + (isSameCollege ? 0.03 : 0);
+
+        // Best-of-K Selection logic
+        if (!bestMatch || hybridScore > bestMatch.finalScore) {
+          bestMatch = { ...match, finalScore: hybridScore };
         }
-        
-        return null;
       }
       
-      // Score each mentor
-      const scoredMentors = mentors.map(mentor => {
-        let score = 0;
-        let reasons = [];
-        
-        // Expertise match (5 points per match)
-        if (mentor.expertise) {
-          mentor.expertise.forEach(exp => {
-            keywords.forEach(kw => {
-              if (exp.toLowerCase().includes(kw.toLowerCase())) {
-                score += 5;
-                reasons.push(`Expertise: ${exp}`);
-              }
-            });
-          });
-        }
-        
-        // Bio match (2 points per match)
-        if (mentor.bio) {
-          keywords.forEach(kw => {
-            if (mentor.bio.toLowerCase().includes(kw.toLowerCase())) {
-              score += 2;
-              reasons.push(`Bio mentions: ${kw}`);
-            }
-          });
-        }
-        
-        // Rating boost (up to 3 points)
-        if (mentor.ratings && mentor.ratings.average) {
-          score += (mentor.ratings.average / 5) * 3;
-          reasons.push(`Rating: ${mentor.ratings.average.toFixed(1)}/5`);
-        }
-        
-        // Check if mentor has solved similar questions before
-        // TODO: Implement experience history check
-        
-        return { 
-          mentor, 
-          score, 
-          reason: reasons.join(', ')
-        };
-      });
-      
-      // Sort by score (highest first)
-      scoredMentors.sort((a, b) => b.score - a.score);
-      
-      console.log('✅ Atyant Engine: Selected mentor:', scoredMentors[0].mentor.username, 'Score:', scoredMentors[0].score);
-      
-      return scoredMentors[0];
-    } catch (error) {
-      console.error('❌ Atyant Engine error:', error);
-      throw error;
-    }
+      return bestMatch && bestMatch.finalScore > 0.88 ? bestMatch : null; 
+    } catch (e) { return null; }
   }
 
   /**
-   * Process a new question submission
+   * 🤝 Live Mentor Allotment: Experience-First Scoring
+   * Experience is the entry ticket. College is secondary context.
    */
-  async processQuestion(userId, questionText, options = {}) {
+  async findBestMentor(studentId, keywords) {
     try {
-      const { isFollowUp = false, originalMentorId = null, parentQuestionId = null, parentAnswerCardId = null } = options;
-      
-      console.log('\n🚀 ========== PROCESSING QUESTION ==========');
-      console.log('👤 User ID:', userId);
-      console.log('📝 Question:', questionText);
-      console.log('🔄 Is Follow-up:', isFollowUp);
-      if (isFollowUp) {
-        console.log('👨‍🏫 Original Mentor ID (should be used):', originalMentorId);
-        console.log('🔗 Parent Question ID:', parentQuestionId);
-        console.log('📋 Parent Answer Card ID:', parentAnswerCardId);
-        console.log('⚠️ Will NOT create new answer card - will append to existing');
-      }
-      
-      // Extract keywords
-      const keywords = this.extractBetterKeywords(questionText);
-      console.log('🔍 Extracted keywords:', keywords);
-      
-      // Create question record
-      const question = new Question({
-        userId,
-        questionText,
-        keywords,
-        status: 'pending',
-        isFollowUp: isFollowUp,
-        parentQuestionId: parentQuestionId
+      const student = await User.findById(studentId).select('education');
+      const sEdu = student?.education?.[0] || {};
+      const intent = this.detectIntent(keywords.join(' '));
+
+      console.log(`🤝 Intent Detected: ${intent || 'General'}. Searching eligible mentors...`);
+
+      const mentors = await User.find({ role: 'mentor' }).select('username email education expertise bio');
+
+      // 🚀 HARD ELIGIBILITY: No domain experience = Mentor doesn't exist for this query.
+      const eligibleMentors = mentors.filter(mentor => {
+        const text = ((mentor.expertise || []).join(' ') + ' ' + (mentor.bio || '')).toLowerCase();
+        if (intent === 'internship') return text.includes('intern');
+        if (intent === 'placement') return text.includes('placement') || text.includes('job');
+        return true; 
       });
-      
-      await question.save();
-      console.log('✅ Question saved with ID:', question._id);
-      
-      // For follow-up questions, use the original mentor (bypass mentor selection)
-      if (isFollowUp && originalMentorId) {
-        console.log('\n🔁 FOLLOW-UP MODE ACTIVATED');
-        console.log('⚠️ BYPASSING MENTOR SELECTION');
-        console.log('✅ Using original mentor:', originalMentorId);
+
+      if (eligibleMentors.length === 0) return null;
+
+      const scored = eligibleMentors.map(mentor => {
+        let points = 0;
+        const lowerBio = ((mentor.expertise || []).join(' ') + ' ' + (mentor.bio || '')).toLowerCase();
+        const mEdu = mentor.education?.[0] || {};
+        const collegeMatch = sEdu.institution?.toLowerCase() === mEdu.institution?.toLowerCase();
+        const branchMatch = sEdu.field?.toLowerCase() === mEdu.field?.toLowerCase();
         
-        question.selectedMentorId = originalMentorId;
-        question.selectionReason = 'Follow-up question - same mentor as original';
-        question.status = 'mentor_assigned';
+        // 🔥 CORE AUTHORITY (Experience Points)
+        if (lowerBio.includes('internship') || lowerBio.includes('placement')) points += 200;
+        if (lowerBio.includes('ppo')) points += 60;
         
-        // ⚠️ IMPORTANT: Set answer card ID to parent's answer card for continuity
-        if (parentAnswerCardId) {
-          question.answerCardId = parentAnswerCardId;
-          console.log('📋 Linked to parent answer card:', parentAnswerCardId);
-        }
+        // 🎓 CONTEXT (Secondary Points)
+        if (branchMatch) points += 40;
+        if (collegeMatch) points += 20;
         
-        await question.save();
-        
-        console.log('✅ Follow-up assigned to original mentor');
-        console.log('📝 Question ID:', question._id);
-        console.log('📝 Mentor ID:', originalMentorId);
-        console.log('🔗 Parent Question ID:', parentQuestionId);
-        console.log('📋 Answer Card ID:', parentAnswerCardId);
-        console.log('==========================================\n');
-        
-        return {
-          success: true,
-          questionId: question._id,
-          message: 'Follow-up question submitted to your mentor...',
-        };
-      }
-      
-      // For new questions, find best mentor
-      console.log('\n🆕 NEW QUESTION MODE');
-      console.log('🔍 Finding best mentor...');
-      const bestMatch = await this.findBestMentor(questionText, keywords);
-      
-      if (!bestMatch) {
-        question.status = 'pending';
-        await question.save();
-        return {
-          success: false,
-          message: 'No suitable mentor found at this moment. We will assign one soon.',
-          questionId: question._id
-        };
-      }
-      
-      // Assign mentor (internally)
-      question.selectedMentorId = bestMatch.mentor._id;
-      question.selectionReason = bestMatch.reason;
-      question.status = 'mentor_assigned';
-      await question.save();
-      
-      console.log('✅ Question assigned to mentor:', bestMatch.mentor.username);
-      console.log('📝 Question ID:', question._id);
-      console.log('📝 Mentor ID:', bestMatch.mentor._id);
-      console.log('📝 Status:', question.status);
-      
-      // Send notification to mentor
-      try {
-        await sendMentorNewQuestionNotification(
-          bestMatch.mentor.email,
-          bestMatch.mentor.name || bestMatch.mentor.username,
-          questionText,
-          keywords
-        );
-        console.log('📧 Notification email sent to mentor');
-      } catch (emailError) {
-        console.error('❌ Failed to send mentor notification:', emailError);
-        // Don't fail the whole process if email fails
-      }
-      
-      return {
-        success: true,
-        questionId: question._id,
-        message: 'Atyant Engine is processing your question...',
-        // DO NOT return mentor details to user
-      };
-    } catch (error) {
-      console.error('Error processing question:', error);
-      throw error;
-    }
+        return { mentor, points };
+      });
+
+      scored.sort((a, b) => b.points - a.points);
+      return scored[0]?.mentor || null;
+    } catch (e) { return null; }
   }
 
   /**
-   * Transform raw mentor experience into Answer Card
-   * Uses AI to convert mentor's voice into Atyant's voice
+   * ✨ Brand Transformation: AI Structured Format
+   */
+  async aiTransformExperience(raw, questionText) {
+    const fallbackText = typeof raw === 'string' ? raw : (raw.situation || raw.mainAnswer || questionText || "Guidance shared.");
+    return {
+      mainAnswer: fallbackText,
+      situation: raw.situation || fallbackText,
+      firstAttempt: raw.firstAttempt || "Started with basics.",
+      keyMistakes: raw.failures ? [{ description: raw.failures }] : [],
+      whatWorked: raw.whatWorked || "Persistence.",
+      actionableSteps: (raw.stepByStep || "").split('\n').filter(l => l.trim()).map((l, i) => ({
+        step: `Step ${i+1}`,
+        description: l.trim()
+      })),
+      timeline: raw.timeline || "A few months.",
+      differentApproach: raw.wouldDoDifferently || "If I were doing this today, I would focus more on learning from mistakes and adapting quickly.",
+      additionalNotes: raw.additionalNotes || "No extra notes provided.",
+      mentorVoice: raw.situation || fallbackText
+    };
+  }
+
+  /**
+   * 🚀 New Answer Submission Logic
    */
   async transformToAnswerCard(mentorExperience, question) {
     try {
-      const rawExp = mentorExperience.rawExperience;
-      
-      // Use AI to transform
-      const transformed = await this.aiTransformExperience(rawExp, question.questionText);
-      
-      // Create Answer Card
+      const transformed = await this.aiTransformExperience(mentorExperience.rawExperience, question.questionText);
+      const embedding = await getQuestionEmbedding(question.questionText);
       const answerCard = new AnswerCard({
         questionId: question._id,
         mentorExperienceId: mentorExperience._id,
         mentorId: mentorExperience.mentorId,
-        answerContent: transformed
+        answerContent: transformed,
+        embedding: embedding 
       });
-      
-      await answerCard.save();
-      
-      // Update question status
-      question.answerCardId = answerCard._id;
-      question.status = 'answer_generated';
-      await question.save();
-      
-      return answerCard;
-    } catch (error) {
-      console.error('Error transforming to answer card:', error);
-      throw error;
-    }
+      return await answerCard.save();
+    } catch (error) { throw error; }
   }
 
   /**
-   * AI transformation of raw experience to Answer Card
+   * 🛠️ Main Process Orchestrator
    */
-  async aiTransformExperience(rawExperience, questionText) {
+  async processQuestion(userId, questionText, options = {}) {
     try {
-      const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-      
-      if (!GEMINI_API_KEY) {
-        // Fallback: Manual transformation
-        return this.manualTransform(rawExperience);
+      console.log('\n🚀 ========== ATYANT ENGINE START ==========');
+      const vector = await getQuestionEmbedding(questionText);
+      const keywords = this.extractBetterKeywords(questionText);
+
+      // 1. Instant Connection Gate
+      if (vector && !options.isFollowUp) {
+        // Updated Signature: passing questionText for intent check
+        const match = await this.findBestSemanticMatch(userId, vector, questionText);
+          if (match) {
+            const q = new Question({
+              userId, 
+              questionText, 
+              status: 'answered_instantly',
+              answerCardId: match._id, 
+              isInstant: true,
+              // 🚀 THE FIX: Hybrid score ko percentage mein badal kar save karein
+              matchScore: Math.round((match.finalScore || match.score || 0.94) * 100) // fallback to 94 if missing
+            });
+            await q.save();
+  
+            return { 
+              success: true, 
+              instantAnswer: true, 
+              questionId: q._id, 
+              // 🔥 Pura object bhej rahe hain taaki student ko roadmap/mistakes sab dikhe
+              answer: match.answerContent 
+            };
+          }
       }
+
+      // 2. Forced Live Mentor Search
+      const bestMentor = await this.findBestMentor(userId, keywords);
+      const question = new Question({ userId, questionText, keywords, status: 'pending' });
       
-      const prompt = `You are Atyant's AI transformer. Convert this mentor's raw experience into a structured Answer Card.
-
-ORIGINAL QUESTION: ${questionText}
-
-MENTOR'S RAW EXPERIENCE:
-Situation: ${rawExperience.situation}
-First Attempt: ${rawExperience.firstAttempt}
-What Failed: ${rawExperience.failures}
-What Worked: ${rawExperience.whatWorked}
-Step-by-Step: ${rawExperience.stepByStep}
-Timeline: ${rawExperience.timeline}
-Would Do Differently: ${rawExperience.wouldDoDifferently}
-
-TRANSFORM THIS INTO:
-1. Main Answer (conversational, practical, opinionated - NOT generic AI tone)
-2. Key Mistakes (3-5 clear mistakes from failures)
-3. Actionable Steps (5-7 specific steps with descriptions)
-4. Timeline (realistic expectations)
-5. Real Context (what makes this answer credible)
-
-RULES:
-- Use Atyant's voice (confident, direct, practical)
-- NO motivational fluff
-- NO generic advice
-- Include REAL mistakes
-- Be SPECIFIC and ACTIONABLE
-- Avoid "you should", use "Here's what works"
-
-Return ONLY valid JSON:
-{
-  "mainAnswer": "...",
-  "keyMistakes": ["...", "..."],
-  "actionableSteps": [{"step": "...", "description": "..."}, ...],
-  "timeline": "...",
-  "realContext": "..."
-}`;
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [{ text: prompt }]
-            }],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 2000,
-              topP: 0.9
-            }
-          })
-        }
-      );
-
-      const data = await response.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      
-      // Extract JSON
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        console.warn('AI transformation failed, using manual fallback');
-        return this.manualTransform(rawExperience);
+      if (bestMentor) {
+        question.selectedMentorId = bestMentor._id;
+        question.status = 'mentor_assigned';
+        await question.save();
+        return { success: true, questionId: question._id, message: `Matching with ${bestMentor.username}...` };
       }
-      
-      const transformed = JSON.parse(jsonMatch[0]);
-      return transformed;
-      
-    } catch (error) {
-      console.error('AI transformation error:', error);
-      return this.manualTransform(rawExperience);
-    }
+      await question.save();
+      return { success: false, message: 'Looking for a senior...' };
+    } catch (error) { throw error; }
   }
 
-  /**
-   * Manual transformation fallback
-   */
-  manualTransform(rawExperience) {
-    return {
-      mainAnswer: `Here's what worked based on real experience:\n\n${rawExperience.whatWorked}\n\nThe key was: ${rawExperience.stepByStep}`,
-      keyMistakes: rawExperience.failures.split('.').filter(s => s.trim()).slice(0, 5),
-      actionableSteps: rawExperience.stepByStep.split('\n').filter(s => s.trim()).map((step, idx) => ({
-        step: `Step ${idx + 1}`,
-        description: step.trim()
-      })).slice(0, 7),
-      timeline: rawExperience.timeline,
-      realContext: `Based on direct experience with: ${rawExperience.situation}`
-    };
+  extractBetterKeywords(text) {
+    const intentWords = ['internship','intern','placement','job','offcampus','oncampus','referral','resume'];
+    const base = text.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(w => w.length > 2);
+    return [...new Set([...intentWords.filter(w => base.includes(w)), ...base])].slice(0, 15);
   }
 }
 
-// Export singleton instance
 const atyantEngine = new AtyantEngine();
 export default atyantEngine;

@@ -62,10 +62,11 @@ const userSchema = new mongoose.Schema({
   
   // ========== EDUCATION (Optional) ==========
   education: [{
-    institution: { type: String },
+    institution: { type: String }, // College name matching ke liye
     degree: { type: String },
-    field: { type: String },
-    year: { type: String }
+    field: { type: String },      // Branch matching ke liye
+    year: { type: String },
+    cgpa: { type: Number }        // 🚀 Matching logic ke liye zaroori
   }],
   
   // ========== SOCIAL LINKS (Optional) ==========

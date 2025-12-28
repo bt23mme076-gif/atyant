@@ -121,8 +121,10 @@ const MentorDashboard = () => {
   const handleSubmitExperience = async (e) => {
     e.preventDefault();
     
-    // Validate required fields
-    const required = ['situation', 'firstAttempt', 'failures', 'whatWorked', 'stepByStep', 'timeline', 'wouldDoDifferently'];
+    // 🚀 THE FIX: Agar follow-up hai toh sirf 'situation' validate karein
+    const required = selectedQuestion.isFollowUp 
+      ? ['situation'] 
+      : ['situation', 'firstAttempt', 'failures', 'whatWorked', 'stepByStep', 'timeline', 'wouldDoDifferently'];
     for (const field of required) {
       if (!experience[field].trim()) {
         alert(`Please fill in: ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
@@ -199,134 +201,104 @@ const MentorDashboard = () => {
               <p>{selectedQuestion.text}</p>
             </div>
           </div>
-
           <form className="experience-form" onSubmit={handleSubmitExperience}>
-            <div className="form-group">
-              <label>
-                When I was in this situation
-                <span className="hint">Describe your context when you faced a similar challenge</span>
-              </label>
-              <textarea
-                value={experience.situation}
-                onChange={(e) => handleExperienceChange('situation', e.target.value)}
-                maxLength={1000}
-                placeholder="I was working on a project where..."
-              />
-              <div className="char-counter-mentor">{experience.situation.length}/1000</div>
-            </div>
-
-            <div className="form-group">
-              <label>
-                What I tried first
-                <span className="hint">Your initial approach to solving the problem</span>
-              </label>
-              <textarea
-                value={experience.firstAttempt}
-                onChange={(e) => handleExperienceChange('firstAttempt', e.target.value)}
-                maxLength={1000}
-                placeholder="My first approach was to..."
-              />
-              <div className="char-counter-mentor">{experience.firstAttempt.length}/1000</div>
-            </div>
-
-            <div className="form-group">
-              <label>
-                What failed (be specific)
-                <span className="hint">Mistakes you made and why they didn't work</span>
-              </label>
-              <textarea
-                value={experience.failures}
-                onChange={(e) => handleExperienceChange('failures', e.target.value)}
-                maxLength={1000}
-                placeholder="I made the mistake of... This failed because..."
-              />
-              <div className="char-counter-mentor">{experience.failures.length}/1000</div>
-            </div>
-
-            <div className="form-group">
-              <label>
-                What worked
-                <span className="hint">The solution that actually solved the problem</span>
-              </label>
-              <textarea
-                value={experience.whatWorked}
-                onChange={(e) => handleExperienceChange('whatWorked', e.target.value)}
-                maxLength={1000}
-                placeholder="What finally worked was..."
-              />
-              <div className="char-counter-mentor">{experience.whatWorked.length}/1000</div>
-            </div>
-
-            <div className="form-group">
-              <label>
-                Step-by-step actions
-                <span className="hint">Detailed steps someone should follow to replicate your success</span>
-              </label>
-              <textarea
-                value={experience.stepByStep}
-                onChange={(e) => handleExperienceChange('stepByStep', e.target.value)}
-                maxLength={2000}
-                placeholder="Step 1: ...&#10;Step 2: ...&#10;Step 3: ..."
-              />
-              <div className="char-counter-mentor">{experience.stepByStep.length}/2000</div>
-            </div>
-
-            <div className="form-group">
-              <label>
-                Timeline / Outcomes
-                <span className="hint">How long did it take? What were the results?</span>
-              </label>
-              <textarea
-                value={experience.timeline}
-                onChange={(e) => handleExperienceChange('timeline', e.target.value)}
-                maxLength={500}
-                placeholder="It took me 2 weeks, and the result was..."
-              />
-              <div className="char-counter-mentor">{experience.timeline.length}/500</div>
-            </div>
-
-            <div className="form-group">
-              <label>
-                What I would do differently today
-                <span className="hint">Lessons learned and improvements</span>
-              </label>
-              <textarea
-                value={experience.wouldDoDifferently}
-                onChange={(e) => handleExperienceChange('wouldDoDifferently', e.target.value)}
-                maxLength={1000}
-                placeholder="If I were doing this today, I would..."
-              />
-              <div className="char-counter-mentor">{experience.wouldDoDifferently.length}/1000</div>
-            </div>
-
-            <div className="form-group">
-              <label>
-                Additional Notes (optional)
-                <span className="hint">Any other context or tips</span>
-              </label>
-              <textarea
-                value={experience.additionalNotes}
-                onChange={(e) => handleExperienceChange('additionalNotes', e.target.value)}
-                maxLength={500}
-                placeholder="Also worth mentioning..."
-              />
-              <div className="char-counter-mentor">{experience.additionalNotes.length}/500</div>
-            </div>
-
+            {selectedQuestion.isFollowUp ? (
+              /* 🟢 SIMPLE VIEW: Only for Follow-ups */
+              <div className="form-group simple-reply-mode">
+                <label>
+                  Your Direct Answer
+                  <span className="hint">Since this is a follow-up, just provide a clear text answer.</span>
+                </label>
+                <textarea
+                  value={experience.situation}
+                  onChange={(e) => handleExperienceChange('situation', e.target.value)}
+                  maxLength={1500}
+                  placeholder="Type your follow-up reply here..."
+                  className="follow-up-textarea"
+                />
+                <div className="char-counter-mentor">{experience.situation.length}/1500</div>
+              </div>
+            ) : (
+              /* 🔵 FULL VIEW: Only for Original Questions */
+              <>
+                <div className="form-group">
+                  <label>When I was in this situation <span className="hint">Context</span></label>
+                  <textarea
+                    value={experience.situation}
+                    onChange={(e) => handleExperienceChange('situation', e.target.value)}
+                    maxLength={1000}
+                    placeholder="I was working on a project where..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>What I tried first <span className="hint">Your initial approach</span></label>
+                  <textarea
+                    value={experience.firstAttempt}
+                    onChange={(e) => handleExperienceChange('firstAttempt', e.target.value)}
+                    maxLength={1000}
+                    placeholder="My first approach was to..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>What failed (be specific) <span className="hint">Mistakes and why they didn't work</span></label>
+                  <textarea
+                    value={experience.failures}
+                    onChange={(e) => handleExperienceChange('failures', e.target.value)}
+                    maxLength={1000}
+                    placeholder="I made the mistake of... This failed because..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>What worked <span className="hint">The solution that actually solved the problem</span></label>
+                  <textarea
+                    value={experience.whatWorked}
+                    onChange={(e) => handleExperienceChange('whatWorked', e.target.value)}
+                    maxLength={1000}
+                    placeholder="What finally worked was..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Step-by-step actions <span className="hint">Detailed steps</span></label>
+                  <textarea
+                    value={experience.stepByStep}
+                    onChange={(e) => handleExperienceChange('stepByStep', e.target.value)}
+                    maxLength={2000}
+                    placeholder="Step 1: ...\nStep 2: ...\nStep 3: ..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Timeline / Outcomes <span className="hint">How long did it take? What were the results?</span></label>
+                  <textarea
+                    value={experience.timeline}
+                    onChange={(e) => handleExperienceChange('timeline', e.target.value)}
+                    maxLength={500}
+                    placeholder="It took me 2 weeks, and the result was..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>What I would do differently today <span className="hint">Lessons learned and improvements</span></label>
+                  <textarea
+                    value={experience.wouldDoDifferently}
+                    onChange={(e) => handleExperienceChange('wouldDoDifferently', e.target.value)}
+                    maxLength={1000}
+                    placeholder="If I were doing this today, I would..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Additional Notes (optional) <span className="hint">Any other context or tips</span></label>
+                  <textarea
+                    value={experience.additionalNotes}
+                    onChange={(e) => handleExperienceChange('additionalNotes', e.target.value)}
+                    maxLength={500}
+                    placeholder="Also worth mentioning..."
+                  />
+                </div>
+              </>
+            )}
             <div className="form-actions">
-              <button
-                type="button"
-                className="cancel-btn"
-                onClick={() => setSelectedQuestion(null)}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="submit-experience-btn"
-                disabled={submitting}
-              >
-                {submitting ? 'Submitting...' : 'Submit Experience'}
+              <button type="button" className="cancel-btn" onClick={() => setSelectedQuestion(null)}>Cancel</button>
+              <button type="submit" className="submit-experience-btn" disabled={submitting}>
+                {submitting ? 'Sending...' : (selectedQuestion.isFollowUp ? 'Send Reply' : 'Submit Experience')}
               </button>
             </div>
           </form>

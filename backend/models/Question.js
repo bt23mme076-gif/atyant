@@ -39,7 +39,15 @@ const questionSchema = new mongoose.Schema({
   // Status of the question
   status: {
     type: String,
-    enum: ['pending', 'mentor_assigned', 'awaiting_experience', 'experience_submitted', 'answer_generated', 'delivered'],
+    enum: [
+      'pending',
+      'mentor_assigned',
+      'awaiting_experience',
+      'experience_submitted',
+      'answer_generated',
+      'delivered',
+      'answered_instantly' // 🚀 Bas ye ek line add karni hai
+    ],
     default: 'pending'
   },
   

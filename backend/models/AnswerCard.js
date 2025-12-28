@@ -21,39 +21,31 @@ const answerCardSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+
+  /**
+   * 🚀 VECTOR SEARCH FIELD (ADDED)
+   * Isme Python API se aaya hua 384-dimension array save hoga.
+   * 'select: false' isliye taaki normal API calls mein ye data load na ho (performance).
+   */
+  embedding: {
+    type: [Number],
+    required: false, // Initial data migration ke waqt false rakhna sahi hai
+    select: false    
+  },
   
   // Transformed Answer Card content (in Atyant's voice)
   answerContent: {
-    // Main answer text
-    mainAnswer: {
-      type: String,
-      required: true,
-      maxlength: 3000
-    },
-    
-    // Key mistakes to avoid (from failures)
-    keyMistakes: [{
-      type: String,
-      maxlength: 300
-    }],
-    
-    // Clear actionable steps
-    actionableSteps: [{
-      step: String,
-      description: String
-    }],
-    
-    // Timeline/expectations
-    timeline: {
-      type: String,
-      maxlength: 500
-    },
-    
-    // Real-world context
-    realContext: {
-      type: String,
-      maxlength: 500
-    }
+    type: new mongoose.Schema({
+      mainAnswer: String,
+      situation: String,
+      firstAttempt: String,
+      keyMistakes: [Object],
+      whatWorked: String,
+      actionableSteps: [Object],
+      timeline: String,
+      differentApproach: String,
+      additionalNotes: String
+    }, { _id: false })
   },
   
   // Trust message
@@ -75,7 +67,7 @@ const answerCardSchema = new mongoose.Schema({
     max: 2
   },
   
-  // Follow-up Q&A pairs (stored in same card)
+  // Follow-up Q&A pairs
   followUpAnswers: [{
     questionText: {
       type: String,
@@ -86,14 +78,17 @@ const answerCardSchema = new mongoose.Schema({
       ref: 'Question'
     },
     answerContent: {
-      mainAnswer: String,
-      keyMistakes: [String],
-      actionableSteps: [{
-        step: String,
-        description: String
-      }],
-      timeline: String,
-      realContext: String
+      type: new mongoose.Schema({
+        mainAnswer: String,
+        situation: String,
+        firstAttempt: String,
+        keyMistakes: [Object],
+        whatWorked: String,
+        actionableSteps: [Object],
+        timeline: String,
+        differentApproach: String,
+        additionalNotes: String
+      }, { _id: false })
     },
     mentorExperienceId: {
       type: mongoose.Schema.Types.ObjectId,
