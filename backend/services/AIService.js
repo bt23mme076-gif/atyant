@@ -10,7 +10,7 @@ import { ATYANT_KNOWLEDGE, findRelevantInfo } from './AtyantKnowledge.js';
  */
 export const getQuestionEmbedding = async (text) => {
   try {
-    const PYTHON_SERVICE_URL = process.env.PYTHON_AI_URL || "http://127.0.0.1:8000";
+    const PYTHON_SERVICE_URL = process.env.PYTHON_ENGINE_URL || "http://127.0.0.1:8000";
     const response = await axios.post(`${PYTHON_SERVICE_URL}/embed`, { text });
 
     // Debugging: Check karo Python actually kya bhej raha hai
