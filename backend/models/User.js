@@ -1,6 +1,26 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
+    // 🚀 NAYE STRUCTURED FIELDS
+    primaryDomain: { 
+      type: String, 
+      enum: ['placement', 'internship', 'both'], 
+      default: null 
+    },
+    topCompanies: [{ 
+      type: String // e.g., ["Meta", "Amazon", "Google", "ZS"]
+    }],
+    milestones: [{ 
+      type: String // e.g., ["PPO", "Off-campus Winner", "6-Month Internship"]
+    }],
+    specialTags: [{ 
+    type: String,
+    default: [] // 🔥 NAYA: ["Foreign Internship 🌍", "IIT Research Intern", "IIM MBA Intern"]
+    }],
+    tier: { 
+      type: Number, 
+      default: 1 // 1: Beginner, 2: Intermediate, 3: Expert (Authority indicator)
+    },
   username: {
     type: String,
     required: true,

@@ -17,8 +17,53 @@ const ProfilePage = () => {
     education: [{ institution: '', degree: '', field: '', year: '' }],
     interests: [],
     expertise: [],
-    domainExperience: []
+    domainExperience: [],
+    // 🚀 NEW ENGINE FIELDS
+    primaryDomain: '',
+    topCompanies: [],
+    milestones: [],
+    specialTags: []
   });
+
+  // Options for Structured Tags
+  const domains = ['placement', 'internship', 'both'];
+  const milestoneOptions = ['PPO', 'Off-campus Winner', 'On-campus Placement', 'Remote Internship'];
+
+  // 📋 Internship & Placement Optimized Categories
+  const specialCategoryOptions = [
+    'Foreign Internship 🌍', 
+    'IIT Research Intern 🎓', 
+    'IIM MBA Intern 💼', 
+    'FAANG Cracked 🚀',
+    'International Job Offer ✈️',
+    'Tier-1 College (IIT/NIT/BITS)',
+    'Masters Abroad 🏛️'
+  ];
+
+  // Company input state and handlers
+  const [companyInput, setCompanyInput] = useState('');
+
+  const handleCompanyKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const newCompany = companyInput.trim();
+      // Ensure company is not empty and not already added
+      if (newCompany && !(formData.topCompanies || []).includes(newCompany)) {
+        setFormData(prev => ({
+          ...prev,
+          topCompanies: [...(prev.topCompanies || []), newCompany]
+        }));
+        setCompanyInput('');
+      }
+    }
+  };
+
+  const removeCompany = (indexToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      topCompanies: (prev.topCompanies || []).filter((_, index) => index !== indexToRemove)
+    }));
+  };
   
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: '', type: '' });
@@ -38,21 +83,17 @@ const ProfilePage = () => {
   // Add this before the return statement:
   const isLocationLoading = locationStatus === 'updating' || locationStatus === 'checking';
 
-  // ========== FETCH PROFILE DATA ==========
+  // ========== FETCH PROFILE DATA (Safety Added) ==========
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user?.token) return;
-      
       setLoading(true);
-      
       try {
         const res = await fetch(`${API_URL}/api/profile/me`, {
           headers: { 'Authorization': `Bearer ${user.token}` }
         });
-        
         if (res.ok) {
           const data = await res.json();
-          
           setFormData({
             username: data.username || '',
             bio: data.bio || '',
@@ -63,9 +104,13 @@ const ProfilePage = () => {
               : [{ institution: '', degree: '', field: '', year: '' }],
             interests: data.interests || [],
             expertise: data.expertise || [],
-            domainExperience: data.domainExperience || []
+            domainExperience: data.domainExperience || [],
+            // 🚀 Load new engine fields with fallback to prevent errors
+            primaryDomain: data.primaryDomain || '',
+            topCompanies: data.topCompanies || [],
+            milestones: data.milestones || [],
+            specialTags: data.specialTags || [] // 🔥 THIS LINE FIXES THE REFRESH ISSUE
           });
-          
           setImagePreview(data.profilePicture || '');
         } else {
           setMessage({ text: 'Failed to load profile.', type: 'error' });
@@ -77,9 +122,22 @@ const ProfilePage = () => {
         setLoading(false);
       }
     };
-    
     fetchProfile();
   }, [user]);
+
+  // 🚀 Helper Fix: Bulletproof array handling
+  const toggleTag = (field, value) => {
+    setFormData(prev => {
+      // 🛡️ Safety Check: Ensure array exists before calling .includes
+      const currentArray = prev[field] || [];
+      return {
+        ...prev,
+        [field]: currentArray.includes(value) 
+          ? currentArray.filter(item => item !== value) 
+          : [...currentArray, value]
+      };
+    });
+  };
 
   // ========== CHECK IF LOCATION IS ALREADY SAVED ==========
   useEffect(() => {
@@ -90,8 +148,6 @@ const ProfilePage = () => {
 
   const checkUserLocation = async () => {
     try {
-      console.log('🔍 Checking saved location...');
-      
       const response = await fetch(`${API_URL}/api/location/my-location`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
@@ -101,12 +157,10 @@ const ProfilePage = () => {
       const data = await response.json();
       
       if (data.success && data.hasLocation) {
-        console.log('✅ Location already saved:', data.location.city);
         setCurrentLocation(data.location);
         setLocationStatus('enabled');
         setShowLocationPrompt(false);
       } else {
-        console.log('⚠️ No location saved');
         setLocationStatus('disabled');
         setShowLocationPrompt(true);
       }
@@ -127,13 +181,9 @@ const ProfilePage = () => {
       return;
     }
 
-    console.log('📍 Getting GPS location...');
-
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-
-        console.log('✅ GPS coordinates received:', { latitude, longitude });
 
         try {
           const response = await fetch(`${API_URL}/api/location/update-location`, {
@@ -142,60 +192,35 @@ const ProfilePage = () => {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${user.token}`
             },
-            body: JSON.stringify({
-              latitude,
-              longitude
-            })
+            body: JSON.stringify({ latitude, longitude })
           });
 
           const data = await response.json();
-
-          console.log('📍 Backend response:', data);
 
           if (data.success) {
             setCurrentLocation(data.location);
             setLocationStatus('enabled');
             setShowLocationPrompt(false);
             setMessage({ text: '✅ Location enabled successfully!', type: 'success' });
-            
-            // Clear success message after 3 seconds
-            setTimeout(() => {
-              setMessage({ text: '', type: '' });
-            }, 3000);
+            setTimeout(() => setMessage({ text: '', type: '' }), 3000);
           } else {
             setLocationError('Failed to save location: ' + data.message);
             setLocationStatus('disabled');
           }
         } catch (error) {
-          console.error('❌ Error saving location:', error);
           setLocationError('Error saving location. Please try again.');
           setLocationStatus('disabled');
         }
       },
       (error) => {
-        console.error('❌ GPS error:', error);
-        
-        if (error.code === 1) {
-          setLocationError('Location permission denied. Please enable location access in your browser settings.');
-        } else if (error.code === 2) {
-          setLocationError('Location information unavailable. Please check your device GPS.');
-        } else if (error.code === 3) {
-          setLocationError('Location request timeout. Please try again.');
-        }
-        
         setLocationStatus('disabled');
       },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0
-      }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
   // ========== UPDATE LOCATION (REFRESH GPS) ==========
   const updateLocation = () => {
-    console.log('🔄 Updating location...');
     enableLocation();
   };
 
@@ -340,14 +365,14 @@ const ProfilePage = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${user.token}`
         },
+        // 🔥 formData ab saare fields (specialTags sahit) backend bhejega
         body: JSON.stringify(formData)
       });
-
-      const data = await res.json();
 
       if (res.ok) {
         setMessage({ text: 'Profile updated successfully!', type: 'success' });
       } else {
+        const data = await res.json();
         setMessage({ text: data.message || 'Failed to update profile.', type: 'error' });
       }
     } catch (err) {
@@ -358,51 +383,19 @@ const ProfilePage = () => {
   };
 
   const branches = [
-    'Computer Science and Engineering',
-    'Information Technology',
-    'Mechanical Engineering',
-    'Civil Engineering',
-    'Electrical Engineering',
-    'Electronics and Communication Engineering',
-    'Chemical Engineering',
-    'Biomedical Engineering',
-    'Aerospace Engineering',
-    'Environmental Engineering',
-    'Artificial Intelligence and Data Science',
-    'Electronics Engineering',
-    'Instrumentation Engineering',
-    'Automobile Engineering',
-    'Biotechnology Engineering',
-    'Mining Engineering',
-    'Production/Manufacturing Engineering',
-    'Industrial Engineering',
-    'Metallurgy and Materials Engineering',
-    'Other'
+    'Computer Science and Engineering', 'Information Technology', 'Mechanical Engineering', 
+    'Civil Engineering', 'Electrical Engineering', 'Electronics and Communication Engineering', 
+    'Chemical Engineering', 'Biomedical Engineering', 'Aerospace Engineering', 
+    'Environmental Engineering', 'Artificial Intelligence and Data Science', 'Electronics Engineering', 
+    'Instrumentation Engineering', 'Automobile Engineering', 'Biotechnology Engineering', 
+    'Mining Engineering', 'Production/Manufacturing Engineering', 'Industrial Engineering', 
+    'Metallurgy and Materials Engineering', 'Other'
   ];
 
   const collegeData = {
-    'Indore': [
-      'IIT Indore',
-      'SGSITS',
-      'IET-DAVV',
-      'Acropolis Institute of Technology and Research',
-      'Indore Institute of Science & Technology'
-    ],
-    'Bhopal': [
-      'MANIT Bhopal',
-      'IIIT Bhopal',
-      'LNCT Bhopal',
-      'VIT Bhopal University',
-      'Radharaman Engineering College'
-    ],
-    'Nagpur': [
-      'IIIT Nagpur',
-      'VNIT Nagpur',
-      'GHRCE Nagpur',
-      'RCOEM Nagpur',
-      'YCCE Nagpur',
-      'Priyadarshini College of Engineering'
-    ],
+    'Indore': ['IIT Indore', 'SGSITS', 'IET-DAVV', 'Acropolis Institute of Technology and Research', 'Indore Institute of Science & Technology'],
+    'Bhopal': ['MANIT Bhopal', 'IIIT Bhopal', 'LNCT Bhopal', 'VIT Bhopal University', 'Radharaman Engineering College'],
+    'Nagpur': ['IIIT Nagpur', 'VNIT Nagpur', 'GHRCE Nagpur', 'RCOEM Nagpur', 'YCCE Nagpur', 'Priyadarshini College of Engineering'],
     'Other': ['Other']
   };
 
@@ -416,19 +409,15 @@ const ProfilePage = () => {
 
   return (
     <>
-      {/* Location Loading Overlay */}
       {isLocationLoading && (
         <div className="location-loading-overlay">
           <div className="location-loading-spinner"></div>
           <div className="location-loading-text">
-            {locationStatus === 'checking'
-              ? 'Checking your location status...'
-              : 'Fetching your location, please wait...'}
+            {locationStatus === 'checking' ? 'Checking your location status...' : 'Fetching your location, please wait...'}
           </div>
         </div>
       )}
 
-      {/* Existing Profile Page */}
       <div className="profile-page-layout">
         {/* ========== PROFILE PICTURE SECTION ========== */}
         <div className="profile-picture-container">
@@ -438,79 +427,30 @@ const ProfilePage = () => {
             alt="Profile"
             className="profile-avatar"
           />
-          <input
-            type="file"
-            id="imageUpload"
-            accept="image/*"
-            onChange={handleImageChange}
-            style={{ display: 'none' }}
-          />
-          <label htmlFor="imageUpload" className="upload-btn">
-            Choose Image
-          </label>
-          {imageFile && (
-            <button onClick={handleImageUpload} className="save-photo-btn" disabled={loading}>
-              {loading ? 'Uploading...' : 'Save Photo'}
-            </button>
-          )}
+          <input type="file" id="imageUpload" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+          <label htmlFor="imageUpload" className="upload-btn">Choose Image</label>
+          {imageFile && <button onClick={handleImageUpload} className="save-photo-btn" disabled={loading}>Save Photo</button>}
         </div>
 
         {/* ========== PROFILE FORM SECTION ========== */}
         <div className="profile-form-container">
           <h2>My Profile</h2>
 
-          {/* ========== LOCATION SETUP SECTION ========== */}
           <div className={`location-setup-section ${locationStatus === 'disabled' ? 'urgent' : ''}`}>
             <div className="location-header">
               <MapPin size={24} />
               <h3>Location Setup</h3>
-              {locationStatus === 'enabled' && (
-                <span className="status-badge success">
-                  <CheckCircle size={16} />
-                  Active
-                </span>
-              )}
-              {locationStatus === 'disabled' && (
-                <span className="status-badge warning">
-                  <AlertCircle size={16} />
-                  Not Set
-                </span>
-              )}
+              {locationStatus === 'enabled' && <span className="status-badge success"><CheckCircle size={16} /> Active</span>}
+              {locationStatus === 'disabled' && <span className="status-badge warning"><AlertCircle size={16} /> Not Set</span>}
             </div>
 
             {locationStatus === 'disabled' && showLocationPrompt && (
               <div className="location-prompt-card">
-                <div className="prompt-icon">📍</div>
                 <h4>Enable Your Location</h4>
-                <p>
-                  {user?.role === 'mentor' 
-                    ? 'To appear in nearby searches for students, enable location access.'
-                    : 'To find nearby mentors and connect with them, enable location access.'
-                  }
-                </p>
-                <button 
-                  onClick={enableLocation}
-                  className="enable-location-btn"
-                  disabled={locationStatus === 'updating'}
-                >
-                  {locationStatus === 'updating' ? (
-                    <>
-                      <RefreshCw size={18} className="spinning" />
-                      Getting Location...
-                    </>
-                  ) : (
-                    <>
-                      <MapPin size={18} />
-                      Enable Location
-                    </>
-                  )}
+                <p>{user?.role === 'mentor' ? 'To appear in nearby searches for students, enable location access.' : 'To find nearby mentors and connect with them, enable location access.'}</p>
+                <button onClick={enableLocation} className="enable-location-btn" disabled={locationStatus === 'updating'}>
+                  {locationStatus === 'updating' ? <><RefreshCw size={18} className="spinning" /> Getting Location...</> : <><MapPin size={18} /> Enable Location</>}
                 </button>
-                {locationError && (
-                  <div className="location-error-message">
-                    <AlertCircle size={16} />
-                    {locationError}
-                  </div>
-                )}
               </div>
             )}
 
@@ -518,231 +458,121 @@ const ProfilePage = () => {
               <div className="location-enabled-card">
                 <CheckCircle size={20} className="check-icon" />
                 <div className="location-details">
-                  <p className="location-text">
-                    📍 <strong>{typeof currentLocation.city === 'string' ? currentLocation.city : (typeof currentLocation === 'string' ? currentLocation : 'Location Set')}</strong>
-                    {currentLocation.state && typeof currentLocation.state === 'string' && `, ${currentLocation.state}`}
-                  </p>
-                  {/* ========== SHOW EXACT COORDINATES ========== */}
-                  {currentLocation.coordinates && (
-                    <p className="coordinates-text">
-                      🗺️ Coordinates: {currentLocation.coordinates[1].toFixed(6)}, {currentLocation.coordinates[0].toFixed(6)}
-                    </p>
-                  )}
-                  {currentLocation.lastUpdated && (
-                    <p className="last-updated">
-                      Updated: {new Date(currentLocation.lastUpdated).toLocaleDateString()}
-                    </p>
-                  )}
-                  <p className="location-benefit">
-                    {user?.role === 'mentor' 
-                      ? '✨ Students can now find you in nearby searches'
-                      : '✨ You can now find mentors near your location'
-                    }
-                  </p>
+                  <p className="location-text">📍 <strong>{currentLocation.city || 'Location Set'}</strong>, {currentLocation.state || ''}</p>
                 </div>
-                <button 
-                  onClick={updateLocation}
-                  className="update-location-btn-small"
-                  disabled={locationStatus === 'updating'}
-                >
-                  <RefreshCw size={14} />
-                  Update
-                </button>
+                <button onClick={updateLocation} className="update-location-btn-small" disabled={locationStatus === 'updating'}><RefreshCw size={14} /> Update</button>
               </div>
             )}
           </div>
 
-          {/* ========== PROFILE FORM ========== */}
           <form onSubmit={handleSubmit}>
             <h3>Basic Information</h3>
-            
-            <input
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="Username"
-              required
-            />
-            
-            <textarea
-              name="bio"
-              value={formData.bio}
-              onChange={handleChange}
-              placeholder="Write a short bio about yourself..."
-              rows="4"
-            />
-            
-            <input
-              name="linkedinProfile"
-              value={formData.linkedinProfile}
-              onChange={handleChange}
-              placeholder="LinkedIn Profile URL"
-            />
+            <input name="username" value={formData.username} onChange={handleChange} placeholder="Username" required />
+            <textarea name="bio" value={formData.bio} onChange={handleChange} placeholder="Bio..." rows="4" />
+            <input name="linkedinProfile" value={formData.linkedinProfile} onChange={handleChange} placeholder="LinkedIn URL" />
 
             <h3>Education</h3>
-            <select
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              required
-            >
+            <select name="city" value={formData.city} onChange={handleChange} required>
               <option value="" disabled>-- Select Your City --</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
+              {cities.map(city => <option key={city} value={city}>{city}</option>)}
             </select>
 
             {formData.education.map((edu, index) => (
               <div key={index} className="education-group">
-                <select
-                  value={edu.institution}
-                  onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
-                  disabled={!formData.city || formData.city === 'Other'}
-                  required
-                >
-                  <option value="" disabled>
-                    {formData.city ? '-- Select Your College --' : 'Please select a city first'}
-                  </option>
-                  {formData.city && collegeData[formData.city] && collegeData[formData.city].map(college => (
-                    <option key={college} value={college}>{college}</option>
-                  ))}
+                <select value={edu.institution} onChange={(e) => handleEducationChange(index, 'institution', e.target.value)} required>
+                  <option value="" disabled>-- Select Your College --</option>
+                  {formData.city && collegeData[formData.city]?.map(college => <option key={college} value={college}>{college}</option>)}
                 </select>
-                
-                {(formData.city === 'Other' || edu.institution === 'Other') && (
-                  <input
-                    placeholder="Please specify your College/University"
-                    value={edu.institution === 'Other' ? '' : edu.institution}
-                    onChange={(e) => handleEducationChange(index, 'institution', e.target.value)}
-                    required
-                  />
-                )}
-
-                <select
-                  value={edu.degree}
-                  onChange={(e) => handleEducationChange(index, 'degree', e.target.value)}
-                  required
-                >
-                  <option value="" disabled>-- Select Degree --</option>
-                  {degrees.map(degree => (
-                    <option key={degree} value={degree}>{degree}</option>
-                  ))}
+                <select value={edu.degree} onChange={(e) => handleEducationChange(index, 'degree', e.target.value)} required>
+                  {degrees.map(degree => <option key={degree} value={degree}>{degree}</option>)}
                 </select>
-                
-                <select
-                  value={edu.year}
-                  onChange={(e) => handleEducationChange(index, 'year', e.target.value)}
-                  required
-                >
-                  <option value="" disabled>-- Select Year --</option>
-                  {years.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
+                <select value={edu.year} onChange={(e) => handleEducationChange(index, 'year', e.target.value)} required>
+                  {years.map(year => <option key={year} value={year}>{year}</option>)}
                 </select>
-
-                <select
-                  value={edu.field}
-                  onChange={(e) => handleEducationChange(index, 'field', e.target.value)}
-                  required
-                >
-                  <option value="" disabled>-- Select Branch --</option>
-                  {branches.map(branch => (
-                    <option key={branch} value={branch}>{branch}</option>
-                  ))}
+                <select value={edu.field} onChange={(e) => handleEducationChange(index, 'field', e.target.value)} required>
+                  {branches.map(branch => <option key={branch} value={branch}>{branch}</option>)}
                 </select>
-                
-                {formData.education.length > 1 && (
-                  <button 
-                    type="button" 
-                    className="remove-btn" 
-                    onClick={() => removeEducation(index)}
-                  >
-                    &times;
-                  </button>
-                )}
+                {formData.education.length > 1 && <button type="button" className="remove-btn" onClick={() => removeEducation(index)}>&times;</button>}
               </div>
             ))}
-            
-            <button type="button" className="add-btn" onClick={addEducation}>
-              + Add Another Education
-            </button>
+            <button type="button" className="add-btn" onClick={addEducation}>+ Add Education</button>
 
             {user?.role === 'user' && (
               <>
                 <h3>Student Details</h3>
-                
                 <div className="chip-input-container">
                   <div className="chips-wrapper">
                     {formData.interests.map((interest, index) => (
-                      <span key={index} className="chip">
-                        {interest}
-                        <button 
-                          type="button" 
-                          className="chip-remove" 
-                          onClick={() => removeInterest(index)}
-                        >
-                          ×
-                        </button>
-                      </span>
+                      <span key={index} className="chip">{interest} <button type="button" className="chip-remove" onClick={() => removeInterest(index)}>&times;</button></span>
                     ))}
-                    <input
-                      type="text"
-                      value={interestInput}
-                      onChange={(e) => setInterestInput(e.target.value)}
-                      onKeyDown={handleInterestKeyDown}
-                      placeholder={formData.interests.length === 0 ? "Type interest and press Enter" : "Add more..."}
-                      className="chip-input"
-                    />
+                    <input type="text" value={interestInput} onChange={(e) => setInterestInput(e.target.value)} onKeyDown={handleInterestKeyDown} placeholder="Add interest..." className="chip-input" />
                   </div>
                 </div>
-                <small className="helper-text">
-                  💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each interest
-                </small>
               </>
             )}
 
             {user?.role === 'mentor' && (
               <>
                 <h3>Mentor Details</h3>
-                
+                {/* 🚀 Atyant Engine Optimization Section */}
+                <div className="engine-optimization-section">
+                  <h3 className="section-title">🚀 Atyant Engine Optimization</h3>
+                  <p className="helper-text">Standardize your profile for Placement & Internship matching.</p>
+
+                  <div className="form-group">
+                    <label>Primary Mentorship Focus</label>
+                    <select name="primaryDomain" value={formData.primaryDomain} onChange={(e) => setFormData({...formData, primaryDomain: e.target.value})} className="engine-select">
+                      <option value="">-- Focus --</option>
+                      <option value="placement">Placement Focus</option>
+                      <option value="internship">Internship Focus</option>
+                      <option value="both">Both</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Companies Expertise</label>
+                    <div className="chip-input-container">
+                      <div className="chips-wrapper">
+                        {(formData.topCompanies || []).map((company, index) => (
+                          <span key={index} className="chip company-chip">{company} <button type="button" className="chip-remove" onClick={() => removeCompany(index)}>×</button></span>
+                        ))}
+                        <input type="text" value={companyInput} onChange={(e) => setCompanyInput(e.target.value)} onKeyDown={handleCompanyKeyDown} placeholder="Type company & Enter" className="chip-input" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Special Achievement Categories</label>
+                    <div className="tags-grid">
+                      {specialCategoryOptions.map(tag => (
+                        <button type="button" key={tag} onClick={() => toggleTag('specialTags', tag)} className={`tag-btn special ${(formData.specialTags || []).includes(tag) ? 'active' : ''}`}>{tag}</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Career Milestones</label>
+                    <div className="tags-grid">
+                      {milestoneOptions.map(m => (
+                        <button type="button" key={m} onClick={() => toggleTag('milestones', m)} className={`tag-btn milestone ${(formData.milestones || []).includes(m) ? 'active' : ''}`}>{m}</button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 <div className="chip-input-container">
                   <div className="chips-wrapper">
                     {formData.expertise.map((skill, index) => (
-                      <span key={index} className="chip">
-                        {skill}
-                        <button 
-                          type="button" 
-                          className="chip-remove" 
-                          onClick={() => removeExpertise(index)}
-                        >
-                          ×
-                        </button>
-                      </span>
+                      <span key={index} className="chip">{skill} <button type="button" className="chip-remove" onClick={() => removeExpertise(index)}>&times;</button></span>
                     ))}
-                    <input
-                      type="text"
-                      value={expertiseInput}
-                      onChange={(e) => setExpertiseInput(e.target.value)}
-                      onKeyDown={handleExpertiseKeyDown}
-                      placeholder={formData.expertise.length === 0 ? "Type expertise and press Enter" : "Add more..."}
-                      className="chip-input"
-                    />
+                    <input type="text" value={expertiseInput} onChange={(e) => setExpertiseInput(e.target.value)} onKeyDown={handleExpertiseKeyDown} placeholder="Add skill..." className="chip-input" />
                   </div>
                 </div>
-                <small className="helper-text">
-                  💡 Press <kbd>Enter</kbd> or <kbd>,</kbd> after each skill
-                </small>
               </>
             )}
 
-            <button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Profile'}
-            </button>
-
-            {message.text && (
-              <p className={`form-message ${message.type}`}>
-                {message.text}
-              </p>
-            )}
+            <button type="submit" disabled={loading} className="save-profile-btn">{loading ? 'Saving...' : 'Save Profile'}</button>
+            {message.text && <p className={`form-message ${message.type}`}>{message.text}</p>}
           </form>
         </div>
       </div>
