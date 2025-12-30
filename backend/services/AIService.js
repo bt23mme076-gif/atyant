@@ -44,7 +44,55 @@ class AIService {
     }
     console.log('✅ Gemini AI initialized successfully');
   }
+  // AIService class ke andar refineExperience function mein prompt ko aise change karein:
+async refineExperience(rawData) {
+  try {
+    if (!this.apiKey) return rawData;
 
+    // 🔥 NEW HUMAN PROMPT: Isse AI feeling khatam hogi
+    const prompt = `You are a senior mentor at Atyant. A mentor shared their raw journey below. 
+    Your task: Fix only the grammar and make the structure readable. 
+    STRICT RULES:
+    1. DO NOT change the mentor's original story or specific details.
+    2. KEEP the tone casual and "Senior-like". 
+    3. If they used Hinglish (Hindi + English), PRESERVE IT.
+    4. AVOID robotic words like 'delve', 'unleash', 'comprehensive', or 'empower'.
+    5. Return ONLY a JSON object with these keys: 
+    6. Map 'What failed' text to the 'keyMistakes' array.
+    7. Map 'Step-by-step actions' to the 'actionableSteps' array.
+{
+  "mainAnswer": "Short summary",
+  "situation": "The backstory",
+  "firstAttempt": "Initially tried...",
+  "keyMistakes": [
+    { "mistake": "Mistake Title", "description": "Why it failed" }
+  ],
+  "whatWorked": "Final success solution",
+  "actionableSteps": [
+    { "step": "Step Title", "description": "What to do exactly" }
+  ],
+  "timeline": "Months/Days",
+  "differentApproach": "If I did it today...",
+  "additionalNotes": "Final tips"
+}
+    
+    RAW DATA: ${JSON.stringify(rawData)}`;
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+
+    const data = await response.json();
+    const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const jsonMatch = aiText.match(/\{[\s\S]*\}/);
+    return jsonMatch ? JSON.parse(jsonMatch[0]) : rawData;
+  } catch (error) {
+    return rawData; 
+  }
+}
   // Aapka Platform Knowledge Prompt
   getSystemPrompt() {
     return `You are Atyant AI Assistant - an expert on the Atyant student mentorship platform.

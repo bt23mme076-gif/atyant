@@ -81,19 +81,18 @@ router.put('/me', protect, async (req, res) => {
     if (skills !== undefined) user.skills = Array.isArray(skills) ? skills : [];
     if (education !== undefined) user.education = Array.isArray(education) ? education : [];
 
-    // 🚀 2. Assignment: Naye Engine Fields ko Save karna
-    if (primaryDomain !== undefined) user.primaryDomain = primaryDomain;
-    
-    if (topCompanies !== undefined) {
-      user.topCompanies = Array.isArray(topCompanies) ? topCompanies : [];
-    }
-    
-    if (milestones !== undefined) {
-      user.milestones = Array.isArray(milestones) ? milestones : [];
-    }
-    
-    if (specialTags !== undefined) {
-      user.specialTags = Array.isArray(specialTags) ? specialTags : [];
+    // 🚀 2. Assignment: Naye Engine Fields ko Save karna (Mentor only)
+    if (user.role === 'mentor') {
+      if (primaryDomain !== undefined) user.primaryDomain = primaryDomain;
+      if (topCompanies !== undefined) {
+        user.topCompanies = Array.isArray(topCompanies) ? topCompanies : [];
+      }
+      if (milestones !== undefined) {
+        user.milestones = Array.isArray(milestones) ? milestones : [];
+      }
+      if (specialTags !== undefined) {
+        user.specialTags = Array.isArray(specialTags) ? specialTags : [];
+      }
     }
 
     // Safety check for location
@@ -120,8 +119,6 @@ router.put('/me', protect, async (req, res) => {
   }
 });
     
-
-// (The above block was duplicated and/or misplaced, so it is removed for clarity and to fix indentation.)
 
 // ========== UPLOAD PROFILE PICTURE (PROTECTED) ==========
 router.post('/upload-picture', protect, upload.single('profilePicture'), async (req, res) => {

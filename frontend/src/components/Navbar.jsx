@@ -171,6 +171,21 @@ const Navbar = () => {
       <button className="hamburger mobile-only" onClick={() => setOpen(v => !v)}>
         <Menu size={22} />
       </button>
+
+      {/* Overlay for mobile menu */}
+      {open && (
+        <div
+          className="mobile-menu-overlay"
+          onClick={() => setOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.18)', // halka dark, ya transparent bhi rakh sakte ho
+            zIndex: 2001
+          }}
+        />
+      )}
+
       <div ref={panelRef} className={`menu-panel mobile-only ${open ? 'open' : ''}`}>
         {renderLinks(true)}
         {user && <hr />}

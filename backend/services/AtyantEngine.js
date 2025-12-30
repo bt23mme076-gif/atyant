@@ -3,192 +3,194 @@ import Question from '../models/Question.js';
 import AnswerCard from '../models/AnswerCard.js';
 import { sendMentorNewQuestionNotification } from '../utils/emailNotifications.js';
 import { getQuestionEmbedding } from './AIService.js';
+import aiServiceInstance from './AIService.js';
 
-/* ===============================
-   CONFIG — PRECISION WEIGHTS
-================================ */
 const CONFIG = {
   SEMANTIC_FLOOR: 0.85,
-  INSTANT_THRESHOLD: 0.88,
+  INSTANT_THRESHOLD: 0.88, // 🔥 88% target
   LOAD_PENALTY: 50,
   MAX_LOAD: 5
 };
 
+// Helper function: Mentor profiles se sab unique companies nikaalo
+async function getAllTargetCompanies() {
+  const mentors = await User.find({ role: 'mentor' }).select('topCompanies');
+  // 🔥 Har element ko string check karke sanitize karein
+  const allCompanies = mentors.flatMap(m =>
+    Array.isArray(m.topCompanies) ? m.topCompanies.filter(c => typeof c === 'string') : []
+  );
+  return [...new Set(allCompanies.map(c => c.trim().toLowerCase()))].filter(Boolean);
+}
+
 class AtyantEngine {
 
-  // 1. Student ki query se details nikalna
-  detectQueryDetails(text) {
+  // Query details detection (intent, companies, tags)
+  async detectQueryDetails(text) {
     const t = text.toLowerCase();
-    
-    // Intent detection
     let intent = null;
     if (t.includes('internship') || t.includes('intern')) intent = 'internship';
     if (t.includes('placement') || t.includes('job') || t.includes('role')) intent = 'placement';
 
-    // Company detection
-    const commonCompanies = ['meta', 'google', 'amazon', 'microsoft', 'netflix', 'tcs', 'infosys', 'zomato', 'uber', 'goldman', 'startup'];
-    const mentionedCompanies = commonCompanies.filter(comp => t.includes(comp));
+    // 🔥 Dynamic companies list from mentor profiles
+    const companies = await getAllTargetCompanies();
+    const mentionedCompanies = companies.filter(comp => comp && t.includes(comp));
 
-    // Tag/Specialty detection
-    const specialKeywords = ['foreign', 'iit', 'nit', 'faang', 'masters', 'research', 'iim', 'bits', 'startup', 'ppo'];
+    const specialKeywords = [
+      'foreign', 'iit', 'nit', 'faang', 'masters', 'research', 'iim', 'bits', 'startup',
+      'ppo', 'off-campus', 'scholarship', 'on-campus'
+    ];
     const foundTags = specialKeywords.filter(word => t.includes(word));
 
     return { intent, mentionedCompanies, foundTags };
   }
 
-  /* ===============================
-      PATH A: AI SEMANTIC (Unique Mode)
-  =============================== */
+  /* =============================================
+      PATH A: AI SEMANTIC (With Detailed Logs)
+     ============================================= */
   async findBestSemanticMatch(studentId, vector, questionText) {
     try {
       const student = await User.findById(studentId).select('education');
       const sEdu = student?.education?.[0] || {};
-      const { intent, mentionedCompanies, foundTags } = this.detectQueryDetails(questionText);
+
+      // 🔥 FIX: await zaroori hai
+      const { intent, mentionedCompanies, foundTags } = await this.detectQueryDetails(questionText);
       
-      console.log(`\n🔎 --- AI SEMANTIC ANALYSIS (Precision Mode) ---`);
+      console.log(`\n🔎 --- STAGE 1: AI SEMANTIC SEARCH ---`);
+      console.log(`Detected Intent: ${intent || 'General'} | Companies: [${mentionedCompanies}]`);
 
       const candidates = await AnswerCard.aggregate([
-        {
-          "$vectorSearch": {
-            "index": "vector_index",
-            "path": "embedding",
-            "queryVector": vector,
-            "numCandidates": 40,
-            "limit": 20
-          }
-        },
+        { "$vectorSearch": { "index": "vector_index", "path": "embedding", "queryVector": vector, "numCandidates": 40, "limit": 15 } },
         { "$project": { "answerContent": 1, "mentorId": 1, "score": { "$meta": "vectorSearchScore" } } }
       ]);
+
+      console.log(`Found ${candidates.length} potential AI matches in Atlas.`);
 
       const uniqueMentorsMap = new Map();
 
       for (let match of candidates) {
-        if (match.score < CONFIG.SEMANTIC_FLOOR) continue;
+        if (match.score < CONFIG.SEMANTIC_FLOOR) {
+          // console.log(`Skipped: MentorID ${match.mentorId} score too low (${(match.score*100).toFixed(1)}%)`);
+          continue;
+        }
 
-        // Fetch Mentor with all 4 NEW FIELDS 🚀
-        const mentor = await User.findById(match.mentorId).select('username education expertise bio primaryDomain topCompanies milestones specialTags activeQuestions');
+        const mentor = await User.findById(match.mentorId).select('username avatar bio education primaryDomain topCompanies milestones specialTags');
         if (!mentor) continue;
 
         let hybridScore = match.score;
         let bonusLogs = [];
 
-        // 🚀 Bonus 1: primaryDomain Match (+0.05)
-        if (mentor.primaryDomain === intent || mentor.primaryDomain === 'both') {
-            hybridScore += 0.05; bonusLogs.push('Domain Match');
+        // 🚀 Scoring Logic
+        if (mentor.primaryDomain === intent || mentor.primaryDomain === 'both') { hybridScore += 0.05; bonusLogs.push('Domain(+5%)'); }
+        if (
+          mentor.topCompanies?.some(
+            c => typeof c === 'string' && mentionedCompanies.includes(c.toLowerCase())
+          )
+        ) {
+          hybridScore += 0.08;
+          bonusLogs.push('Company(+8%)');
         }
+        if (mentor.milestones?.some(m => foundTags.some(ft => m.toLowerCase().includes(ft)))) { hybridScore += 0.05; bonusLogs.push('Milestone(+5%)'); }
+        if (mentor.specialTags?.some(tag => foundTags.some(ft => tag.toLowerCase().includes(ft)))) { hybridScore += 0.07; bonusLogs.push('EliteTag(+7%)'); }
 
-        // 🚀 Bonus 2: topCompanies Match (+0.08)
-        const hasCompanyExp = (mentor.topCompanies || []).some(c => 
-          mentionedCompanies.some(mc => mc.toLowerCase() === c.toLowerCase())
-        );
-        if (hasCompanyExp) { hybridScore += 0.08; bonusLogs.push('Target Company'); }
-
-        // 🚀 Bonus 3: Milestones/PPO Match (+0.05)
-        const hasMilestone = (mentor.milestones || []).some(m => 
-            foundTags.some(ft => m.toLowerCase().includes(ft))
-        );
-        if (hasMilestone) { hybridScore += 0.05; bonusLogs.push('Milestone Match'); }
-
-        // 🚀 Bonus 4: specialTags (FAANG/IIT) Match (+0.07)
-        const hasSpecialTag = (mentor.specialTags || []).some(tag => 
-            foundTags.some(ft => tag.toLowerCase().includes(ft))
-        );
-        if (hasSpecialTag) { hybridScore += 0.07; bonusLogs.push('Special Achievement'); }
-
-        // College/Branch Logic
         const mEdu = mentor?.education?.[0] || {};
-        const isSameCollege = sEdu.institution?.toLowerCase() === mEdu.institution?.toLowerCase();
-        const isSameBranch = sEdu.field?.toLowerCase() === mEdu.field?.toLowerCase();
-        if (isSameBranch) hybridScore += 0.03;
-        if (isSameCollege) hybridScore += 0.02;
+        if (sEdu.field?.toLowerCase() === mEdu.field?.toLowerCase()) { hybridScore += 0.03; bonusLogs.push('Branch(+3%)'); }
 
         if (!uniqueMentorsMap.has(match.mentorId.toString()) || hybridScore > uniqueMentorsMap.get(match.mentorId.toString()).finalScore) {
           uniqueMentorsMap.set(match.mentorId.toString(), {
             ...match,
             finalScore: hybridScore,
-            username: mentor.username,
-            context: bonusLogs.join(', ') || 'General Match'
+            mentorProfile: { username: mentor.username, avatar: mentor.avatar, bio: mentor.bio, education: mEdu },
+            breakdown: bonusLogs.join(' | ') || 'No Bonuses'
           });
         }
       }
 
-      const finalRankings = Array.from(uniqueMentorsMap.values()).sort((a, b) => b.finalScore - a.finalScore);
+      const sorted = Array.from(uniqueMentorsMap.values()).sort((a, b) => b.finalScore - a.finalScore);
       
-      finalRankings.forEach((m, i) => {
-        console.log(`Rank #${i + 1}: ${m.username} | Score: ${(m.finalScore * 100).toFixed(2)}% | Bonus: ${m.context}`);
+      // 🔥 LOGGING RANKINGS
+      sorted.forEach((m, i) => {
+        console.log(`Rank #${i + 1}: ${m.mentorProfile.username} | Total: ${(m.finalScore * 100).toFixed(2)}% | Logic: [AI Base: ${(m.score*100).toFixed(1)}% | ${m.breakdown}]`);
       });
 
-      const best = finalRankings[0];
-      return best && best.finalScore > CONFIG.INSTANT_THRESHOLD ? best : null; 
-    } catch (e) { console.error("Engine Error:", e); return null; }
+      const best = sorted[0];
+      if (best && best.finalScore > CONFIG.INSTANT_THRESHOLD) {
+        console.log(`✅ INSTANT MATCH SUCCESS: ${best.mentorProfile.username} hit ${CONFIG.INSTANT_THRESHOLD*100}% threshold.`);
+        return best;
+      } else {
+        console.log(`⚠️ INSTANT MATCH FAILED: No candidate reached ${CONFIG.INSTANT_THRESHOLD*100}% (Best was ${(best?.finalScore*100 || 0).toFixed(1)}%)`);
+        return null;
+      }
+    } catch (e) { console.error("Semantic Error:", e); return null; }
   }
 
-  /* ===============================
-      PATH B: LIVE MENTOR ROUTING
-  =============================== */
+  /* =============================================
+      PATH B: LIVE ROUTING (With Detailed Logs)
+     ============================================= */
   async findBestMentor(studentId, keywords) {
     try {
       const questionText = keywords.join(' ');
       const student = await User.findById(studentId).select('education');
       const sEdu = student?.education?.[0] || {};
-      const { intent, mentionedCompanies, foundTags } = this.detectQueryDetails(questionText);
 
-      console.log(`\n🤝 --- LIVE MENTOR ALLOTMENT ANALYSIS ---`);
+      // 🔥 FIX: await zaroori hai
+      const { intent, mentionedCompanies, foundTags } = await this.detectQueryDetails(questionText);
+
+      console.log(`\n🤝 --- STAGE 2: LIVE MENTOR ALLOTMENT ---`);
 
       const mentors = await User.find({ role: 'mentor' }).select('username education primaryDomain topCompanies milestones specialTags activeQuestions');
+      console.log(`Scanning ${mentors.length} mentors in DB...`);
 
       const scored = mentors.map(mentor => {
         let points = 0;
         let breakdown = [];
 
-        // 🔥 1. Company Match (+500)
-        const compMatch = (mentor.topCompanies || []).some(c => mentionedCompanies.includes(c.toLowerCase()));
-        if (compMatch) { points += 500; breakdown.push('Target Company'); }
-
-        // 🔥 2. Special Tags Match (+400)
-        const tagMatch = (mentor.specialTags || []).some(tag => foundTags.some(ft => tag.toLowerCase().includes(ft)));
-        if (tagMatch) { points += 400; breakdown.push('Special Tag'); }
-
-        // 🔥 3. Domain Match (+200)
-        if (mentor.primaryDomain === intent || mentor.primaryDomain === 'both') {
-            points += 200; breakdown.push('Domain Match');
-        }
-
-        // 🔥 4. Milestones Match (+150)
-        const mileMatch = (mentor.milestones || []).some(m => foundTags.some(ft => m.toLowerCase().includes(ft)));
-        if (mileMatch) { points += 150; breakdown.push('Milestone Match'); }
-
-        // Context Match
+        // Points Logic
+        if (mentor.topCompanies?.some(c => mentionedCompanies.includes(c.toLowerCase()))) { points += 500; breakdown.push('TargetCompany(+500)'); }
+        if (mentor.specialTags?.some(tag => foundTags.includes(tag.toLowerCase()))) { points += 400; breakdown.push('SpecialTag(+400)'); }
+        if (mentor.primaryDomain === intent || mentor.primaryDomain === 'both') { points += 200; breakdown.push('Domain(+200)'); }
+        if (mentor.milestones?.some(m => foundTags.some(ft => m.toLowerCase().includes(ft)))) { points += 150; breakdown.push('Milestone(+150)'); }
+        
         const mEdu = mentor.education?.[0] || {};
-        if (sEdu.field?.toLowerCase() === mEdu.field?.toLowerCase()) points += 50;
+        if (sEdu.field?.toLowerCase() === mEdu.field?.toLowerCase()) { points += 50; breakdown.push('Branch(+50)'); }
         
         // Load Penalty
-        points -= (mentor.activeQuestions || 0) * CONFIG.LOAD_PENALTY;
+        const penalty = (mentor.activeQuestions || 0) * CONFIG.LOAD_PENALTY;
+        points -= penalty;
+        if (penalty > 0) breakdown.push(`BusyPenalty(-${penalty})`);
 
-        return { mentor, points, breakdown };
+        return { mentor, points, logs: breakdown.join(' ') };
       });
 
-      scored.sort((a, b) => b.points - a.points);
-      const winner = scored[0] && scored[0].points > 100 ? scored[0].mentor : null;
+      const sorted = scored.sort((a, b) => b.points - a.points);
       
-      if (winner) console.log(`🎯 WINNER SELECTED: ${winner.username} (Score: ${scored[0].points})`);
+      // 🔥 LOGGING MENTOR POINTS
+      sorted.slice(0, 5).forEach((item, i) => {
+        console.log(`Mentor Rank #${i+1}: ${item.mentor.username} | Total Pts: ${item.points} | Logic: [${item.logs || 'Generic'}]`);
+      });
+
+      const winner = sorted[0] && sorted[0].points > 100 ? sorted[0].mentor : null;
+      if (winner) console.log(`🎯 WINNER CHOSEN: ${winner.username}`);
       return winner;
     } catch (e) { return null; }
   }
 
-  /* ===============================
-      MAIN ENGINE FLOW
-  =============================== */
+  /* =============================================
+      MAIN PROCESS
+     ============================================= */
   async processQuestion(userId, questionText, options = {}) {
     try {
       console.log('\n🚀 ========== ATYANT ENGINE START ==========');
-      const vector = await getQuestionEmbedding(questionText);
+      console.log(`User Question: "${questionText.substring(0, 50)}..."`);
+
+      const vector = await getQuestionEmbedding(questionText).catch(() => {
+        console.log("❌ AI VECTOR ERROR: Service might be asleep.");
+        return null;
+      });
       const keywords = this.extractBetterKeywords(questionText);
 
-      // Path A: Check for Instant AI Answer
+      // Path A: AI Path
       if (vector && !options.isFollowUp) {
         const match = await this.findBestSemanticMatch(userId, vector, questionText);
-
         if (match) {
           const q = new Question({
             userId, questionText, status: 'answered_instantly',
@@ -196,11 +198,18 @@ class AtyantEngine {
             matchScore: Math.round(match.finalScore * 100)
           });
           await q.save();
-          return { success: true, instantAnswer: true, questionId: q._id, answer: match.answerContent };
+          console.log('🚀 ========== ATYANT ENGINE FINISHED (INSTANT) ==========');
+          return { 
+            success: true, 
+            instantAnswer: true, 
+            questionId: q._id, 
+            answerContent: match.answerContent, // Space added after comma
+            mentor: match.mentorProfile 
+          };
         }
       }
 
-      // Path B: Route to Best Human Mentor
+      // Path B: Routing Path
       const bestMentor = await this.findBestMentor(userId, keywords);
       const question = new Question({ userId, questionText, keywords, status: 'pending' });
       
@@ -208,42 +217,92 @@ class AtyantEngine {
         question.selectedMentorId = bestMentor._id;
         question.status = 'mentor_assigned';
         await question.save();
+        await User.findByIdAndUpdate(bestMentor._id, { $inc: { activeQuestions: 1 } });
         
-        // Notification
-        try {
-          await sendMentorNewQuestionNotification(bestMentor.email, bestMentor.username, questionText);
-        } catch (mailErr) { console.log("Mail Err ignored"); }
-        
+        try { await sendMentorNewQuestionNotification(bestMentor.email, bestMentor.username, questionText); } catch (e) {}
+        console.log('🚀 ========== ATYANT ENGINE FINISHED (ROUTED) ==========');
         return { success: true, questionId: question._id, message: `Matching with ${bestMentor.username}...` };
       }
 
       await question.save();
-      return { success: false, message: 'Looking for a senior...' };
-    } catch (error) { throw error; }
+      console.log("❌ NO MATCH: Question moved to global pool.");
+      return { success: true, message: 'Looking for a senior...', questionId: question._id };
+    } catch (error) { 
+      console.error("ENGINE CRITICAL ERROR:", error);
+      return { success: false, message: 'Failed to submit.' }; 
+    }
   }
 
   extractBetterKeywords(text) {
-    const base = text.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(w => w.length > 2);
-    return [...new Set(base)].slice(0, 15);
+    return [...new Set(text.toLowerCase().replace(/[^\w\s]/g, ' ').split(/\s+/).filter(w => w.length > 3))].slice(0, 12);
   }
 
-  // Submission logic with load update
-  async transformToAnswerCard(mentorExperience, question) {
-    // mentorExperience: MentorExperience mongoose doc
-    // question: Question mongoose doc
+ async transformToAnswerCard(mentorExperience, question) {
+  try {
     const mentorId = mentorExperience.mentorId;
     const questionId = question._id;
     const mentorExperienceId = mentorExperience._id;
-    const answerContent = mentorExperience.rawExperience;
-    // 1. Generate Embedding
-    const embedding = await getQuestionEmbedding(answerContent.situation || '');
-    // 2. Save Card (include mentorExperienceId)
-    const newCard = new AnswerCard({ mentorId, questionId, mentorExperienceId, answerContent, embedding });
-    await newCard.save();
-    // 3. Update Load
-    await User.findByIdAndUpdate(mentorId, { $inc: { activeQuestions: -1 } });
-    return newCard;
-  }
-}
+    
+    // 1. Mentor ka raw data uthaya
+    const rawData = mentorExperience.rawExperience;
 
+    console.log("✨ Atyant AI is refining the experience with Hinglish preservation...");
+
+    // 🔥 CHANGE HERE: Purane placeholder ko asli function se badla
+    let polishedContent;
+    try {
+      // Humne AIService mein 'refineExperience' naam rakha hai
+      polishedContent = await aiServiceInstance.refineExperience(rawData);
+    } catch (err) {
+      console.log("⚠️ AI Service Sleep/Error, using Raw Data.");
+      polishedContent = rawData;
+    }
+
+    // 🟢 Ensure keyMistakes and actionableSteps are always arrays
+    if (polishedContent) {
+      if (typeof polishedContent.keyMistakes === 'string') {
+        polishedContent.keyMistakes = [polishedContent.keyMistakes];
+      }
+      if (
+        polishedContent.actionableSteps &&
+        typeof polishedContent.actionableSteps === 'string'
+      ) {
+        polishedContent.actionableSteps = [
+          { step: "Next Step", description: polishedContent.actionableSteps }
+        ];
+      }
+      // Agar null ya undefined hai toh bhi empty array set kar do
+      if (!Array.isArray(polishedContent.keyMistakes)) {
+        polishedContent.keyMistakes = [];
+      }
+      if (!Array.isArray(polishedContent.actionableSteps)) {
+        polishedContent.actionableSteps = [];
+      }
+    }
+
+    // 2. Generate Embedding (Search ke liye zaroori hai)
+    const embedding = await getQuestionEmbedding(polishedContent.situation || '');
+
+    // 3. Save Card (Ab isme Mistakes, Steps, Timeline sab polished aur full honge)
+    const newCard = new AnswerCard({ 
+      mentorId, 
+      questionId, 
+      mentorExperienceId, 
+      answerContent: polishedContent, // Full AI refined object
+      embedding 
+    });
+
+    await newCard.save();
+
+    // 4. Update Mentor Load (-1 active question)
+    await User.findByIdAndUpdate(mentorId, { $inc: { activeQuestions: -1 } });
+
+    console.log("✅ Answer Card Created with FULL AI Fields and Personal Touch.");
+    return newCard;
+  } catch (error) {
+    console.error("Transformation Error:", error);
+    throw error;
+  }
+ }
+}
 export default new AtyantEngine();

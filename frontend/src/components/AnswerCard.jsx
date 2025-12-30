@@ -130,23 +130,27 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
         </div>
 
         {/* 🎯 SECTION 3: ROADMAP */}
-        {content.actionableSteps?.length > 0 && (
-          <section className="answer-section roadmap-section">
-            <h3 className="section-label">🎯 Actionable Steps</h3>
-            <div className="roadmap-grid">
-              {content.actionableSteps.map((item, idx) => (
-                <div key={idx} className="roadmap-step">
-                  <div className="step-number">{idx + 1}</div>
-                  <div className="step-info">
-                    {/* 🚀 THE FIX: Check karein ki string hi render ho rahi hai */}
-                    <strong>{typeof item.step === 'object' ? item.step.text : item.step}</strong>
-                    <p>{typeof item.description === 'object' ? item.description.text : item.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+{content.actionableSteps?.length > 0 && (
+  <section className="answer-section roadmap-section">
+    <h3 className="section-label">🎯 Actionable Steps</h3>
+    <div className="roadmap-grid">
+      {content.actionableSteps.map((item, idx) => (
+        <div key={idx} className="roadmap-step">
+          <div className="step-number">{idx + 1}</div>
+          <div className="step-info">
+            {/* 🚀 THE FIX: Check if item is an object or string */}
+            <strong>
+              {typeof item === 'object' ? (item.step || `Step ${idx + 1}`) : `Step ${idx + 1}`}
+            </strong>
+            <p>
+              {typeof item === 'object' ? (item.description || item.text || JSON.stringify(item)) : item}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
 
         {/* ⏳ SECTION 4: OUTCOME & REFLECTIONS */}
         <div className="insight-grid">
