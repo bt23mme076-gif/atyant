@@ -18,9 +18,9 @@ const MentorDashboard = () => {
     firstAttempt: '',
     failures: '',
     whatWorked: '',
-    stepByStep: '',
+    actionableSteps: '',
     timeline: '',
-    wouldDoDifferently: '',
+    differentApproach: '',
     additionalNotes: ''
   });
   const [submitting, setSubmitting] = useState(false);
@@ -104,9 +104,9 @@ const MentorDashboard = () => {
       firstAttempt: '',
       failures: '',
       whatWorked: '',
-      stepByStep: '',
+      actionableSteps: '',
       timeline: '',
-      wouldDoDifferently: '',
+      differentApproach: '',
       additionalNotes: ''
     });
   };
@@ -124,7 +124,7 @@ const MentorDashboard = () => {
     // 🚀 THE FIX: Agar follow-up hai toh sirf 'situation' validate karein
     const required = selectedQuestion.isFollowUp 
       ? ['situation'] 
-      : ['situation', 'firstAttempt', 'failures', 'whatWorked', 'stepByStep', 'timeline', 'wouldDoDifferently'];
+      : ['situation', 'firstAttempt', 'failures', 'whatWorked', 'actionableSteps', 'timeline', 'differentApproach'];
     for (const field of required) {
       if (!experience[field].trim()) {
         alert(`Please fill in: ${field.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
@@ -260,8 +260,8 @@ const MentorDashboard = () => {
                 <div className="form-group">
                   <label>Step-by-step actions <span className="hint">Detailed steps</span></label>
                   <textarea
-                    value={experience.stepByStep}
-                    onChange={(e) => handleExperienceChange('stepByStep', e.target.value)}
+                    value={experience.actionableSteps}
+                    onChange={(e) => handleExperienceChange('actionableSteps', e.target.value)}
                     maxLength={2000}
                     placeholder="Step 1: ...\nStep 2: ...\nStep 3: ..."
                   />
@@ -278,8 +278,8 @@ const MentorDashboard = () => {
                 <div className="form-group">
                   <label>What I would do differently today <span className="hint">Lessons learned and improvements</span></label>
                   <textarea
-                    value={experience.wouldDoDifferently}
-                    onChange={(e) => handleExperienceChange('wouldDoDifferently', e.target.value)}
+                    value={experience.differentApproach}
+                    onChange={(e) => handleExperienceChange('differentApproach', e.target.value)}
                     maxLength={1000}
                     placeholder="If I were doing this today, I would..."
                   />

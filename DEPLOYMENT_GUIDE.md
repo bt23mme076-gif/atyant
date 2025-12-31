@@ -212,9 +212,9 @@ Content-Type: application/json
     "firstAttempt": "Test first attempt...",
     "failures": "Test failures...",
     "whatWorked": "Test what worked...",
-    "stepByStep": "Step 1...\nStep 2...",
+    "actionableSteps": "Step 1...\nStep 2...",
     "timeline": "2 weeks",
-    "wouldDoDifferently": "I would..."
+    "differentApproach": "I would..."
   }
 }
 ```

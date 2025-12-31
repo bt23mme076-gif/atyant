@@ -138,6 +138,7 @@ router.get('/mentor/answered-questions', protect, async (req, res) => {
 router.post('/mentor/submit-experience', protect, async (req, res) => {
   try {
     const { questionId, rawExperience } = req.body;
+    console.log('DEBUG: Received rawExperience:', rawExperience);
     const question = await Question.findOne({ _id: questionId, selectedMentorId: req.user.userId });
     if (!question) return res.status(404).json({ success: false, error: 'Unauthorized or question not found' });
 
@@ -162,6 +163,8 @@ router.post('/mentor/submit-experience', protect, async (req, res) => {
         // question.answerCardId = undefined; // Ensure no new card is linked
     } else {
       // Main Question: Full AI transformation for Roadmap/Mistakes
+      // Debug log for what will be saved
+      console.log('DEBUG: Saving MentorExperience with:', { questionId, mentorId: req.user.userId, rawExperience });
       const mentorExperience = new MentorExperience({ questionId, mentorId: req.user.userId, rawExperience });
       await mentorExperience.save();
 

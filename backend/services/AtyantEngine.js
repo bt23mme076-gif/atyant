@@ -278,6 +278,14 @@ class AtyantEngine {
       if (!Array.isArray(polishedContent.actionableSteps)) {
         polishedContent.actionableSteps = [];
       }
+      // FIELD MAPPING FIX: Copy differentApproach to differentApproach if needed
+      if (!polishedContent.differentApproach && polishedContent.differentApproach) {
+        polishedContent.differentApproach = polishedContent.differentApproach;
+      }
+      // Also, if AI omits both, but rawData has it, use that
+      if (!polishedContent.differentApproach && mentorExperience.rawExperience?.differentApproach) {
+        polishedContent.differentApproach = mentorExperience.rawExperience.differentApproach;
+      }
     }
 
     // 2. Generate Embedding (Search ke liye zaroori hai)

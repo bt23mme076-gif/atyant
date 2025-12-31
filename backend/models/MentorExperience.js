@@ -32,8 +32,8 @@ const mentorExperienceSchema = new mongoose.Schema({
     },
     
     // What failed
-    failures: {
-      type: String,
+   keyMistakes: {
+      type: Array,
       required: true,
       maxlength: 1000
     },
@@ -45,9 +45,9 @@ const mentorExperienceSchema = new mongoose.Schema({
       maxlength: 1000
     },
     
-    // Step-by-step actions
-    stepByStep: {
-      type: String,
+    // Step-by-step actions taken
+    actionableSteps: {
+      type: Array,
       required: true,
       maxlength: 2000
     },
@@ -60,7 +60,7 @@ const mentorExperienceSchema = new mongoose.Schema({
     },
     
     // What I would do differently today
-    wouldDoDifferently: {
+    differentApproach: {
       type: String,
       required: true,
       maxlength: 1000
