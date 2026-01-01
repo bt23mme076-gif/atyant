@@ -104,6 +104,9 @@ const MentorGallery = () => {
   // Duplicate mentors array for seamless scrolling
   const scrollingMentors = [...mentors, ...mentors];
 
+  // Faster scroll speed
+  const scrollSpeed = 15;
+
   return (
     <section className="gallery-section">
       <h2>Meet Our Mentors</h2>

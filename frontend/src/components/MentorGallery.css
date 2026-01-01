@@ -379,3 +379,15 @@
     padding: 8px 14px;
   }
 }
+
+/* Find the animation and reduce duration */
+
+/* Before (likely): */
+.mentor-track {
+  animation: scroll 30s linear infinite;
+}
+
+/* After (faster): */
+.mentor-track {
+  animation: scroll 15s linear infinite;
+}
