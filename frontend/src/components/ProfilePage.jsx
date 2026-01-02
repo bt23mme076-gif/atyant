@@ -505,7 +505,7 @@ const ProfilePage = () => {
                     {formData.interests.map((interest, index) => (
                       <span key={index} className="chip">{interest} <button type="button" className="chip-remove" onClick={() => removeInterest(index)}>&times;</button></span>
                     ))}
-                    <input type="text" value={interestInput} onChange={(e) => setInterestInput(e.target.value)} onKeyDown={handleInterestKeyDown} placeholder="Add interest..." className="chip-input" />
+                    <input type="text" value={interestInput} onChange={(e) => setInterestInput(e.target.value)} onKeyDown={handleInterestKeyDown} placeholder="Add interest... and enter to add" className="chip-input" />
                   </div>
                 </div>
               </>
@@ -565,7 +565,7 @@ const ProfilePage = () => {
                     {formData.expertise.map((skill, index) => (
                       <span key={index} className="chip">{skill} <button type="button" className="chip-remove" onClick={() => removeExpertise(index)}>&times;</button></span>
                     ))}
-                    <input type="text" value={expertiseInput} onChange={(e) => setExpertiseInput(e.target.value)} onKeyDown={handleExpertiseKeyDown} placeholder="Add skill..." className="chip-input" />
+                    <input type="text" value={expertiseInput} onChange={(e) => setExpertiseInput(e.target.value)} onKeyDown={handleExpertiseKeyDown} placeholder="Add skill... and enter to add" className="chip-input" />
                   </div>
                 </div>
               </>

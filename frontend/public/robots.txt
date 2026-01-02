@@ -1,3 +1,39 @@
+# Atyant - robots.txt
+# AI-Powered Student Guidance Engine
+# https://atyant.in
+
 User-agent: *
 Allow: /
-Sitemap: https://yourdomain.com/sitemap.xml
+Allow: /internships
+Allow: /nearby-mentors
+Allow: /profile/*
+
+# Block Authentication Pages
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password/
+
+# Block Private/Protected Routes
+Disallow: /dashboard
+Disallow: /chat
+Disallow: /chat/
+Disallow: /mentors
+Disallow: /engine/
+Disallow: /my-questions
+Disallow: /mentor-dashboard
+Disallow: /profile$
+
+# Block API & System Files
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /sw.js
+
+# Block URL Parameters (Duplicate Content)
+Disallow: /*?*
+
+# Sitemap Location
+Sitemap: https://atyant.in/sitemap.xml
+
+# Crawl Delay
+Crawl-delay: 1

@@ -1,9 +1,10 @@
 // Service Worker for Atyant - Performance Optimization
-const CACHE_NAME = 'atyant-v1';
+const CACHE_NAME = 'atyant-v2';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/favicon.png'
 ];
 
 // Install service worker

@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import './HeroSection.css';
+import LoadingSpinner from './LoadingSpinner';
 
 const HeroSection = () => {
   const [problem, setProblem] = useState('');
@@ -15,6 +16,7 @@ const HeroSection = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
+  const [loading, setLoading] = useState(false);
   const statsRef = useRef(null);
   const suggestionsRef = useRef(null);
   const navigate = useNavigate();
@@ -129,6 +131,7 @@ const HeroSection = () => {
     }
 
     setSubmitting(true);
+    setLoading(true);
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const res = await fetch(`${API_URL}/api/engine/submit-question`, {
@@ -149,6 +152,7 @@ const HeroSection = () => {
       alert('Network error. Please try again.');
     } finally {
       setSubmitting(false);
+      setLoading(false);
     }
   };
 
@@ -171,6 +175,10 @@ const HeroSection = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showSuggestions]);
+
+  if (loading) {
+    return <LoadingSpinner fullScreen={true} />;
+  }
 
   return (
     <section className="hero-section" id="hero-section">

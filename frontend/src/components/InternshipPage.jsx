@@ -1,13 +1,18 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Download, Mail, ExternalLink, Search, Filter, Building2, GraduationCap, ChevronLeft, ChevronRight, Quote, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../AuthContext'; // ✅ Import AuthContext
+import { AuthContext } from '../AuthContext';
+import SEO from './SEO';
+import LoadingSpinner from './LoadingSpinner';
 import './InternshipPage.css';
 
 const InternshipPage = () => {
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext); // ✅ Get user from context
-  const isLoggedIn = !!user; // ✅ Simple check
+  const { user } = useContext(AuthContext);
+  const isLoggedIn = !!user;
+  
+  // ✅ ADD LOADING STATE
+  const [loading, setLoading] = useState(true);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInstitute, setSelectedInstitute] = useState('all');
@@ -23,6 +28,16 @@ const InternshipPage = () => {
 
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
+
+  // ✅ ADD useEffect FOR INITIAL LOADING
+  useEffect(() => {
+    // Simulate initial page load
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 800); // 800ms loading time
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // ========== PROTECTED LINK HANDLER ==========
   const handleProtectedLink = (url, e) => {
@@ -63,13 +78,13 @@ const InternshipPage = () => {
     // Download template code...
     const emailTemplate = `(1) GENERALIZED IIM EMAIL 
 
-Subject: Request for Summer/Winter Internship Opportunity in [Professor’s Domain]
+Subject: Request for Summer/Winter Internship Opportunity in [Professor's Domain]
 
 Respected Prof. [Name],
 
 I hope you are doing well. I am [Your Name], a 2nd yr B.Tech MME student.
 
-I am writing to express my interest in a Summer/Winter Research Internship (May–July 2026) in [Professor’s Domain]. I have explored your work on [2–3 specific topics], and I find your perspective on [one concept] particularly insightful. I would be grateful for the opportunity to learn from your approach and contribute to your research.
+I am writing to express my interest in a Summer/Winter Research Internship (May–July 2026) in [Professor's Domain]. I have explored your work on [2–3 specific topics], and I find your perspective on [one concept] particularly insightful. I would be grateful for the opportunity to learn from your approach and contribute to your research.
 
 Through [Your Club / 180 Degrees Consulting], I have gained experience in organizational analysis, behavioural insights, structured problem-solving, and data-driven decision-making. I also use analytical tools like Python and Power BI to support research-oriented tasks.
 
@@ -94,7 +109,7 @@ Respected Prof. [Name],
 
 I hope you are doing well. I am [Your Name], a 2nd yr B.Tech MME student.
 
-I am writing to express my interest in a Summer Research Internship (June–July 2026) under your guidance. I have explored your research in [Professor’s Domain], especially [1–2 specific topics], and I am fascinated by the scientific depth and experimental approaches involved. I am eager to gain hands-on research exposure in your group.
+I am writing to express my interest in a Summer Research Internship (June–July 2026) under your guidance. I have explored your research in [Professor's Domain], especially [1–2 specific topics], and I am fascinated by the scientific depth and experimental approaches involved. I am eager to gain hands-on research exposure in your group.
 
 I have been strengthening my fundamentals in [thermo/transport/materials/data analysis/modelling etc.], and I am motivated to contribute to meaningful research in your lab.
 
@@ -493,8 +508,21 @@ Resume Link: [Resume Link]
     ]
   };
 
+  // ✅ ADD LOADING CHECK BEFORE RETURN
+  if (loading) {
+    return <LoadingSpinner fullScreen={true} message="Loading Internship Portal..." />;
+  }
+
   return (
     <div className="internship-page">
+      {/* ✅ SEO FOR INTERNSHIP PAGE */}
+      <SEO 
+        title="Research Internship Portal | IIT & IIM Faculty Directory"
+        description="Find research internship opportunities at IITs & IIMs. Access faculty contacts, email templates, and step-by-step cold emailing guide. Get internship at top institutions."
+        keywords="IIT internship, IIM internship, research internship India, cold email professor, faculty directory IIT, summer internship IIT, winter internship IIM, VNIT internship guide"
+        url="https://atyant.in/internships"
+      />
+
       {/* ========== HERO SECTION ========== */}
       <div className="internship-hero">
         <div className="hero-content">
@@ -914,7 +942,6 @@ Resume Link: [Resume Link]
           </div>
         </div>
       </div>
-
     </div>
   );
 };

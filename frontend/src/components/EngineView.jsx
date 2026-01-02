@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import AnswerCard from './AnswerCard';
+import LoadingSpinner from './LoadingSpinner';
 import './EngineView.css';
 
 const EngineView = () => {
@@ -88,14 +89,7 @@ const EngineView = () => {
   };
 
   if (loading) {
-    return (
-      <div className="engine-view-container">
-        <div className="status-card">
-          <div className="loading-spinner"></div>
-          <h2>Loading...</h2>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {

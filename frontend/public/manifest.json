@@ -1,8 +1,12 @@
 {
-  "name": "अत्यanT",
+  "name": "Atyant – AI-Powered Student Guidance Engine",
   "short_name": "Atyant",
-  "description": "Atyant connects students with real mentors who’ve already solved the same problems — from academics to internships to career advice. Get real answers, not theories. Join India’s fastest-growing student network today!",
-  "keywords": "Atyant, student mentorship, college mentor, find seniors, academic help, career guidance, student solution network, VNIT Nagpur, college doubts, internship help",
+  "description": "AI matches you with seniors who've already cracked it. Get human-verified roadmaps for internships, placements & career clarity.",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#6366f1",
+  "background_color": "#0a0a0f",
+  "lang": "en-IN",
   "icons": [
     {
       "src": "/favicon.png",
@@ -14,9 +18,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "theme_color": "#000000",
-  "background_color": "#ffffff",
-  "display": "standalone",
-  "start_url": "/"
+  ]
 }

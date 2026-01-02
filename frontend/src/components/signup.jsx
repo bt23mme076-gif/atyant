@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import "./AuthForm.css";
 import { Eye, EyeOff } from "lucide-react";
+import LoadingSpinner from "./LoadingSpinner";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -128,6 +129,10 @@ const Signup = () => {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <div className="auth-container">

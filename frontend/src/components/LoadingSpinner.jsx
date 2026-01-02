@@ -11,7 +11,7 @@ const LoadingSpinner = ({ message = 'Loading...', fullScreen = false }) => {
             <div className="spinner-ring"></div>
             <div className="spinner-ring"></div>
             <div className="spinner-logo">
-              <span className="logo-text">अत्यंत</span>
+              <span className="logo-text">अत्यant</span>
             </div>
           </div>
           <p className="loading-message">{message}</p>

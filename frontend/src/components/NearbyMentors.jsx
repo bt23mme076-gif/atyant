@@ -5,6 +5,7 @@ import { MapPin, Navigation, Users, MessageCircle, Search, X, ChevronRight, Refr
 import './NearbyMentors.css';
 import './shared.css';
 import LoadingSpinner from './LoadingSpinner';
+import SEO from './SEO'; // ✅ NEW IMPORT
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -431,6 +432,14 @@ const NearbyMentors = () => {
 
   return (
     <div className="nearby-mentors-page">
+      {/* ✅ SEO FOR NEARBY MENTORS PAGE */}
+      <SEO 
+        title="Find Nearby Achievers & Mentors"
+        description="Discover mentors near your location who've cracked placements, internships & career goals. Connect with seniors from IITs, NITs & top colleges. Get real guidance, not generic advice."
+        keywords="nearby mentors, find mentors near me, college seniors near me, placement guidance, internship help, career mentors India, VNIT mentors, IIT mentors, NIT seniors, local student mentors"
+        url="https://atyant.in/nearby-mentors"
+      />
+
       {/* ========== HEADER ========== */}
       <div className="nearby-header">
         <div className="header-content">

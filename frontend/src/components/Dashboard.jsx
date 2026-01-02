@@ -4,6 +4,7 @@ import { AuthContext } from '../AuthContext';
 import { Link, Navigate } from 'react-router-dom';
 import { MessageSquare, Users, TrendingUp, MapPin, Calendar, BookOpen } from 'lucide-react';
 import './Dashboard.css';
+import LoadingSpinner from './LoadingSpinner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -89,6 +90,10 @@ const Dashboard = () => {
   // Redirect students to home
   if (user?.role !== 'mentor') {
     return <Navigate to="/" replace />;
+  }
+
+  if (loading) {
+    return <LoadingSpinner />;
   }
 
   if (user?.role === 'mentor') {

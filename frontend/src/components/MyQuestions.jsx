@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
+import LoadingSpinner from './LoadingSpinner';
 import './MyQuestions.css';
 
 const MyQuestions = () => {
@@ -68,14 +69,7 @@ const MyQuestions = () => {
   };
 
   if (loading) {
-    return (
-      <div className="my-questions-container">
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>Loading your questions...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner fullScreen={true} message="Processing your question..." />;
   }
 
   return (
