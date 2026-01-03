@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
 import { AuthContext } from '../AuthContext';
-import { MapPin, RefreshCw, AlertCircle, CheckCircle } from 'lucide-react';
+import { MapPin, RefreshCw, AlertCircle, CheckCircle, Plus } from 'lucide-react';
 import './ProfilePage.css';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -80,6 +80,11 @@ const ProfilePage = () => {
   const [interestInput, setInterestInput] = useState('');
   const [expertiseInput, setExpertiseInput] = useState('');
 
+  // Track unsaved changes
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [initialFormData, setInitialFormData] = useState(null);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+
   // Add this before the return statement:
   const isLocationLoading = locationStatus === 'updating' || locationStatus === 'checking';
 
@@ -111,6 +116,23 @@ const ProfilePage = () => {
             milestones: data.milestones || [],
             specialTags: data.specialTags || [] // 🔥 THIS LINE FIXES THE REFRESH ISSUE
           });
+          // Store initial data to track changes
+          setInitialFormData({
+            username: data.username || '',
+            bio: data.bio || '',
+            linkedinProfile: data.linkedinProfile || '',
+            city: data.city || '',
+            education: data.education && data.education.length > 0 
+              ? data.education 
+              : [{ institution: '', degree: '', field: '', year: '' }],
+            interests: data.interests || [],
+            expertise: data.expertise || [],
+            domainExperience: data.domainExperience || [],
+            primaryDomain: data.primaryDomain || '',
+            topCompanies: data.topCompanies || [],
+            milestones: data.milestones || [],
+            specialTags: data.specialTags || []
+          });
           setImagePreview(data.profilePicture || '');
         } else {
           setMessage({ text: 'Failed to load profile.', type: 'error' });
@@ -137,6 +159,68 @@ const ProfilePage = () => {
           : [...currentArray, value]
       };
     });
+    setHasUnsavedChanges(true);
+  };
+
+  // Check for unsaved changes when form data changes
+  useEffect(() => {
+    if (initialFormData) {
+      const isChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+      setHasUnsavedChanges(isChanged);
+    }
+  }, [formData, initialFormData]);
+
+  // Warn user before leaving page with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  // Add company with button (for mobile)
+  const addCompany = () => {
+    const newCompany = companyInput.trim();
+    if (newCompany && !(formData.topCompanies || []).includes(newCompany)) {
+      setFormData(prev => ({
+        ...prev,
+        topCompanies: [...(prev.topCompanies || []), newCompany]
+      }));
+      setCompanyInput('');
+      setHasUnsavedChanges(true);
+    }
+  };
+
+  // Add expertise with button (for mobile)
+  const addExpertise = () => {
+    const newExpertise = expertiseInput.trim();
+    if (newExpertise && !formData.expertise.includes(newExpertise)) {
+      setFormData(prev => ({
+        ...prev,
+        expertise: [...prev.expertise, newExpertise]
+      }));
+      setExpertiseInput('');
+      setHasUnsavedChanges(true);
+    }
+  };
+
+  // Add interest with button (for mobile)
+  const addInterest = () => {
+    const newInterest = interestInput.trim();
+    if (newInterest && !formData.interests.includes(newInterest)) {
+      setFormData(prev => ({
+        ...prev,
+        interests: [...prev.interests, newInterest]
+      }));
+      setInterestInput('');
+      setHasUnsavedChanges(true);
+    }
   };
 
   // ========== CHECK IF LOCATION IS ALREADY SAVED ==========
@@ -371,6 +455,9 @@ const ProfilePage = () => {
 
       if (res.ok) {
         setMessage({ text: 'Profile updated successfully!', type: 'success' });
+        // Reset unsaved changes after successful save
+        setInitialFormData({...formData});
+        setHasUnsavedChanges(false);
       } else {
         const data = await res.json();
         setMessage({ text: data.message || 'Failed to update profile.', type: 'error' });
@@ -505,7 +592,10 @@ const ProfilePage = () => {
                     {formData.interests.map((interest, index) => (
                       <span key={index} className="chip">{interest} <button type="button" className="chip-remove" onClick={() => removeInterest(index)}>&times;</button></span>
                     ))}
-                    <input type="text" value={interestInput} onChange={(e) => setInterestInput(e.target.value)} onKeyDown={handleInterestKeyDown} placeholder="Add interest... and enter to add" className="chip-input" />
+                    <input type="text" value={interestInput} onChange={(e) => setInterestInput(e.target.value)} onKeyDown={handleInterestKeyDown} placeholder="Add interest..." className="chip-input" />
+                    <button type="button" className="chip-add-btn" onClick={addInterest} disabled={!interestInput.trim()} title="Add interest">
+                      <Plus size={16} /> Add
+                    </button>
                   </div>
                 </div>
               </>
@@ -536,7 +626,10 @@ const ProfilePage = () => {
                         {(formData.topCompanies || []).map((company, index) => (
                           <span key={index} className="chip company-chip">{company} <button type="button" className="chip-remove" onClick={() => removeCompany(index)}>×</button></span>
                         ))}
-                        <input type="text" value={companyInput} onChange={(e) => setCompanyInput(e.target.value)} onKeyDown={handleCompanyKeyDown} placeholder="Type company & Enter" className="chip-input" />
+                        <input type="text" value={companyInput} onChange={(e) => setCompanyInput(e.target.value)} onKeyDown={handleCompanyKeyDown} placeholder="Type company name" className="chip-input" />
+                        <button type="button" className="chip-add-btn" onClick={addCompany} disabled={!companyInput.trim()} title="Add company">
+                          <Plus size={16} /> Add
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -565,13 +658,25 @@ const ProfilePage = () => {
                     {formData.expertise.map((skill, index) => (
                       <span key={index} className="chip">{skill} <button type="button" className="chip-remove" onClick={() => removeExpertise(index)}>&times;</button></span>
                     ))}
-                    <input type="text" value={expertiseInput} onChange={(e) => setExpertiseInput(e.target.value)} onKeyDown={handleExpertiseKeyDown} placeholder="Add skill... and enter to add" className="chip-input" />
+                    <input type="text" value={expertiseInput} onChange={(e) => setExpertiseInput(e.target.value)} onKeyDown={handleExpertiseKeyDown} placeholder="Add skill..." className="chip-input" />
+                    <button type="button" className="chip-add-btn" onClick={addExpertise} disabled={!expertiseInput.trim()} title="Add skill">
+                      <Plus size={16} /> Add
+                    </button>
                   </div>
                 </div>
               </>
             )}
 
-            <button type="submit" disabled={loading} className="save-profile-btn">{loading ? 'Saving...' : 'Save Profile'}</button>
+            {hasUnsavedChanges && (
+              <div className="unsaved-warning">
+                <AlertCircle size={18} />
+                <span>You have unsaved changes. Don't forget to save!</span>
+              </div>
+            )}
+
+            <button type="submit" disabled={loading} className="save-profile-btn">
+              {loading ? 'Saving...' : hasUnsavedChanges ? '💾 Save Changes' : 'Save Profile'}
+            </button>
             {message.text && <p className={`form-message ${message.type}`}>{message.text}</p>}
           </form>
         </div>

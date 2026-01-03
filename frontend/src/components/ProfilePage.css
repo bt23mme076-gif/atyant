@@ -1,56 +1,57 @@
-/* ========== 1. VARIABLES - PREMIUM LIGHT THEME ========== */
+/* ========== PREMIUM DARK THEME - CLEAN & MODERN ========== */
 .profile-page-layout {
-  --primary: #6366f1;
-  --primary-dark: #4f46e5;
-  --primary-light: #eef2ff;
-  --primary-glow: rgba(99, 102, 241, 0.15);
-  --accent: #8b5cf6;
+  --primary: #3b82f6;
+  --primary-dark: #2563eb;
+  --primary-light: #dbeafe;
+  --primary-glow: rgba(59, 130, 246, 0.2);
+  --accent: #06b6d4;
+  --accent-light: #cffafe;
   --success: #10b981;
   --success-light: #d1fae5;
   --danger: #ef4444;
   --warning: #f59e0b;
   --warning-light: #fef3c7;
   
-  /* Light Theme Colors */
-  --bg-page: #f8fafc;
-  --bg-card: #ffffff;
-  --bg-input: #f1f5f9;
-  --bg-hover: #f8fafc;
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
-  --border-color: #e2e8f0;
-  --border-hover: #cbd5e1;
+  /* Dark Theme Colors */
+  --bg-page: #0f172a;
+  --bg-card: #1e293b;
+  --bg-card-hover: #334155;
+  --bg-input: #0f172a;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border-color: #334155;
+  --border-hover: #475569;
   
   /* Effects */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.1);
-  --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.12);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.15);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-xl: 20px;
   --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ========== 2. PAGE BACKGROUND ========== */
+/* ========== PAGE LAYOUT ========== */
 .profile-page-layout {
   max-width: 1200px;
   margin: 0 auto;
   padding: 32px 24px;
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: 300px 1fr;
   gap: 32px;
   align-items: start;
   min-height: 100vh;
   background: var(--bg-page);
 }
 
-/* ========== 3. PROFILE PICTURE CARD (LEFT) ========== */
+/* ========== PROFILE PICTURE CARD ========== */
 .profile-page-layout .profile-picture-container {
   position: sticky;
-  top: 100px;
+  top: 90px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -59,57 +60,52 @@
   background: var(--bg-card);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-md);
   transition: var(--transition);
 }
 
 .profile-page-layout .profile-picture-container:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+  border-color: var(--primary);
+  box-shadow: var(--shadow-glow);
 }
 
 .profile-page-layout .profile-picture-container h3 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-secondary);
   margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* Avatar with Gradient Ring */
+/* Avatar */
 .profile-page-layout .profile-avatar {
-  width: 160px;
-  height: 160px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  padding: 4px;
-  background: linear-gradient(135deg, var(--primary), var(--accent), #ec4899);
-  box-shadow: var(--shadow-md);
+  border: 4px solid var(--primary);
+  box-shadow: 0 0 0 4px var(--bg-card), var(--shadow-md);
   transition: var(--transition);
 }
 
-.profile-page-layout .profile-avatar img,
-.profile-page-layout .profile-avatar {
-  border-radius: 50%;
-}
-
 .profile-page-layout .profile-picture-container:hover .profile-avatar {
-  transform: scale(1.03);
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  transform: scale(1.05);
+  box-shadow: 0 0 0 4px var(--bg-card), var(--shadow-glow);
 }
 
-/* Upload Button - Soft Style */
+/* Buttons */
 .profile-page-layout .upload-btn {
   width: 100%;
   padding: 12px 20px;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: var(--transition);
   text-align: center;
-  border: none;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: white;
+  border: 2px solid var(--primary);
+  background: transparent;
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -117,14 +113,15 @@
 }
 
 .profile-page-layout .upload-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--primary-glow);
+  background: var(--primary);
+  color: white;
+  box-shadow: var(--shadow-glow);
 }
 
 .profile-page-layout .save-photo-btn {
   width: 100%;
   padding: 12px 20px;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -141,19 +138,19 @@
 .profile-page-layout .save-photo-btn:hover {
   background: #059669;
   transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
 }
 
-/* ========== 4. PROFILE FORM CARD (RIGHT) ========== */
+/* ========== PROFILE FORM CARD ========== */
 .profile-page-layout .profile-form-container {
-  padding: 40px;
+  padding: 36px;
   background: var(--bg-card);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-md);
 }
 
 .profile-page-layout .profile-form-container h2 {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 8px;
@@ -163,31 +160,33 @@
 .profile-page-layout .profile-form-container form {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
 }
 
 .profile-page-layout .profile-form-container h3 {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--primary);
   padding-bottom: 10px;
-  border-bottom: 2px solid var(--primary-light);
+  border-bottom: 2px solid var(--border-color);
   margin-bottom: 0;
   display: flex;
   align-items: center;
   gap: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* ========== 5. FORM INPUTS - CLEAN STYLE ========== */
+/* ========== FORM INPUTS ========== */
 .profile-page-layout form input,
 .profile-page-layout form textarea,
 .profile-page-layout form select {
   width: 100%;
   padding: 14px 16px;
   font-size: 0.95rem;
-  border: 1.5px solid var(--border-color);
+  border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
-  background: var(--bg-card);
+  background: var(--bg-input);
   color: var(--text-primary);
   transition: var(--transition);
 }
@@ -201,7 +200,6 @@
 .profile-page-layout form textarea:hover,
 .profile-page-layout form select:hover {
   border-color: var(--border-hover);
-  background: var(--bg-hover);
 }
 
 .profile-page-layout form input:focus,
@@ -209,11 +207,9 @@
 .profile-page-layout form select:focus {
   outline: none;
   border-color: var(--primary);
-  background: var(--bg-card);
-  box-shadow: 0 0 0 4px var(--primary-light);
+  box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
-/* Select Dropdown */
 .profile-page-layout form select {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -226,10 +222,10 @@
   cursor: pointer;
 }
 
-/* ========== 6. LOCATION SECTION - SOFT COLORS ========== */
+/* ========== LOCATION SECTION ========== */
 .location-setup-section {
-  background: linear-gradient(135deg, var(--primary-light), #faf5ff);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.1));
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 24px;
   margin-bottom: 24px;
@@ -237,16 +233,16 @@
 }
 
 .location-setup-section:hover {
-  box-shadow: var(--shadow-glow);
+  border-color: var(--primary);
 }
 
 .location-setup-section.urgent {
-  background: linear-gradient(135deg, var(--warning-light), #fef9c3);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  animation: softPulse 3s ease-in-out infinite;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(234, 179, 8, 0.1));
+  border-color: var(--warning);
+  animation: urgentGlow 2s ease-in-out infinite;
 }
 
-@keyframes softPulse {
+@keyframes urgentGlow {
   0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.2); }
   50% { box-shadow: 0 0 20px 0 rgba(245, 158, 11, 0.15); }
 }
@@ -261,39 +257,40 @@
 
 .location-header h3 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: var(--text-primary);
   flex: 1;
   border: none;
   padding: 0;
+  text-transform: none;
 }
 
-/* Status Badges - Pill Style */
 .status-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
   border-radius: 20px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .status-badge.success {
-  background: var(--success-light);
+  background: rgba(16, 185, 129, 0.15);
   color: var(--success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .status-badge.warning {
-  background: var(--warning-light);
+  background: rgba(245, 158, 11, 0.15);
   color: var(--warning);
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
-/* Location Enabled Card */
 .location-enabled-card {
-  background: var(--success-light);
+  background: rgba(16, 185, 129, 0.1);
   border: 1px solid rgba(16, 185, 129, 0.2);
   border-radius: var(--radius-md);
   padding: 16px 20px;
@@ -314,22 +311,17 @@
 .location-details .location-text {
   margin: 0;
   color: var(--text-primary);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 500;
 }
 
-.location-details .location-text span {
-  color: var(--success);
-  font-weight: 600;
-}
-
 .update-location-btn-small {
-  background: var(--bg-card);
+  background: transparent;
   color: var(--success);
-  border: 1.5px solid var(--success);
+  border: 1px solid var(--success);
   padding: 8px 16px;
   border-radius: 20px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
@@ -344,14 +336,13 @@
   color: white;
 }
 
-/* Enable Location Button */
 .enable-location-btn {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: var(--primary);
   color: white;
   border: none;
   padding: 14px 24px;
   border-radius: var(--radius-md);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
@@ -361,18 +352,18 @@
 }
 
 .enable-location-btn:hover:not(:disabled) {
+  background: var(--primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px var(--primary-glow);
+  box-shadow: var(--shadow-glow);
 }
 
 .enable-location-btn:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* Location Prompt Card */
 .location-prompt-card {
-  background: var(--bg-card);
+  background: var(--bg-input);
   border-radius: var(--radius-md);
   padding: 24px;
   text-align: center;
@@ -381,7 +372,7 @@
 
 .location-prompt-card h4 {
   color: var(--text-primary);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   margin: 12px 0;
 }
 
@@ -389,41 +380,40 @@
   color: var(--text-secondary);
   margin: 12px 0 20px;
   line-height: 1.6;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
-/* ========== 7. EDUCATION SECTION ========== */
+/* ========== EDUCATION SECTION ========== */
 .profile-page-layout .education-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 14px;
   padding: 20px;
-  border: 1.5px solid var(--border-color);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   position: relative;
-  background: var(--bg-hover);
+  background: var(--bg-input);
   transition: var(--transition);
 }
 
 .profile-page-layout .education-group:hover {
   border-color: var(--primary);
-  background: var(--bg-card);
 }
 
 .profile-page-layout .remove-btn {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: var(--bg-card);
-  border: 1.5px solid var(--danger);
+  background: transparent;
+  border: 1px solid var(--danger);
   color: var(--danger);
   cursor: pointer;
   padding: 0;
   border-radius: 50%;
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1;
   transition: var(--transition);
   display: flex;
@@ -434,17 +424,16 @@
 .profile-page-layout .remove-btn:hover {
   background: var(--danger);
   color: white;
-  transform: rotate(90deg);
 }
 
 .profile-page-layout .add-btn {
   padding: 12px 20px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   border-radius: var(--radius-md);
   cursor: pointer;
   border: 2px dashed var(--primary);
-  background: var(--primary-light);
+  background: transparent;
   color: var(--primary);
   transition: var(--transition);
   align-self: flex-start;
@@ -459,7 +448,7 @@
   border-style: solid;
 }
 
-/* ========== 8. CHIPS INPUT - SOFT STYLE ========== */
+/* ========== CHIPS INPUT ========== */
 .chip-input-container {
   margin-bottom: 1rem;
 }
@@ -469,9 +458,9 @@
   flex-wrap: wrap;
   gap: 10px;
   padding: 12px 14px;
-  min-height: 54px;
-  background: var(--bg-card);
-  border: 1.5px solid var(--border-color);
+  min-height: 52px;
+  background: var(--bg-input);
+  border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
   align-items: center;
   transition: var(--transition);
@@ -483,7 +472,7 @@
 
 .chips-wrapper:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-light);
+  box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
 .chip {
@@ -491,22 +480,21 @@
   align-items: center;
   gap: 8px;
   padding: 6px 14px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: var(--primary);
   color: white;
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 500;
-  animation: chipPop 0.25s ease;
+  animation: chipIn 0.2s ease;
 }
 
-@keyframes chipPop {
+@keyframes chipIn {
   0% { opacity: 0; transform: scale(0.8); }
-  50% { transform: scale(1.05); }
   100% { opacity: 1; transform: scale(1); }
 }
 
 .chip-remove {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
   width: 18px;
@@ -522,12 +510,12 @@
 }
 
 .chip-remove:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .chip-input {
   flex: 1;
-  min-width: 150px;
+  min-width: 100px;
   border: none;
   background: transparent;
   outline: none;
@@ -540,18 +528,69 @@
   color: var(--text-muted);
 }
 
-/* ========== 9. ENGINE OPTIMIZATION SECTION ========== */
+/* Add Button for Mobile */
+.chip-add-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chip-add-btn:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+.chip-add-btn:disabled {
+  background: var(--border-color);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Unsaved Warning */
+.unsaved-warning {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius-md);
+  color: var(--warning);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.unsaved-warning svg {
+  flex-shrink: 0;
+}
+
+/* ========== ENGINE OPTIMIZATION SECTION ========== */
 .engine-optimization-section {
-  background: linear-gradient(135deg, #faf5ff, var(--primary-light));
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(6, 182, 212, 0.08));
   padding: 24px;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  border: 1px solid var(--border-color);
   margin: 24px 0;
+}
+
+.engine-optimization-section:hover {
+  border-color: var(--primary);
 }
 
 .engine-optimization-section .section-title {
   color: var(--text-primary);
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 700;
   margin-bottom: 4px;
   display: flex;
@@ -559,11 +598,12 @@
   gap: 10px;
   border: none;
   padding: 0;
+  text-transform: none;
 }
 
 .engine-optimization-section .helper-text {
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   margin-bottom: 20px;
 }
 
@@ -572,7 +612,7 @@
   color: var(--text-primary);
   margin-bottom: 8px;
   display: block;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .engine-optimization-section .form-group {
@@ -583,8 +623,8 @@
   width: 100%;
   padding: 14px 16px;
   border-radius: var(--radius-md);
-  border: 1.5px solid var(--border-color);
-  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  background: var(--bg-input);
   color: var(--text-primary);
   font-size: 0.95rem;
   transition: var(--transition);
@@ -592,10 +632,10 @@
 
 .engine-select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-light);
+  box-shadow: 0 0 0 3px var(--primary-glow);
 }
 
-/* Tags Grid - Pill Buttons */
+/* Tags Grid */
 .tags-grid {
   display: flex;
   flex-wrap: wrap;
@@ -605,45 +645,49 @@
 
 .tag-btn {
   padding: 10px 18px;
-  border-radius: 25px;
-  border: 1.5px solid var(--border-color);
-  background: var(--bg-card);
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
   transition: var(--transition);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
 }
 
 .tag-btn:hover {
   border-color: var(--primary);
   color: var(--primary);
-  background: var(--primary-light);
 }
 
 .tag-btn.active {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: var(--primary);
   color: white;
-  border-color: transparent;
-  box-shadow: 0 4px 12px var(--primary-glow);
+  border-color: var(--primary);
 }
 
 .tag-btn.special.active {
-  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  background: #8b5cf6;
+  border-color: #8b5cf6;
 }
 
 .tag-btn.milestone.active {
-  background: linear-gradient(135deg, var(--success), #059669);
+  background: var(--success);
+  border-color: var(--success);
 }
 
-/* ========== 10. SUBMIT BUTTON ========== */
+.company-chip {
+  background: var(--accent);
+}
+
+/* ========== SUBMIT BUTTON ========== */
 .profile-page-layout form button[type='submit'],
 .save-profile-btn {
   padding: 16px 32px;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  background: var(--primary);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
@@ -656,8 +700,9 @@
 }
 
 .profile-page-layout form button[type='submit']:hover:not(:disabled) {
+  background: var(--primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px var(--primary-glow);
+  box-shadow: var(--shadow-glow);
 }
 
 .profile-page-layout form button[type='submit']:disabled {
@@ -672,29 +717,29 @@
   text-align: center;
   font-weight: 500;
   margin-top: 16px;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .profile-page-layout .form-message.success {
-  background: var(--success-light);
+  background: rgba(16, 185, 129, 0.1);
   color: var(--success);
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
 .profile-page-layout .form-message.error {
-  background: #fee2e2;
+  background: rgba(239, 68, 68, 0.1);
   color: var(--danger);
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-/* ========== 11. LOADING OVERLAY ========== */
+/* ========== LOADING OVERLAY ========== */
 .location-loading-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(8px);
   z-index: 9999;
   display: flex;
@@ -704,12 +749,12 @@
 }
 
 .location-loading-spinner {
-  border: 4px solid var(--border-color);
-  border-top: 4px solid var(--primary);
+  border: 3px solid var(--border-color);
+  border-top: 3px solid var(--primary);
   border-radius: 50%;
   width: 48px;
   height: 48px;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
   margin-bottom: 16px;
 }
 
@@ -723,7 +768,7 @@
   font-weight: 600;
 }
 
-/* ========== 12. RESPONSIVE ========== */
+/* ========== RESPONSIVE ========== */
 @media (max-width: 968px) {
   .profile-page-layout {
     grid-template-columns: 1fr;
@@ -737,18 +782,18 @@
   }
   
   .profile-page-layout .profile-avatar {
-    width: 130px;
-    height: 130px;
+    width: 120px;
+    height: 120px;
   }
   
   .profile-page-layout .profile-form-container {
-    padding: 28px 20px;
+    padding: 24px 20px;
   }
 }
 
 @media (max-width: 640px) {
   .profile-page-layout .profile-form-container h2 {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
   }
   
   .profile-page-layout .education-group {
@@ -768,7 +813,25 @@
   
   .tag-btn {
     padding: 8px 14px;
+    font-size: 0.8rem;
+  }
+
+  .chip-add-btn {
+    padding: 10px 16px;
+  }
+
+  .chips-wrapper {
+    gap: 8px;
+  }
+
+  .chip-input {
+    min-width: 80px;
+  }
+
+  .unsaved-warning {
+    padding: 12px 14px;
     font-size: 0.85rem;
+    flex-wrap: wrap;
   }
 }
 
@@ -779,4 +842,8 @@
   opacity: 0;
   position: absolute;
   pointer-events: none;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
 }
