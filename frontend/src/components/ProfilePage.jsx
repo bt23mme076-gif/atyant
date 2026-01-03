@@ -33,7 +33,7 @@ const ProfilePage = () => {
   const specialCategoryOptions = [
     'Foreign Internship 🌍', 
     'IIT Research Intern 🎓', 
-    'IIM MBA Intern 💼', 
+    'IIM Research Intern 💼', 
     'FAANG Cracked 🚀',
     'International Job Offer ✈️',
     'Tier-1 College (IIT/NIT/BITS)',
@@ -442,6 +442,12 @@ const ProfilePage = () => {
     setLoading(true);
     setMessage({ text: '', type: '' });
 
+    // Filter out incomplete education entries before sending
+    const filteredEducation = Array.isArray(formData.education)
+      ? formData.education.filter(edu => edu.institution && edu.degree && edu.field && edu.year)
+      : [];
+    const submitData = { ...formData, education: filteredEducation };
+
     try {
       const res = await fetch(`${API_URL}/api/profile/me`, {
         method: 'PUT',
@@ -449,14 +455,12 @@ const ProfilePage = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${user.token}`
         },
-        // 🔥 formData ab saare fields (specialTags sahit) backend bhejega
-        body: JSON.stringify(formData)
+        body: JSON.stringify(submitData)
       });
 
       if (res.ok) {
         setMessage({ text: 'Profile updated successfully!', type: 'success' });
-        // Reset unsaved changes after successful save
-        setInitialFormData({...formData});
+        setInitialFormData({ ...formData, education: filteredEducation });
         setHasUnsavedChanges(false);
       } else {
         const data = await res.json();
@@ -508,12 +512,15 @@ const ProfilePage = () => {
       <div className="profile-page-layout">
         {/* ========== PROFILE PICTURE SECTION ========== */}
         <div className="profile-picture-container">
-          <h3>Profile Picture</h3>
-          <img
-            src={imagePreview || `https://ui-avatars.com/api/?name=${formData.username || 'User'}&background=random&size=150`}
-            alt="Profile"
-            className="profile-avatar"
-          />
+          {/* Profile Avatar */}
+          <img src={imagePreview || `https://ui-avatars.com/api/?name=${formData.username || 'User'}&background=random&size=150`} alt="Profile" className="profile-avatar" />
+          {/* Unsaved Warning */}
+          {hasUnsavedChanges && (
+            <div className="unsaved-warning">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="#f59e0b" strokeWidth="2" d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              You have unsaved changes. Don't forget to save!
+            </div>
+          )}
           <input type="file" id="imageUpload" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
           <label htmlFor="imageUpload" className="upload-btn">Choose Image</label>
           {imageFile && <button onClick={handleImageUpload} className="save-photo-btn" disabled={loading}>Save Photo</button>}
@@ -579,6 +586,22 @@ const ProfilePage = () => {
                 <select value={edu.field} onChange={(e) => handleEducationChange(index, 'field', e.target.value)} required>
                   {branches.map(branch => <option key={branch} value={branch}>{branch}</option>)}
                 </select>
+                <div>
+                  <label htmlFor="cgpa">CGPA</label>
+                  <select
+                    id="cgpa"
+                    name="cgpa"
+                    value={edu.cgpa || ''}
+                    onChange={e => handleEducationChange(index, 'cgpa', e.target.value)}
+                  >
+                    <option value="">Select CGPA Range</option>
+                    <option value="9-10">9-10</option>
+                    <option value="9-8">9-8</option>
+                    <option value="8-7">8-7</option>
+                    <option value="7-6">7-6</option>
+                    <option value="6-5">6-5</option>
+                  </select>
+                </div>
                 {formData.education.length > 1 && <button type="button" className="remove-btn" onClick={() => removeEducation(index)}>&times;</button>}
               </div>
             ))}

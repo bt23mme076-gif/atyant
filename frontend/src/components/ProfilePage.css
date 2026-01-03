@@ -1,3 +1,19 @@
+.cgpa-select {
+  background: linear-gradient(90deg, #1e293b 60%, #2563eb22 100%);
+  border: 2px solid var(--primary);
+  color: #fbbf24;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 8px #2563eb22;
+}
+
+label[for="cgpa"] {
+  color: #fbbf24;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: block;
+  font-size: 0.95rem;
+}
 /* ========== PREMIUM DARK THEME - CLEAN & MODERN ========== */
 .profile-page-layout {
   --primary: #3b82f6;

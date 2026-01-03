@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: [] // 🔥 NAYA: ["Foreign Internship 🌍", "IIT Research Intern", "IIM MBA Intern"]
     }],
+    
     tier: { 
       type: Number, 
       default: 1 // 1: Beginner, 2: Intermediate, 3: Expert (Authority indicator)

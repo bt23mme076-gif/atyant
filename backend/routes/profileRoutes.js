@@ -79,7 +79,26 @@ router.put('/me', protect, async (req, res) => {
     if (expertise !== undefined) user.expertise = Array.isArray(expertise) ? expertise : [];
     if (domainExperience !== undefined) user.domainExperience = Array.isArray(domainExperience) ? domainExperience : [];
     if (skills !== undefined) user.skills = Array.isArray(skills) ? skills : [];
-    if (education !== undefined) user.education = Array.isArray(education) ? education : [];
+    // If education is provided, map CGPA range string to a number (average or upper value)
+    if (education !== undefined) {
+      user.education = Array.isArray(education)
+        ? education.map(edu => {
+            // If cgpa is a string range (e.g., '9-10'), convert to number (e.g., 9.5)
+            let cgpaValue = edu.cgpa;
+            if (typeof cgpaValue === 'string' && cgpaValue.includes('-')) {
+              const [min, max] = cgpaValue.split('-').map(Number);
+              if (!isNaN(min) && !isNaN(max)) {
+                cgpaValue = (min + max) / 2;
+              }
+            }
+            // If cgpaValue is still an empty string or not a number, set to undefined
+            if (cgpaValue === '' || isNaN(Number(cgpaValue))) {
+              cgpaValue = undefined;
+            }
+            return { ...edu, cgpa: cgpaValue };
+          })
+        : [];
+    }
 
     // 🚀 2. Assignment: Naye Engine Fields ko Save karna (Mentor only)
     if (user.role === 'mentor') {
@@ -94,23 +113,29 @@ router.put('/me', protect, async (req, res) => {
         user.specialTags = Array.isArray(specialTags) ? specialTags : [];
       }
     }
-
-    // Safety check for location
-    if (user.location && typeof user.location === 'object') {
-      if (!user.location.coordinates || user.location.coordinates.length !== 2) {
-        user.location = undefined;
-      }
-    }
-    
-    // 💾 Database mein save karein
-    const updatedUser = await user.save({ validateBeforeSave: true });
-    
-    console.log('✅ User updated with Engine tags successfully');
-    
-    // Return updated data
-    const userResponse = updatedUser.toObject();
+          if (education !== undefined) {
+            user.education = Array.isArray(education)
+              ? education
+                  .map(edu => {
+                    let cgpaValue = edu.cgpa;
+                    if (typeof cgpaValue === 'string' && cgpaValue.includes('-')) {
+                      const [min, max] = cgpaValue.split('-').map(Number);
+                      if (!isNaN(min) && !isNaN(max)) {
+                        cgpaValue = (min + max) / 2;
+                      }
+                    }
+                    if (cgpaValue === '' || cgpaValue === null || typeof cgpaValue === 'undefined' || isNaN(Number(cgpaValue))) {
+                      cgpaValue = undefined;
+                    }
+                    return { ...edu, cgpa: cgpaValue };
+                  })
+                  // Only keep entries with all required fields present and non-empty
+                  .filter(edu => edu.institution && edu.degree && edu.field && edu.year)
+              : [];
+          }
+    // Prepare response object after save
+    const userResponse = user.toObject();
     delete userResponse.password;
-    
     res.json(userResponse);
     
   } catch (error) {
