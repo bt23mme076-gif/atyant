@@ -24,7 +24,7 @@ router.get('/mentors', async (req, res) => {
     const mentors = await User.find({ role: 'mentor' })
       .select('username profilePicture bio city expertise skills isOnline lastActive yearsOfExperience price location')
       .lean() // ✅ Returns plain JS objects (30% faster)
-      .sort({ isOnline: -1, lastActive: -1 }); // ✅ Active mentors first
+      .sort({ _id: 1 }); // ✅ Oldest mentor first
 
     // ✅ Update cache
     mentorCache = mentors;
