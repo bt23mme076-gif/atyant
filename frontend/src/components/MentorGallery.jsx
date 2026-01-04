@@ -102,7 +102,7 @@ const MentorGallery = () => {
   }
 
   // Duplicate mentors array for seamless scrolling
-  const scrollingMentors = [...mentors, ...mentors];
+  const scrollingMentors = mentors;
 
   // Faster scroll speed
   const scrollSpeed = 15;

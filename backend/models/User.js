@@ -17,7 +17,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: [] // 🔥 NAYA: ["Foreign Internship 🌍", "IIT Research Intern", "IIM MBA Intern"]
     }],
-    
+    companyDomain: { 
+      type: String, 
+      enum: ['Tech', 'Data Analytics', 'Consulting', 'Product', 'Core Engineering'], 
+      default: null 
+    },
     tier: { 
       type: Number, 
       default: 1 // 1: Beginner, 2: Intermediate, 3: Expert (Authority indicator)

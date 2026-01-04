@@ -43,101 +43,52 @@ router.get('/me', protect, async (req, res) => {
 router.put('/me', protect, async (req, res) => {
   try {
     const userId = req.user.id || req.user.userId;
-    
-    // 🚀 1. Extraction:req.body se naye fields nikalna
-    const { 
-      username, 
-      bio, 
-      city, 
-      interests,
-      education, 
-      expertise,
-      domainExperience,
-      linkedinProfile,
-      skills,
-      // 🔥 NAYE ENGINE FIELDS YAHAN ADD KIYE HAIN
-      primaryDomain,
-      topCompanies,
-      milestones,
-      specialTags 
-    } = req.body;
-    
-    const user = await User.findById(userId);
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    const updateData = req.body;
 
-    // Basic fields update
-    if (username !== undefined) user.username = username;
-    if (bio !== undefined) user.bio = bio;
-    if (city !== undefined) user.city = city;
-    if (linkedinProfile !== undefined) user.linkedinProfile = linkedinProfile;
-    
-    // Arrays update with safety check
-    if (interests !== undefined) user.interests = Array.isArray(interests) ? interests : [];
-    if (expertise !== undefined) user.expertise = Array.isArray(expertise) ? expertise : [];
-    if (domainExperience !== undefined) user.domainExperience = Array.isArray(domainExperience) ? domainExperience : [];
-    if (skills !== undefined) user.skills = Array.isArray(skills) ? skills : [];
-    // If education is provided, map CGPA range string to a number (average or upper value)
-    if (education !== undefined) {
-      user.education = Array.isArray(education)
-        ? education.map(edu => {
-            // If cgpa is a string range (e.g., '9-10'), convert to number (e.g., 9.5)
-            let cgpaValue = edu.cgpa;
-            if (typeof cgpaValue === 'string' && cgpaValue.includes('-')) {
-              const [min, max] = cgpaValue.split('-').map(Number);
-              if (!isNaN(min) && !isNaN(max)) {
-                cgpaValue = (min + max) / 2;
-              }
-            }
-            // If cgpaValue is still an empty string or not a number, set to undefined
-            if (cgpaValue === '' || isNaN(Number(cgpaValue))) {
-              cgpaValue = undefined;
-            }
-            return { ...edu, cgpa: cgpaValue };
-          })
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // 1. Basic Fields update
+    const basicFields = ['username', 'bio', 'city', 'linkedinProfile', 'companyDomain', 'primaryDomain'];
+    basicFields.forEach(field => {
+      if (updateData[field] !== undefined) user[field] = updateData[field];
+    });
+
+    // 🔥 Handle Enums separately to prevent "" (empty string) errors
+if (req.body.companyDomain === "" || req.body.companyDomain === null) {
+  user.companyDomain = undefined; // This allows the 'default: null' to work
+} else if (req.body.companyDomain) {
+  user.companyDomain = req.body.companyDomain;
+}
+
+    // 2. Array Fields update
+    const arrayFields = ['interests', 'expertise', 'domainExperience', 'skills', 'topCompanies', 'milestones', 'specialTags'];
+    arrayFields.forEach(field => {
+      if (updateData[field] !== undefined) {
+        user[field] = Array.isArray(updateData[field]) ? updateData[field] : [];
+      }
+    });
+
+    // 3. Education Logic (Processed once)
+    if (updateData.education !== undefined) {
+      user.education = Array.isArray(updateData.education)
+        ? updateData.education.map(edu => ({
+            institution: edu.institution,
+            degree: edu.degree,
+            field: edu.field,
+            year: edu.year,
+            cgpa: edu.cgpa ? Number(edu.cgpa) : undefined
+          }))
+          .filter(edu => edu.institution && edu.degree)
         : [];
     }
 
-    // 🚀 2. Assignment: Naye Engine Fields ko Save karna (Mentor only)
-    if (user.role === 'mentor') {
-      if (primaryDomain !== undefined) user.primaryDomain = primaryDomain;
-      if (topCompanies !== undefined) {
-        user.topCompanies = Array.isArray(topCompanies) ? topCompanies : [];
-      }
-      if (milestones !== undefined) {
-        user.milestones = Array.isArray(milestones) ? milestones : [];
-      }
-      if (specialTags !== undefined) {
-        user.specialTags = Array.isArray(specialTags) ? specialTags : [];
-      }
-    }
-          if (education !== undefined) {
-            user.education = Array.isArray(education)
-              ? education
-                  .map(edu => {
-                    let cgpaValue = edu.cgpa;
-                    if (typeof cgpaValue === 'string' && cgpaValue.includes('-')) {
-                      const [min, max] = cgpaValue.split('-').map(Number);
-                      if (!isNaN(min) && !isNaN(max)) {
-                        cgpaValue = (min + max) / 2;
-                      }
-                    }
-                    if (cgpaValue === '' || cgpaValue === null || typeof cgpaValue === 'undefined' || isNaN(Number(cgpaValue))) {
-                      cgpaValue = undefined;
-                    }
-                    return { ...edu, cgpa: cgpaValue };
-                  })
-                  // Only keep entries with all required fields present and non-empty
-                  .filter(edu => edu.institution && edu.degree && edu.field && edu.year)
-              : [];
-          }
-    // Prepare response object after save
+    await user.save();
     const userResponse = user.toObject();
     delete userResponse.password;
-    res.json(userResponse);
-    
+
+    res.json({ message: 'Profile updated', user: userResponse });
+
   } catch (error) {
     console.error('❌ Error updating profile:', error);
     res.status(500).json({ message: 'Server Error', error: error.message });

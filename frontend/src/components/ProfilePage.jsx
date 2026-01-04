@@ -19,25 +19,27 @@ const ProfilePage = () => {
     expertise: [],
     domainExperience: [],
     // 🚀 NEW ENGINE FIELDS
-    primaryDomain: '',
+    primaryDomain: null,
     topCompanies: [],
     milestones: [],
-    specialTags: []
+    specialTags: [],
+    companyDomain: null, // <-- add this
   });
 
   // Options for Structured Tags
   const domains = ['placement', 'internship', 'both'];
   const milestoneOptions = ['PPO', 'Off-campus Winner', 'On-campus Placement', 'Remote Internship'];
-
+  const companyDomains = ['Tech', 'Data Analytics', 'Consulting', 'Product', 'Core Engineering'];
   // 📋 Internship & Placement Optimized Categories
   const specialCategoryOptions = [
     'Foreign Internship 🌍', 
     'IIT Research Intern 🎓', 
     'IIM Research Intern 💼', 
     'FAANG Cracked 🚀',
-    'International Job Offer ✈️',
-    'Tier-1 College (IIT/NIT/BITS)',
-    'Masters Abroad 🏛️'
+    'On Campus Internship',
+    'Off Campus Internship',
+    'Remote Internship'
+  
   ];
 
   // Company input state and handlers
@@ -111,10 +113,11 @@ const ProfilePage = () => {
             expertise: data.expertise || [],
             domainExperience: data.domainExperience || [],
             // 🚀 Load new engine fields with fallback to prevent errors
-            primaryDomain: data.primaryDomain || '',
+            primaryDomain: data.primaryDomain || null,
             topCompanies: data.topCompanies || [],
             milestones: data.milestones || [],
-            specialTags: data.specialTags || [] // 🔥 THIS LINE FIXES THE REFRESH ISSUE
+            specialTags: data.specialTags || [], // 🔥 THIS LINE FIXES THE REFRESH ISSUE
+            companyDomain: data.companyDomain || null // <-- add this
           });
           // Store initial data to track changes
           setInitialFormData({
@@ -131,7 +134,8 @@ const ProfilePage = () => {
             primaryDomain: data.primaryDomain || '',
             topCompanies: data.topCompanies || [],
             milestones: data.milestones || [],
-            specialTags: data.specialTags || []
+            specialTags: data.specialTags || [],
+            companyDomain: data.companyDomain || '' // <-- add this
           });
           setImagePreview(data.profilePicture || '');
         } else {
@@ -587,20 +591,17 @@ const ProfilePage = () => {
                   {branches.map(branch => <option key={branch} value={branch}>{branch}</option>)}
                 </select>
                 <div>
-                  <label htmlFor="cgpa">CGPA</label>
-                  <select
-                    id="cgpa"
-                    name="cgpa"
+                  <label>CGPA</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="10"
+                    placeholder="e.g. 9.2"
                     value={edu.cgpa || ''}
                     onChange={e => handleEducationChange(index, 'cgpa', e.target.value)}
-                  >
-                    <option value="">Select CGPA Range</option>
-                    <option value="9-10">9-10</option>
-                    <option value="9-8">9-8</option>
-                    <option value="8-7">8-7</option>
-                    <option value="7-6">7-6</option>
-                    <option value="6-5">6-5</option>
-                  </select>
+                    className="cgpa-input"
+                  />
                 </div>
                 {formData.education.length > 1 && <button type="button" className="remove-btn" onClick={() => removeEducation(index)}>&times;</button>}
               </div>
@@ -626,13 +627,9 @@ const ProfilePage = () => {
 
             {user?.role === 'mentor' && (
               <>
-                <h3>Mentor Details</h3>
-                {/* 🚀 Atyant Engine Optimization Section */}
-                <div className="engine-optimization-section">
-                  <h3 className="section-title">🚀 Atyant Engine Optimization</h3>
-                  <p className="helper-text">Standardize your profile for Placement & Internship matching.</p>
-
-                  <div className="form-group">
+               <div className="mentor-exciting-section"> {/* 🔥 Container ko yahan se shuru kiya */}
+               <h3>Mentor Details (used by our Atyant Engine for accurate routing)</h3>
+               <div className="form-group">
                     <label>Primary Mentorship Focus</label>
                     <select name="primaryDomain" value={formData.primaryDomain} onChange={(e) => setFormData({...formData, primaryDomain: e.target.value})} className="engine-select">
                       <option value="">-- Focus --</option>
@@ -642,6 +639,83 @@ const ProfilePage = () => {
                     </select>
                   </div>
 
+              {/* 4. Companies Expertise */}
+                  <div className="form-group">
+                    <label>Companies Expertise</label>
+                    <div className="chip-input-container">
+                      <div className="chips-wrapper">
+                        {(formData.topCompanies || []).map((company, index) => (
+                          <span key={index} className="chip company-chip">{company} <button type="button" className="chip-remove" onClick={() => removeCompany(index)}>×</button></span>
+                        ))}
+                        <input type="text" value={companyInput} onChange={(e) => setCompanyInput(e.target.value)} onKeyDown={handleCompanyKeyDown} placeholder="Type company name" className="chip-input" />
+                        <button type="button" className="chip-add-btn" onClick={addCompany} disabled={!companyInput.trim()} title="Add company">
+                          <Plus size={16} /> Add
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {/* 1. Company Domain */}
+                  <div className="form-group">
+                    <label>Company Domain</label>
+                    <div className="domain-cards">
+                      {[
+                        { label: 'Tech', value: 'Tech', icon: '💻' },
+                        { label: 'Data Analytics', value: 'Data Analytics', icon: '📊' },
+                        { label: 'Consulting', value: 'Consulting', icon: '🧑‍💼' },
+                        { label: 'Product', value: 'Product', icon: '📦' },
+                        { label: 'Core Engineering', value: 'Core Engineering', icon: '⚙️' }
+                      ].map(domain => (
+                        <button
+                          type="button"
+                          key={domain.value}
+                          className={`domain-card${formData.companyDomain === domain.value ? ' selected' : ''}`}
+                          onClick={() => setFormData({ ...formData, companyDomain: domain.value })}
+                        >
+                          <span className="domain-icon">{domain.icon}</span>
+                          {domain.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 2. Placement Achievements */}
+                  <div className="form-group">
+                    <label>Placement Achievements</label>
+                    <div className="tags-row">
+                      {['On-campus Placement', 'Off-campus', 'PPO'].map(tag => (
+                        <button
+                          type="button"
+                          key={tag}
+                          onClick={() => toggleTag('milestones', tag)}
+                          className={`tag-btn${(formData.milestones || []).includes(tag) ? ' active' : ''}`}
+                        >{tag}</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 3. Internship Achievements */}
+                  <div className="form-group">
+                    <label>Internship Achievements</label>
+                    <div className="tags-row">
+                      {['On Campus Internship',
+                        'Off Campus Internship',
+                        'IIT Research Intern',
+                        'IIM Research Intern',
+                        'Foreign Internship',
+                        'Remote Internship',
+                        'FAANG Cracked 🚀',
+                      ].map(tag => (
+                        <button
+                          type="button"
+                          key={tag}
+                          onClick={() => toggleTag('specialTags', tag)}
+                          className={`tag-btn${(formData.specialTags || []).includes(tag) ? ' active' : ''}`}
+                        >{tag}</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 4. Companies Expertise */}
                   <div className="form-group">
                     <label>Companies Expertise</label>
                     <div className="chip-input-container">
@@ -657,34 +731,17 @@ const ProfilePage = () => {
                     </div>
                   </div>
 
-                  <div className="form-group">
-                    <label>Special Achievement Categories</label>
-                    <div className="tags-grid">
-                      {specialCategoryOptions.map(tag => (
-                        <button type="button" key={tag} onClick={() => toggleTag('specialTags', tag)} className={`tag-btn special ${(formData.specialTags || []).includes(tag) ? 'active' : ''}`}>{tag}</button>
+                  {/* 5. Skills */}
+                  <div className="chip-input-container">
+                    <div className="chips-wrapper">
+                      {formData.expertise.map((skill, index) => (
+                        <span key={index} className="chip">{skill} <button type="button" className="chip-remove" onClick={() => removeExpertise(index)}>&times;</button></span>
                       ))}
+                      <input type="text" value={expertiseInput} onChange={(e) => setExpertiseInput(e.target.value)} onKeyDown={handleExpertiseKeyDown} placeholder="Add skill..." className="chip-input" />
+                      <button type="button" className="chip-add-btn" onClick={addExpertise} disabled={!expertiseInput.trim()} title="Add skill">
+                        <Plus size={16} /> Add
+                      </button>
                     </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Career Milestones</label>
-                    <div className="tags-grid">
-                      {milestoneOptions.map(m => (
-                        <button type="button" key={m} onClick={() => toggleTag('milestones', m)} className={`tag-btn milestone ${(formData.milestones || []).includes(m) ? 'active' : ''}`}>{m}</button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="chip-input-container">
-                  <div className="chips-wrapper">
-                    {formData.expertise.map((skill, index) => (
-                      <span key={index} className="chip">{skill} <button type="button" className="chip-remove" onClick={() => removeExpertise(index)}>&times;</button></span>
-                    ))}
-                    <input type="text" value={expertiseInput} onChange={(e) => setExpertiseInput(e.target.value)} onKeyDown={handleExpertiseKeyDown} placeholder="Add skill..." className="chip-input" />
-                    <button type="button" className="chip-add-btn" onClick={addExpertise} disabled={!expertiseInput.trim()} title="Add skill">
-                      <Plus size={16} /> Add
-                    </button>
                   </div>
                 </div>
               </>
