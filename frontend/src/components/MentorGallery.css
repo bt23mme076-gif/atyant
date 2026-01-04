@@ -10,21 +10,31 @@
 }
 
 .scrolling-wrapper {
-  width: 100vw;      /* Changed from 100% to 100vw for proper horizontal scrolling */
   overflow: hidden;
+  width: 100%;
   position: relative;
-  padding: 20px 0;
-  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
 
 .scrolling-content {
   display: flex;
-  width: max-content;
-  animation: scroll 60s linear infinite;
-  padding: 10px 0;
+  gap: 2rem;
+  animation: scrollMentors 10s linear infinite;
+  will-change: transform;
 }
-.scrolling-content:hover {
-  animation-play-state: paused;
+
+@keyframes scrollMentors {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Ensure .mentor-gallery-card has a fixed width for smooth scrolling */
+.mentor-gallery-card {
+  min-width: 280px;
+  flex: 0 0 auto;
 }
 
 .mentor-gallery-card {

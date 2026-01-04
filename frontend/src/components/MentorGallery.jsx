@@ -31,14 +31,14 @@ const MentorGallery = () => {
       // Fetch from API
       try {
         const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const response = await fetch(`${API_URL}/api/mentor/mentors?limit=8`);
+        const response = await fetch(`${API_URL}/api/mentor/mentors`); // Removed ?limit=8
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         const data = await response.json();
-        const mentorData = Array.isArray(data) ? data.slice(0, 8) : [];
+        const mentorData = Array.isArray(data) ? data : []; // Removed .slice(0, 8)
         setMentors(mentorData);
         
         // Cache the data
