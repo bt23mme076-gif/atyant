@@ -96,7 +96,9 @@ const Navbar = () => {
       ) : (
         <>         
           <Link to="/my-questions" className="nav-link" onClick={linkAction}>My Questions</Link>
-
+          <Link to="/internship-journey" className="nav-link internship-journey-link" onClick={linkAction}>
+            Internship Journey
+          </Link>
           <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
             {!isMobile && <GraduationCap size={18} />}
             Internships

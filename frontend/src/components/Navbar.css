@@ -373,16 +373,16 @@
   margin: 4px 0;
   font-family: var(--brand-font);
   font-size: 1rem;
-  color: var(--nav-text);
-  background: transparent;
+  color: #232942 !important;
+  background: #fff !important;
   border: none;
   border-radius: 10px;
   cursor: pointer;
   transition: background .18s, color .18s, transform .14s;
 }
 .dropdown-item:hover {
-  background: #232942;
-  color: #39e7fa;
+  background: #e0e7ff !important;
+  color: #667eea !important;
   transform: translateX(2px);
 }
 
@@ -452,6 +452,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  color: #fff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.12);
 }
 
 .nav-link.internship-link svg {

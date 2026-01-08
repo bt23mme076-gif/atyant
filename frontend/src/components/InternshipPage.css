@@ -191,9 +191,11 @@
   justify-content: center;
   gap: 10px;
   padding: 14px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 14px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	border-radius: 14px;
 }
+
+/* If you want to override background to white, do it in a separate rule or with !important if needed */
 
 .count-badge {
   background: white;
@@ -217,6 +219,10 @@
   .filters-container {
     display: grid;
     grid-template-columns: 2fr 1.5fr 1fr;
+  .filter-select option {
+    color: #1f2937;
+    background: #fff;
+  }
     grid-template-rows: auto auto;
     gap: 16px;
   }

@@ -17,8 +17,8 @@
 
 .scrolling-content {
   display: flex;
-  gap: 2rem;
-  animation: scrollMentors 10s linear infinite;
+  width: fit-content;
+  animation: scrollMentors 30s linear infinite;
   will-change: transform;
 }
 
@@ -33,16 +33,13 @@
 
 /* Ensure .mentor-gallery-card has a fixed width for smooth scrolling */
 .mentor-gallery-card {
+  width: 280px;
   min-width: 280px;
-  flex: 0 0 auto;
-}
-
-.mentor-gallery-card {
+  margin-right: 2rem;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 15px 25px;
-  width: 280px;
   background: white;
   border-radius: 12px;
   padding: 20px;
@@ -168,10 +165,6 @@
 }
 
 /* Makes the scrolling-content twice as long for seamless repeat */
-@keyframes scroll {
-  0% { transform: translateX(0);}
-  100% { transform: translateX(-50%);}
-}
 /* ========== HIERARCHICAL DROPDOWN ========== */
 .hierarchical-select-wrapper {
   position: relative;

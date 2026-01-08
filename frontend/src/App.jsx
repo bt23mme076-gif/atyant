@@ -1,6 +1,6 @@
 // src/App.jsx
 import React, { useContext, useState, Suspense, lazy } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthContext } from './AuthContext';
 import { Analytics } from '@vercel/analytics/react';
@@ -32,6 +32,7 @@ const InternshipPage = lazy(() => import('./components/InternshipPage'));
 const EngineView = lazy(() => import('./components/EngineView')); // ✅ ATYANT ENGINE
 const MentorDashboard = lazy(() => import('./components/MentorDashboard')); // ✅ MENTOR DASHBOARD
 const MyQuestions = lazy(() => import('./components/MyQuestions')); // ✅ USER QUESTIONS LIST
+const InternshipJourney = lazy(() => import('./components/InternshipJourney'));
 
 function App() {
   const location = useLocation();
@@ -112,6 +113,11 @@ function App() {
               <Route path="/mentor-dashboard" element={
                 <ProtectedRoute>
                   <MentorDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/internship-journey" element={
+                <ProtectedRoute>
+                  <InternshipJourney />
                 </ProtectedRoute>
               } />
             </Routes>

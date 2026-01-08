@@ -170,68 +170,69 @@ const Profile = () => {
   }
 
   return (
-    <div className="profile-container">
-      {/* ...all your existing JSX remains exactly same... */}
-      
-      {/* Your existing profile sections */}
-      <div className="profile-header">
-        {/* ...existing header code... */}
-      </div>
-
-      <div className="profile-content">
-        {/* ...all your existing sections... */        
-        {/* ========== NEW: ADD THIS SECTION ANYWHERE ========== */}
-        <div className="location-section">
-          <h3>
-            <MapPin size={24} />
-            Your Location
-          </h3>
-          
-          {currentLocation?.city && typeof currentLocation.city === 'string' && (
-            <div className="current-location-display">
-              <p>
-                📍 Current Location: <strong>{currentLocation.city}</strong>
-                {currentLocation.state && typeof currentLocation.state === 'string' && `, ${currentLocation.state}`}
-              </p>
-              <p className="location-updated">
-                Last updated: {currentLocation.lastUpdated 
-                  ? new Date(currentLocation.lastUpdated).toLocaleDateString() 
-                  : 'Not set'}
-              </p>
-            </div>
-          )}
-          
-          <p className="location-description">
-            Update your location to be discovered by nearby mentors and students
-          </p>
-          
-          <button 
-            onClick={updateLocation}
-            disabled={updatingLocation}
-            className="update-location-btn"
-          >
-            {updatingLocation ? (
-              <>
-                <RefreshCw size={18} className="spinning" />
-                Updating...
-              </>
-            ) : (
-              <>
-                <MapPin size={18} />
-                Update My Location
-              </>
-            )}
-          </button>
-
-          {locationStatus && (
-            <p className="location-status">{locationStatus}</p>
-          )}
+    <>
+      <div className="profile-container">
+        {/* ...all your existing JSX remains exactly same... */}
+        {/* Your existing profile sections */}
+        <div className="profile-header">
+          {/* ...existing header code... */}
         </div>
-        {/* ========== END NEW SECTION ========== */}
 
-        {/* ...rest of your existing sections... */}
+        <div className="profile-content">
+          {/* ...all your existing sections... */}
+          {/* ========== NEW: ADD THIS SECTION ANYWHERE ========== */}
+          <div className="location-section">
+            <h3>
+              <MapPin size={24} />
+              Your Location
+            </h3>
+
+            {currentLocation?.city && typeof currentLocation.city === 'string' && (
+              <div className="current-location-display">
+                <p>
+                  📍 Current Location: <strong>{currentLocation.city}</strong>
+                  {currentLocation.state && typeof currentLocation.state === 'string' && `, ${currentLocation.state}`}
+                </p>
+                <p className="location-updated">
+                  Last updated: {currentLocation.lastUpdated
+                    ? new Date(currentLocation.lastUpdated).toLocaleDateString()
+                    : 'Not set'}
+                </p>
+              </div>
+            )}
+
+            <p className="location-description">
+              Update your location to be discovered by nearby mentors and students
+            </p>
+
+            <button
+              onClick={updateLocation}
+              disabled={updatingLocation}
+              className="update-location-btn"
+            >
+              {updatingLocation ? (
+                <>
+                  <RefreshCw size={18} className="spinning" />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <MapPin size={18} />
+                  Update My Location
+                </>
+              )}
+            </button>
+
+            {locationStatus && (
+              <p className="location-status">{locationStatus}</p>
+            )}
+          </div>
+          {/* ========== END NEW SECTION ========== */}
+
+          {/* ...rest of your existing sections... */}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

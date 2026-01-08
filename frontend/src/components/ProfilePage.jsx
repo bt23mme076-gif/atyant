@@ -112,12 +112,11 @@ const ProfilePage = () => {
             interests: data.interests || [],
             expertise: data.expertise || [],
             domainExperience: data.domainExperience || [],
-            // 🚀 Load new engine fields with fallback to prevent errors
-            primaryDomain: data.primaryDomain || null,
+            primaryDomain: data.primaryDomain || '',
             topCompanies: data.topCompanies || [],
             milestones: data.milestones || [],
-            specialTags: data.specialTags || [], // 🔥 THIS LINE FIXES THE REFRESH ISSUE
-            companyDomain: data.companyDomain || null // <-- add this
+            specialTags: data.specialTags || [],
+            companyDomain: data.companyDomain || ''
           });
           // Store initial data to track changes
           setInitialFormData({
@@ -135,7 +134,7 @@ const ProfilePage = () => {
             topCompanies: data.topCompanies || [],
             milestones: data.milestones || [],
             specialTags: data.specialTags || [],
-            companyDomain: data.companyDomain || '' // <-- add this
+            companyDomain: data.companyDomain || ''
           });
           setImagePreview(data.profilePicture || '');
         } else {
@@ -163,16 +162,18 @@ const ProfilePage = () => {
           : [...currentArray, value]
       };
     });
-    setHasUnsavedChanges(true);
   };
 
   // Check for unsaved changes when form data changes
   useEffect(() => {
-    if (initialFormData) {
-      const isChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
-      setHasUnsavedChanges(isChanged);
+    // Agar initialFormData abhi tak set nahi hua, ya loading hai, toh check mat karo
+    if (!initialFormData || loading) {
+      setHasUnsavedChanges(false);
+      return;
     }
-  }, [formData, initialFormData]);
+    const isChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    setHasUnsavedChanges(isChanged);
+  }, [formData, initialFormData, loading]);
 
   // Warn user before leaving page with unsaved changes
   useEffect(() => {
@@ -628,20 +629,21 @@ const ProfilePage = () => {
             {user?.role === 'mentor' && (
               <>
                <div className="mentor-exciting-section"> {/* 🔥 Container ko yahan se shuru kiya */}
-               <h3>Mentor Details (used by our Atyant Engine for accurate routing)</h3>
+
+               <h3>Mentor Details <small>(USED BY OUR ATYANT ENGINE FOR ACCURATE ROUTING)</small></h3>
                <div className="form-group">
-                    <label>Primary Mentorship Focus</label>
-                    <select name="primaryDomain" value={formData.primaryDomain} onChange={(e) => setFormData({...formData, primaryDomain: e.target.value})} className="engine-select">
-                      <option value="">-- Focus --</option>
-                      <option value="placement">Placement Focus</option>
-                      <option value="internship">Internship Focus</option>
-                      <option value="both">Both</option>
-                    </select>
-                  </div>
+                 <h3>Primary Mentorship Focus</h3>
+                 <select name="primaryDomain" value={formData.primaryDomain} onChange={(e) => setFormData({...formData, primaryDomain: e.target.value})} className="engine-select">
+                   <option value="">-- Focus --</option>
+                   <option value="placement">Placement Focus</option>
+                   <option value="internship">Internship Focus</option>
+                   <option value="both">Both</option>
+                 </select>
+               </div>
 
               {/* 4. Companies Expertise */}
                   <div className="form-group">
-                    <label>Companies Expertise</label>
+                    <h3>Companies Expertise</h3>
                     <div className="chip-input-container">
                       <div className="chips-wrapper">
                         {(formData.topCompanies || []).map((company, index) => (
@@ -656,7 +658,7 @@ const ProfilePage = () => {
                   </div>
                   {/* 1. Company Domain */}
                   <div className="form-group">
-                    <label>Company Domain</label>
+                    <h3>Company Domain</h3>
                     <div className="domain-cards">
                       {[
                         { label: 'Tech', value: 'Tech', icon: '💻' },
@@ -680,7 +682,7 @@ const ProfilePage = () => {
 
                   {/* 2. Placement Achievements */}
                   <div className="form-group">
-                    <label>Placement Achievements</label>
+                    <h3>Placement Achievements</h3>
                     <div className="tags-row">
                       {['On-campus Placement', 'Off-campus', 'PPO'].map(tag => (
                         <button
@@ -695,7 +697,7 @@ const ProfilePage = () => {
 
                   {/* 3. Internship Achievements */}
                   <div className="form-group">
-                    <label>Internship Achievements</label>
+                    <h3>Internship Achievements</h3>
                     <div className="tags-row">
                       {['On Campus Internship',
                         'Off Campus Internship',
@@ -715,24 +717,9 @@ const ProfilePage = () => {
                     </div>
                   </div>
 
-                  {/* 4. Companies Expertise */}
-                  <div className="form-group">
-                    <label>Companies Expertise</label>
-                    <div className="chip-input-container">
-                      <div className="chips-wrapper">
-                        {(formData.topCompanies || []).map((company, index) => (
-                          <span key={index} className="chip company-chip">{company} <button type="button" className="chip-remove" onClick={() => removeCompany(index)}>×</button></span>
-                        ))}
-                        <input type="text" value={companyInput} onChange={(e) => setCompanyInput(e.target.value)} onKeyDown={handleCompanyKeyDown} placeholder="Type company name" className="chip-input" />
-                        <button type="button" className="chip-add-btn" onClick={addCompany} disabled={!companyInput.trim()} title="Add company">
-                          <Plus size={16} /> Add
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* 5. Skills */}
                   <div className="chip-input-container">
+                    <h3>Skills</h3>
                     <div className="chips-wrapper">
                       {formData.expertise.map((skill, index) => (
                         <span key={index} className="chip">{skill} <button type="button" className="chip-remove" onClick={() => removeExpertise(index)}>&times;</button></span>

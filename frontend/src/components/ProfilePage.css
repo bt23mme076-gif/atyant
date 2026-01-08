@@ -1,21 +1,4 @@
-.cgpa-select {
-  background: linear-gradient(90deg, #97932b 60%, #2563eb22 100%);
-  border: 2px solid var(--primary);
-  color: #fbbf24;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  box-shadow: 0 2px 8px #2563eb22;
-}
-
-label[for="cgpa"] {
-  color: #fbbf24;
-  font-weight: 700;
-  margin-bottom: 4px;
-  display: block;
-  font-size: 0.95rem;
-}
-/* ========== PREMIUM DARK THEME - CLEAN & MODERN ========== */
-.profile-page-layout {
+:root {
   --primary: #3b82f6;
   --primary-dark: #2563eb;
   --primary-light: #dbeafe;
@@ -27,8 +10,6 @@ label[for="cgpa"] {
   --danger: #ef4444;
   --warning: #f59e0b;
   --warning-light: #fef3c7;
-  
-  /* Dark Theme Colors */
   --bg-page: #0f172a;
   --bg-card: #1e293b;
   --bg-card-hover: #334155;
@@ -179,18 +160,33 @@ label[for="cgpa"] {
   gap: 24px;
 }
 
+
+/* ========== UPDATED PROFILE FORM SECTION HEADERS ========== */
 .profile-page-layout .profile-form-container h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--primary);
-  padding-bottom: 10px;
-  border-bottom: 2px solid var(--border-color);
-  margin-bottom: 0;
+  font-size: 1.1rem;           /* Slightly larger */
+  font-weight: 800;            /* Maximum weight for authority */
+  color: #1d4ed8;              /* A deeper, more vibrant blue for better contrast */
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0; /* Cleaner, lighter border line */
+  margin-top: 10px;
+  margin-bottom: 15px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  /* Text Rendering Improvements */
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;      /* Professional spacing */
+  opacity: 1 !important;       /* Force full visibility */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Specific fix for the Atyant Routing text inside the parenthesis */
+.profile-page-layout .profile-form-container h3 span, 
+.profile-page-layout .profile-form-container h3 small {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;             /* Keep the routing info slightly muted but crisp */
+  letter-spacing: 0;
 }
 
 /* ========== FORM INPUTS ========== */
