@@ -18,7 +18,7 @@
 .scrolling-content {
   display: flex;
   width: fit-content;
-  animation: scrollMentors 30s linear infinite;
+  animation: scrollMentors 60s linear infinite;
   will-change: transform;
 }
 
