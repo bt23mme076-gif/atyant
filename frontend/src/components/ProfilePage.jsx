@@ -635,7 +635,7 @@ const ProfilePage = () => {
 
                <h3>Mentor Details <small>(USED BY OUR ATYANT ENGINE FOR ACCURATE ROUTING)</small></h3>
                <div className="form-group">
-                 <h3>Primary Mentorship Focus</h3>
+                 <h3>Primary Mentorship Focus*</h3>
                  <select name="primaryDomain" value={formData.primaryDomain} onChange={(e) => setFormData({...formData, primaryDomain: e.target.value})} className="engine-select">
                    <option value="">-- Focus --</option>
                    <option value="placement">Placement Focus</option>
@@ -646,7 +646,7 @@ const ProfilePage = () => {
 
               {/* 4. Companies Expertise */}
                   <div className="form-group">
-                    <h3>Companies Expertise</h3>
+                    <h3>Companies Expertise*</h3>
                     <div className="chip-input-container">
                       <div className="chips-wrapper">
                         {(formData.topCompanies || []).map((company, index) => (
@@ -727,8 +727,8 @@ const ProfilePage = () => {
                       {formData.expertise.map((skill, index) => (
                         <span key={index} className="chip">{skill} <button type="button" className="chip-remove" onClick={() => removeExpertise(index)}>&times;</button></span>
                       ))}
-                      <input type="text" value={expertiseInput} onChange={(e) => setExpertiseInput(e.target.value)} onKeyDown={handleExpertiseKeyDown} placeholder="Add skill..." className="chip-input" />
-                      <button type="button" className="chip-add-btn" onClick={addExpertise} disabled={!expertiseInput.trim()} title="Add skill">
+                      <input type="text" value={expertiseInput} onChange={(e) => setExpertiseInput(e.target.value)} onKeyDown={handleExpertiseKeyDown} placeholder="Like DSA, MERN, PowerBi, Casestudy..." className="chip-input" />
+                      <button type="button" className="chip-add-btn" onClick={addExpertise} disabled={!expertiseInput.trim()} title="Add skill ">
                         <Plus size={16} /> Add
                       </button>
                     </div>
