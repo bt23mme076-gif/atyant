@@ -426,6 +426,7 @@ const ProfilePage = () => {
     const newEducation = [...formData.education];
     newEducation[index][field] = value;
     setFormData(prev => ({ ...prev, education: newEducation }));
+    setHasUnsavedChanges(true);
   };
 
   const addEducation = () => {
@@ -433,12 +434,14 @@ const ProfilePage = () => {
       ...prev,
       education: [...prev.education, { institution: '', degree: '', field: '', year: '' }]
     }));
+    setHasUnsavedChanges(true);
   };
 
   const removeEducation = (index) => {
     if (formData.education.length > 1) {
       const newEducation = formData.education.filter((_, i) => i !== index);
       setFormData(prev => ({ ...prev, education: newEducation }));
+      setHasUnsavedChanges(true);
     }
   };
 

@@ -60,6 +60,15 @@ if (req.body.companyDomain === "" || req.body.companyDomain === null) {
 } else if (req.body.companyDomain) {
   user.companyDomain = req.body.companyDomain;
 }
+      // 🔥 Handle primaryDomain enum to prevent "" (empty string) errors
+      if (req.body.primaryDomain === "" || req.body.primaryDomain === null) {
+        user.primaryDomain = undefined; // This allows the 'default: null' to work
+      } else if (req.body.primaryDomain) {
+        const allowedDomains = ['placement', 'internship', 'both'];
+        if (allowedDomains.includes(req.body.primaryDomain)) {
+          user.primaryDomain = req.body.primaryDomain;
+        }
+      }
 
     // 2. Array Fields update
     const arrayFields = ['interests', 'expertise', 'domainExperience', 'skills', 'topCompanies', 'milestones', 'specialTags'];
