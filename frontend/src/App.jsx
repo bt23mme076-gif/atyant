@@ -58,7 +58,8 @@ function App() {
               
               {/* ✅ INTERNSHIP PAGE - PUBLIC (but links are protected) */}
               <Route path="/internships" element={<InternshipPage />} />
-
+              <Route path="/internship-journey" element={<InternshipJourney />} />
+              
               {/* ========== PROTECTED ROUTES ========== */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>

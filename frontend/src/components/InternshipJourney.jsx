@@ -20,7 +20,10 @@ const HeroStep = React.memo(({ onNext }) => (
     <div className="badge">Quality-First Protocol</div>
     <h1 className="ultra-title">Internships don't fail because of <span className="gradient-text">effort.</span><br/>They fail because of <span className="gradient-text-red">execution.</span></h1>
     <p className="ultra-subtitle">Professor inboxes are graveyards of generic emails. Atyant is the filter that ensures your profile is respected, not just seen.</p>
-    <button className="glow-button" onClick={onNext}>Start Readiness Scan <Search size={20} /></button>
+    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
+      <button className="glow-button" style={{ background: '#222', color: '#f43f5e', border: '1px solid #f43f5e' }} onClick={() => window.open('https://forms.gle/qzBr4YNpVavv52cB9', '_blank')}>Get Free Resume Review</button>
+      <button className="glow-button" onClick={onNext}>Start Readiness Scan <Search size={20} /></button>
+    </div>
   </motion.div>
 ));
 
