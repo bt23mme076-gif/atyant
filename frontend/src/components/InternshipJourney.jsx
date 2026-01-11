@@ -22,7 +22,10 @@ const HeroStep = React.memo(({ onNext }) => (
     <p className="ultra-subtitle">Professor inboxes are graveyards of generic emails. Atyant is the filter that ensures your profile is respected, not just seen.</p>
     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
       <button className="glow-button" style={{ background: '#222', color: '#f43f5e', border: '1px solid #f43f5e' }} onClick={() => window.open('https://forms.gle/qzBr4YNpVavv52cB9', '_blank')}>Get Free Resume Review</button>
-      <button className="glow-button" onClick={onNext}>Start Readiness Scan <Search size={20} /></button>
+      <button className="glow-button" disabled style={{ opacity: 0.7, cursor: 'not-allowed' }}>
+        <Lock size={18} style={{ marginRight: 8, verticalAlign: 'middle' }} />
+        Start Readiness Scan <Search size={20} />
+      </button>
     </div>
   </motion.div>
 ));
