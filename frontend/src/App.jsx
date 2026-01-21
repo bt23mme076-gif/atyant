@@ -40,19 +40,10 @@ function App() {
   const { user, login } = useContext(AuthContext);
   const [showAIChat, setShowAIChat] = useState(false);
   const [showGoogleModal, setShowGoogleModal] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(true); // default true for SSR safety
   const isChatPage = location.pathname === '/chat';
   const isHomePage = location.pathname === '/';
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '906654136908-h073tkun6s64bitgliluu03nr66bqbne.apps.googleusercontent.com';
-
-  // Detect desktop only on client
-  useEffect(() => {
-    const checkDesktop = () => setIsDesktop(window.innerWidth > 600);
-    checkDesktop();
-    window.addEventListener('resize', checkDesktop);
-    return () => window.removeEventListener('resize', checkDesktop);
-  }, []);
 
   // Show modal on first visit if not logged in and not dismissed
   React.useEffect(() => {
@@ -199,15 +190,13 @@ function App() {
           <AIChat onClose={() => setShowAIChat(false)} />
         </Suspense>
       )}
-      {/* Google Login Modal Integration - Only show on desktop (client-safe) */}
-      {isDesktop && (
-        <GoogleLoginModal
-          isOpen={showGoogleModal && !user}
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleError}
-          onClose={handleModalClose}
-        />
-      )}
+      {/* Google Login Modal Integration */}
+      <GoogleLoginModal
+        isOpen={showGoogleModal && !user}
+        onSuccess={handleGoogleSuccess}
+        onError={handleGoogleError}
+        onClose={handleModalClose}
+      />
     </div>
   );
 }
