@@ -87,7 +87,7 @@ const WhyChooseUs = () => {
         {/* Header */}
         <div className="why-header why-animate">
           <span className="why-badge">💡 The Difference</span>
-          <h2>Why Choose <span className="gradient-text">अत्यAnT</span>?</h2>
+          <h2>Why Choose <span className="gradient-text">Atyant</span>?</h2>
           <p>Not just another platform. A smarter way to get real guidance.</p>
         </div>
 

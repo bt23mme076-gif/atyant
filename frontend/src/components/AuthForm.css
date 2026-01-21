@@ -1,3 +1,57 @@
+.auth-modal-popup {
+  /* ...existing styles... */
+}
+
+@media (max-width: 600px) {
+  .auth-modal-popup {
+    right: 8px;
+    left: 8px;
+    top: 16vw;
+    min-width: unset;
+    width: calc(100vw - 16px);
+    max-width: 98vw;
+    padding: 1.2rem 0.7rem 1rem 0.7rem;
+    border-radius: 10px;
+    font-size: 1rem;
+  }
+}
+/* GoogleLoginModal styles */
+/* GoogleLoginModal Topmate-style */
+.auth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Make modal appear above navbar and fully visible */
+.auth-modal-popup {
+  position: absolute;
+  top: 70px; /* move lower to clear navbar */
+  right: 32px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  min-width: 320px;
+  text-align: left;
+  pointer-events: auto;
+  z-index: 2001;
+}
+
+.auth-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #888;
+  cursor: pointer;
+}
 /* Container */
 .auth-container {
   display: flex;

@@ -130,7 +130,7 @@ const Navbar = () => {
 
   return (
     <header className="navbar">
-      <Link to="/" className="brand">अत्यant</Link>
+      <Link to="/" className="brand">Atyant</Link>
 
       {/* --- Desktop Menu --- */}
       <nav className="navbar-links desktop-only">

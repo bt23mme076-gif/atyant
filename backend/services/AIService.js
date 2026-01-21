@@ -36,7 +36,8 @@ export const getQuestionEmbedding = async (text) => {
 class AIService {
   constructor() {
     this.apiKey = process.env.GEMINI_API_KEY;
-    this.model = 'gemini-1.5-flash'; // Sabse stable aur fast model
+    // Use gemini-pro for v1beta endpoint compatibility (public API key)
+    this.model = 'gemini-pro';
     
     if (!this.apiKey) {
       console.error('❌ GEMINI_API_KEY not found in .env!');
@@ -78,7 +79,9 @@ async refineExperience(rawData) {
     
     RAW DATA: ${JSON.stringify(rawData)}`;
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+    // Use v1beta endpoint for compatibility
+    // Hardcode model name to ensure correct usage
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -126,7 +129,9 @@ async refineExperience(rawData) {
         aiResponse = platformInfo.type === 'faq' ? platformInfo.content.answer : "I can help with that Atyant feature!";
       } else {
         // Gemini API logic
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+        // Use v1beta endpoint for compatibility
+        // Hardcode model name to ensure correct usage
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -135,7 +140,14 @@ async refineExperience(rawData) {
           })
         });
         const data = await response.json();
+        console.log('🔎 Gemini API raw response:', JSON.stringify(data, null, 2));
+        if (data.error) {
+          console.error('❌ Gemini API Error:', data.error);
+        }
         aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "I'm here to help! 😊";
+        if (!aiResponse || aiResponse === "I'm here to help! 😊") {
+          console.warn('⚠️ Gemini API did not return a valid answer. See above for details.');
+        }
       }
 
       conversation.messages.push({ role: 'assistant', content: aiResponse, timestamp: new Date() });

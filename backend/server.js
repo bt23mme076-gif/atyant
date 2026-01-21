@@ -34,7 +34,11 @@ import { moderator } from './utils/ContentModerator.js';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const app = express();
+import path from 'path';
 const PORT = process.env.PORT || 3000;
+
+// Serve uploads directory for audio answers
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // ✅ PERFORMANCE: Enable Gzip Compression (70% size reduction)
 app.use(compression({

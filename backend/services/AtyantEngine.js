@@ -107,10 +107,12 @@ class AtyantEngine {
 
       const sorted = Array.from(uniqueMentorsMap.values()).sort((a, b) => b.finalScore - a.finalScore);
       
-      // 🔥 LOGGING RANKINGS
-      sorted.forEach((m, i) => {
-        console.log(`Rank #${i + 1}: ${m.mentorProfile.username} | Total: ${(m.finalScore * 100).toFixed(2)}% | Logic: [AI Base: ${(m.score*100).toFixed(1)}% | ${m.breakdown}]`);
+      // 🔥 LOGGING TOP 5 RANKINGS (clear summary)
+      console.log('--- TOP 5 MENTOR MATCHES ---');
+      sorted.slice(0, 5).forEach((m, i) => {
+        console.log(`Rank #${i + 1}: ${m.mentorProfile.username} | Total: ${(m.finalScore * 100).toFixed(2)}% | AI Base: ${(m.score*100).toFixed(1)}% | Bonuses: ${m.breakdown}`);
       });
+      console.log('---------------------------');
 
       const best = sorted[0];
       if (best && best.finalScore > CONFIG.INSTANT_THRESHOLD) {

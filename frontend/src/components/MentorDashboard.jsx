@@ -1,5 +1,5 @@
 // src/components/MentorDashboard.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './MentorDashboard.css';
@@ -24,6 +24,30 @@ const MentorDashboard = () => {
     additionalNotes: ''
   });
   const [submitting, setSubmitting] = useState(false);
+  // Audio recording state
+  const [recording, setRecording] = useState(false);
+  const [audioURL, setAudioURL] = useState(null);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const mediaRecorderRef = useRef(null);
+  // Audio recording handlers
+  const handleRecord = async () => {
+    if (!recording) {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new window.MediaRecorder(stream);
+      const chunks = [];
+      mediaRecorderRef.current.ondataavailable = (e) => chunks.push(e.data);
+      mediaRecorderRef.current.onstop = () => {
+        const blob = new Blob(chunks, { type: 'audio/webm' });
+        setAudioBlob(blob);
+        setAudioURL(URL.createObjectURL(blob));
+      };
+      mediaRecorderRef.current.start();
+      setRecording(true);
+    } else {
+      mediaRecorderRef.current.stop();
+      setRecording(false);
+    }
+  };
 
   useEffect(() => {
     if (!user?.token) {
@@ -120,10 +144,9 @@ const MentorDashboard = () => {
 
   const handleSubmitExperience = async (e) => {
     e.preventDefault();
-    
     // 🚀 THE FIX: Agar follow-up hai toh sirf 'situation' validate karein
-    const required = selectedQuestion.isFollowUp 
-      ? ['situation'] 
+    const required = selectedQuestion.isFollowUp
+      ? ['situation']
       : ['situation', 'firstAttempt', 'failures', 'whatWorked', 'actionableSteps', 'timeline', 'differentApproach'];
     for (const field of required) {
       if (!experience[field].trim()) {
@@ -131,40 +154,44 @@ const MentorDashboard = () => {
         return;
       }
     }
-    
     setSubmitting(true);
-    
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      console.log('📤 Submitting experience to:', `${API_URL}/api/engine/mentor/submit-experience`);
-      
-      const response = await fetch(`${API_URL}/api/engine/mentor/submit-experience`, {
+      // Use FormData for audio upload
+      const formData = new FormData();
+      formData.append('questionId', selectedQuestion.id);
+      if (selectedQuestion.mentorExperienceId && selectedQuestion.mentorExperienceId !== '') {
+        formData.append('mentorExperienceId', selectedQuestion.mentorExperienceId);
+      }
+      formData.append('mentorId', user.id);
+      formData.append('answerContent', JSON.stringify(experience));
+      if (audioBlob) {
+        if (audioBlob.size > 0) {
+          formData.append('audio', audioBlob, 'answer.webm');
+        } else {
+          alert('Audio recording failed or is empty. Please re-record.');
+          setSubmitting(false);
+          return;
+        }
+      }
+      const response = await fetch(`${API_URL}/api/ask/mentor/submit-audio-answer`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${user.token}`
         },
-        body: JSON.stringify({
-          questionId: selectedQuestion.id,
-          rawExperience: experience
-        })
+        body: formData
       });
-      
       const data = await response.json();
-      
       if (data.success) {
         alert('✅ Experience submitted successfully! Answer card has been generated.');
         setSelectedQuestion(null);
-        
-        console.log('🔄 Refreshing question lists...');
-        
+        setAudioBlob(null);
+        setAudioURL(null);
         // Refresh both lists with a small delay to allow backend processing
         setTimeout(() => {
           fetchPendingQuestions();
           fetchAnsweredQuestions();
         }, 500);
-        
-        // Switch to answered tab to see result
         setTimeout(() => {
           setActiveTab('answered');
         }, 600);
@@ -202,6 +229,16 @@ const MentorDashboard = () => {
             </div>
           </div>
           <form className="experience-form" onSubmit={handleSubmitExperience}>
+            {/* Audio recording section */}
+            <div className="form-group mentor-audio-section">
+              <label className="mentor-audio-label">Mentor Voice Message <span className="mentor-audio-optional">(optional: Anything you want to say)</span></label>
+              <button type="button" className="mentor-audio-btn" onClick={handleRecord}>
+                {recording ? '⏹️ Stop Recording' : '🎤 Record Audio'}
+              </button>
+              {audioURL && (
+                <audio controls src={audioURL} className="mentor-audio-preview" />
+              )}
+            </div>
             {selectedQuestion.isFollowUp ? (
               /* 🟢 SIMPLE VIEW: Only for Follow-ups */
               <div className="form-group simple-reply-mode">

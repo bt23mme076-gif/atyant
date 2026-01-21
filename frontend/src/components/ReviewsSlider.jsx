@@ -170,7 +170,7 @@ export default function ReviewsSlider() {
         </div>
         
         <h2 className="review-animate">
-          What Students Say About <span className="gradient-text">अत्यAnT</span>
+          What Students Say About <span className="gradient-text">Atyant</span>
         </h2>
         <p className="reviews-subtitle review-animate">
           Real experiences. Real guidance. Real results.

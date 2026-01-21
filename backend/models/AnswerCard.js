@@ -12,7 +12,7 @@ const answerCardSchema = new mongoose.Schema({
   mentorExperienceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'MentorExperience',
-    required: true
+    required: false
   },
   
   // Mentor who provided the experience (hidden from user)
@@ -46,6 +46,16 @@ const answerCardSchema = new mongoose.Schema({
       differentApproach: String,
       additionalNotes: String
     }, { _id: false })
+  },
+
+  // Mentor audio answer (optional)
+  audioUrl: {
+    type: String,
+    default: null
+  },
+  transcript: {
+    type: String,
+    default: null
   },
   
   // Trust message

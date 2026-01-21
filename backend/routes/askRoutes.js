@@ -1,10 +1,78 @@
 // backend/routes/askRoutes.js
 import express from 'express';
+import multer from 'multer';
 import User from '../models/User.js';
 import { extractKeywords } from '../utils/keywordExtractor.js';
 import protect from '../middleware/authMiddleware.js';
+import AnswerCard from '../models/AnswerCard.js';
+
+import path from 'path';
+import fs from 'fs';
+import { uploadAudioToCloudinary } from '../utils/cloudinaryUpload.js';
 
 const router = express.Router();
+const upload = multer({ dest: 'uploads/' });
+
+// Dummy speech-to-text (replace with real service if needed)
+async function dummySpeechToText(audioPath) {
+  // In production, integrate Google Speech-to-Text or similar
+  return 'Transcript not implemented (add real speech-to-text integration)';
+}
+
+// Mentor submits answer with optional audio
+router.post('/mentor/submit-audio-answer', protect, upload.single('audio'), async (req, res) => {
+  try {
+    const { questionId, mentorExperienceId, mentorId, answerContent } = req.body;
+    let audioUrl = null;
+    let transcript = null;
+    if (req.file) {
+      // Upload audio file to Cloudinary
+      audioUrl = await uploadAudioToCloudinary(req.file.path, 'mentor-voice-answers');
+      // Log file details for debugging
+      console.log('Audio file uploaded to Cloudinary:', {
+        cloudinaryUrl: audioUrl,
+        size: req.file.size,
+        mimetype: req.file.mimetype,
+        originalname: req.file.originalname
+      });
+      // Optionally run speech-to-text (if you want to use the Cloudinary URL, pass it here)
+      transcript = await dummySpeechToText(req.file.path);
+    }
+    // Parse answerContent if sent as JSON string
+    let parsedContent = answerContent;
+    if (typeof answerContent === 'string') {
+      try { parsedContent = JSON.parse(answerContent); } catch {}
+    }
+    // Ensure actionableSteps is a string if mentor submits a single text field
+    if (parsedContent && typeof parsedContent === 'object' && parsedContent.actionableSteps) {
+      if (Array.isArray(parsedContent.actionableSteps) && parsedContent.actionableSteps.length === 1 && typeof parsedContent.actionableSteps[0] === 'string') {
+        parsedContent.actionableSteps = parsedContent.actionableSteps[0];
+      }
+    }
+    // Prepare AnswerCard data, skip mentorExperienceId if empty
+    const answerCardData = {
+      questionId,
+      mentorId,
+      answerContent: parsedContent,
+      audioUrl,
+      transcript
+    };
+    if (mentorExperienceId && mentorExperienceId !== '') {
+      answerCardData.mentorExperienceId = mentorExperienceId;
+    }
+    const answerCard = await AnswerCard.create(answerCardData);
+    // Update the Question with answerCardId and status
+    await import('../models/Question.js').then(async ({ default: Question }) => {
+      await Question.findByIdAndUpdate(questionId, {
+        answerCardId: answerCard._id,
+        status: 'delivered'
+      });
+    });
+    res.json({ success: true, answerCard });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 // ✅ IMPROVED: Better keyword extraction for search
 function extractBetterKeywords(text) {

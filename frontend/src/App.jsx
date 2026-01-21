@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useContext, useState, Suspense, lazy } from 'react';
+import React, { useContext, useState, Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthContext } from './AuthContext';
@@ -7,6 +7,7 @@ import { Analytics } from '@vercel/analytics/react';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Bot } from 'lucide-react';
 import './components/FloatingAIButton.css';
+import GoogleLoginModal from './components/GoogleLoginModal';
 
 // ✅ KEEP THESE (Need immediately)
 import Navbar from './components/Navbar';
@@ -36,10 +37,55 @@ const InternshipJourney = lazy(() => import('./components/InternshipJourney'));
 
 function App() {
   const location = useLocation();
-  const { user } = useContext(AuthContext);
+  const { user, login } = useContext(AuthContext);
   const [showAIChat, setShowAIChat] = useState(false);
+  const [showGoogleModal, setShowGoogleModal] = useState(false);
   const isChatPage = location.pathname === '/chat';
   const isHomePage = location.pathname === '/';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '906654136908-h073tkun6s64bitgliluu03nr66bqbne.apps.googleusercontent.com';
+
+  // Show modal on first visit if not logged in and not dismissed
+  React.useEffect(() => {
+    // Debug: Log modal logic
+    console.log('Auth modal check:', { user, dismissed: localStorage.getItem('atyant_google_modal_dismissed') });
+    if (!user && !localStorage.getItem('atyant_google_modal_dismissed')) {
+      setShowGoogleModal(true);
+    }
+  }, [user]);
+
+  // Google login handler (used by both modal and button)
+  const handleGoogleSuccess = (credentialResponse) => {
+    if (!credentialResponse || !credentialResponse.credential) return;
+    fetch(`${API_URL}/api/auth/google-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: credentialResponse.credential }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.token) {
+          login(data.token);
+          setShowGoogleModal(false);
+          localStorage.setItem('atyant_google_modal_dismissed', 'true');
+        } else if (data.message && data.message.toLowerCase().includes('signup')) {
+          // Redirect to signup page if signup required
+          window.location.href = '/signup';
+        } else {
+          // Show error
+          alert(data.message || 'Google login failed.');
+        }
+      });
+  };
+
+  const handleGoogleError = () => {
+    // Optionally show a toast or error message
+  };
+
+  const handleModalClose = () => {
+    setShowGoogleModal(false);
+    localStorage.setItem('atyant_google_modal_dismissed', 'true');
+  };
 
   return (
     <div className={isChatPage && user ? 'App chat-active' : 'App'}>
@@ -144,6 +190,13 @@ function App() {
           <AIChat onClose={() => setShowAIChat(false)} />
         </Suspense>
       )}
+      {/* Google Login Modal Integration */}
+      <GoogleLoginModal
+        isOpen={showGoogleModal && !user}
+        onSuccess={handleGoogleSuccess}
+        onError={handleGoogleError}
+        onClose={handleModalClose}
+      />
     </div>
   );
 }

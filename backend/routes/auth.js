@@ -136,15 +136,30 @@ router.post('/google-login', async (req, res) => {
     let user = await User.findOne({ email });
 
     if (!user) {
-      // ✅ OPTIMIZED: Reduced bcrypt cost from 10 to 8
+      // Generate a unique, sanitized username
+      let baseUsername = name ? name.replace(/[^a-zA-Z0-9]/g, '').toLowerCase() : 'user';
+      let username = baseUsername;
+      let tries = 0;
+      while (await User.findOne({ username })) {
+        username = `${baseUsername}${Math.floor(Math.random() * 10000)}`;
+        if (++tries > 10) {
+          username = `${baseUsername}${Date.now()}`;
+          break;
+        }
+      }
       user = new User({
-        username: name,
+        username,
         email,
         password: await bcrypt.hash(sub + email, 8),
         role: 'user',
         profilePicture: picture || null,
+        // Do NOT set location unless valid GeoJSON
       });
-      await user.save();
+      try {
+        await user.save();
+      } catch (err) {
+        return res.status(400).json({ message: 'Signup required. Please sign up first.' });
+      }
     } else if (!user.profilePicture && picture) {
       user.profilePicture = picture;
       await user.save();

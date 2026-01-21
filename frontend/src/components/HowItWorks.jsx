@@ -33,7 +33,7 @@ const HowItWorks = () => {
         {/* Header */}
         <div className="flow-header animate-item">
           <span className="flow-badge">✨ The Magic Behind</span>
-          <h2>How <span className="gradient-text">अत्यAnT</span> Works</h2>
+          <h2>How <span className="gradient-text">Atyant</span> Works</h2>
           <p>From your question to personalized guidance — powered by AI + real experience</p>
         </div>
 

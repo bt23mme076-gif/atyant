@@ -1,3 +1,56 @@
+/* 🎤 Mentor Audio Section */
+.mentor-audio-answer {
+  background: #f5f3ff;
+  border: 1px solid #ede9fe;
+  border-radius: 18px;
+  padding: 24px 28px 18px 28px;
+  margin: 0 30px 28px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.07);
+  position: relative;
+}
+.mentor-audio-label-row-modern {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #4f46e5;
+}
+.mentor-audio-mic {
+  font-size: 1.5rem;
+  color: #a78bfa;
+  display: flex;
+  align-items: center;
+}
+.mentor-audio-label-modern {
+  font-size: 1.08rem;
+  color: #4f46e5;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+.mentor-audio-bar-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  background: #ede9fe;
+  border-radius: 12px;
+  padding: 18px 0 10px 0;
+  margin-bottom: 2px;
+}
+.mentor-audio-bar {
+  width: 90%;
+  max-width: 420px;
+  min-width: 180px;
+  height: 38px;
+  background: #f5f3ff;
+  border-radius: 8px;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.07);
+}
 /* ============================================
    Atyant Branded Answer Card - Document Style
    ============================================ */

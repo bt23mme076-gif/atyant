@@ -1,7 +1,41 @@
+// TranscriptToggle component (show only if real transcript exists)
+function TranscriptToggle({ transcript }) {
+  const [show, setShow] = useState(false);
+  if (!transcript || transcript === 'Transcript not implemented (add real speech-to-text integration)') {
+    return null;
+  }
+  return (
+    <div style={{ marginTop: 8, width: '100%' }}>
+      <button
+        style={{
+          background: '#ede9fe',
+          color: '#4f46e5',
+          border: 'none',
+          borderRadius: 8,
+          padding: '6px 18px',
+          fontWeight: 600,
+          cursor: 'pointer',
+          marginBottom: 6
+        }}
+        onClick={() => setShow((s) => !s)}
+      >
+        {show ? 'Hide Transcript' : 'Show Transcript'}
+      </button>
+      {show && (
+        <div style={{ background: '#f7f7f7', padding: 8, borderRadius: 4, marginTop: 4 }}>
+          {transcript}
+        </div>
+      )}
+    </div>
+  );
+}
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './AnswerCard.css';
+
+
 
 const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
   const { user } = useAuth();
@@ -14,7 +48,37 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
   const [loadingMentor, setLoadingMentor] = useState(!answerCard.mentor);
 
   // 🚀 Step 1: Main Answer Content (Full Detail)
-  const content = answerCard.answerContent || answerCard.content || {};
+  let content = answerCard.answerContent || answerCard.content || {};
+
+  // Robust: Auto-split actionableSteps if it's a string or an array with a single string
+  let stepsToSplit = null;
+  if (content.actionableSteps && typeof content.actionableSteps === 'string') {
+    stepsToSplit = content.actionableSteps;
+  } else if (Array.isArray(content.actionableSteps) && content.actionableSteps.length === 1 && typeof content.actionableSteps[0] === 'string') {
+    stepsToSplit = content.actionableSteps[0];
+  }
+  if (stepsToSplit) {
+    // Match 'stepX-' (or similar) and capture everything until the next 'stepX-' or end of string
+    const stepRegex = /(step\s*\d+[a-zA-Z]*\s*[:.\-–_])([^]*?)(?=step\s*\d+[a-zA-Z]*\s*[:.\-–_]|$)/gi;
+    const stepMatches = [...stepsToSplit.matchAll(stepRegex)];
+    if (stepMatches.length > 0) {
+      content = {
+        ...content,
+        actionableSteps: stepMatches.map((m, idx) => ({
+          step: `Step ${idx + 1}`,
+          description: m[2].trim()
+        }))
+      };
+    } else {
+      // fallback: treat as single step
+      content = {
+        ...content,
+        actionableSteps: [
+          { step: 'Step 1', description: stepsToSplit }
+        ]
+      };
+    }
+  }
 
   useEffect(() => {
     const fetchMentorData = async () => {
@@ -85,6 +149,12 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
           </div>
         </div>
       )}
+
+
+
+
+
+
 
       <div className="answer-body-main">
         {/* 📜 SECTION 1: THE BACKSTORY */}
@@ -199,6 +269,35 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* =============================
+          🎤 Mentor Audio Answer (BOTTOM)
+          ============================= */}
+      {(answerCard.audioUrl || answerCard.transcript) && (
+        <div className="mentor-audio-answer">
+          {answerCard.audioUrl && (
+            <>
+              <div className="mentor-audio-label-row-modern">
+                <span className="mentor-audio-mic">🎤</span>
+                <span className="mentor-audio-label-modern">Mentor's Voice Answer</span>
+              </div>
+              <div className="mentor-audio-bar-wrap">
+                <audio
+                  controls
+                  src={
+                    answerCard.audioUrl.startsWith('http')
+                      ? answerCard.audioUrl
+                      : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${answerCard.audioUrl}`
+                  }
+                  className="mentor-audio-bar"
+                />
+              </div>
+            </>
+          )}
+          {/* Show transcript toggle only if real transcript exists */}
+          <TranscriptToggle transcript={answerCard.transcript} />
         </div>
       )}
 
