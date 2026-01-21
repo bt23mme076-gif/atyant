@@ -190,13 +190,15 @@ function App() {
           <AIChat onClose={() => setShowAIChat(false)} />
         </Suspense>
       )}
-      {/* Google Login Modal Integration */}
-      <GoogleLoginModal
-        isOpen={showGoogleModal && !user}
-        onSuccess={handleGoogleSuccess}
-        onError={handleGoogleError}
-        onClose={handleModalClose}
-      />
+      {/* Google Login Modal Integration - Only show on desktop */}
+      {typeof window !== 'undefined' && window.innerWidth > 600 && (
+        <GoogleLoginModal
+          isOpen={showGoogleModal && !user}
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+          onClose={handleModalClose}
+        />
+      )}
     </div>
   );
 }

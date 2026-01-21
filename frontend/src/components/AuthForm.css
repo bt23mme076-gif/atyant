@@ -54,23 +54,10 @@
 }
 /* Container */
 .auth-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 50px 20px;
-  min-height: 100vh;
-  background: radial-gradient(1200px 800px at 10% 10%, #eef2ff 0%, #f3f4f6 35%, #eceff4 100%), linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
-  position: relative;
-  overflow: hidden;
-}
-.auth-container::before,
-.auth-container::after {
-  content: '';
-  position: absolute;
-  width: 480px;
-  height: 480px;
-  border-radius: 50%;
-  filter: blur(70px);
+  .auth-modal-popup,
+  .auth-modal-overlay {
+    display: none !important;
+  }
   opacity: 0.35;
   z-index: 0;
 }
@@ -98,41 +85,54 @@
 
 /* Header */
 .auth-form h2 {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 800;
-  margin-bottom: 22px;
-  color: #0f172a;
-  letter-spacing: -0.02em;
-}
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.18); /* subtle dark overlay for focus */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  z-index: 9999;
 
 /* Form groups */
 .form-group { width: 100%; margin-bottom: 16px; position: relative; }
-.form-group label {
-  display: inline-block;
-  margin-bottom: 6px;
-  font-size: 0.92rem;
-  color: #374151;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-/* Inputs */
-.auth-form input[type="text"],
+  position: relative;
+  top: unset;
+  right: unset;
+  left: unset;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  min-width: 320px;
+  max-width: 95vw;
+  text-align: left;
+  pointer-events: auto;
+  z-index: 10001;
 .auth-form input[type="email"],
 .auth-form input[type="password"] {
   width: 100%;
-  min-height: 44px;
-  padding: 14px 14px;
-  border: 1px solid #cfd6e0;
-  border-radius: 10px;
-  font-size: 0.98rem;
-  color: #111827;
-  background: #ffffff;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.08s ease;
-  outline: none;
-  box-sizing: border-box;
-}
+  .auth-modal-popup {
+    min-width: unset;
+    width: 100vw;
+    max-width: 98vw;
+    padding: 1.2rem 0.7rem 1rem 0.7rem;
+    border-radius: 10px;
+    font-size: 1rem;
+    margin: 0 auto;
+    left: unset;
+    right: unset;
+    top: unset;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  }
+  .auth-modal-overlay {
+    align-items: flex-start;
+    padding-top: 18vw;
+  }
 .auth-form input::placeholder { color: #6b7280; }
 .auth-form input:focus {
   border-color: #4f46e5;
