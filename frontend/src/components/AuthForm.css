@@ -1,3 +1,9 @@
+/* Hide GoogleLoginModal on mobile devices */
+@media (max-width: 600px) {
+  .auth-modal-overlay {
+    display: none !important;
+  }
+}
 .auth-modal-popup {
   /* ...existing styles... */
 }
