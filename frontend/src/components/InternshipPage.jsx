@@ -439,8 +439,8 @@ Resume Link: [Resume Link]
             onChange={e => setCategory(e.target.value)}
             className="filter-dropdown"
           > 
-            <option value="IIM">IIM</option>
             <option value="IIT">IIT</option>
+            <option value="IIM">IIM</option>
           </select>
           <label htmlFor="college-select">College: </label>
           <select
