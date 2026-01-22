@@ -299,6 +299,10 @@ const InternshipJourney = () => {
 
   return (
     <div className="internship-journey-root">
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', margin: '18px 0 0 0' }}>
+        <button className="glow-button" onClick={() => window.open('/iit-links', '_blank')}>IIT Links</button>
+        <button className="glow-button" onClick={() => window.open('/iim-links', '_blank')}>IIM Links</button>
+      </div>
       <div className="atyant-ultra-portal">
         <aside className="progress-sidebar">
           <div className="sidebar-header"><Activity size={20} className="text-blue" /> Protocol Tracking</div>

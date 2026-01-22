@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { useEffect as useEffectReact, useState as useStateReact } from 'react';
 import { Download, Mail, ExternalLink, Search, Filter, Building2, GraduationCap, ChevronLeft, ChevronRight, Quote, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
@@ -83,9 +84,7 @@ Subject: Request for Summer/Winter Internship Opportunity in [Professor's Domain
 Respected Prof. [Name],
 
 I hope you are doing well. I am [Your Name], a 2nd yr B.Tech MME student.
-
 I am writing to express my interest in a Summer/Winter Research Internship (May–July 2026) in [Professor's Domain]. I have explored your work on [2–3 specific topics], and I find your perspective on [one concept] particularly insightful. I would be grateful for the opportunity to learn from your approach and contribute to your research.
-
 Through [Your Club / 180 Degrees Consulting], I have gained experience in organizational analysis, behavioural insights, structured problem-solving, and data-driven decision-making. I also use analytical tools like Python and Power BI to support research-oriented tasks.
 
 My resume is attached here: [Drive Link]
@@ -108,9 +107,7 @@ Subject: Inquiry Regarding Summer Research Internship (June–July 2026)
 Respected Prof. [Name],
 
 I hope you are doing well. I am [Your Name], a 2nd yr B.Tech MME student.
-
 I am writing to express my interest in a Summer Research Internship (June–July 2026) under your guidance. I have explored your research in [Professor's Domain], especially [1–2 specific topics], and I am fascinated by the scientific depth and experimental approaches involved. I am eager to gain hands-on research exposure in your group.
-
 I have been strengthening my fundamentals in [thermo/transport/materials/data analysis/modelling etc.], and I am motivated to contribute to meaningful research in your lab.
 
 My resume is attached here: [Drive Link]
@@ -132,9 +129,7 @@ Subject: Research Internship Inquiry for Summer 2025
 Respected Prof. Agarwal,
 
 I hope you are doing well. I am Aman, a 2nd yr B.Tech Metallurgical and Materials Engineering student at Visvesvaraya National Institute of Technology (VNIT), Nagpur.
-
 I am writing to express my interest in a Summer Research Internship (June–July 2025) under your guidance. I am deeply interested in your research on International Business Dispute Resolution and Arbitration, and your work in International Commercial Arbitration and Corporate Governance particularly resonates with me. I would be grateful for the opportunity to explore this field further under your mentorship.
-
 I have experience in research, data analysis (SQL, Power BI, Python), and consulting, and I am currently an Associate at 180 Degrees Consulting VNIT, where I have worked on projects involving business strategy, organizational assessment, and market research. I believe this experience aligns well with the structured and analytical approach needed in your research area.
 
 My resume is attached for your reference. I would appreciate the opportunity to discuss how I can contribute to your ongoing work.
@@ -158,7 +153,6 @@ Subject: Inquiry Regarding Summer Research Opportunity (June–July 2025)
 Respected Prof. Tanushree H. Choudhury,
 
 I hope you are doing well. I am Ansh, a 2nd yr B.Tech Chemical Engineering student at Visvesvaraya National Institute of Technology (VNIT), Nagpur. I am writing to express my interest in a Summer Research Internship (June–July 2025) under your guidance.
-
 I am particularly interested in your research on synthesizing oxide nanostructures through solution-based techniques, especially the development of tailored morphologies with enhanced thermal stability. The science behind these materials and their tunable properties fascinates me, and I am eager to gain hands-on experience in this field.
 
 My resume is attached for your reference. I would be grateful for any opportunity to contribute to your ongoing research activities.
@@ -191,7 +185,7 @@ Resume Link: [Resume Link]
       branch: "Metallurgical Engineering",
       internAt: "IIT Delhi - Materials Science Lab",
       gender: "male",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Aryan&gender=male",
+      image: "https://res.cloudinary.com/dny6dtmox/image/upload/v1769103408/Screenshot_2026-01-22_230637_fzbexi.png",
       review: "Cold emailing worked like magic! I sent 60 emails and got 4 positive responses. The key is personalization - mention their recent papers and explain why you're genuinely interested.",
       tips: "Start 4 months before summer. Research the professor's work deeply. Your email should show you've done homework, not just copy-paste template."
     },
@@ -201,7 +195,7 @@ Resume Link: [Resume Link]
       branch: "Civil Engineering",
       internAt: "IIT Kanpur - Structural Engineering",
       gender: "male",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Nitin&gender=male",
+      image: "https://res.cloudinary.com/dny6dtmox/image/upload/v1769103294/Screenshot_2026-01-22_230421_rz9gjl.png",
       review: "Being from NIT, I was nervous about reaching IIT professors. But professors care about passion, not college name. I got internship at IIT Kanpur by showing my genuine interest in earthquake-resistant structures.",
       tips: "Don't hesitate because of your college tag. Show your projects, skills, and enthusiasm. Quality of email matters more than sender's college."
     },
@@ -211,7 +205,7 @@ Resume Link: [Resume Link]
       branch: "Chemical Engineering",
       internAt: "IIM Bangalore - Operations Research",
       gender: "male",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Hemant&gender=male",
+      image: "https://res.cloudinary.com/dny6dtmox/image/upload/v1769103060/Screenshot_2026-01-22_230043_sgbpwe.png",
       review: "Got IIM-B internship from a tier-2 college! The trick? I sent a 1-page project proposal along with my email showing how I can contribute to their ongoing research on supply chain optimization.",
       tips: "For IIM internships, highlight analytical skills, data projects, and business acumen. Attach a crisp project proposal - shows initiative and seriousness."
     },
@@ -221,7 +215,7 @@ Resume Link: [Resume Link]
       branch: "Biotechnology",
       internAt: "IIT Hyderabad - Biotech Lab",
       gender: "male",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Shubham&gender=male",
+      image: "https://res.cloudinary.com/dny6dtmox/image/upload/v1769102541/Screenshot_2026-01-22_225213_tjnjvr.png",
       review: "Even from IIT, getting internship isn't automatic. I personalized each email, mentioned specific research papers, and followed up politely after 10 days. Persistence pays off!",
       tips: "Send follow-up emails professionally. Something like: 'Hope you received my previous email. I'm still very interested in contributing to your lab.' Keep it short and respectful."
     },
@@ -231,7 +225,7 @@ Resume Link: [Resume Link]
       branch: "Environmental Engineering",
       internAt: "IIT Bombay - Climate Change Research",
       gender: "female",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Prachi&gender=female",
+      image: "https://res.cloudinary.com/dny6dtmox/image/upload/v1769102308/Screenshot_2026-01-22_224817_osm9ee.png",
       review: "As a girl from private college, I was doubtful. But IIT-B prof loved my passion for climate research! Gender and college don't matter - your interest and skills do. Got internship in first attempt!",
       tips: "Don't underestimate yourself. Highlight relevant coursework, online certifications, and personal projects. Professors value dedication over pedigree."
     },
@@ -241,7 +235,7 @@ Resume Link: [Resume Link]
       branch: "Industrial Engineering",
       internAt: "IIM Ahmedabad - Strategy Consulting",
       gender: "female",
-      image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Roshni&gender=female",
+      image: "https://res.cloudinary.com/dny6dtmox/image/upload/v1769103152/Screenshot_2026-01-22_225454_diggrn.png",
       review: "Cracked IIM-A internship by showing my work with college consulting club. They appreciated practical experience. Your extracurriculars matter - clubs, competitions, case studies - mention them all!",
       tips: "For management internships, showcase leadership roles, case competitions, and analytical projects. IIMs look for well-rounded candidates, not just academics."
     }
@@ -288,201 +282,95 @@ Resume Link: [Resume Link]
     );
   };
 
-  // ========== IIT & IIM FACULTY DATA =========
-  const institutions = {
-    'IIT Bombay': {
-      url: 'https://www.scribd.com/document/345976450/IIT-Bombay-Faculties-List',
-      departments: {
-        'Metallurgical Engineering': 'https://www.iitb.ac.in/mems/en/people/faculty',
-        'Chemical Engineering': 'https://www.che.iitb.ac.in/faculty-directory',
-        'Civil Engineering': 'https://www.civil.iitb.ac.in/faculty',
-        'Aerospace Engineering': 'https://www.aero.iitb.ac.in/home/people/faculty',
-        'Environmental Science': 'https://www.esed.iitb.ac.in/faculty-directory',
-        'Energy Science': 'https://www.ese.iitb.ac.in/faculty',
-      }
-    },
-    'IIT Delhi': {
-      url: 'https://home.iitd.ac.in/faculty.php',
-      departments: {
-        'Textile Technology': 'https://textile.iitd.ac.in/faculty',
-        'Chemical Engineering': 'https://chemistry.iitd.ac.in/faculty',
-        'Civil Engineering': 'https://civil.iitd.ac.in/index.php?lmenuid=faculty',
-        'Materials Science': 'https://mse.iitd.ac.in/faculty',
-        'Applied Mechanics': 'https://am.iitd.ac.in/faculty',
-        'Biotechnology': 'https://beb.iitd.ac.in/faculty.html'
-      }
-    },
-    'IIT Madras': {
-      url: 'https://www.iitm.ac.in/faculty',
-      departments: {
-        'Engineering Design': 'https://www.iitm.ac.in/faculty',
-        'Chemical Engineering': 'https://www.iitm.ac.in/faculty',
-        'Civil Engineering': 'https://www.iitm.ac.in/faculty',
-        'Materials Science': 'https://www.iitm.ac.in/faculty',
-        'Ocean Engineering': 'https://www.iitm.ac.in/faculty',
-        'Biotechnology': 'https://www.iitm.ac.in/faculty'
-      }
-    },
-    'IIT Kanpur': {
-      url: 'https://www.iitk.ac.in/dofa/current-faculty',
-      departments: {
-        'Materials Science': 'https://www.iitk.ac.in/mse/faculty',
-        'Chemical Engineering': 'https://www.iitk.ac.in/che/faculty',
-        'Civil Engineering': 'https://www.iitk.ac.in/ce/faculty',
-        'Industrial Engineering': 'https://www.iitk.ac.in/ime/faculty',
-        'Aerospace Engineering': 'https://www.iitk.ac.in/aero/faculty',
-        'Biological Sciences': 'https://www.iitk.ac.in/bsbe/faculty',
-      }
-    },
-    'IIT Kharagpur': {
-      url: 'https://www.iitkgp.ac.in/faclistbydepartment',
-      departments: {
-        'Metallurgical Engineering': 'https://www.iitkgp.ac.in/department/MT',
-        'Mining Engineering': 'https://iitkgp.irins.org/faculty/index/Department+of+Mining+Engineering',
-        'Chemical Engineering': 'https://www.iitkgp.ac.in/department/CH/faculty/ch-bhaskar',
-        'Civil Engineering': 'https://www.iitkgp.ac.in/department/CE/faculty/ce-lsr',
-        'Agricultural Engineering': 'https://www.iitkgp.ac.in/department/AG/faculty',
-        'Biotechnology': 'https://www.iitkgp.ac.in/department/BT/faculty/bt-amitk',
-      }
-    },
-    'IIT Roorkee': {
-      url: 'https://iitr.ac.in/Administration/List%20of%20Faculty.html',
-      departments: {
-        'Metallurgical Engineering': 'https://iitr.ac.in/Departments/Metallurgical%20and%20Materials%20Engineering%20Department/People/Faculty/index.html',
-        'Chemical Engineering': 'https://iitr.ac.in/Departments/Chemical%20Engineering%20Department/People/Faculty/index.html',
-        'Civil Engineering': 'https://civil.iitr.ac.in/faculty.aspx',
-        'Bioscience and Bio Eng': 'https://iitr.ac.in/Departments/Biosciences%20and%20Bioengineering%20Department/People/Faculty/index.html',
-        'Architecture': 'https://iitr.ac.in/Departments/Architecture%20and%20Planning%20Department/People/Faculty/index.html',
-        'Earth Sciences': 'https://iitr.ac.in/Departments/Earth%20Sciences%20Department/People/Faculty/index.html',
-      }
-    },
-    'IIT Guwahati': {
-      url: 'https://www.iitg.ac.in/iitg_faculty_all',
-      departments: {
-        'Chemical Engineering': 'https://www.iitg.ac.in/iitg_faculty_all',
-        'Civil Engineering': 'https://www.iitg.ac.in/iitg_faculty_all',
-        'Biosciences': 'https://www.iitg.ac.in/iitg_faculty_all',
-        'Chemistry': 'https://www.iitg.ac.in/iitg_faculty_all',
-        'Design': 'https://www.iitg.ac.in/iitg_faculty_all',
-      }
-    },
-    'IIT Indore': {
-      url: 'https://www.iiti.ac.in',
-      departments: {
-        'Metallurgy Engineering': 'https://mems.iiti.ac.in/faculty',
-        'Civil Engineering': 'https://ce.iiti.ac.in/faculty.php',
-        'Chemistry': 'https://chemistry.iiti.ac.in/faculty',
-        'Astronomy': 'https://iiti.irins.org/faculty/index/Department+of+Astronomy%2C+Astrophysics+and+Space+Engineering',
-        'Biosciences': 'https://bsbe.iiti.ac.in/main/faculty',
-      }
-    },
-    'IIT Hyderabad': {
-      url: 'https://www.iith.ac.in/people/faculty/',
-      departments: {
-        'Materials Science': 'https://www.iith.ac.in/people/faculty/#profile',
-        'Chemical Engineering': 'https://www.iith.ac.in/people/faculty/#profile',
-        'Civil Engineering': 'https://www.iith.ac.in/people/faculty/#profile',
-        'Biotechnology': 'https://www.iith.ac.in/people/faculty/#profile',
-        'Climate Change': 'https://www.iith.ac.in/people/faculty/#profile',    
-      }
-    },
-    'IIT BHU': {
-      url: 'https://www.iitbhu.ac.in/dept/all',
-      departments: {
-        'Metallurgical Engineering': 'https://www.iitbhu.ac.in/dept/met/faculty',
-        'Ceramic Engineering': 'https://www.iitbhu.ac.in/dept/cer/faculty',
-        'Mining Engineering': 'https://www.iitbhu.ac.in/dept/min/faculty',
-        'Chemical Engineering': 'https://www.iitbhu.ac.in/dept/che/faculty',
-        'Civil Engineering': 'https://www.iitbhu.ac.in/dept/civ/faculty',
-        'Pharmaceutical Engineering': 'https://www.iitbhu.ac.in/dept/phe/faculty',
-      }
-    },
-    'IIT Mandi': {
-      url: 'https://www.iitmandi.ac.in/allfaculty',
-      departments: {
-        'Civil Engineering': 'https://www.iitmandi.ac.in/schools/school_ce.php',
-        'Materials Science': 'https://www.iitmandi.ac.in/schools/smse/people.php',
-        'Bio Engineering': 'https://www.iitmandi.ac.in/schools/sbme/people.php',
-        'Chemistry': 'https://www.iitmandi.ac.in/schools/sbs/people.php',
-      }
-    },
-    'IIT Ropar': {
-      url: 'https://www.iitrpr.ac.in/metallurgy/People/facilities',
-      departments: {
-        'Chemical Engineering': 'https://www.iitrpr.ac.in/chemical/People/faculty.php',
-        'Civil Engineering': 'https://www.iitrpr.ac.in/civil/?member_category=faculty',
-        'Metallurgy': 'https://mme.iitrpr.ac.in/people/faculty',
-        'Chemistry': 'https://www.iitrpr.ac.in/chemistry/faculty.html',
-      }
-    },
-    'IIM Ahmedabad': {
-      url: 'https://www.iima.ac.in/faculty-research/faculty-directory',
-      departments: {
-        'Economics': 'https://www.iima.ac.in/web/faculty/area/economics',
-        'Strategic Management': 'https://www.iima.ac.in/web/faculty/area/strategic-management',
-        'Public Policy': 'https://www.iima.ac.in/web/faculty/area/public-systems-group',
-      }
-    },
-    'IIM Bangalore': {
-      url: 'https://www.iimb.ac.in/index.php/faculty',
-      departments: {
-        'Finance': 'https://www.iimb.ac.in/finance-account',
-        'Marketing': 'https://www.iimb.ac.in/marketing',
-        'Entrepreneurship': 'https://www.iimb.ac.in/entrepreneurship',
-      }
-    },
-    'IIM Calcutta': {
-      url: 'https://www.iimcal.ac.in/faculty/faculty-directory',
-      departments: {
-        'Finance': 'https://www.iimcal.ac.in/faculty/finance-and-control',
-        'Marketing': 'https://www.iimcal.ac.in/faculty/marketing',
-        'Economics': 'https://www.iimcal.ac.in/faculty/economics',
-      }
-    },
-    'IIM Indore': {
-      url: 'https://www.iimidr.ac.in/faculty/',
-      departments: {
-        'Economics': 'https://iimidr.ac.in/faculty/full-time-faculty/',
-        'Finance & Accounting': 'https://www.iimidr.ac.in/faculty/?area=Finance%20and%20Accounting',
-        'Marketing': 'https://www.iimidr.ac.in/faculty/?area=Marketing',
-        'Strategic Management': 'https://www.iimidr.ac.in/faculty/?area=Strategic%20Management',
-        'Organizational Behaviour': 'https://www.iimidr.ac.in/faculty/?area=Organizational%20Behaviour',
-      }
-    },
-    'IIM Lucknow': {
-      url: 'https://www.iiml.ac.in/faculty-list-by-area',
-      departments: {
-        'Finance': 'https://www.iiml.ac.in/faculty-list-by-specilization?n=Ng==',
-        'Marketing': 'https://www.iiml.ac.in/faculty-list-by-specilization?n=MTA=',
-        'Operations Management': 'https://www.iiml.ac.in/faculty-list-by-specilization?n=MTE=',
-        'Economics': 'https://www.iiml.ac.in/faculty-list-by-specilization?n=Mg==',
-        'Information Systems': 'https://www.iiml.ac.in/faculty-list-by-specilization?n=OA==',
-      }
-    },
-    'IIM Nagpur': {
-      url: 'https://www.iimnagpur.ac.in/faculty.php',
-      departments: {
-        'Finance & Accounting': 'https://www.iimnagpur.ac.in/faculty.php?area=Finance%20and%20Accounting',
-        'Marketing': 'https://www.iimnagpur.ac.in/faculty.php?area=Marketing',
-        'Operations Management': 'https://www.iimnagpur.ac.in/faculty.php?area=Operations%20Management',
-        'Strategy & Entrepreneurship': 'https://www.iimnagpur.ac.in/faculty.php?area=Strategy',
-        'Organizational Behaviour': 'https://www.iimnagpur.ac.in/faculty.php?area=Organizational%20Behaviour',
-      }
-    },
-  };
 
-  // ========== FILTER INSTITUTIONS ==========
-  const filteredInstitutions = Object.entries(institutions).filter(([name, data]) => {
-    const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesInstitute = selectedInstitute === 'all' || name === selectedInstitute;
-    
-    const matchesType = 
-      institutionType === 'all' || 
-      (institutionType === 'iit' && name.startsWith('IIT')) ||
-      (institutionType === 'iim' && name.startsWith('IIM'));
-    
-    return matchesSearch && matchesInstitute && matchesType;
-  });
+
+  // ========== NEW IIM & IIT FILTER LOGIC =========
+  // Example: Replace with your actual data source or API fetch
+  const [category, setCategory] = useState('IIT'); // 'IIT' or 'IIM'
+  const [college, setCollege] = useState('');
+  const [professors, setProfessors] = useState([]);
+  const [colleges, setColleges] = useState([]);
+  const [loadingEmails, setLoadingEmails] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [copiedIndex, setCopiedIndex] = useState(null);
+
+  // Simulate fetching college list on category change
+  useEffectReact(() => {
+    // Use the same official names as in IIMDirectory/IITDirectory
+    if (category === 'IIT') {
+      setColleges([
+        'Indian Institute of Technology Bombay',
+        'Indian Institute of Technology Delhi',
+        'Indian Institute of Technology Kanpur',
+        'Indian Institute of Technology Kharagpur',
+        'Indian Institute of Technology Madras',
+        'Indian Institute of Technology Roorkee',
+        // Add more IITs as per your sheet tabs
+      ]);
+    } else {
+      setColleges([
+        'Indian Institute of Management Ahmedabad',
+        'Indian Institute of Management Bangalore',
+        'Indian Institute of Management Calcutta',
+        'Indian Institute of Management Lucknow',
+        'Indian Institute of Management Raipur',
+        'Indian Institute of Management Nagpur',
+        'Indian Institute of Management Indore',
+        'Indian Institute of Management Kozhikode',
+        'Indian Institute of Management Mumbai',
+        'Indian Institute of Management Shillong',
+        'Indian Institute of Management Udaipur',
+        'Indian Institute of Management Tiruchirappalli',
+        'Indian Institute of Management Rohtak',
+        'Indian Institute of Management Amritsar',
+        'Indian Institute of Management Bodh Gaya',
+        'Indian Institute of Management Sirmaur',
+        'Indian Institute of Management Visakhapatnam'
+      ]);
+    }
+    setCollege('');
+    setProfessors([]);
+  }, [category]);
+
+  // Fetch professors for selected college/category
+  useEffectReact(() => {
+    if (!college) {
+      setProfessors([]);
+      return;
+    }
+    setLoadingEmails(true);
+    // IIT: fetch from Google Sheet, IIM: fetch from backend
+    const fetchProfessors = async () => {
+      try {
+        let data = [];
+        if (category === "IIT") {
+          // Use opensheet.elk.sh for IITs (tab name = college)
+          const SHEET_ID = '1XClZg0lO7whLCO5TSOGZ5w7Asqs3wzmbUv-wVJjqhjE';
+          const tabName = encodeURIComponent(college);
+          const url = `https://opensheet.elk.sh/${SHEET_ID}/${tabName}`;
+          const res = await fetch(url);
+          data = await res.json();
+        } else {
+          // IIM: fetch from backend (tab name = college)
+          const url = `http://localhost:5000/api/iim/professors/${encodeURIComponent(college)}`;
+          const res = await fetch(url);
+          data = await res.json();
+        }
+        if (Array.isArray(data)) {
+          setProfessors(data);
+        } else {
+          setProfessors([]);
+        }
+      } catch (e) {
+        setProfessors([]);
+      } finally {
+        setLoadingEmails(false);
+      }
+    };
+    fetchProfessors();
+  }, [college, category]);
+
+
 
   // ========== SKILLS REQUIRED DATA ==========
   const skillsData = {
@@ -515,34 +403,17 @@ Resume Link: [Resume Link]
 
   return (
     <div className="internship-page">
-      {/* ✅ SEO FOR INTERNSHIP PAGE */}
-      <SEO 
-        title="Research Internship Portal | IIT & IIM Faculty Directory"
-        description="Find research internship opportunities at IITs & IIMs. Access faculty contacts, email templates, and step-by-step cold emailing guide. Get internship at top institutions."
-        keywords="IIT internship, IIM internship, research internship India, cold email professor, faculty directory IIT, summer internship IIT, winter internship IIM, VNIT internship guide"
-        url="https://atyant.in/internships"
-      />
-
       {/* ========== HERO SECTION ========== */}
       <div className="internship-hero">
         <div className="hero-content">
           <GraduationCap size={64} className="hero-icon" />
           <h1>Research Internship Portal</h1>
           <p>Connect with faculty at IITs & IIMs - Focus on Core & Non-Core Branches</p>
-          
-          {/* ✅ Use user from context */}
           {isLoggedIn && user && (
-            <div style={{ 
-              marginBottom: '16px', 
-              color: '#4ade80', 
-              fontSize: '1rem',
-              fontWeight: '600' 
-            }}>
+            <div style={{ marginBottom: '16px', color: '#4ade80', fontSize: '1rem', fontWeight: '600' }}>
               ✅ Welcome {user.name}!
             </div>
           )}
-          
-          {/* Download Button */}
           <button 
             onClick={handleDownloadTemplate}
             className={`download-template-btn ${!isLoggedIn ? 'locked' : ''}`}
@@ -550,7 +421,6 @@ Resume Link: [Resume Link]
             {isLoggedIn ? <Download size={20} /> : <Lock size={20} />}
             <span>{isLoggedIn ? 'Download Email Template' : 'Login to Download Template'}</span>
           </button>
-
           {!isLoggedIn && (
             <p style={{ marginTop: '12px', color: 'rgba(255,255,255,0.85)', fontSize: '0.9rem' }}>
               🔒 Login required to download template and access faculty links
@@ -559,77 +429,110 @@ Resume Link: [Resume Link]
         </div>
       </div>
 
-     
-      {/* ========== SEARCH & FILTER ========== */}
-      <div className="internship-filters">
-        <div className="filters-container">
-          
-          <div className="search-bar">
-            <Search size={20} />
-            <input
-              type="text"
-              placeholder="Search institutions..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <div className="type-filter-buttons">
-            <button 
-              className={`type-btn ${institutionType === 'all' ? 'active' : ''}`}
-              onClick={() => setInstitutionType('all')}
-            >
-              <Building2 size={18} />
-              All Institutions
-            </button>
-            <button 
-              className={`type-btn iit-btn ${institutionType === 'iit' ? 'active' : ''}`}
-              onClick={() => setInstitutionType('iit')}
-            >
-              <GraduationCap size={18} />
-              IITs Only
-            </button>
-            <button 
-              className={`type-btn iim-btn ${institutionType === 'iim' ? 'active' : ''}`}
-              onClick={() => setInstitutionType('iim')}
-            >
-              <Building2 size={18} />
-              IIMs Only
-            </button>
-          </div>
-
-          <select 
-            value={selectedInstitute}
-            onChange={(e) => setSelectedInstitute(e.target.value)}
-            className="filter-select"
-          >
-            <option value="all">Select Institution</option>
-            <optgroup label="IITs">
-              {Object.keys(institutions)
-                .filter(name => name.startsWith('IIT'))
-                .map(name => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-            </optgroup>
-            <optgroup label="IIMs">
-              {Object.keys(institutions)
-                .filter(name => name.startsWith('IIM'))
-                .map(name => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-            </optgroup>
+      {/* ========== NEW FILTER: CATEGORY & COLLEGE, THEN SHOW EMAILS ========== */}
+      <div className="faculty-directory-combined filter-section-prominent">
+        <div className="faculty-directory-filter-bar">
+          <label htmlFor="category-select">Category: </label>
+          <select
+            id="category-select"
+            value={category}
+            onChange={e => setCategory(e.target.value)}
+            className="filter-dropdown"
+          > 
+            <option value="IIM">IIM</option>
+            <option value="IIT">IIT</option>
           </select>
-
-          <div className="results-count">
-            <span className="count-badge">{filteredInstitutions.length}</span>
-            <span className="count-text">
-              {filteredInstitutions.length === 1 ? 'Institution' : 'Institutions'} Found
-            </span>
-          </div>
-
+          <label htmlFor="college-select">College: </label>
+          <select
+            id="college-select"
+            value={college}
+            onChange={e => setCollege(e.target.value)}
+            className="filter-dropdown"
+          >
+            <option value="">Select College</option>
+            {colleges.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+        <div className="faculty-directory-content">
+          {category && !college && (
+            <h2 className="professor-directory-info-heading" style={{marginTop: 24, marginBottom: 18, fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.01em'}}>
+              Select a college to view all official professor email addresses and use the search to filter by name or academic area.
+            </h2>
+          )}
+          {college && (
+            <>
+              <div className="iim-directory-controls" style={{marginBottom: 16}}>
+                <input
+                  type="text"
+                  placeholder="Search by Name or Academic Area"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="filter-dropdown"
+                  style={{maxWidth: 400, width: '100%'}}
+                />
+              </div>
+            </>
+          )}
+          {loadingEmails ? (
+            <div className="email-list-loading">Loading emails...</div>
+          ) : (
+            college && (
+              <div className="professor-card-list">
+                <h3 className="email-list-title">All Professors ({college})</h3>
+                <div className="professor-card-grid">
+                  {professors
+                    .filter(prof => {
+                      const name = prof.name || prof.Name || '';
+                      const area = prof.academicarea || prof.academicaarea || '';
+                      return (
+                        name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        area.toLowerCase().includes(searchTerm.toLowerCase())
+                      );
+                    })
+                    .map((prof, idx) => {
+                      const name = prof.name || prof.Name || 'Unknown Name';
+                      const email = prof.email || prof.Email || 'No Email Provided';
+                      const academicarea = prof.academicarea || prof.academicaarea || '';
+                      return (
+                        <div key={idx} className="professor-card">
+                          <div className="professor-card-header">
+                            <span className="professor-card-number">{idx + 1}.</span>
+                            <span className="professor-card-name" title={name}>{name}</span>
+                          </div>
+                          <span className="department-badge">{academicarea || ""}</span>
+                          <div className="professor-card-email-row">
+                            <span className="professor-card-email-label">Official Email</span>
+                            <a href={`mailto:${email}`} className="professor-card-email">{email}</a>
+                            <button
+                              className="email-copy-btn"
+                              onClick={() => {
+                                navigator.clipboard.writeText(email);
+                                setCopiedIndex(idx);
+                                setTimeout(() => setCopiedIndex(null), 1200);
+                              }}
+                              title="Copy Email"
+                            >
+                              <svg height="18" width="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="6" y="6" width="10" height="12" rx="2" stroke="#174ea6" strokeWidth="1.5" fill="#e0f7fa"/>
+                                <rect x="2" y="2" width="10" height="12" rx="2" stroke="#90cdf4" strokeWidth="1.2" fill="#fff"/>
+                              </svg>
+                            </button>
+                            {copiedIndex === idx && (
+                              <span className="copied-msg">Copied!</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+                {professors.length === 0 && <div className="email-list-empty">No professors/emails found for this college.</div>}
+              </div>
+            )
+          )}
         </div>
       </div>
-
       {/* ========== HOW TO COLD EMAIL - STEP BY STEP ========== */}
       <div className="how-to-section">
         <h3>📧 How to Cold Email - Step by Step Guide</h3>
@@ -717,58 +620,7 @@ Resume Link: [Resume Link]
         </div>
       </div>
 
-      {/* ========== INSTITUTIONS LIST ========== */}
-      <div className="institutions-section">
-        <h2>
-          <Building2 size={28} />
-          Faculty Directory - Core Branches
-        </h2>
-        
-        <div className="institutions-grid">
-          {filteredInstitutions.map(([name, data]) => (
-            <div key={name} className="institution-card">
-              <div className="institution-header">
-                <h3>{name}</h3>
-                <a 
-                  href={data.url} 
-                  onClick={(e) => handleProtectedLink(data.url, e)}
-                  className={`view-all-btn ${!isLoggedIn ? 'locked' : ''}`}
-                >
-                  {isLoggedIn ? 'View All Faculty' : 'Login to View'}
-                  {isLoggedIn ? <ExternalLink size={16} /> : <Lock size={16} />}
-                </a>
-              </div>
 
-              <div className="departments-list">
-                <h4>Departments:</h4>
-                {Object.entries(data.departments).map(([dept, url]) => (
-                  <a
-                    key={dept}
-                    href={url}
-                    onClick={(e) => handleProtectedLink(url, e)}
-                    className={`department-link ${!isLoggedIn ? 'locked' : ''}`}
-                  >
-                    <span>{dept}</span>
-                    {isLoggedIn ? <ExternalLink size={14} /> : <Lock size={14} />}
-                  </a>
-                ))}
-              </div>
-
-              <div className="card-footer">
-                <Mail size={16} />
-                <span>{isLoggedIn ? 'Use email template to reach out' : 'Login to access links'}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {filteredInstitutions.length === 0 && (
-          <div className="no-results">
-            <Search size={48} />
-            <p>No institutions found matching your search</p>
-          </div>
-        )}
-      </div>
 
       {/* ========== TESTIMONIALS ========== */}
       <div className="testimonials-section">

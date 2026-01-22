@@ -23,6 +23,7 @@ import locationRoutes from './routes/locationRoutes.js';
 import aiChatRoutes from './routes/aiChatRoutes.js';
 import ratingRoutes from './routes/ratingRoutes.js';
 import engineRoutes from './routes/engineRoutes.js'; // ✅ ATYANT ENGINE
+import iimRoutes from './routes/iimRoutes.js'; // ✅ IIM DATA ROUTE
 
 // Import models
 import Feedback from './models/Feedback.js';
@@ -54,7 +55,7 @@ app.use(compression({
 
 // --- Middleware ---
 const allowedOrigins = [
-  process.env.FRONTEND_URL || "https://www.atyant.in",
+  process.env.FRONTEND_URL || "https://www.atyant.in","http://localhost:5000", // Backend port
   "https://atyant.in",
   "http://localhost:5173"
 ];
@@ -126,6 +127,7 @@ app.use('/api/location', locationRoutes);
 app.use('/api/ai', aiChatRoutes);
 app.use('/api/ratings', ratingRoutes);app.use('/api/engine', engineRoutes); // ✅ ATYANT ENGINE
 console.log('✅ AI Chat routes registered at /api/ai/*');
+app.use('/api/iim', iimRoutes); // ✅ Register IIM Route
 
 // --- Contact form route ---
 app.post("/api/contact", async (req, res) => {

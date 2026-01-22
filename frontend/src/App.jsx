@@ -34,6 +34,11 @@ const EngineView = lazy(() => import('./components/EngineView')); // ✅ ATYANT 
 const MentorDashboard = lazy(() => import('./components/MentorDashboard')); // ✅ MENTOR DASHBOARD
 const MyQuestions = lazy(() => import('./components/MyQuestions')); // ✅ USER QUESTIONS LIST
 const InternshipJourney = lazy(() => import('./components/InternshipJourney'));
+const IITLinksPage = lazy(() => import('./components/IITLinksPage'));
+const IIMLinksPage = lazy(() => import('./components/IIMLinksPage'));
+const IIMDirectory = lazy(() => import('./components/IIMDirectory'));
+const IITDirectory = lazy(() => import('./components/IITDirectory'));
+
 
 function App() {
   const location = useLocation();
@@ -105,6 +110,12 @@ function App() {
               {/* ✅ INTERNSHIP PAGE - PUBLIC (but links are protected) */}
               <Route path="/internships" element={<InternshipPage />} />
               <Route path="/internship-journey" element={<InternshipJourney />} />
+              <Route path="/iit-links" element={<IITLinksPage />} />
+              <Route path="/iim-links" element={<IIMLinksPage />} />
+              <Route path="/iim-directory" element={<IIMDirectory />} />
+              <Route path="/iim-list" element={<IIMDirectory />} />
+              <Route path="/iit-list"  element={<IITDirectory />} />
+
               
               {/* ========== PROTECTED ROUTES ========== */}
               <Route path="/dashboard" element={

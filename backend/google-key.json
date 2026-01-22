@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "steady-copilot-472005-v8",
+  "private_key_id": "db0dad8af328c092dcbbdb6147fa4e9a670e53aa",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEugIBADANBgkqhkiG9w0BAQEFAASCBKQwggSgAgEAAoIBAQCipcEAtByXnSWs\nZ/K+Djt7UQO8b2VEZ22MNGHlSPSwQhPzB+iSC85h9b/Setzl0eSYwwznu3sN3lBU\n/eiGBdSlF9Lo0QWf2s7CIxxQFEWmGXHgAmhoWJoyMvzLgnqDN9lEio4Fdo+6485G\nVU7StJPfylcyHlejZTijWVo0qYqAVsbAgJZwWG1rFER1KBk0Wc6q6ESrilocMBb+\nSl+CussA3BBIDUFchzNVcWCi09WNeJ/clngHdE4kp3ClaHRq6e8wDyp9Xju4S9Uq\nouct+4XxtICNDiYbEXGI0aGnCNPDqbE8DNXl/rYYeRzVTfZICRxSUtwoajDBWC4L\ngFdITvIlAgMBAAECgf8PaCQgLO+IbRpkenREDJUV2VbBQswU7rcx0MR1M7P5/khl\nfRpKu1ORc/X3uiuymW9OCSvvx5Kgfa6eXm7oQyUhfmA8LZCa099CBJFqBIGUelSP\nI6tANyRkHPBVVsbEJ0Ytd/J8Ef8LdQjVIL+WtgRL7p7T4IvsrmnvD0e8NVMpVOgk\nU+ExkjamK6G3cnGR2JvnhvpwziVObFIVM5vcHo1pdidP3qV3pitkds4QWQRuVuwe\n30DvRG09oQGqaaWSzKHcj7Z9AVxWB/uwMmLxMLfcmQMky+OORtelLn2YvVGBxJGz\nPrPcEACAmfaydUX6OWehskUtT8rq9pBjUWSxK6kCgYEA4ZpAD+VxhYVcERSX0j0X\n+9itbhhBMfoYwee3aldWtKz7lX45fId+G15MH+QS5D9T9FWMODXA0pzlr9nqPqYq\nH2a6iN9CkJthW7+nvgcbk7T0ZUAhEsSed56DADc0xuv2eLQI/wR+lujbakQ3uHDg\nNrRt3LSS6pL7I5NX0yf+as0CgYEAuI/7refK2wP52tZ+wDDmNHcPNeyp5PnG0REP\nnW2ZzBmrASNQP/Q5yv2nIMey485VuSTr6CCnwBBoDNwuYCRUErTP4xKRYuP+22PN\ngWquv4s61sW1TvWwwK1aZHAJuxDaAXI5pkWhQM+DqiMRRnBB5H/LpGsPBGsA3Ik9\nTJkK1LkCgYBLRxkRNNJIZ1NtL53pPRF/q7FTByzZ7EXOje8ZwMLhzsaz/0ZXUy61\nGyXzjjrvhmIRKWp8ZxNMM6ZAo0oSVYfAqpqbiUPA1NgLsUvbkKuXAc566oceqBTo\nfS/hJoqpxZqcdBZ8YZeL628rak/db2yhVFtERcywERNTr5qijrnKEQKBgCtiBOn6\n+08CH0AWfVLV67bXaabmS4U8RUStevspYSZ9vhmVYG64DMGvYBKvflhYDwRnLmCx\nFF1sPdkQBIKq52xCPj+FBNG3ABg33H2YQx1ZL+p+LMEztWmFFiNXxqHHM0d1vyFb\naq0eWjeq6IujJYn9lDPAypXiRSCRzevsaYRZAoGAdG/IzXjQKAYpTrvjEIr9h2GE\n7N5RhXHvOlLvkNc94QMNNexM0nZQpu28OkCKqhiV8PHHFDtk4Fwq1vYTALCQUzut\nwo8BvbRqCj8kRZjb3Zc9W2mGJqQnz9XiBG1m3L/x0VLWi+eyXi0IBJEUMRUauewQ\nohD2/xZkj9iHsknt+Pk=\n-----END PRIVATE KEY-----\n",
+  "client_email": "sheet-reader@steady-copilot-472005-v8.iam.gserviceaccount.com",
+  "client_id": "115581001935745710052",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/sheet-reader%40steady-copilot-472005-v8.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

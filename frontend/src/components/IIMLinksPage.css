@@ -1,0 +1,271 @@
+/* 1. Add this at the top of your CSS to prevent scroll-jitter */
+html {
+  scroll-behavior: smooth;
+  overscroll-behavior-y: none; /* Prevents "bounce" on trackpads */
+}
+
+/* 2. Optimized Card Style */
+/* Remove transform: translateZ(0), will-change, and perspective for scroll stability on desktop */
+.iit-glass-card, .iim-glass-card {
+  background: var(--glass-fill);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* For Safari */
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 24px;
+  backface-visibility: hidden;
+  /* Only transition transform on hover, not always */
+  transition: box-shadow 0.4s ease, border-color 0.3s ease;
+  transform-origin: center;
+}
+
+/* 3. Improved Hover (No Shaking) */
+/* Only apply transform and hardware acceleration on hover for smoothness */
+.iit-glass-card:hover, .iim-glass-card:hover {
+  transform: translateY(-5px) scale(1.01);
+  border-color: var(--primary-accent);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  will-change: transform, box-shadow;
+  perspective: 1000px;
+}
+
+/* 4. Smooth Tags */
+.branch-tag, .area-tag {
+  /* Pre-set the border size so it doesn't "jump" when color changes */
+  border: 1px solid rgba(255, 255, 255, 0.1); 
+  transform: translateZ(0);
+  transition: all 0.2s ease-out;
+}
+
+.branch-tag:hover, .area-tag:hover {
+  background: var(--primary-accent) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+:root {
+  --iim-primary: #10b981; /* Emerald/Green theme for Management */
+  --iim-bg: #020617;
+  --glass-fill: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --text-bright: #f1f5f9;
+  --text-dim: #64748b;
+}
+
+.iim-links-root {
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, #064e3b, #020617);
+  color: var(--text-bright);
+  padding-bottom: 80px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Hero Section */
+.iim-hero-section {
+  padding: 80px 20px 40px;
+  text-align: center;
+}
+
+.hero-glass-container {
+  max-width: 850px;
+  margin: 0 auto;
+  padding: 50px 30px;
+  background: var(--glass-fill);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 30px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.hero-accent-icon {
+  color: var(--iim-primary);
+  margin-bottom: 20px;
+}
+
+.hero-glass-container h1 {
+  font-size: 3rem;
+  font-weight: 900;
+  margin-bottom: 15px;
+  letter-spacing: -0.03em;
+  background: linear-gradient(to right, #34d399, #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-glass-container p {
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  margin-bottom: 35px;
+}
+
+/* Search Input */
+.iim-search-box {
+  position: relative;
+  max-width: 550px;
+  margin: 0 auto;
+}
+
+.search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-dim);
+}
+
+.iim-search-box input {
+  width: 100%;
+  padding: 18px 20px 18px 60px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1.5px solid var(--glass-border);
+  border-radius: 16px;
+  color: white;
+  font-size: 1.05rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.iim-search-box input:focus {
+  outline: none;
+  border-color: var(--iim-primary);
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Grid & Cards */
+.iim-content-wrapper {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 0 25px;
+}
+
+.stats-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.iim-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+/* Remove will-change and transition transform for scroll stability */
+.iim-glass-card {
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow 0.3s, border-color 0.3s;
+  transform-origin: center;
+}
+
+.iim-glass-card:hover {
+  transform: scale(1.01);
+  border-color: var(--iim-primary);
+  box-shadow: 0 24px 48px -16px rgba(16,185,129,0.18), 0 2px 8px rgba(15,23,42,0.06);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
+}
+
+.name-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.inst-icon {
+  color: var(--iim-primary);
+}
+
+.card-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.portal-btn {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--iim-primary);
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.3s;
+}
+
+.portal-btn:hover {
+  background: var(--iim-primary);
+  color: white;
+}
+
+.card-body h3 {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 18px;
+}
+
+.area-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.area-tag {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  color: var(--text-bright);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.2s;
+}
+
+.area-tag:hover {
+  background: var(--iim-primary);
+  color: white;
+  border-color: var(--iim-primary);
+}
+
+.card-footer {
+  margin-top: auto;
+  padding-top: 25px;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  border-top: 1px dashed var(--glass-border);
+}
+
+.no-match-state {
+  text-align: center;
+  padding: 100px 0;
+  color: var(--text-dim);
+}
+
+@media (max-width: 1024px) {
+  .iim-cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-glass-container h1 {
+    font-size: 2.2rem;
+  }
+}
