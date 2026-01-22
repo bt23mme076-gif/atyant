@@ -98,7 +98,7 @@ router.get('/mentor/pending-questions', protect, async (req, res) => {
         questionText: q.questionText,
         isFollowUp: q.isFollowUp,
         status: q.status,
-        createdAt: q.createdAt
+        createdAt: q.createdAt ? new Date(q.createdAt).toISOString() : null
       }))
     });
   } catch (error) {

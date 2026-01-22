@@ -340,6 +340,7 @@ Resume Link: [Resume Link]
     }
     setLoadingEmails(true);
     // IIT: fetch from Google Sheet, IIM: fetch from backend
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const fetchProfessors = async () => {
       try {
         let data = [];
@@ -352,7 +353,7 @@ Resume Link: [Resume Link]
           data = await res.json();
         } else {
           // IIM: fetch from backend (tab name = college)
-          const url = `http://localhost:5000/api/iim/professors/${encodeURIComponent(college)}`;
+          const url = `${API_URL}/api/iim/professors/${encodeURIComponent(college)}`;
           const res = await fetch(url);
           data = await res.json();
         }
