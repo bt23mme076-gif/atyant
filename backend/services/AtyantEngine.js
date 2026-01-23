@@ -107,10 +107,15 @@ class AtyantEngine {
 
       const sorted = Array.from(uniqueMentorsMap.values()).sort((a, b) => b.finalScore - a.finalScore);
       
-      // 🔥 LOGGING TOP 5 RANKINGS (clear summary)
-      console.log('--- TOP 5 MENTOR MATCHES ---');
-      sorted.slice(0, 5).forEach((m, i) => {
-        console.log(`Rank #${i + 1}: ${m.mentorProfile.username} | Total: ${(m.finalScore * 100).toFixed(2)}% | AI Base: ${(m.score*100).toFixed(1)}% | Bonuses: ${m.breakdown}`);
+      // 🔥 LOGGING ALL MENTOR MATCHES (detailed)
+      console.log('--- ALL MENTOR MATCHES ---');
+      sorted.forEach((m, i) => {
+        console.log(
+          `Rank #${i + 1}: ${m.mentorProfile.username} | ` +
+          `Total: ${(m.finalScore * 100).toFixed(2)}% | ` +
+          `AI Base: ${(m.score * 100).toFixed(1)}% | ` +
+          `Bonuses: ${m.breakdown}`
+        );
       });
       console.log('---------------------------');
 
@@ -291,6 +296,7 @@ class AtyantEngine {
     }
 
     // 2. Generate Embedding (Search ke liye zaroori hai)
+    console.log("Generating vector for AnswerCard:", polishedContent.situation || '');
     const embedding = await getQuestionEmbedding(polishedContent.situation || '');
 
     // 3. Save Card (Ab isme Mistakes, Steps, Timeline sab polished aur full honge)

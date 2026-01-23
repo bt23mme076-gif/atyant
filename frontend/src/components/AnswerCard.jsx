@@ -277,11 +277,50 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
           ============================= */}
       {(answerCard.audioUrl || answerCard.transcript) && (
         <div className="mentor-audio-answer">
+          {/* DEBUG: Show user and audioUrl info for troubleshooting */}
+          {process.env.NODE_ENV === 'development' && (
+            <pre style={{background:'#f3f3f3',color:'#333',fontSize:12,padding:8,borderRadius:4,marginBottom:8}}>
+              {JSON.stringify({ user, audioUrl: answerCard.audioUrl }, null, 2)}
+            </pre>
+          )}
           {answerCard.audioUrl && (
             <>
               <div className="mentor-audio-label-row-modern">
                 <span className="mentor-audio-mic">🎤</span>
                 <span className="mentor-audio-label-modern">Mentor's Voice Answer</span>
+                {/* Mentor-only delete button */}
+                {user?.role === 'mentor' && (
+                  <button
+                    style={{
+                      marginLeft: 16,
+                      background: '#fee2e2',
+                      color: '#b91c1c',
+                      border: 'none',
+                      borderRadius: 6,
+                      padding: '4px 12px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      fontSize: '0.95em'
+                    }}
+                    onClick={async () => {
+                      if (!window.confirm('Are you sure you want to delete this voice answer?')) return;
+                      try {
+                        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                        const response = await fetch(`${API_URL}/api/engine/delete-voice-answer`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${user.token}`
+                          },
+                          body: JSON.stringify({ answerCardId: answerCard._id || answerCard.id })
+                        });
+                        if (response.ok && onRefresh) onRefresh();
+                      } catch (e) { alert('Failed to delete voice answer.'); }
+                    }}
+                  >
+                    Delete Voice
+                  </button>
+                )}
               </div>
               <div className="mentor-audio-bar-wrap">
                 <audio
