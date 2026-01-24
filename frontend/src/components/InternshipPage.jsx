@@ -299,12 +299,29 @@ Resume Link: [Resume Link]
     // Use the same official names as in IIMDirectory/IITDirectory
     if (category === 'IIT') {
       setColleges([
-        'Indian Institute of Technology Bombay',
-        'Indian Institute of Technology Delhi',
-        'Indian Institute of Technology Kanpur',
-        'Indian Institute of Technology Kharagpur',
-        'Indian Institute of Technology Madras',
-        'Indian Institute of Technology Roorkee',
+        'Indian Institute of Technology Bhilai',
+'Indian Institute of Technology (BHU) Varanasi',
+'Indian Institute of Technology Bhubaneswar',
+'Indian Institute of Technology Bombay',
+'Indian Institute of Technology Delhi',
+'Indian Institute of Technology (ISM) Dhanbad',
+'Indian Institute of Technology Dharwad',
+'Indian Institute of Technology Gandhinagar',
+'Indian Institute of Technology Goa',
+'Indian Institute of Technology Guwahati',
+'Indian Institute of Technology Hyderabad',
+'Indian Institute of Technology Indore',
+'Indian Institute of Technology Jammu',
+'Indian Institute of Technology Jodhpur',
+'Indian Institute of Technology Kanpur',
+'Indian Institute of Technology Kharagpur',
+'Indian Institute of Technology Madras',
+'Indian Institute of Technology Mandi',
+'Indian Institute of Technology Palakkad',
+'Indian Institute of Technology Patna',
+'Indian Institute of Technology Roorkee',
+'Indian Institute of Technology Ropar',
+'Indian Institute of Technology Tirupati',
         // Add more IITs as per your sheet tabs
       ]);
     } else {

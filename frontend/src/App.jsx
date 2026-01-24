@@ -38,6 +38,7 @@ const IITLinksPage = lazy(() => import('./components/IITLinksPage'));
 const IIMLinksPage = lazy(() => import('./components/IIMLinksPage'));
 const IIMDirectory = lazy(() => import('./components/IIMDirectory'));
 const IITDirectory = lazy(() => import('./components/IITDirectory'));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 
 
 function App() {
@@ -118,6 +119,7 @@ function App() {
 
               
               {/* ========== PROTECTED ROUTES ========== */}
+            
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <Dashboard />
@@ -176,6 +178,11 @@ function App() {
               <Route path="/internship-journey" element={
                 <ProtectedRoute>
                   <InternshipJourney />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin-dashboard" element={
+                <ProtectedRoute>
+                  <AdminDashboard />
                 </ProtectedRoute>
               } />
             </Routes>

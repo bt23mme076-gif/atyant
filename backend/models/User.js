@@ -207,6 +207,14 @@ const userSchema = new mongoose.Schema({
 // ✅ Sparse index - only indexes documents where coordinates exist
 userSchema.index({ 'location.coordinates': '2dsphere' }, { sparse: true });
 
+// Remove invalid location objects before saving (must be after userSchema is defined)
+userSchema.pre('save', function(next) {
+  if (this.location && (!this.location.type || !Array.isArray(this.location.coordinates) || this.location.coordinates.length !== 2)) {
+    this.location = undefined;
+  }
+  next();
+});
+
 // Remove duplicate indexes if any:
 // userSchema.index({ email: 1 }); // Remove if using unique: true in field definition
 // userSchema.index({ username: 1 }); // Remove if using unique: true in field definition

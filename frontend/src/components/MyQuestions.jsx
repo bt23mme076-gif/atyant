@@ -90,44 +90,50 @@ const MyQuestions = () => {
         </div>
       ) : (
         <div className="questions-grid">
-          {questions.map((q) => (
-            <Link 
-              key={q.id} 
-              to={`/engine/${q.id}`}
-              className="question-item"
-            >
-              <div className="question-item-header">
-                {getStatusBadge(q.status)}
-                <span className="question-date">
-                  {new Date(q.createdAt).toLocaleDateString('en-IN', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric'
-                  })}
-                </span>
-              </div>
-              
-              <h3 className="question-title">{q.text}</h3>
-              
-              <div className="question-meta">
-                {q.hasAnswer ? (
-                  <span className="meta-item answer-ready">✅ Answer Ready</span>
-                ) : (
-                  <span className="meta-item processing">⏳ Processing</span>
-                )}
-                
-                {q.followUpCount > 0 && (
-                  <span className="meta-item">
-                    💬 {q.followUpCount} follow-up{q.followUpCount > 1 ? 's' : ''}
+          {questions.map((q) => {
+            return (
+              <Link 
+                key={q.id} 
+                to={`/engine/${q.id}`}
+                className="question-item"
+              >
+                <div className="question-item-header">
+                  {getStatusBadge(q.status)}
+                  <span className="question-date">
+                    {q.createdAt && !isNaN(new Date(q.createdAt)) ? (
+                      new Date(q.createdAt).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })
+                    ) : (
+                      <span style={{ color: '#aaa' }}>No Date</span>
+                    )}
                   </span>
-                )}
-              </div>
-              
-              <div className="question-action">
-                <span className="view-link">View Status →</span>
-              </div>
-            </Link>
-          ))}
+                </div>
+                
+                <h3 className="question-title">{q.text}</h3>
+                
+                <div className="question-meta">
+                  {q.hasAnswer ? (
+                    <span className="meta-item answer-ready">✅ Answer Ready</span>
+                  ) : (
+                    <span className="meta-item processing">⏳ Processing</span>
+                  )}
+                  
+                  {q.followUpCount > 0 && (
+                    <span className="meta-item">
+                      💬 {q.followUpCount} follow-up{q.followUpCount > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+                
+                <div className="question-action">
+                  <span className="view-link">View Status →</span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
       

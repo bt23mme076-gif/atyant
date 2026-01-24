@@ -1,0 +1,162 @@
+/* ====== GLOBAL ====== */
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f4f6fa;
+}
+
+textarea {
+  font-family: inherit;
+  resize: vertical;
+}
+
+/* ====== LAYOUT ====== */
+.admin-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* ====== LEFT PANEL ====== */
+.left-panel {
+  width: 32%;
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+}
+
+.left-header {
+  padding: 16px;
+  font-weight: 700;
+  font-size: 18px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.question-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.question-card {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.question-card:hover {
+  background: #f5f8ff;
+}
+
+.question-card.active {
+  background: #eef4ff;
+  border-left: 4px solid #2563eb;
+}
+
+.question-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.match-score {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* ====== RIGHT PANEL ====== */
+.right-panel {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* ====== SECTION BLOCK ====== */
+.section {
+  margin-bottom: 28px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #111827;
+}
+
+/* ====== CARD ====== */
+.card {
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+}
+
+/* ====== MENTOR ====== */
+.mentor-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.mentor-background {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+.match-confidence {
+  font-size: 12px;
+  color: #2563eb;
+  margin-top: 6px;
+}
+
+/* ====== FORM ====== */
+.form-group {
+  margin-bottom: 14px;
+}
+
+.form-group textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #f8fbff;
+}
+
+/* ====== BUTTON ====== */
+.primary-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.primary-btn:hover {
+  background: #1e40af;
+}
+
+.primary-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* ====== EMPTY STATE ====== */
+.empty-state {
+  margin-top: 120px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 15px;
+}

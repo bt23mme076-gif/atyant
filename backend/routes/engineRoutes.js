@@ -190,7 +190,17 @@ router.get('/my-questions', protect, async (req, res) => {
   try {
     const questions = await Question.find({ userId: req.user.userId, isFollowUp: { $ne: true } })
       .sort({ createdAt: -1 }).populate('answerCardId');
-    res.json({ success: true, questions: questions.map(q => ({ id: q._id, text: q.questionText, status: q.status, hasAnswer: !!q.answerCardId })) });
+    res.json({
+      success: true,
+      questions: questions.map(q => ({
+        id: q._id,
+        text: q.questionText,
+        status: q.status,
+        hasAnswer: !!q.answerCardId,
+        createdAt: q.createdAt || null,
+        followUpCount: Array.isArray(q.followUpQuestions) ? q.followUpQuestions.length : 0
+      }))
+    });
   } catch (e) { res.status(500).json({ success: false }); }
 });
 

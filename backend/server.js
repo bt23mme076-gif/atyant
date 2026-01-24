@@ -24,6 +24,7 @@ import aiChatRoutes from './routes/aiChatRoutes.js';
 import ratingRoutes from './routes/ratingRoutes.js';
 import engineRoutes from './routes/engineRoutes.js'; // ✅ ATYANT ENGINE
 import iimRoutes from './routes/iimRoutes.js'; // ✅ IIM DATA ROUTE
+import adminRoutes from './routes/adminRoutes.js'; // ✅ ADMIN ROUTE
 
 // Import models
 import Feedback from './models/Feedback.js';
@@ -128,6 +129,7 @@ app.use('/api/ai', aiChatRoutes);
 app.use('/api/ratings', ratingRoutes);app.use('/api/engine', engineRoutes); // ✅ ATYANT ENGINE
 console.log('✅ AI Chat routes registered at /api/ai/*');
 app.use('/api/iim', iimRoutes); // ✅ Register IIM Route
+app.use('/api/admin', adminRoutes); // ✅ ADMIN ROUTE
 
 // --- Contact form route ---
 app.post("/api/contact", async (req, res) => {
