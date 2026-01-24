@@ -300,28 +300,28 @@ Resume Link: [Resume Link]
     if (category === 'IIT') {
       setColleges([
         'Indian Institute of Technology Bhilai',
-'Indian Institute of Technology (BHU) Varanasi',
-'Indian Institute of Technology Bhubaneswar',
-'Indian Institute of Technology Bombay',
-'Indian Institute of Technology Delhi',
-'Indian Institute of Technology (ISM) Dhanbad',
-'Indian Institute of Technology Dharwad',
-'Indian Institute of Technology Gandhinagar',
-'Indian Institute of Technology Goa',
-'Indian Institute of Technology Guwahati',
-'Indian Institute of Technology Hyderabad',
-'Indian Institute of Technology Indore',
-'Indian Institute of Technology Jammu',
-'Indian Institute of Technology Jodhpur',
-'Indian Institute of Technology Kanpur',
-'Indian Institute of Technology Kharagpur',
-'Indian Institute of Technology Madras',
-'Indian Institute of Technology Mandi',
-'Indian Institute of Technology Palakkad',
-'Indian Institute of Technology Patna',
-'Indian Institute of Technology Roorkee',
-'Indian Institute of Technology Ropar',
-'Indian Institute of Technology Tirupati',
+        'Indian Institute of Technology (BHU) Varanasi',
+        'Indian Institute of Technology Bhubaneswar',
+        'Indian Institute of Technology Bombay',
+        'Indian Institute of Technology Delhi',
+        'Indian Institute of Technology (ISM) Dhanbad',
+        'Indian Institute of Technology Dharwad',
+        'Indian Institute of Technology Gandhinagar',
+        'Indian Institute of Technology Goa',
+        'Indian Institute of Technology Guwahati',
+        'Indian Institute of Technology Hyderabad',
+        'Indian Institute of Technology Indore',
+        'Indian Institute of Technology Jammu',
+        'Indian Institute of Technology Jodhpur',
+        'Indian Institute of Technology Kanpur',
+        'Indian Institute of Technology Kharagpur',
+        'Indian Institute of Technology Madras',
+        'Indian Institute of Technology Mandi',
+        'Indian Institute of Technology Palakkad',
+        'Indian Institute of Technology Patna',
+        'Indian Institute of Technology Roorkee',
+        'Indian Institute of Technology Ropar',
+        'Indian Institute of Technology Tirupati',
         // Add more IITs as per your sheet tabs
       ]);
     } else {
@@ -348,6 +348,21 @@ Resume Link: [Resume Link]
     setCollege('');
     setProfessors([]);
   }, [category]);
+
+  // Protected college selection handler
+  const handleCollegeSelect = (e) => {
+    const selected = e.target.value;
+    if (!isLoggedIn && selected) {
+      const shouldLogin = window.confirm(
+        '🔒 Login Required!\n\nYou need to login to view faculty emails.\n\nClick OK to go to login page.'
+      );
+      if (shouldLogin) {
+        navigate('/login', { state: { from: '/internships' } });
+      }
+      return;
+    }
+    setCollege(selected);
+  };
 
   // Fetch professors for selected college/category
   useEffectReact(() => {
@@ -464,7 +479,7 @@ Resume Link: [Resume Link]
           <select
             id="college-select"
             value={college}
-            onChange={e => setCollege(e.target.value)}
+            onChange={handleCollegeSelect}
             className="filter-dropdown"
           >
             <option value="">Select College</option>
