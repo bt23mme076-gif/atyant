@@ -36,10 +36,10 @@ const protect = (req, res, next) => {
       // Attach user info to request (keep all existing fields + add standardized ones)
       req.user = {
         ...decoded,                        // Keep all existing token data
-        id: decoded.id || decoded.userId,  // ✅ Add standardized 'id' field
-        userId: decoded.id || decoded.userId  // ✅ Add standardized 'userId' field
+        id: decoded._id || decoded.id || decoded.userId,
+        userId: decoded._id || decoded.id || decoded.userId,
+        _id: decoded._id || decoded.id || decoded.userId // ✅ Always set _id for MongoDB compatibility
       };
-      
       next();
     } catch (jwtError) {
       console.error('JWT verification failed:', jwtError);

@@ -20,36 +20,84 @@ async function dummySpeechToText(audioPath) {
 }
 
 // Mentor submits answer with optional audio
+// PATCH: Allow admin to submit answers as any mentor (admin-injected mentorId)
+// If user is admin, allow any mentorId. If mentor, enforce mentorId === logged-in user.
 router.post('/mentor/submit-audio-answer', protect, upload.single('audio'), async (req, res) => {
   try {
     const { questionId, mentorExperienceId, mentorId, answerContent } = req.body;
+    // --- CRITICAL OVERRIDE FOR ADMIN ---
+    // If not admin, enforce mentorId === logged-in user
+    if (req.user.role !== 'admin') {
+      if (!mentorId || mentorId !== String(req.user._id)) {
+        return res.status(403).json({ success: false, error: 'Mentors can only submit as themselves.' });
+      }
+    }
+    // Load Question to check if follow-up
+    const Question = (await import('../models/Question.js')).default;
+    const question = await Question.findById(questionId);
+    if (!question) return res.status(404).json({ success: false, error: 'Question not found' });
+    if (question.isFollowUp && question.parentQuestionId) {
+      // For both admin and mentor: always update the existing follow-up entry as a single text reply
+      const parentQuestion = await Question.findById(question.parentQuestionId);
+      if (!parentQuestion || !parentQuestion.answerCardId) {
+        return res.status(404).json({ success: false, error: 'Parent AnswerCard not found' });
+      }
+      const AnswerCard = (await import('../models/AnswerCard.js')).default;
+      const answerCard = await AnswerCard.findById(parentQuestion.answerCardId);
+      if (!answerCard) return res.status(404).json({ success: false, error: 'Parent AnswerCard not found' });
+      // Parse answerContent if sent as JSON string
+      let parsedContent = answerContent;
+      if (typeof answerContent === 'string') {
+        try { parsedContent = JSON.parse(answerContent); } catch {}
+      }
+      // Always extract main text reply for follow-up
+      let mainAnswer = '';
+      if (parsedContent) {
+        if (typeof parsedContent === 'object') {
+          mainAnswer = parsedContent.situation || parsedContent.mainAnswer || '';
+        } else if (typeof parsedContent === 'string') {
+          mainAnswer = parsedContent;
+        }
+      }
+      // Find and update the existing follow-up entry (robust string comparison, debug log)
+      const incomingQid = question._id.toString();
+      const allFollowupQids = answerCard.followUpAnswers.map(fu => fu.questionId?.toString());
+      console.log('[FollowUp Debug] Incoming QID:', incomingQid, 'All followUpAnswers QIDs:', allFollowupQids);
+      const followUpIndex = answerCard.followUpAnswers.findIndex(
+        fu => fu.questionId && fu.questionId.toString() === incomingQid
+      );
+      if (followUpIndex !== -1) {
+        answerCard.followUpAnswers[followUpIndex].answerContent = { mainAnswer };
+        answerCard.followUpAnswers[followUpIndex].answeredAt = new Date();
+      } else {
+        // Do NOT push a new entry, return error for debugging
+        console.error('[FollowUp Debug] No matching follow-up entry found for questionId:', incomingQid);
+        return res.status(404).json({ success: false, error: 'Follow-up entry not found in parent card', debug: { incomingQid, allFollowupQids } });
+      }
+      // Optionally update followUpCount
+      answerCard.followUpCount = answerCard.followUpAnswers.length;
+      await answerCard.save();
+      // Mark question as delivered
+      question.status = 'delivered';
+      await question.save();
+      return res.json({ success: true, followUp: true, answerCard });
+    }
+    // Normal (not follow-up): create AnswerCard as before
     let audioUrl = null;
     let transcript = null;
     if (req.file) {
-      // Upload audio file to Cloudinary
       audioUrl = await uploadAudioToCloudinary(req.file.path, 'mentor-voice-answers');
-      // Log file details for debugging
-      console.log('Audio file uploaded to Cloudinary:', {
-        cloudinaryUrl: audioUrl,
-        size: req.file.size,
-        mimetype: req.file.mimetype,
-        originalname: req.file.originalname
-      });
-      // Optionally run speech-to-text (if you want to use the Cloudinary URL, pass it here)
       transcript = await dummySpeechToText(req.file.path);
     }
-    // Parse answerContent if sent as JSON string
     let parsedContent = answerContent;
     if (typeof answerContent === 'string') {
       try { parsedContent = JSON.parse(answerContent); } catch {}
     }
-    // Ensure actionableSteps is a string if mentor submits a single text field
     if (parsedContent && typeof parsedContent === 'object' && parsedContent.actionableSteps) {
       if (Array.isArray(parsedContent.actionableSteps) && parsedContent.actionableSteps.length === 1 && typeof parsedContent.actionableSteps[0] === 'string') {
         parsedContent.actionableSteps = parsedContent.actionableSteps[0];
       }
     }
-    // Prepare AnswerCard data, skip mentorExperienceId if empty
     const answerCardData = {
       questionId,
       mentorId,
@@ -61,12 +109,9 @@ router.post('/mentor/submit-audio-answer', protect, upload.single('audio'), asyn
       answerCardData.mentorExperienceId = mentorExperienceId;
     }
     const answerCard = await AnswerCard.create(answerCardData);
-    // Update the Question with answerCardId and status
-    await import('../models/Question.js').then(async ({ default: Question }) => {
-      await Question.findByIdAndUpdate(questionId, {
-        answerCardId: answerCard._id,
-        status: 'delivered'
-      });
+    await Question.findByIdAndUpdate(questionId, {
+      answerCardId: answerCard._id,
+      status: 'delivered'
     });
     res.json({ success: true, answerCard });
   } catch (err) {

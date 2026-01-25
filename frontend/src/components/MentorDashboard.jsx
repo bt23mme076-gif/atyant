@@ -157,13 +157,22 @@ const MentorDashboard = () => {
     setSubmitting(true);
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      // Debug logging for mentorId and user._id
+      console.log('Submitting answer:', {
+        userId: user._id || user.id,
+        mentorId: user._id || user.id,
+        questionId: selectedQuestion._id || selectedQuestion.id,
+        question: selectedQuestion,
+        experience
+      });
       // Use FormData for audio upload
       const formData = new FormData();
-      formData.append('questionId', selectedQuestion.id);
+      formData.append('questionId', selectedQuestion._id || selectedQuestion.id);
       if (selectedQuestion.mentorExperienceId && selectedQuestion.mentorExperienceId !== '') {
         formData.append('mentorExperienceId', selectedQuestion.mentorExperienceId);
       }
-      formData.append('mentorId', user.id);
+      // Always use the logged-in mentor's own user ID
+      formData.append('mentorId', user._id || user.id);
       formData.append('answerContent', JSON.stringify(experience));
       if (audioBlob) {
         if (audioBlob.size > 0) {
@@ -183,7 +192,11 @@ const MentorDashboard = () => {
       });
       const data = await response.json();
       if (data.success) {
-        alert('✅ Experience submitted successfully! Answer card has been generated.');
+        if (data.followUp) {
+          alert('✅ Follow-up answer sent to user.');
+        } else {
+          alert('✅ Experience submitted successfully! Answer card has been generated.');
+        }
         setSelectedQuestion(null);
         setAudioBlob(null);
         setAudioURL(null);

@@ -38,6 +38,8 @@ import './AnswerCard.css';
 
 
 const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
+  // Ensure question is always defined for follow-up logic
+  const question = answerCard.question || null;
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -135,6 +137,11 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
 
       <div className="answer-card-header">
         <div className="trust-disclaimer">✓ Real experience-backed guidance.</div>
+        {question && question.isFollowUp && (
+          <div className="followup-heading" style={{marginTop:8, color:'#7c3aed', fontWeight:600}}>
+            🔁 This is a follow-up question
+          </div>
+        )}
       </div>
 
       {/* 👤 Mentor Profile Section */}
@@ -247,18 +254,16 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
       </div>
 
       {/* 🔁 FOLLOW-UP THREAD: Clean & Simple Flow */}
-      {answerCard.followUpAnswers && answerCard.followUpAnswers.length > 0 && (
+      {((answerCard.followUpAnswers && answerCard.followUpAnswers.length > 0) || (question && question.isFollowUp)) && (
         <div className="follow-up-thread">
           <h3 className="section-label">📚 Follow-up Chat</h3>
-          {answerCard.followUpAnswers.map((fu, i) => (
+          {/* Show all follow-up Q&A from AnswerCard (admin flow) */}
+          {answerCard.followUpAnswers && answerCard.followUpAnswers.length > 0 && answerCard.followUpAnswers.map((fu, i) => (
             <div key={i} className="thread-item">
-              {/* Student Question Bubble: Hamesha dikhega */}
               <div className="student-q"><strong>Q:</strong> {fu.questionText}</div>
-              {/* Mentor Answer Bubble: Sirf tab dikhao jab content ho */}
               <div className="mentor-a">
                 {fu.answerContent ? (
                   <p>
-                    {/* 🚀 SAME FIX: Objects are not valid as children crash ko rokne ke liye */}
                     {typeof fu.answerContent === 'object' 
                       ? (fu.answerContent.mainAnswer || "Processing...") 
                       : fu.answerContent}
@@ -269,6 +274,15 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
               </div>
             </div>
           ))}
+          {/* Show direct mentor reply for follow-up (mentor flow) */}
+          {question && question.isFollowUp && question.followUpAnswer && (
+            <div className="thread-item">
+              <div className="student-q"><strong>Q:</strong> {question.questionText}</div>
+              <div className="mentor-a">
+                <p>{question.followUpAnswer}</p>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

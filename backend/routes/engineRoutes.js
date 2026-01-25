@@ -38,13 +38,24 @@ router.get('/question-status/:questionId', protect, async (req, res) => {
     }
 
     // 🔥 DEEP POPULATE: Mentor data nested inside AnswerCard to stop loading gear
-    const question = await Question.findOne({ _id: questionId, userId: req.user.userId })
+    let question = await Question.findOne({ _id: questionId, userId: req.user.userId });
+    if (!question) return res.status(404).json({ success: false, error: 'Question not found' });
+
+    // If this is a follow-up, redirect to parent question
+    if (question.isFollowUp && question.parentQuestionId) {
+      return res.json({
+        success: true,
+        redirect: true,
+        parentQuestionId: question.parentQuestionId
+      });
+    }
+
+    // Otherwise, fetch answer card as usual
+    question = await Question.findOne({ _id: questionId, userId: req.user.userId })
       .populate({
         path: 'answerCardId',
         populate: { path: 'mentorId', select: 'name username bio expertise profileImage ratings' }
       });
-
-    if (!question) return res.status(404).json({ success: false, error: 'Question not found' });
 
     // 🚀 HEADER FIX: If it's a follow-up, send original question text as header
     let displayTitle = question.questionText;
@@ -62,8 +73,7 @@ router.get('/question-status/:questionId', protect, async (req, res) => {
         ? question.answerCardId.answerContent
         : { mainAnswer: question.answerCardId.answerContent },
       isInstant: question.status === 'answered_instantly',
-        // 🚀 THE FIX: Hardcoded 94 hatao, Question model se asli score lo
-        matchScore: question.matchScore || 85 // Fallback to 85 if not found
+      matchScore: question.matchScore || 85
     } : null;
 
     res.json({
@@ -151,8 +161,16 @@ router.post('/mentor/submit-experience', protect, async (req, res) => {
         fu => fu.questionId?.toString() === questionId.toString()
       );
       if (followUpIndex !== -1) {
-          // 🔥 Save as object to match schema
-          parentCard.followUpAnswers[followUpIndex].answerContent = { mainAnswer: rawExperience.situation };
+        // 🔥 Save as object to match schema, fallback if situation is missing
+        let mainAnswer = '';
+        if (rawExperience) {
+          if (typeof rawExperience === 'object') {
+            mainAnswer = rawExperience.situation || rawExperience.mainAnswer || '';
+          } else if (typeof rawExperience === 'string') {
+            mainAnswer = rawExperience;
+          }
+        }
+        parentCard.followUpAnswers[followUpIndex].answerContent = { mainAnswer };
         parentCard.followUpAnswers[followUpIndex].answeredAt = new Date();
       } else {
         return res.status(404).json({ success: false, error: 'Follow-up entry not found in parent card' });
@@ -226,24 +244,35 @@ router.post('/submit-follow-up', protect, async (req, res) => {
     const originalQuestion = await Question.findById(answerCard.questionId);
     const targetMentorId = originalQuestion.selectedMentorId;
 
-    // Direct Question Create karein (No Engine matching logic)
-    const followUpQ = new Question({
+    // Check if a follow-up with same text, user, and parent already exists
+    let followUpQ = await Question.findOne({
       userId: req.user.userId,
       questionText: followUpText,
       isFollowUp: true,
-      parentQuestionId: originalQuestion._id,
-      selectedMentorId: targetMentorId, // 🔥 Direct Assignment
-      status: 'mentor_assigned'
+      parentQuestionId: originalQuestion._id
     });
-    await followUpQ.save();
+    if (!followUpQ) {
+      followUpQ = new Question({
+        userId: req.user.userId,
+        questionText: followUpText,
+        isFollowUp: true,
+        parentQuestionId: originalQuestion._id,
+        selectedMentorId: targetMentorId, // 🔥 Direct Assignment
+        status: 'mentor_assigned'
+      });
+      await followUpQ.save();
+    }
 
-    // Parent card update karein
-    answerCard.followUpAnswers.push({ 
-      questionText: followUpText, 
-      questionId: followUpQ._id, 
-      askedAt: new Date() 
+    // Remove all previous entries for this follow-up QID
+    answerCard.followUpAnswers = answerCard.followUpAnswers.filter(fu => fu.questionId?.toString() !== followUpQ._id.toString());
+    // Add the latest (single) entry
+    answerCard.followUpAnswers.push({
+      questionText: followUpText,
+      questionId: followUpQ._id,
+      askedAt: new Date()
     });
-    answerCard.followUpCount += 1;
+    // Set followUpCount to unique QIDs (max 2)
+    answerCard.followUpCount = Math.min(answerCard.followUpAnswers.length, 2);
     await answerCard.save();
 
     // Mentor ko notification bhejein (Direct)
