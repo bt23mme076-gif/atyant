@@ -193,7 +193,7 @@ placeholder="What 2–3 resume rules you NEVER compromise on?
             autoComplete="off"
             className="mentor-dna-input"
 placeholder="What practices you strongly oppose and will never suggest?
-(eg. Paid referrals, fake certificates, exaggerating skills, copy-paste answers)"
+(e.g. Paid referrals, fake certificates, exaggerating skills, copy-paste answers)"
             helperText="Atyant Engine will use this to define your mentor persona. Be as raw and honest as possible."
             multiline
             minRows={2}
