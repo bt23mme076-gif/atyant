@@ -49,9 +49,16 @@ router.put('/me', protect, async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     // 1. Basic Fields update
-    const basicFields = ['username', 'bio', 'city', 'linkedinProfile', 'companyDomain', 'primaryDomain'];
+    const basicFields = ['username', 'bio', 'city', 'linkedinProfile', 'companyDomain', 'primaryDomain', 'strategy'];
     basicFields.forEach(field => {
-      if (updateData[field] !== undefined) user[field] = updateData[field];
+      if (req.body[field] !== undefined) {
+        if (field === 'strategy' && typeof req.body[field] === 'object') {
+          user.strategy = { ...(user.strategy?.toObject?.() || user.strategy || {}), ...req.body[field] };
+          user.markModified('strategy'); // 🔥 Ensure Mongoose saves nested changes
+        } else {
+          user[field] = req.body[field];
+        }
+      }
     });
 
     // 🔥 Handle Enums separately to prevent "" (empty string) errors

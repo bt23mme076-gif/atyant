@@ -193,7 +193,17 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  
+   // Mentor Schema update
+   strategy: {
+     tone: String,          // Blunt, Friendly, or Strategist
+     language: String,      // Hinglish or English
+     hardTruth: String,     // One harsh truth
+     timeWaste: String,     // Biggest time waste for students
+     roadmap: String,       // Their 100-day roadmap
+     resumeTip: String,     // One killer resume signal
+     neverRecommend: String, // Forbidden advice
+     permission: Boolean    // Admin drafting consent
+},
   // ========== MESSAGE CREDITS ==========
   messageCredits: {
     type: Number,

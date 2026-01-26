@@ -1,5 +1,13 @@
-// src/services/api.js
 
+// Mentor API helpers
+export const mentorApi = {
+  updateStrategy: (data) => {
+    return apiCall('/api/mentor/update-strategy', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  }
+};
 // ========================================
 // API BASE URL CONFIGURATION
 // ========================================

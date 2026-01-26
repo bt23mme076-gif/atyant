@@ -2,12 +2,15 @@ import React, { useState, useEffect, useContext, useRef, useCallback } from 'rea
 import { AuthContext } from '../AuthContext';
 import { MapPin, RefreshCw, AlertCircle, CheckCircle, Plus } from 'lucide-react';
 import './ProfilePage.css';
+
+import MentorInfo from './MentorInfo';
 import LoadingSpinner from './LoadingSpinner';
+
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const ProfilePage = () => {
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser, updateUser } = useContext(AuthContext);
   
   const [formData, setFormData] = useState({
     username: '',
@@ -25,6 +28,33 @@ const ProfilePage = () => {
     specialTags: [],
     companyDomain: null, // <-- add this
   });
+
+  // Fetch latest user profile only on mount (not on every user change)
+  useEffect(() => {
+    let didFetch = false;
+    const fetchProfile = async () => {
+      if (didFetch) return;
+      didFetch = true;
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_URL}/api/profile/me`, { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok) {
+          const data = await res.json();
+          updateUser(data); // ✅ Update AuthContext
+          setFormData(prev => ({
+            ...prev,
+            ...data,
+            strategy: data.strategy || prev.strategy
+          }));
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
+      }
+    };
+    fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only on mount
 
   // Options for Structured Tags
   const domains = ['placement', 'internship', 'both'];
@@ -229,22 +259,26 @@ const ProfilePage = () => {
   };
 
   // ========== CHECK IF LOCATION IS ALREADY SAVED ==========
+  // Only check location on mount (not every user change)
   useEffect(() => {
-    if (user && user.token) {
-      checkUserLocation();
-    }
-  }, [user]);
+    checkUserLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const checkUserLocation = async () => {
+    // Guard: Only fetch if user and token exist
+    if (!user || !user.token) {
+      setLocationStatus('disabled');
+      setShowLocationPrompt(true);
+      return;
+    }
     try {
       const response = await fetch(`${API_URL}/api/location/my-location`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
       });
-      
       const data = await response.json();
-      
       if (data.success && data.hasLocation) {
         setCurrentLocation(data.location);
         setLocationStatus('enabled');
@@ -612,6 +646,7 @@ const ProfilePage = () => {
             ))}
             <button type="button" className="add-btn" onClick={addEducation}>+ Add Education</button>
 
+
             {user?.role === 'user' && (
               <>
                 <h3>Student Details</h3>
@@ -631,20 +666,20 @@ const ProfilePage = () => {
 
             {user?.role === 'mentor' && (
               <>
-               <div className="mentor-exciting-section"> {/* 🔥 Container ko yahan se shuru kiya */}
+                <div className="mentor-exciting-section"> {/* 🔥 Container ko yahan se shuru kiya */}
+                  <h3>Mentor Details <small>(USED BY OUR ATYANT ENGINE FOR ACCURATE ROUTING)</small></h3>
+                  <div className="form-group">
+                    <h3>Primary Mentorship Focus*</h3>
+                    <select name="primaryDomain" value={formData.primaryDomain} onChange={(e) => setFormData({...formData, primaryDomain: e.target.value})} className="engine-select">
+                      <option value="">-- Focus --</option>
+                      <option value="placement">Placement Focus</option>
+                      <option value="internship">Internship Focus</option>
+                      <option value="both">Both</option>
+                    </select>
+                  </div>
 
-               <h3>Mentor Details <small>(USED BY OUR ATYANT ENGINE FOR ACCURATE ROUTING)</small></h3>
-               <div className="form-group">
-                 <h3>Primary Mentorship Focus*</h3>
-                 <select name="primaryDomain" value={formData.primaryDomain} onChange={(e) => setFormData({...formData, primaryDomain: e.target.value})} className="engine-select">
-                   <option value="">-- Focus --</option>
-                   <option value="placement">Placement Focus</option>
-                   <option value="internship">Internship Focus</option>
-                   <option value="both">Both</option>
-                 </select>
-               </div>
-
-              {/* 4. Companies Expertise */}
+                  {/* Mentor Info (DNA) Section */}
+                  <MentorInfo mentor={user} onDnaUpdate={setUser} />
                   <div className="form-group">
                     <h3>Companies Expertise*</h3>
                     <div className="chip-input-container">

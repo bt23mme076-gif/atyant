@@ -1,0 +1,94 @@
+/* MentorInfo summary card styles */
+.mentor-dna-summary-card {
+  max-width: 600px;
+  margin: 2rem auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px #e0e7ef99;
+  padding: 2.2rem 2rem 2rem 2rem;
+  border: 1.5px solid #e0e7ef;
+}
+.mentor-dna-summary-title {
+  color: #1976d2;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+.mentor-dna-summary-email {
+  text-align: center;
+  font-size: 1.08rem;
+  color: #333;
+  margin-bottom: 1.2rem;
+}
+.mentor-dna-summary-section {
+  margin-top: 1.5rem;
+}
+.mentor-dna-summary-heading {
+  color: #2350c5;
+  font-size: 1.18rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.7rem;
+  text-transform: uppercase;
+}
+.mentor-dna-summary-list {
+  list-style: none;
+  padding: 0;
+  font-size: 1.13rem;
+  margin: 0;
+}
+.mentor-dna-summary-list li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+.mentor-dna-summary-list b {
+  color: #1976d2;
+  font-weight: 700;
+  margin-right: 0.3rem;
+}
+.mentor-dna-summary-permission {
+  font-weight: 600;
+  color: #388e3c;
+}
+.mentor-dna-summary-btn {
+  margin-top: 1.5rem;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 28px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px #e0e7ef33;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.mentor-dna-summary-btn:hover {
+  background: #1251a3;
+}
+@media (max-width: 600px) {
+  .mentor-dna-summary-card {
+    max-width: 100vw;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+  }
+  .mentor-dna-summary-title {
+    font-size: 1.3rem;
+  }
+  .mentor-dna-summary-heading {
+    font-size: 1rem;
+  }
+  .mentor-dna-summary-list {
+    font-size: 1rem;
+  }
+  .mentor-dna-summary-btn {
+    font-size: 1rem;
+    padding: 10px 0;
+  }
+}

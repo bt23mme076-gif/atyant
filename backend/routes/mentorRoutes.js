@@ -3,6 +3,24 @@ const router = express.Router();
 import User from '../models/User.js';
 import Message from '../models/Message.js';
 import protect from '../middleware/authMiddleware.js';
+// ========== UPDATE MENTOR STRATEGY ========== 
+router.post('/update-strategy', protect, async (req, res) => {
+  try {
+    const { tone, language, hardTruth, timeWaste, roadmap, resumeTip, neverRecommend, permission } = req.body;
+    const mentorId = req.user.id || req.user.userId;
+    const update = {
+      strategy: { tone, language, hardTruth, timeWaste, roadmap, resumeTip, neverRecommend, permission },
+      isStrategyComplete: true
+    };
+    const mentor = await User.findByIdAndUpdate(mentorId, { $set: update }, { new: true });
+    if (!mentor) {
+      return res.status(404).json({ error: 'Mentor not found' });
+    }
+    res.status(200).json({ message: 'Strategy saved! Now we can handle your pending questions.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Update failed' });
+  }
+});
 
 const isDev = process.env.NODE_ENV === 'development';
 

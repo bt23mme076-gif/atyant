@@ -1,0 +1,186 @@
+/* Responsive: Card and content */
+@media (max-width: 600px) {
+  .mentor-dna-form-outer {
+    margin-top: 0.5rem;
+    min-height: 90vh;
+    align-items: flex-start;
+  }
+  .mentor-dna-form-card {
+    max-width: 100vw;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .mentor-dna-form-content {
+    padding: 1.2rem 0.5rem 1.2rem 0.5rem;
+  }
+  .mentor-dna-title {
+    font-size: 1.3rem;
+    margin-bottom: 0.2rem;
+  }
+  .mentor-dna-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+  .mentor-dna-stepper {
+    margin-bottom: 1.2rem;
+  }
+  .mentor-dna-btn-row {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .mentor-dna-btn {
+    min-width: 90px;
+    font-size: 0.98rem;
+    padding: 10px 0;
+  }
+  .mentor-dna-step-content {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Make input and textarea look good and responsive */
+.mentor-dna-input input,
+.mentor-dna-input textarea {
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 1.08rem;
+  padding: 10px 12px;
+  color: #222;
+}
+.mentor-dna-input textarea {
+  min-height: 60px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 1.08rem;
+}
+@media (max-width: 600px) {
+  .mentor-dna-input input,
+  .mentor-dna-input textarea {
+    font-size: 1rem;
+    padding: 8px 8px;
+  }
+  .mentor-dna-input textarea {
+    min-height: 44px;
+  }
+}
+
+/* Stepper scroll for mobile */
+.mentor-dna-stepper {
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+@media (max-width: 600px) {
+  .mentor-dna-stepper {
+    margin-bottom: 1.2rem;
+    padding-bottom: 2px;
+    max-width: 100vw;
+  }
+}
+/* MentorDNAForm custom styles */
+body {
+  background: #f6f8fa;
+}
+.mentor-dna-bg {
+  background: linear-gradient(120deg, #e0e7ef 0%, #f6f8fa 100%);
+  min-height: 100vh;
+}
+.mentor-dna-form-outer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  margin-top: 2rem;
+}
+.mentor-dna-form-card {
+  max-width: 540px;
+  width: 100%;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px #e0e7ef;
+  padding: 0;
+  transition: box-shadow 0.2s;
+}
+.mentor-dna-glass {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 32px #b0c4de44;
+}
+.mentor-dna-form-content {
+  padding: 2.5rem 2rem 2rem 2rem;
+}
+.mentor-dna-title {
+  text-align: center;
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: #1976d2 !important;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+  opacity: 1 !important;
+}
+.mentor-dna-permission {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 1.5rem;
+  margin-top: 0.5rem;
+  padding-left: 0.2rem;
+}
+.mentor-dna-subtitle {
+  text-align: center;
+  font-size: 1.15rem;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+  color: #444;
+}
+.mentor-dna-divider {
+  border-bottom: 1.5px solid #e0e7ef;
+  margin-bottom: 1.5rem;
+}
+.mentor-dna-stepper {
+  margin-bottom: 2rem;
+}
+.mentor-dna-step-content {
+  margin-bottom: 1.5rem;
+}
+.mentor-dna-input input {
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 1.08rem;
+  padding: 10px 12px;
+}
+.mentor-dna-btn-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.mentor-dna-btn {
+  min-width: 110px;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #e0e7ef33;
+  transition: background 0.2s, color 0.2s;
+}
+.mentor-dna-btn-back {
+  color: #1976d2;
+  background: #f0f6ff;
+}
+.mentor-dna-btn-next {
+  background: #1976d2;
+  color: #fff;
+}
+.mentor-dna-btn-next:disabled {
+  background: #b0c4de;
+  color: #fff;
+}
+.mentor-dna-error {
+  color: #d32f2f;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.mentor-dna-success {
+  color: #388e3c;
+  text-align: center;
+  margin-bottom: 1rem;
+}
