@@ -3,48 +3,32 @@ import react from '@vitejs/plugin-react';
 import compression from 'vite-plugin-compression';
 
 export default defineConfig({
+  base: '/',
   plugins: [
     react(),
     compression({ algorithm: 'gzip', ext: '.gz' }),
     compression({ algorithm: 'brotliCompress', ext: '.br' })
   ],
   build: {
-    target: 'es2015',
-    minify: 'terser',
+    target: 'esnext', // Modern browsers ke liye faster build
+    minify: 'esbuild', // Terser se jyada stable hai React 18 ke liye
     sourcemap: false,
     cssCodeSplit: true,
-    chunkSizeWarningLimit: 1000,
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    },
+    chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
-        manualChunks(id) {
+        // Sabhi node_modules ko ek hi vendor file mein rakhein
+        // Isse "Children of undefined" wali error hamesha ke liye khatam ho jayegi
+        manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // Split React libraries separately
-            if (id.includes('react/')) return 'react-core';
-            if (id.includes('react-dom/')) return 'react-dom';
-            if (id.includes('react-router')) return 'react-router';
-            if (id.includes('@tanstack/react-query')) return 'react-query';
-            if (id.includes('socket.io-client')) return 'socket';
-            if (id.includes('lucide-react')) return 'icons';
-            if (id.includes('swiper')) return 'swiper';
-            // Everything else
             return 'vendor';
           }
-        }
-      }
-    }
+        },
+      },
+    },
   },
+  // Esbuild debugging ke liye best hai
   esbuild: {
     drop: ['console', 'debugger'],
-    legalComments: 'none'
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
-    exclude: ['lucide-react']
   }
 });
