@@ -1009,3 +1009,117 @@
 .spinning {
   animation: spin 1s linear infinite;
 }
+
+/* --- Enhanced Mobile Responsiveness --- */
+@media (max-width: 600px) {
+  .profile-page-layout {
+    grid-template-columns: 1fr;
+    padding: 8px 2vw;
+    gap: 12px;
+    min-width: 0;
+    width: 100vw;
+    box-sizing: border-box;
+  }
+  .profile-page-layout .profile-picture-container {
+    position: static;
+    padding: 16px 8px;
+    border-radius: 0;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .profile-page-layout .profile-avatar {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 8px;
+  }
+  .profile-page-layout .upload-btn,
+  .profile-page-layout .save-photo-btn {
+    font-size: 0.95rem;
+    padding: 10px;
+    width: 100%;
+    min-width: 0;
+  }
+  .profile-page-layout .profile-form-container {
+    padding: 12px 6px;
+    border-radius: 0;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .profile-page-layout .profile-form-container h2 {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+  .location-setup-section {
+    padding: 12px 6px;
+    margin-bottom: 12px;
+    border-radius: 0;
+  }
+  .location-header {
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .location-enabled-card {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+    padding: 10px 6px;
+  }
+  .update-location-btn-small {
+    width: 100%;
+    font-size: 0.85rem;
+    padding: 10px 0;
+  }
+  .enable-location-btn {
+    width: 100%;
+    font-size: 0.95rem;
+    padding: 12px 0;
+  }
+  .location-prompt-card {
+    padding: 12px 6px;
+    font-size: 0.95rem;
+  }
+  .chips-wrapper {
+    gap: 6px;
+    padding: 8px 4px;
+    min-height: 40px;
+  }
+  .chip {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+  }
+  .chip-input {
+    min-width: 60px;
+    font-size: 0.85rem;
+  }
+  .chip-add-btn {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+  .unsaved-warning {
+    padding: 8px 6px;
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+  }
+  .mentor-exciting-section {
+    padding: 0.5rem 0.2rem;
+    border-radius: 0;
+  }
+  .domain-cards {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .domain-card {
+    padding: 0.7rem 0.5rem;
+    font-size: 0.95rem;
+  }
+  .tags-row {
+    gap: 0.5rem;
+  }
+  .tag-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+}
