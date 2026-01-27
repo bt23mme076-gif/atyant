@@ -1,6 +1,8 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../AuthContext';
+
+import MentorInfo from './MentorInfo';
 import './AdminDashboard.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -12,6 +14,7 @@ const AdminDashboard = () => {
   const [mentor, setMentor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showMentorDNA, setShowMentorDNA] = useState(false);
   const [answerForm, setAnswerForm] = useState({
     mainAnswer: '',
     situation: '',
@@ -235,8 +238,21 @@ const AdminDashboard = () => {
                   {selectedQuestion.createdAt && (new Date(selectedQuestion.createdAt)).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
                 </div>
                 {selectedQuestion.matchedMentorName && (
-                  <div style={{fontSize:'13px', color:'#2563eb', marginTop:4}}>
+                  <div style={{fontSize:'13px', color:'#2563eb', marginTop:4, display:'flex', alignItems:'center', gap:8}}>
                     Matched Mentor: <span style={{fontWeight:600}}>{selectedQuestion.matchedMentorName}</span>
+                    {mentor && (
+                      <button
+                        style={{marginLeft:12, padding:'2px 10px', fontSize:'12px', borderRadius:6, border:'1px solid #2563eb', background:'#f1f5fe', color:'#2563eb', cursor:'pointer'}}
+                        onClick={() => setShowMentorDNA(v => !v)}
+                      >
+                        {showMentorDNA ? 'Hide DNA' : 'Show DNA'}
+                      </button>
+                    )}
+                  </div>
+                )}
+                {showMentorDNA && mentor && (
+                  <div style={{margin:'18px 0'}}>
+                    <MentorInfo mentor={mentor} onDnaUpdate={m => setMentor(m)} />
                   </div>
                 )}
               </div>

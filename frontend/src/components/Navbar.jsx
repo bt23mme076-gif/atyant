@@ -102,12 +102,7 @@ const Navbar = () => {
           <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
             {!isMobile && <GraduationCap size={18} />}
             Internships
-          </Link>
-          <Link to="/nearby-mentors" className="nav-link nearby-mentors" onClick={linkAction}>
-            Nearby Achievers
-          </Link>
-          
-          <Link to="/chat" className="nav-link" onClick={linkAction}>My Chats</Link>
+          </Link>      
         </>
       );
     }
