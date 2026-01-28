@@ -1,21 +1,19 @@
-
-import React from 'react';
+import React, { useState } from 'react';
+import MentorDNAForm from './MentorDNAForm';
 import './MentorInfo.css';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-
-// Only show summary, never allow edit (admin view)
-export default function MentorInfo({ mentor }) {
-
+export default function MentorInfo({ mentor, onDnaUpdate }) {
+  const [editing, setEditing] = useState(false);
 
   // Loading guard: don't render until mentor data is loaded
   if (!mentor || !mentor.email) {
     return <div>Loading Mentoring DNA...</div>;
   }
 
-
-  // Show summary if DNA exists (tone filled)
+  // Show summary if DNA exists (tone filled) and not editing
   const hasStrategy = !!(mentor?.strategy?.tone);
-  if (hasStrategy) {
+  if (hasStrategy && !editing) {
     return (
       <div className="mentor-dna-summary-card">
         <h2 className="mentor-dna-summary-title">{mentor.name || mentor.username}</h2>
@@ -34,14 +32,22 @@ export default function MentorInfo({ mentor }) {
             <li><b>Permission:</b> <span className="mentor-dna-summary-permission">{mentor.strategy.permission ? 'Yes' : 'No'}</span></li>
           </ul>
         </div>
+        <button className="mentor-dna-summary-btn" onClick={() => setEditing(true)}>Edit DNA</button>
       </div>
     );
   }
 
-  // If no DNA, show message
+  // Show form if not filled or editing
   return (
-    <div className="mentor-dna-summary-card" style={{textAlign:'center', color:'#888', fontSize:'1.1rem', padding:'2rem'}}>
-      No DNA available for this mentor.
+    <div style={{ maxWidth: 600, margin: '2rem auto' }}>
+      <MentorDNAForm
+        strategy={mentor.strategy || {}}
+        onSuccess={async (newStrategy) => {
+          if (refreshMentor) await refreshMentor();
+          if (onDnaUpdate) onDnaUpdate({ ...mentor, strategy: { ...mentor.strategy, ...newStrategy } });
+          setEditing(false);
+        }}
+      />
     </div>
   );
 }

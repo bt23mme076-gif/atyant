@@ -75,6 +75,9 @@ const AdminDashboard = () => {
       additionalNotes: ''
     });
     try {
+    const handleDnaUpdate = (updatedMentor) => {
+      setMentor(updatedMentor);
+    };
       const res = await fetch(`${API_URL}/api/mentor/mentors/${q.matchedMentorId}`, {
         headers: {
           Authorization: `Bearer ${user?.token}`
@@ -252,7 +255,18 @@ const AdminDashboard = () => {
                 )}
                 {showMentorDNA && mentor && (
                   <div style={{margin:'18px 0'}}>
-                    <MentorInfo mentor={mentor} onDnaUpdate={m => setMentor(m)} />
+                    <MentorInfo mentor={mentor} onDnaUpdate={m => setMentor(m)} refreshMentor={async () => {
+                      if (!selectedQuestion?.matchedMentorId) return;
+                      try {
+                        const res = await fetch(`${API_URL}/api/mentor/mentors/${selectedQuestion.matchedMentorId}`, {
+                          headers: { Authorization: `Bearer ${user?.token}` }
+                        });
+                        const data = await res.json();
+                        setMentor(data);
+                      } catch (err) {
+                        console.error('Failed to refresh mentor');
+                      }
+                    }} />
                   </div>
                 )}
               </div>
