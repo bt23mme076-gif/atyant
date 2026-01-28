@@ -19,6 +19,16 @@
   --text-muted: #64748b;
   --border-color: #334155;
   --border-hover: #475569;
+
+  .cgpa-input::placeholder {
+  color: #1d4ed8 !important;
+  opacity: 0.7;
+}
+
+label[for*="cgpa"], label:has(+ .cgpa-input), label:has(input.cgpa-input) {
+  color: #1d4ed8 !important;
+  font-weight: bold;
+}
   
   /* Effects */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
