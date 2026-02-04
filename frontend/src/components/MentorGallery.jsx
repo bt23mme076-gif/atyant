@@ -4,7 +4,7 @@ import './MentorGallery.css';
 import defaultAvatar from '../assets/default-avatar.svg';
 
 // ✅ CACHE CONSTANTS
-const CACHE_TIME = 20 * 60 * 1000; // 20 minutes
+const CACHE_TIME = 40 * 60 * 1000; // 40 minutes
 const CACHE_KEY = 'mentors_gallery_cache';
 
 const MentorGallery = () => {
