@@ -132,8 +132,63 @@ const HeroSection = () => {
 
     setSubmitting(true);
     setLoading(true);
+    
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      
+      // Fetch user profile to check completion
+      const profileRes = await fetch(`${API_URL}/api/profile/me`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      
+      if (!profileRes.ok) {
+        alert('Failed to verify profile. Please try again.');
+        setSubmitting(false);
+        setLoading(false);
+        return;
+      }
+      
+      const profileData = await profileRes.json();
+      
+      // Debug: Log profile data
+      console.log('📋 Profile Data:', profileData);
+      console.log('Username:', profileData.username);
+      console.log('Bio:', profileData.bio);
+      console.log('Education:', profileData.education);
+      
+      // Check if required profile fields are filled (removed skills/expertise)
+      const hasUsername = !!profileData.username;
+      const hasBio = !!profileData.bio;
+      const hasEducation = profileData.education && Array.isArray(profileData.education) && profileData.education.length > 0;
+      
+      const isProfileComplete = hasUsername && hasBio && hasEducation;
+      
+      console.log('✅ Profile Complete:', isProfileComplete);
+      console.log('Has Username:', hasUsername);
+      console.log('Has Bio:', hasBio);
+      console.log('Has Education:', hasEducation);
+      
+      if (!isProfileComplete) {
+        const missingFields = [];
+        if (!hasUsername) missingFields.push('Username');
+        if (!hasBio) missingFields.push('Bio');
+        if (!hasEducation) missingFields.push('Education');
+
+        alert(`Please complete your profile. Missing: ${missingFields.join(', ')}`);
+        console.log('❌ Profile incomplete, redirecting to profile page');
+        localStorage.setItem('pendingQuestion', problem);
+        navigate('/profile');
+        setSubmitting(false);
+        setLoading(false);
+        return;
+      }
+      
+      console.log('✅ Profile complete, submitting question');
+      
+      // Profile is complete, proceed with question submission
       const res = await fetch(`${API_URL}/api/engine/submit-question`, {
         method: 'POST',
         headers: {

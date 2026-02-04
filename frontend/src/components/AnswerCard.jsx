@@ -291,12 +291,6 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
           ============================= */}
       {(answerCard.audioUrl || answerCard.transcript) && (
         <div className="mentor-audio-answer">
-          {/* DEBUG: Show user and audioUrl info for troubleshooting */}
-          {process.env.NODE_ENV === 'development' && (
-            <pre style={{background:'#f3f3f3',color:'#333',fontSize:12,padding:8,borderRadius:4,marginBottom:8}}>
-              {JSON.stringify({ user, audioUrl: answerCard.audioUrl }, null, 2)}
-            </pre>
-          )}
           {answerCard.audioUrl && (
             <>
               <div className="mentor-audio-label-row-modern">
