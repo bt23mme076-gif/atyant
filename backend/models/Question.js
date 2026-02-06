@@ -8,13 +8,56 @@ const questionSchema = new mongoose.Schema({
     required: true
   },
   
-  // Question text
+  // NEW: Question title
+  title: {
+    type: String,
+    required: false, // Not required for backward compatibility
+    trim: true,
+    minlength: 10,
+    maxlength: 200,
+    default: function() {
+      // Default to first 50 chars of questionText if not provided
+      return this.questionText ? this.questionText.substring(0, 50) : '';
+    }
+  },
+  
+  // Question text (main field)
   questionText: {
     type: String,
     required: true,
     trim: true,
     minlength: 10,
     maxlength: 1000
+  },
+  
+  // NEW: Category
+  category: {
+    type: String,
+    required: false, // Not required for backward compatibility
+    enum: [
+      'Academic & College Life',
+      'Technical Skills',
+      'Career Growth',
+      'Personal Development',
+      'Entrepreneurship'
+    ],
+    default: 'Career Growth'
+  },
+  
+  // NEW: Reason for asking
+  reason: {
+    type: String,
+    trim: true,
+    maxlength: 500,
+    default: ''
+  },
+  
+  // NEW: Quality score from AI check
+  qualityScore: {
+    type: Number,
+    min: 0,
+    max: 100,
+    default: 0
   },
   
   // Keywords extracted from question
@@ -30,6 +73,14 @@ const questionSchema = new mongoose.Schema({
     default: null
   },
   
+  // NEW: Match percentage with selected mentor
+  matchPercentage: {
+    type: Number,
+    min: 0,
+    max: 100,
+    default: 0
+  },
+  
   // Mentor selection logic/reason (for internal tracking)
   selectionReason: {
     type: String,
@@ -40,15 +91,18 @@ const questionSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: [
+      'draft',
+      'submitted',
       'pending',
       'mentor_assigned',
       'awaiting_experience',
       'experience_submitted',
       'answer_generated',
       'delivered',
-      'answered_instantly' // 🚀 Bas ye ek line add karni hai
+      'answered_instantly',
+      'failed'
     ],
-    default: 'pending'
+    default: 'draft'
   },
   
   // Answer Card ID (once generated)
@@ -103,6 +157,17 @@ const questionSchema = new mongoose.Schema({
     default: null
   },
   
+  // NEW: Edit tracking (5 minute edit window)
+  lastEditedAt: {
+    type: Date,
+    default: null
+  },
+  
+  isEditable: {
+    type: Boolean,
+    default: true
+  },
+  
   // Metadata
   createdAt: {
     type: Date,
@@ -112,11 +177,37 @@ const questionSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+}, {
+  timestamps: true,
+  toJSON: { virtuals: true, getters: true },
+  toObject: { virtuals: true, getters: true }
 });
 
-// Update timestamp on save
+// Virtual for 'description' - alias for questionText (for backward compatibility)
+questionSchema.virtual('description').get(function() {
+  return this.questionText;
+}).set(function(value) {
+  this.questionText = value;
+});
+
+// Method to check if question is editable (within 5 minutes of submission)
+questionSchema.methods.checkEditable = function() {
+  if (!this.createdAt) return false;
+  const fiveMinutes = 5 * 60 * 1000;
+  const timePassed = Date.now() - this.createdAt.getTime();
+  return timePassed < fiveMinutes && this.status === 'submitted';
+};
+
+// Update isEditable and timestamp before save
 questionSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
+  
+  if (this.isNew) {
+    this.isEditable = true;
+  } else if (this.status !== 'draft') {
+    this.isEditable = this.checkEditable();
+  }
+  
   next();
 });
 

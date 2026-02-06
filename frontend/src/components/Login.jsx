@@ -62,26 +62,11 @@ const Login = () => {
       // Check for pending question from home page
       const pendingQuestion = localStorage.getItem('pendingQuestion');
       if (pendingQuestion) {
+        // Keep the question in localStorage as 'draftQuestion' for enhanced flow
         localStorage.removeItem('pendingQuestion');
-        // Submit the question after a short delay to ensure auth is ready
-        setTimeout(async () => {
-          try {
-            const submitResponse = await axios.post(
-              `${API_URL}/api/engine/submit-question`,
-              { questionText: pendingQuestion },
-              { headers: { Authorization: `Bearer ${response.data.token}` } }
-            );
-            if (submitResponse.data.success) {
-              navigate(`/engine/${submitResponse.data.questionId}`);
-              return;
-            }
-          } catch (err) {
-            console.error('Failed to submit pending question:', err);
-          }
-          // Fallback to normal navigation if question submission fails
-          const userRole = response.data.user?.role || 'user';
-          navigate(userRole === 'mentor' ? '/dashboard' : '/');
-        }, 500);
+        localStorage.setItem('draftQuestion', pendingQuestion);
+        // Redirect to enhanced ask page
+        navigate('/ask');
       } else {
         // Normal redirect
         const userRole = response.data.user?.role || 'user';
@@ -109,37 +94,15 @@ const Login = () => {
       if (res.ok) {
         login(data.token);
         toast.success('Logged in with Google!');
-        
+
         // Check for pending question from home page
         const pendingQuestion = localStorage.getItem('pendingQuestion');
         if (pendingQuestion) {
+          // Keep the question in localStorage as 'draftQuestion' for enhanced flow
           localStorage.removeItem('pendingQuestion');
-          // Submit the question after a short delay to ensure auth is ready
-          setTimeout(async () => {
-            try {
-              const submitResponse = await fetch(
-                `${API_URL}/api/engine/submit-question`,
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${data.token}`
-                  },
-                  body: JSON.stringify({ questionText: pendingQuestion })
-                }
-              );
-              const submitData = await submitResponse.json();
-              if (submitData.success) {
-                navigate(`/engine/${submitData.questionId}`);
-                return;
-              }
-            } catch (err) {
-              console.error('Failed to submit pending question:', err);
-            }
-            // Fallback to normal navigation if question submission fails
-            const userRole = data.user?.role || 'user';
-            navigate(userRole === 'mentor' ? '/dashboard' : '/');
-          }, 500);
+          localStorage.setItem('draftQuestion', pendingQuestion);
+          // Redirect to enhanced ask page
+          navigate('/ask');
         } else {
           // Normal redirect
           const userRole = data.user?.role || 'user';

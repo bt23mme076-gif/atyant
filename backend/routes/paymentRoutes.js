@@ -26,39 +26,76 @@ const razorpay = new Razorpay({
 // Create a payment order
 router.post('/create-order', protect, async (req, res) => {
   try {
+    // Get amount and credits from request body, with defaults
+    const { amount = 1, credits = 5 } = req.body;
+    
+    // Convert rupees to paisa (Razorpay requires amount in smallest currency unit)
+    const amountInPaisa = amount * 100;
+    
     const options = {
-      amount: 500, // Amount in paisa (e.g., 5.00 INR)
+      amount: amountInPaisa, // Amount in paisa (e.g., 1.00 = 4900 paisa)
       currency: 'INR',
+      receipt: `rcpt_${Date.now()}`,
+      notes: {
+        credits: credits,
+        userId: req.user.userId
+      }
     };
+    
     const order = await razorpay.orders.create(options);
-    res.json(order);
+    
+    // Send order details back to frontend
+    res.json({
+      ...order,
+      creditsToAdd: credits
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error creating order' });
+    console.error('Error creating order:', error);
+    res.status(500).json({ message: 'Error creating order', error: error.message });
   }
 });
 
 // Verify the payment
 router.post('/verify-payment', protect, async (req, res) => {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
 
-    const expectedSignature = crypto
-        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-        .update(body.toString())
-        .digest('hex');
+        const expectedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .update(body.toString())
+            .digest('hex');
 
-    if (expectedSignature === razorpay_signature) {
-    // --- ADD THIS LOGIC ---
-    const user = await User.findById(req.user.userId);
-    if (user) {
-        user.messageCredits += 20; // Add 20 credits on successful purchase
-        await user.save();
+        if (expectedSignature === razorpay_signature) {
+            // Fetch order details to get the credits amount
+            const order = await razorpay.orders.fetch(razorpay_order_id);
+            const creditsToAdd = parseInt(order.notes?.credits) || 5; // Default to 5 if not found
+            
+            // Add credits to user - both for messages AND questions
+            const user = await User.findById(req.user.userId);
+            if (user) {
+                // Add to both message credits (for chat) and question credits
+                user.messageCredits = (user.messageCredits || 0) + creditsToAdd;
+                user.credits = (user.credits || 0) + creditsToAdd;
+                await user.save();
+                
+                console.log(`✅ Added ${creditsToAdd} credits to user ${user.username}. Message Credits: ${user.messageCredits}, Question Credits: ${user.credits}`);
+            }
+            
+            res.json({ 
+                success: true, 
+                message: 'Payment verified successfully',
+                creditsAdded: creditsToAdd,
+                messageCredits: user.messageCredits,
+                questionCredits: user.credits
+            });
+        } else {
+            res.status(400).json({ success: false, message: 'Payment verification failed' });
+        }
+    } catch (error) {
+        console.error('Payment verification error:', error);
+        res.status(500).json({ success: false, message: 'Error verifying payment', error: error.message });
     }
-    res.json({ success: true, message: 'Payment verified successfully' });
-} else {
-    res.status(400).json({ success: false, message: 'Payment verification failed' });
-}
-    
 });
 
 // Create Razorpay order for mentorship purchase

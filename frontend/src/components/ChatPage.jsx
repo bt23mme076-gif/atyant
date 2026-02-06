@@ -773,6 +773,10 @@ const ChatPage = ({ recipientId, recipientName }) => {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          amount: 1, // 1 for 5 credits
+          credits: 5
+        })
       });
       if (!orderResponse.ok) {
         const t = await orderResponse.text();
@@ -785,7 +789,7 @@ const ChatPage = ({ recipientId, recipientName }) => {
         amount: order.amount,
         currency: order.currency,
         name: "Atyant",
-        description: "Mentor Chat Credits",
+        description: "Chat Credits - 5 Credits for 1",
         order_id: order.id,
         handler: async function (response) {
           const verificationResponse = await fetch(`${API_URL}/api/payment/verify-payment`, {
@@ -797,7 +801,29 @@ const ChatPage = ({ recipientId, recipientName }) => {
           });
           const result = await verificationResponse.json();
           if (result.success) {
-            toast.success("Payment successful! Credits added.");
+            toast.success(`🎉 Payment successful! ${result.creditsAdded || 5} credits added to your account.`, {
+              position: "top-center",
+              autoClose: 4000,
+            });
+            
+            console.log('✅ Payment verified. New balances:', {
+              messageCredits: result.messageCredits,
+              questionCredits: result.questionCredits
+            });
+            
+            // Update message credits in state
+            if (result.messageCredits !== undefined) {
+              setCredits(result.messageCredits);
+            } else {
+              // Fallback: Refresh credits from profile
+              const profileRes = await fetch(`${API_URL}/api/profile/me`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+              });
+              if (profileRes.ok) {
+                const data = await profileRes.json();
+                setCredits(data.messageCredits);
+              }
+            }
           } else {
             toast.error("Payment verification failed. Please contact support.");
           }
@@ -950,7 +976,9 @@ const ChatPage = ({ recipientId, recipientName }) => {
           {currentUser && currentUser.role === 'user' && (
             <div className="credits-section">
               <p>Credits Remaining: {credits !== null ? credits : 'Loading...'}</p>
-              <button onClick={handlePayment} className="buy-credits-btn">Buy More Credits Rs 5 - 2 Questions</button>
+              <button onClick={handlePayment} className="buy-credits-btn">
+                💳 Buy 5 Credits - 1
+              </button>
             </div>
           )}
           {contactList.length === 0 ? (
@@ -1221,8 +1249,10 @@ const ChatPage = ({ recipientId, recipientName }) => {
             </div>
             {currentUser?.role === 'user' && (credits === 0 || credits < 0) ? (
               <div className="limit-reached-overlay">
-                <p>Your free limit is over.</p>
-                <button onClick={handlePayment} className="buy-credits-btn">Buy Credits to Continue</button>
+                <p>Your credits are over. Buy more to continue chatting! 💬</p>
+                <button onClick={handlePayment} className="buy-credits-btn">
+                  💳 Buy 5 Credits - 1
+                </button>
               </div>
             ) : (
               <form onSubmit={handleSendMessage} className="message-form">

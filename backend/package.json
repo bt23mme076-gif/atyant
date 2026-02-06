@@ -17,6 +17,7 @@
     "googleapis": "^170.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "lru-cache": "^11.2.5",
     "mongodb": "^6.19.0",
     "mongoose": "^8.19.1",
     "multer": "^2.0.2",

@@ -601,31 +601,34 @@ const ProfilePage = () => {
             )}
           </div>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} autoComplete="off">
             <h3>Basic Information</h3>
             <input name="username" value={formData.username} onChange={handleChange} placeholder="Username" required />
             <textarea name="bio" value={formData.bio} onChange={handleChange} placeholder="Bio..." rows="4" />
             <input name="linkedinProfile" value={formData.linkedinProfile} onChange={handleChange} placeholder="LinkedIn URL" />
 
             <h3>Education</h3>
-            <select name="city" value={formData.city} onChange={handleChange} required>
-              <option value="" disabled>-- Select Your City --</option>
+            <select name="city" value={formData.city} onChange={handleChange} required autoComplete="off">
+              <option value="">-- Select Your City / None --</option>
               {cities.map(city => <option key={city} value={city}>{city}</option>)}
             </select>
 
             {formData.education.map((edu, index) => (
               <div key={index} className="education-group">
                 <select value={edu.institution} onChange={(e) => handleEducationChange(index, 'institution', e.target.value)} required>
-                  <option value="" disabled>-- Select Your College --</option>
+                  <option value="">-- Select Your College / None --</option>
                   {formData.city && collegeData[formData.city]?.map(college => <option key={college} value={college}>{college}</option>)}
                 </select>
                 <select value={edu.degree} onChange={(e) => handleEducationChange(index, 'degree', e.target.value)} required>
+                  <option value="">-- Degree / None --</option>
                   {degrees.map(degree => <option key={degree} value={degree}>{degree}</option>)}
                 </select>
                 <select value={edu.year} onChange={(e) => handleEducationChange(index, 'year', e.target.value)} required>
+                  <option value="">-- Year / None --</option>
                   {years.map(year => <option key={year} value={year}>{year}</option>)}
                 </select>
                 <select value={edu.field} onChange={(e) => handleEducationChange(index, 'field', e.target.value)} required>
+                  <option value="">-- Branch / None --</option>
                   {branches.map(branch => <option key={branch} value={branch}>{branch}</option>)}
                 </select>
                 <div>

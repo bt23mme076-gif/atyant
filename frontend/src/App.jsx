@@ -33,6 +33,7 @@ const InternshipPage = lazy(() => import('./components/InternshipPage'));
 const EngineView = lazy(() => import('./components/EngineView')); // ✅ ATYANT ENGINE
 const MentorDashboard = lazy(() => import('./components/MentorDashboard')); // ✅ MENTOR DASHBOARD
 const MyQuestions = lazy(() => import('./components/MyQuestions')); // ✅ USER QUESTIONS LIST
+const EnhancedAskQuestion = lazy(() => import('./components/EnhancedAskQuestion')); // ✅ NEW ENHANCED ASK FLOW
 const InternshipJourney = lazy(() => import('./components/InternshipJourney'));
 const IITLinksPage = lazy(() => import('./components/IITLinksPage'));
 const IIMLinksPage = lazy(() => import('./components/IIMLinksPage'));
@@ -166,6 +167,13 @@ function App() {
               <Route path="/my-questions" element={
                 <ProtectedRoute>
                   <MyQuestions />
+                </ProtectedRoute>
+              } />
+              
+              {/* ✅ NEW ENHANCED ASK QUESTION FLOW */}
+              <Route path="/ask" element={
+                <ProtectedRoute>
+                  <EnhancedAskQuestion />
                 </ProtectedRoute>
               } />
               

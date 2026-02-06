@@ -17,6 +17,7 @@ const HeroSection = () => {
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [showConfirmPrompt, setShowConfirmPrompt] = useState(false);
   const statsRef = useRef(null);
   const suggestionsRef = useRef(null);
   const navigate = useNavigate();
@@ -120,23 +121,13 @@ const HeroSection = () => {
     fetchSuggestions();
   }, [user]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!problem.trim()) return;
-
-    if (!user?.token) {
-      localStorage.setItem('pendingQuestion', problem);
-      navigate('/login');
-      return;
-    }
-
+  const sendQuestion = async () => {
     setSubmitting(true);
     setLoading(true);
-    
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       
-      // Fetch user profile to check completion
+      // Check profile completion before redirecting
       const profileRes = await fetch(`${API_URL}/api/profile/me`, {
         method: 'GET',
         headers: {
@@ -146,69 +137,52 @@ const HeroSection = () => {
       
       if (!profileRes.ok) {
         alert('Failed to verify profile. Please try again.');
-        setSubmitting(false);
-        setLoading(false);
         return;
       }
       
       const profileData = await profileRes.json();
-      
-      // Debug: Log profile data
       console.log('📋 Profile Data:', profileData);
-      console.log('Username:', profileData.username);
-      console.log('Bio:', profileData.bio);
-      console.log('Education:', profileData.education);
-      
-      // Check if required profile fields are filled (removed skills/expertise)
+
       const hasUsername = !!profileData.username;
       const hasBio = !!profileData.bio;
       const hasEducation = profileData.education && Array.isArray(profileData.education) && profileData.education.length > 0;
-      
       const isProfileComplete = hasUsername && hasBio && hasEducation;
-      
+
       console.log('✅ Profile Complete:', isProfileComplete);
-      console.log('Has Username:', hasUsername);
-      console.log('Has Bio:', hasBio);
-      console.log('Has Education:', hasEducation);
-      
+
       if (!isProfileComplete) {
         const missingFields = [];
         if (!hasUsername) missingFields.push('Username');
         if (!hasBio) missingFields.push('Bio');
         if (!hasEducation) missingFields.push('Education');
-
-        alert(`Please complete your profile. Missing: ${missingFields.join(', ')}`);
-        console.log('❌ Profile incomplete, redirecting to profile page');
+        alert(`Please complete your profile first. Missing: ${missingFields.join(', ')}`);
         localStorage.setItem('pendingQuestion', problem);
         navigate('/profile');
-        setSubmitting(false);
-        setLoading(false);
         return;
       }
+
+      // Store question and redirect to enhanced ask page
+      localStorage.setItem('draftQuestion', problem);
+      navigate('/ask');
       
-      console.log('✅ Profile complete, submitting question');
-      
-      // Profile is complete, proceed with question submission
-      const res = await fetch(`${API_URL}/api/engine/submit-question`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
-        },
-        body: JSON.stringify({ questionText: problem })
-      });
-      const data = await res.json();
-      if (data.success) {
-        navigate(`/engine/${data.questionId}`);
-      } else {
-        alert('Failed to submit question. Please try again.');
-      }
-    } catch {
+    } catch (error) {
+      console.error('Error:', error);
       alert('Network error. Please try again.');
     } finally {
       setSubmitting(false);
       setLoading(false);
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!problem.trim()) return;
+    if (!user?.token) {
+      localStorage.setItem('pendingQuestion', problem);
+      navigate('/login');
+      return;
+    }
+    setShowConfirmPrompt(true);
   };
 
   const handleQuestionClick = () => {
@@ -317,6 +291,32 @@ const HeroSection = () => {
             )}
           </div>
         </form>
+
+        {/* Confirmation Modal - Outside form */}
+        {showConfirmPrompt && (
+          <div className="hero-confirm-overlay" role="dialog" aria-modal="true" onClick={() => setShowConfirmPrompt(false)}>
+            <div className="hero-confirm-card" onClick={(e) => e.stopPropagation()}>
+              <p className="hero-confirm-label">Ready to get your answer?</p>
+              <h3>Let's find the perfect mentor for you</h3>
+              <p className="hero-confirm-body">We'll match your question with experienced mentors and guide you through a personalized answer flow.</p>
+              <div className="hero-confirm-actions">
+                <button type="button" className="hero-confirm-edit" onClick={() => setShowConfirmPrompt(false)}>
+                  Edit question
+                </button>
+                <button
+                  type="button"
+                  className="hero-confirm-send"
+                  onClick={() => {
+                    setShowConfirmPrompt(false);
+                    sendQuestion();
+                  }}
+                >
+                  Continue to submit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Stats Section */}
         <div className="stats-container" ref={statsRef}>

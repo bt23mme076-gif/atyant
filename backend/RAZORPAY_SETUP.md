@@ -4,7 +4,7 @@
 
 ### Features Implemented:
 1. **3 Mentorship Options**:
-   - 💬 Chat Session: ₹499
+   - 💬 Chat Session: 19
    - 🎥 Video Call: ₹999
    - 📚 Complete Roadmap: ₹1,499
 

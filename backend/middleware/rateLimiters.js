@@ -27,8 +27,19 @@ export const chatInfoLimiter = rateLimit({
     legacyHeaders: false,
 });
 
+// 🔥 QUESTION SUBMISSION rate limiter (DDoS protection)
+export const questionLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000, // 10 minutes
+    max: 20, // limit to 20 questions per 10 minutes
+    message: 'Too many questions submitted. Please slow down and try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: false, // count all requests
+});
+
 export default {
     apiLimiter,
     chatMessageLimiter,
-    chatInfoLimiter
+    chatInfoLimiter,
+    questionLimiter
 };

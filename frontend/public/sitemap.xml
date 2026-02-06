@@ -17,12 +17,4 @@
     <priority>0.9</priority>
   </url>
 
-  <!-- Nearby Mentors Page -->
-  <url>
-    <loc>https://atyant.in/nearby-mentors</loc>
-    <lastmod>2025-01-02</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
-  </url>
-
 </urlset>

@@ -89,32 +89,9 @@ const AskQuestionPage = () => {
     e.preventDefault();
     if (!question.trim()) return;
 
-    setLoading(true);
-    setHasSearched(true);
-    try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${API_URL}/api/engine/submit-question`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`
-        },
-        body: JSON.stringify({ questionText: question })
-      });
-      const data = await response.json();
-      
-      if (data.success) {
-        setEngineResult(data);
-        // Navigate to engine view
-        navigate(`/engine/${data.questionId}`);
-      } else {
-        console.error('Engine error:', data.error);
-      }
-    } catch (error) {
-      console.error('Failed to submit question:', error);
-    } finally {
-      setLoading(false);
-    }
+    // Store question and redirect to enhanced ask page
+    localStorage.setItem('draftQuestion', question);
+    navigate('/ask');
   };
 
   // Legacy function - kept for compatibility but not used

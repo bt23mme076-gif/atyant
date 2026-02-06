@@ -208,11 +208,60 @@ const userSchema = new mongoose.Schema({
   messageCredits: {
     type: Number,
     default: 5
+  },
+  
+  // ========== QUESTION CREDITS ==========
+  credits: {
+    type: Number,
+    default: 3,
+    min: 0
+  },
+  
+  profileStrength: {
+    type: Number,
+    min: 0,
+    max: 100,
+    default: 0
   }
   
 }, { 
   timestamps: true 
 });
+
+// Method to calculate profile strength
+userSchema.methods.calculateProfileStrength = function() {
+  let strength = 0;
+  const checks = {
+    username: 10,
+    bio: 15,
+    profilePicture: 10,
+    education: 20,
+    interests: 15,
+    city: 10,
+    linkedinProfile: 10,
+    expertise: 10
+  };
+  
+  for (const [field, points] of Object.entries(checks)) {
+    if (field === 'education') {
+      if (this.education && this.education.length > 0 && this.education[0].institution) {
+        strength += points;
+      }
+    } else if (field === 'interests') {
+      if (this.interests && this.interests.length > 0) {
+        strength += points;
+      }
+    } else if (field === 'expertise') {
+      if (this.role === 'mentor' && this.expertise && this.expertise.length > 0) {
+        strength += points;
+      }
+    } else if (this[field]) {
+      strength += points;
+    }
+  }
+  
+  return Math.min(100, strength);
+};
 
 // ✅ Sparse index - only indexes documents where coordinates exist
 userSchema.index({ 'location.coordinates': '2dsphere' }, { sparse: true });
@@ -222,6 +271,8 @@ userSchema.pre('save', function(next) {
   if (this.location && (!this.location.type || !Array.isArray(this.location.coordinates) || this.location.coordinates.length !== 2)) {
     this.location = undefined;
   }
+  // Update profile strength automatically
+  this.profileStrength = this.calculateProfileStrength();
   next();
 });
 

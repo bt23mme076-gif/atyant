@@ -31,7 +31,7 @@ const MyQuestions = () => {
   const fetchMyQuestions = async () => {
     try {
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/api/engine/my-questions`, {
+      const response = await fetch(`${API_URL}/api/questions/my-questions`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
         }
@@ -51,21 +51,35 @@ const MyQuestions = () => {
 
   const getStatusBadge = (status) => {
     const badges = {
-      'pending': { label: 'Pending', color: '#f59e0b' },
-      'mentor_assigned': { label: 'Assigned to Mentor', color: '#3b82f6' },
-      'awaiting_experience': { label: 'Awaiting Experience', color: '#8b5cf6' },
-      'experience_submitted': { label: 'Processing Answer', color: '#10b981' },
-      'answer_generated': { label: 'Answer Ready', color: '#059669' },
-      'delivered': { label: 'Delivered', color: '#059669' }
+      'draft': { label: 'Draft', color: '#9ca3af', icon: '📝' },
+      'submitted': { label: 'Submitted', color: '#3b82f6', icon: '📨' },
+      'pending': { label: 'Pending', color: '#f59e0b', icon: '⏳' },
+      'mentor_assigned': { label: 'Assigned to Mentor', color: '#8b5cf6', icon: '👤' },
+      'awaiting_experience': { label: 'Awaiting Response', color: '#f59e0b', icon: '⏳' },
+      'experience_submitted': { label: 'Processing Answer', color: '#10b981', icon: '⚙️' },
+      'answer_generated': { label: 'Answer Ready', color: '#059669', icon: '✅' },
+      'delivered': { label: 'Delivered', color: '#059669', icon: '✓' },
+      'answered_instantly': { label: 'Instant Answer', color: '#10b981', icon: '⚡' }
     };
     
-    const badge = badges[status] || { label: status, color: '#6b7280' };
+    const badge = badges[status] || { label: status, color: '#6b7280', icon: '•' };
     
     return (
       <span className="status-badge" style={{ background: badge.color }}>
-        {badge.label}
+        {badge.icon} {badge.label}
       </span>
     );
+  };
+  
+  const getTimeRemaining = (createdAt) => {
+    const created = new Date(createdAt);
+    const now = new Date();
+    const diff = (now - created) / 1000 / 60; // minutes
+    const remaining = 5 - diff;
+    
+    if (remaining <= 0) return null;
+    
+    return Math.ceil(remaining);
   };
 
   if (loading) {
@@ -84,21 +98,48 @@ const MyQuestions = () => {
           <div className="empty-icon">💭</div>
           <h2>No questions yet</h2>
           <p>Ask your first question to get personalized answers from expert mentors!</p>
-          <Link to="/" className="ask-button">
+          <Link to="/ask" className="ask-button">
             Ask a Question
           </Link>
         </div>
       ) : (
         <div className="questions-grid">
           {questions.map((q) => {
+            const timeRemaining = q.isEditable ? getTimeRemaining(q.createdAt) : null;
+            
             return (
-              <Link 
-                key={q.id} 
-                to={`/engine/${q.id}`}
-                className="question-item"
-              >
+              <div key={q._id} className="question-item">
                 <div className="question-item-header">
                   {getStatusBadge(q.status)}
+                  {q.category && (
+                    <span className="category-badge">{q.category}</span>
+                  )}
+                </div>
+                
+                <h3 className="question-title">
+                  {q.title || q.questionText}
+                </h3>
+                
+                <p className="question-description">
+                  {(q.description || q.questionText).substring(0, 150)}
+                  {(q.description || q.questionText).length > 150 ? '...' : ''}
+                </p>
+                
+                {q.selectedMentorId && (
+                  <div className="mentor-assigned">
+                    <span className="mentor-label">Assigned to:</span>
+                    <strong>
+                      {q.selectedMentorId.name || q.selectedMentorId.username}
+                    </strong>
+                    {q.matchPercentage && (
+                      <span className="match-badge">
+                        {q.matchPercentage}% match
+                      </span>
+                    )}
+                  </div>
+                )}
+                
+                <div className="question-meta">
                   <span className="question-date">
                     {q.createdAt && !isNaN(new Date(q.createdAt)) ? (
                       new Date(q.createdAt).toLocaleDateString('en-IN', {
@@ -110,28 +151,35 @@ const MyQuestions = () => {
                       <span style={{ color: '#aaa' }}>No Date</span>
                     )}
                   </span>
-                </div>
-                
-                <h3 className="question-title">{q.text}</h3>
-                
-                <div className="question-meta">
-                  {q.hasAnswer ? (
-                    <span className="meta-item answer-ready">✅ Answer Ready</span>
-                  ) : (
-                    <span className="meta-item processing">⏳ Processing</span>
-                  )}
                   
-                  {q.followUpCount > 0 && (
+                  {q.followUpQuestions && q.followUpQuestions.length > 0 && (
                     <span className="meta-item">
-                      💬 {q.followUpCount} follow-up{q.followUpCount > 1 ? 's' : ''}
+                      💬 {q.followUpQuestions.length} follow-up{q.followUpQuestions.length > 1 ? 's' : ''}
                     </span>
                   )}
                 </div>
                 
                 <div className="question-action">
-                  <span className="view-link">View Status →</span>
+                  {timeRemaining && q.isEditable && (
+                    <button 
+                      className="edit-btn-small"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(`/edit-question/${q._id}`);
+                      }}
+                    >
+                      ✏️ Edit ({timeRemaining}m left)
+                    </button>
+                  )}
+                  
+                  <Link 
+                    to={`/engine/${q._id}`}
+                    className="view-link"
+                  >
+                    {q.answerCardId ? 'View Answer' : 'Track Status'} →
+                  </Link>
                 </div>
-              </Link>
+              </div>
             );
           })}
         </div>

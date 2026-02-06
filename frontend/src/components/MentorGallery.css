@@ -383,6 +383,21 @@
   }
 }
 
+/* Slow down the mentor gallery scrolling on smaller screens for readability */
+@media (max-width: 1024px) {
+  .scrolling-content {
+    /* Slightly slower on tablets */
+    animation-duration: 180s; /* was 120s */
+  }
+}
+
+@media (max-width: 768px) {
+  .scrolling-content {
+    /* Much slower on mobile so items are readable while scrolling */
+    animation-duration: 300s; /* slow down a lot for phones */
+  }
+}
+
 /* Find the animation and reduce duration */
 
 /* Before (likely): */

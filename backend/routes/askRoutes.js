@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import { extractKeywords } from '../utils/keywordExtractor.js';
 import protect from '../middleware/authMiddleware.js';
 import AnswerCard from '../models/AnswerCard.js';
+import { sendUserAnswerReadyNotification } from '../utils/emailNotifications.js';
 
 import path from 'path';
 import fs from 'fs';
@@ -80,6 +81,16 @@ router.post('/mentor/submit-audio-answer', protect, upload.single('audio'), asyn
       // Mark question as delivered
       question.status = 'delivered';
       await question.save();
+
+      // Notify the original asker that their follow-up answer is ready
+      try {
+        const asker = await User.findById(question.userId).select('email username name');
+        if (asker && asker.email) {
+          await sendUserAnswerReadyNotification(asker.email, asker.username || asker.name || 'Student', question.questionText, true);
+        }
+      } catch (notifyErr) {
+        console.error('Error sending follow-up answer notification:', notifyErr);
+      }
       return res.json({ success: true, followUp: true, answerCard });
     }
     // Normal (not follow-up): create AnswerCard as before
@@ -113,6 +124,17 @@ router.post('/mentor/submit-audio-answer', protect, upload.single('audio'), asyn
       answerCardId: answerCard._id,
       status: 'delivered'
     });
+
+    // Send notification to the student that their answer is ready
+    try {
+      const asker = await User.findById(question.userId).select('email username name');
+      if (asker && asker.email) {
+        // Non-follow-up answer
+        await sendUserAnswerReadyNotification(asker.email, asker.username || asker.name || 'Student', question.questionText, false);
+      }
+    } catch (notifyErr) {
+      console.error('Error sending user answer notification:', notifyErr);
+    }
     res.json({ success: true, answerCard });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

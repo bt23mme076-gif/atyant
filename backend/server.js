@@ -25,12 +25,16 @@ import ratingRoutes from './routes/ratingRoutes.js';
 import engineRoutes from './routes/engineRoutes.js'; // ✅ ATYANT ENGINE
 import iimRoutes from './routes/iimRoutes.js'; // ✅ IIM DATA ROUTE
 import adminRoutes from './routes/adminRoutes.js'; // ✅ ADMIN ROUTE
+import questionRoutes from './routes/questionRoutes.js'; // ✅ NEW QUESTION FLOW
 
 // Import models
 import Feedback from './models/Feedback.js';
 import Message from './models/Message.js';
 import User from './models/User.js';
 import { moderator } from './utils/ContentModerator.js';
+
+// ✅ FIX #5: Global rate limiter
+import { globalRateLimit } from './middleware/globalRateLimiter.js';
 
 // Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -113,6 +117,9 @@ if (process.env.NODE_ENV === 'production') {
   mongoose.set('debug', false);
 }
 
+// ✅ FIX #5: Apply global rate limiter (30 req/min per IP)
+app.use('/api/', globalRateLimit);
+
 // --- API Routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api', chatRoutes);
@@ -130,6 +137,7 @@ app.use('/api/ratings', ratingRoutes);app.use('/api/engine', engineRoutes); // �
 console.log('✅ AI Chat routes registered at /api/ai/*');
 app.use('/api/iim', iimRoutes); // ✅ Register IIM Route
 app.use('/api/admin', adminRoutes); // ✅ ADMIN ROUTE
+app.use('/api/questions', questionRoutes); // ✅ NEW QUESTION FLOW
 
 // --- Contact form route ---
 app.post("/api/contact", async (req, res) => {
