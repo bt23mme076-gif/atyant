@@ -29,6 +29,7 @@ const MentorDashboard = () => {
   const [audioURL, setAudioURL] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
   const mediaRecorderRef = useRef(null);
+  
   // Audio recording handlers
   const handleRecord = async () => {
     if (!recording) {
@@ -47,6 +48,15 @@ const MentorDashboard = () => {
       mediaRecorderRef.current.stop();
       setRecording(false);
     }
+  };
+
+  // Delete audio recording
+  const handleDeleteAudio = () => {
+    if (audioURL) {
+      URL.revokeObjectURL(audioURL);
+    }
+    setAudioURL(null);
+    setAudioBlob(null);
   };
 
   useEffect(() => {
@@ -249,7 +259,12 @@ const MentorDashboard = () => {
                 {recording ? '⏹️ Stop Recording' : '🎤 Record Audio'}
               </button>
               {audioURL && (
-                <audio controls src={audioURL} className="mentor-audio-preview" />
+                <div className="mentor-audio-controls">
+                  <audio controls src={audioURL} className="mentor-audio-preview" />
+                  <button type="button" className="mentor-audio-delete-btn" onClick={handleDeleteAudio} title="Delete recording">
+                    🗑️ Delete
+                  </button>
+                </div>
               )}
             </div>
             {selectedQuestion.isFollowUp ? (

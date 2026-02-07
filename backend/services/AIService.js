@@ -79,9 +79,8 @@ async refineExperience(rawData) {
     
     RAW DATA: ${JSON.stringify(rawData)}`;
 
-    // Use v1beta endpoint for compatibility
-    // Hardcode model name to ensure correct usage
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
+    // Use v1beta endpoint with correct model name format
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -128,10 +127,8 @@ async refineExperience(rawData) {
       if (platformInfo) {
         aiResponse = platformInfo.type === 'faq' ? platformInfo.content.answer : "I can help with that Atyant feature!";
       } else {
-        // Gemini API logic
-        // Use v1beta endpoint for compatibility
-        // Hardcode model name to ensure correct usage
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
+        // Gemini API logic - use v1beta endpoint with correct model name
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

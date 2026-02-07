@@ -5,42 +5,42 @@ import './AIChat.css';
 
 const AIChat = ({ onClose }) => {
   const { user } = useContext(AuthContext); // Get user from context
-
-// ✅ Utility function to convert URLs to clickable links
-const linkifyText = (text) => {
-  if (!text) return null;
-  
-  const urlRegex = /(https?:\/\/[^\s]+)/g;
-  const parts = text.split(urlRegex);
-  
-  return parts.map((part, index) => {
-    if (part.match(urlRegex)) {
-      return (
-        <a
-          key={index}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            color: 'inherit',
-            textDecoration: 'underline',
-            wordBreak: 'break-all'
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {part}
-        </a>
-      );
-    }
-    return part;
-  });
-};
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [conversationId, setConversationId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [suggestedMentors, setSuggestedMentors] = useState([]);
   const messagesEndRef = useRef(null);
+
+  // ✅ Utility function to convert URLs to clickable links
+  const linkifyText = (text) => {
+    if (!text) return null;
+    
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    const parts = text.split(urlRegex);
+    
+    return parts.map((part, index) => {
+      if (part.match(urlRegex)) {
+        return (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              color: 'inherit',
+              textDecoration: 'underline',
+              wordBreak: 'break-all'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {part}
+          </a>
+        );
+      }
+      return part;
+    });
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

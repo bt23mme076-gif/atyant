@@ -46,7 +46,8 @@ const ChatBotWidget = () => {
   }, [showPreview]);
 
   // ✅ NEW: Open AIChat component when button is clicked
-  const handleChatClick = () => {
+  const handleChatClick = (e) => {
+    e.stopPropagation();
     setIsChatOpen(true);
     setShowPreview(false); // Hide preview when chat opens
   };
@@ -56,7 +57,8 @@ const ChatBotWidget = () => {
     setIsChatOpen(false);
   };
 
-  const handleClosePreview = () => {
+  const handleClosePreview = (e) => {
+    e.stopPropagation();
     setShowPreview(false);
   };
 

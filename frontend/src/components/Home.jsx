@@ -9,6 +9,7 @@ import FeedbackForm from './FeedbackForm';
 import MentorGallery from '../components/MentorGallery';
 import ChatBotWidget from '../components/ChatBotWidget';
 import ReviewsSlider from './ReviewsSlider';
+import AtyantJourneySlider from './AtyantJourneySlider';
 
 const Home = () => {
   return (
@@ -23,6 +24,7 @@ const Home = () => {
 
       <div id="home"><HeroSection /></div>
       <MentorGallery />
+      <AtyantJourneySlider />
       <div id="about"><AboutUs /></div>
       <div id="how-it-works"><HowItWorks /></div>
       <div id="why-choose-us"><WhyChooseUs /></div>
