@@ -33,7 +33,7 @@ router.post('/create-order', protect, async (req, res) => {
     const amountInPaisa = amount * 100;
     
     const options = {
-      amount: amountInPaisa, // Amount in paisa (e.g., 1.00 = 4900 paisa)
+      amount: amountInPaisa, // Amount in paisa (e.g., 1.00 = 100 paisa)
       currency: 'INR',
       receipt: `rcpt_${Date.now()}`,
       notes: {

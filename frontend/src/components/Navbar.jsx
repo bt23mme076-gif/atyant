@@ -109,7 +109,6 @@ const Navbar = () => {
     
     return (
       <>
-        <Link to="/mentors" className="nav-link" onClick={linkAction}>Mentors</Link>
         <Link to="/internship-journey" className="nav-link internship-journey-link" onClick={linkAction}>
           Internship Journey
         </Link>
