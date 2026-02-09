@@ -76,6 +76,11 @@ const Navbar = () => {
   const renderLinks = (isMobile = false) => {
     const linkAction = () => isMobile && setOpen(false);
     
+    const openCommunityChat = () => {
+      window.dispatchEvent(new CustomEvent('openCommunityChat'));
+      if (isMobile) setOpen(false);
+    };
+    
     if (user) {
       return user.role === 'mentor' ? (
         <>

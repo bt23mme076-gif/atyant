@@ -5,8 +5,8 @@ import './App.css';
 import { AuthContext } from './AuthContext';
 import { Analytics } from '@vercel/analytics/react';
 import ErrorBoundary from './components/ErrorBoundary';
-import { Bot } from 'lucide-react';
-import './components/FloatingAIButton.css';
+import { MessageCircle } from 'lucide-react';
+import './components/CommunityChatButton.css';
 import GoogleLoginModal from './components/GoogleLoginModal';
 
 // ✅ KEEP THESE (Need immediately)
@@ -28,8 +28,8 @@ const ResetPassword = lazy(() => import('./components/ResetPassword'));
 const ProfilePage = lazy(() => import('./components/ProfilePage'));
 const PublicProfilePage = lazy(() => import('./components/PublicProfilePage'));
 const NearbyMentors = lazy(() => import('./components/NearbyMentors'));
-const AIChat = lazy(() => import('./components/AIChat'));
 const InternshipPage = lazy(() => import('./components/InternshipPage'));
+const CommunityChat = lazy(() => import('./components/CommunityChat'));
 const EngineView = lazy(() => import('./components/EngineView')); // ✅ ATYANT ENGINE
 const MentorDashboard = lazy(() => import('./components/MentorDashboard')); // ✅ MENTOR DASHBOARD
 const MyQuestions = lazy(() => import('./components/MyQuestions')); // ✅ USER QUESTIONS LIST
@@ -45,8 +45,10 @@ const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 function App() {
   const location = useLocation();
   const { user, login } = useContext(AuthContext);
-  const [showAIChat, setShowAIChat] = useState(false);
   const [showGoogleModal, setShowGoogleModal] = useState(false);
+  const [showCommunityChat, setShowCommunityChat] = useState(false);
+  const [newMessageCount, setNewMessageCount] = useState(0);
+  const [lastMessageId, setLastMessageId] = useState(null);
   const isChatPage = location.pathname === '/chat';
   const isHomePage = location.pathname === '/';
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -60,6 +62,66 @@ function App() {
       setShowGoogleModal(true);
     }
   }, [user]);
+
+  // Listen for community chat open event from Navbar
+  React.useEffect(() => {
+    const handleOpenCommunityChat = () => {
+      setShowCommunityChat(true);
+    };
+    window.addEventListener('openCommunityChat', handleOpenCommunityChat);
+    return () => window.removeEventListener('openCommunityChat', handleOpenCommunityChat);
+  }, []);
+
+  // Handle community chat toggle with debounce
+  const handleToggleCommunityChat = React.useCallback(() => {
+    setShowCommunityChat(prev => !prev);
+    setNewMessageCount(0); // Reset count when opening chat
+  }, []);
+
+  // Check for new community messages
+  React.useEffect(() => {
+    if (!user || showCommunityChat) return;
+
+    const checkNewMessages = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await fetch(`${API_URL}/api/community-chat/messages?limit=1`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const messages = await response.json();
+          if (messages.length > 0) {
+            const latestMessage = messages[messages.length - 1];
+            
+            // Initialize lastMessageId on first load
+            if (!lastMessageId) {
+              setLastMessageId(latestMessage._id);
+              return;
+            }
+
+            // Check if there's a new message
+            if (latestMessage._id !== lastMessageId) {
+              setNewMessageCount(prev => prev + 1);
+              setLastMessageId(latestMessage._id);
+            }
+          }
+        }
+      } catch (error) {
+        // Silently fail - don't spam console
+      }
+    };
+
+    // Check immediately
+    checkNewMessages();
+
+    // Then check every 15 seconds
+    const interval = setInterval(checkNewMessages, 15000);
+
+    return () => clearInterval(interval);
+  }, [user, showCommunityChat, lastMessageId, API_URL]);
 
   // Google login handler (used by both modal and button)
   const handleGoogleSuccess = (credentialResponse) => {
@@ -145,6 +207,7 @@ function App() {
                   </ErrorBoundary>
                 </ProtectedRoute>
               } />
+              
               <Route path="/profile" element={
                 <ProtectedRoute>
                   <ProfilePage />
@@ -200,22 +263,34 @@ function App() {
       {!isChatPage && <Footer />}
       <Analytics />
       
-      {isHomePage && (
+      {/* Community Chat Floating Button - Only on Home Page */}
+      {user && !showCommunityChat && isHomePage && (
         <button 
-          className="ai-chat-fab"
-          onClick={() => setShowAIChat(true)}
-          title="Need help? Ask AI"
+          className={`community-chat-fab ${newMessageCount > 0 ? 'has-new-messages' : ''}`}
+          onClick={handleToggleCommunityChat}
+          title="Open Community Chat"
+          aria-label="Open Community Chat"
         >
-          <Bot size={24} />
+          <MessageCircle size={24} />
           <span className="pulse-ring"></span>
+          {newMessageCount > 0 && (
+            <>
+              <span className="notification-badge pulse">
+                {newMessageCount > 9 ? '9+' : newMessageCount}
+              </span>
+              <span className="new-message-text">New!</span>
+            </>
+          )}
         </button>
       )}
 
-      {showAIChat && (
+      {/* Community Chat Modal */}
+      {showCommunityChat && (
         <Suspense fallback={null}>
-          <AIChat onClose={() => setShowAIChat(false)} />
+          <CommunityChat onClose={() => setShowCommunityChat(false)} />
         </Suspense>
       )}
+      
       {/* Google Login Modal Integration */}
       <GoogleLoginModal
         isOpen={showGoogleModal && !user}

@@ -10,7 +10,11 @@ const messageSchema = new mongoose.Schema(
     receiver: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false, // Optional for community chat messages
+    },
+    conversationId: {
+      type: String,
+      required: false, // Used for community chat ('community-chat') or group conversations
     },
     text: {
       type: String,
@@ -42,12 +46,17 @@ const messageSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isAnonymous: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
 
 // Index for better query performance
 messageSchema.index({ sender: 1, receiver: 1, createdAt: -1 });
+messageSchema.index({ conversationId: 1, createdAt: -1 }); // For community chat
 messageSchema.index({ status: 1 });
 
 export default mongoose.model('Message', messageSchema);

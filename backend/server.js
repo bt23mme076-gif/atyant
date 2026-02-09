@@ -20,7 +20,7 @@ import searchRoutes from './routes/searchRoutes.js';
 import askRoutes from './routes/askRoutes.js';
 import mentorRoutes from './routes/mentorRoutes.js';
 import locationRoutes from './routes/locationRoutes.js';
-import aiChatRoutes from './routes/aiChatRoutes.js';
+import communityChatRoutes from './routes/communityChatRoutes.js';
 import ratingRoutes from './routes/ratingRoutes.js';
 import engineRoutes from './routes/engineRoutes.js'; // ✅ ATYANT ENGINE
 import iimRoutes from './routes/iimRoutes.js'; // ✅ IIM DATA ROUTE
@@ -117,8 +117,14 @@ if (process.env.NODE_ENV === 'production') {
   mongoose.set('debug', false);
 }
 
-// ✅ FIX #5: Apply global rate limiter (30 req/min per IP)
-app.use('/api/', globalRateLimit);
+// ✅ FIX #5: Apply global rate limiter (100 req/min per IP)
+// Exclude community-chat from strict rate limiting (has its own limiter)
+app.use('/api/', (req, res, next) => {
+  if (req.path.startsWith('/community-chat')) {
+    return next(); // Skip global rate limit for community chat
+  }
+  globalRateLimit(req, res, next);
+});
 
 // --- API Routes ---
 app.use('/api/auth', authRoutes);
@@ -132,9 +138,8 @@ app.use('/api/ask', askRoutes);
 app.use('/api/mentor', mentorRoutes); // New route
 app.use('/api/users', mentorRoutes); // Old route for backward compatibility
 app.use('/api/location', locationRoutes);
-app.use('/api/ai', aiChatRoutes);
+app.use('/api/community-chat', communityChatRoutes); // ✅ COMMUNITY CHAT
 app.use('/api/ratings', ratingRoutes);app.use('/api/engine', engineRoutes); // ✅ ATYANT ENGINE
-console.log('✅ AI Chat routes registered at /api/ai/*');
 app.use('/api/iim', iimRoutes); // ✅ Register IIM Route
 app.use('/api/admin', adminRoutes); // ✅ ADMIN ROUTE
 app.use('/api/questions', questionRoutes); // ✅ NEW QUESTION FLOW

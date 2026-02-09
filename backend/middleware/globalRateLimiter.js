@@ -2,7 +2,7 @@
 
 const rateMap = new Map();
 const WINDOW_MS = 60000; // 1 minute
-const MAX_REQUESTS = 30; // 30 requests per minute per IP
+const MAX_REQUESTS = 100; // 100 requests per minute per IP (increased for community chat)
 
 // Cleanup old entries every 5 minutes to prevent memory leak
 setInterval(() => {

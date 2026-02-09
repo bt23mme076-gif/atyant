@@ -7,7 +7,6 @@ import HowItWorks from './HowItWorks';
 import WhyChooseUs from './WhyChooseUs';
 import FeedbackForm from './FeedbackForm';
 import MentorGallery from '../components/MentorGallery';
-import ChatBotWidget from '../components/ChatBotWidget';
 import ReviewsSlider from './ReviewsSlider';
 import AtyantJourneySlider from './AtyantJourneySlider';
 
@@ -29,7 +28,6 @@ const Home = () => {
       <div id="how-it-works"><HowItWorks /></div>
       <div id="why-choose-us"><WhyChooseUs /></div>
       <div id="FeedbackForm"><FeedbackForm /></div>
-      <div id="chat-bot-widget"><ChatBotWidget /></div>    
       <ReviewsSlider />
     </>
   );

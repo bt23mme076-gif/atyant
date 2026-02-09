@@ -32,6 +32,13 @@ export default function MentorDNAForm({ strategy, onSuccess }) {
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
 
+  // Sync form with strategy prop when it changes
+  useEffect(() => {
+    if (strategy) {
+      setForm(strategy);
+    }
+  }, [strategy]);
+
   // Autosave draft on form change
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -77,6 +84,7 @@ export default function MentorDNAForm({ strategy, onSuccess }) {
       case 0:
         return (
           <TextField
+            key="tone-field"
             label="Tone"
             name="tone"
             value={form.tone}
@@ -96,6 +104,7 @@ If a junior is confused, how would your message FEEL?)"
       case 1:
         return (
           <TextField
+            key="language-field"
             label="Language"
             name="language"
             value={form.language}
@@ -113,6 +122,7 @@ If a junior is confused, how would your message FEEL?)"
       case 2:
         return (
           <TextField
+            key="hardTruth-field"
             label="Hard Truth"
             name="hardTruth"
             value={form.hardTruth}
@@ -131,6 +141,7 @@ If a junior is confused, how would your message FEEL?)"
       case 3:
         return (
           <TextField
+            key="timeWaste-field"
             label="Time Waste"
             name="timeWaste"
             value={form.timeWaste}
@@ -150,6 +161,7 @@ watching motivation instead of working)"
       case 4:
         return (
           <TextField
+            key="roadmap-field"
             label="Roadmap"
             name="roadmap"
             value={form.roadmap}
@@ -168,6 +180,7 @@ Write like advice to your younger self.
       case 5:
         return (
           <TextField
+            key="resumeTip-field"
             label="Resume Tip"
             name="resumeTip"
             value={form.resumeTip}
@@ -185,6 +198,7 @@ placeholder="What 2–3 resume rules you NEVER compromise on?
       case 6:
         return (
           <TextField
+            key="neverRecommend-field"
             label="Never Recommend"
             name="neverRecommend"
             value={form.neverRecommend}
@@ -230,7 +244,7 @@ placeholder="What practices you strongly oppose and will never suggest?
               ))}
             </Stepper>
           </div>
-          <div className="mentor-dna-step-content">{getStepContent(activeStep)}</div>
+          <div key={activeStep} className="mentor-dna-step-content">{getStepContent(activeStep)}</div>
           {error && <div className="mentor-dna-error">{error}</div>}
           {success && <div className="mentor-dna-success">{success}</div>}
           <div className="mentor-dna-btn-row">
