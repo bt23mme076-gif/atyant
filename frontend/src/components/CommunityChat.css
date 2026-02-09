@@ -280,6 +280,7 @@
 .message-item {
   display: flex;
   gap: 14px;
+  position: relative;
   animation: messageSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   transition: transform 0.2s ease;
 }
@@ -316,6 +317,40 @@
   color: white;
   border-radius: 18px 18px 4px 18px;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.delete-message-btn {
+  position: absolute;
+  top: 8px;
+  right: -32px;
+  background: rgba(239, 68, 68, 0.95);
+  border: none;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 1;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.message-item.own-message:hover .delete-message-btn {
+  opacity: 1;
+}
+
+.delete-message-btn:hover {
+  background: rgba(220, 38, 38, 1) !important;
+  transform: scale(1.15) !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.6) !important;
+}
+
+.delete-message-btn:active {
+  transform: scale(0.9);
 }
 
 .message-avatar {
@@ -359,6 +394,7 @@
 }
 
 .message-text {
+  position: relative;
   background: #f1f5f9;
   padding: 14px 18px;
   border-radius: 18px 18px 18px 4px;
@@ -731,6 +767,19 @@
   
   .message-item {
     gap: 8px;
+  }
+  
+  .delete-message-btn {
+    opacity: 1; /* Always show on mobile */
+    width: 26px;
+    height: 26px;
+    right: -30px;
+    top: 6px;
+  }
+  
+  .delete-message-btn svg {
+    width: 14px;
+    height: 14px;
   }
   
   .message-content {

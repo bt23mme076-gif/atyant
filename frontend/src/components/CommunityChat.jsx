@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext, memo } from 'react';
 import { AuthContext } from '../AuthContext';
-import { Send, Users, Smile, X, UserX } from 'lucide-react';
+import { Send, Users, Smile, X, UserX, Trash2 } from 'lucide-react';
 import './CommunityChat.css';
 import UserAvatar from './UserAvatar';
 
@@ -144,6 +144,37 @@ const CommunityChat = ({ onClose }) => {
     };
   }, []); // Empty dependency array - only run once on mount
 
+  const deleteMessage = async (messageId) => {
+    if (!confirm('Are you sure you want to delete this message?')) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.error('❌ No token found');
+        alert('Please login to delete messages');
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/api/community-chat/delete/${messageId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok && mountedRef.current) {
+        setMessages(prev => prev.filter(msg => msg._id !== messageId));
+      } else {
+        const error = await response.json();
+        console.error('❌ Failed to delete message:', error);
+        alert(error.error || 'Failed to delete message');
+      }
+    } catch (error) {
+      console.error('❌ Error deleting message:', error);
+      alert('Failed to delete message. Please try again.');
+    }
+  };
+
   const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || sending) return;
@@ -251,10 +282,12 @@ const CommunityChat = ({ onClose }) => {
                       <p>No messages yet. Start the conversation!</p>
                     </div>
                   ) : (
-                    messages.map((msg) => (
+                    messages.map((msg) => {
+                      const isOwnMessage = msg.sender?._id === user?._id;
+                      return (
                       <div
                         key={msg._id}
-                        className={`message-item ${msg.sender?._id === user?._id ? 'own-message' : ''} ${msg.isAnonymous ? 'anonymous-message' : ''}`}
+                        className={`message-item ${isOwnMessage ? 'own-message' : ''} ${msg.isAnonymous ? 'anonymous-message' : ''}`}
                       >
                         <div className="message-avatar">
                           {msg.isAnonymous ? (
@@ -275,10 +308,24 @@ const CommunityChat = ({ onClose }) => {
                             </span>
                             <span className="message-time">{formatTime(msg.createdAt)}</span>
                           </div>
-                          <div className="message-text">{msg.text}</div>
+                          <div className="message-text">
+                            {msg.text}
+                          </div>
                         </div>
+                        {isOwnMessage && (
+                          <button 
+                            className="delete-message-btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteMessage(msg._id);
+                            }}
+                            title="Delete message"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
                       </div>
-                    ))
+                    )})
                   )}
                   <div ref={messagesEndRef} />
                 </div>
