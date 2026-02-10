@@ -1,3 +1,18 @@
+/* ========== SEO & ACCESSIBILITY ========== */
+/* Screen Reader Only Text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ========== PROFESSOR DIRECTORY ========== */
 .professor-directory-info-heading {
   text-align: center;
   margin: 18px 0 8px 0;
@@ -935,6 +950,30 @@
   text-align: center;
 }
 
+.steps-instruction {
+  text-align: center;
+  color: #667eea;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 20px 0 32px 0;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f0f2ff 100%);
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  }
+}
+
 .steps-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -947,6 +986,7 @@
   border-radius: 12px;
   padding: 24px;
   display: flex;
+  flex-direction: column;
   gap: 16px;
   transition: all 0.3s ease;
   border: 2px solid transparent;
@@ -956,6 +996,37 @@
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
   border-color: #667eea;
+}
+
+/* ========== COLLAPSIBLE STEP HEADER ========== */
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.step-header h3 {
+  flex: 1;
+  margin: 0;
+  color: #1e293b;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+}
+
+.step-header:hover h3 {
+  color: #667eea;
+}
+
+.step-chevron {
+  color: #667eea;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.step-chevron.rotated {
+  transform: rotate(180deg);
 }
 
 .step-number {
@@ -971,6 +1042,22 @@
   font-weight: 700;
   flex-shrink: 0;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.step-content {
+  padding-left: 64px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .step-content h4 {
@@ -1006,6 +1093,47 @@
   font-size: 0.9rem;
   color: #667eea;
   font-family: 'Courier New', monospace;
+}
+
+/* ========== MOBILE RESPONSIVE FOR COLLAPSIBLE STEPS ========== */
+@media (max-width: 768px) {
+  .steps-container {
+    grid-template-columns: 1fr;
+  }
+
+  .steps-instruction {
+    font-size: 0.95rem;
+    padding: 10px 16px;
+    margin: 16px 0 24px 0;
+  }
+
+  .step-card {
+    padding: 16px;
+  }
+
+  .step-header {
+    gap: 12px;
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  .step-header h3 {
+    font-size: 1rem;
+  }
+
+  .step-content {
+    padding-left: 52px;
+    font-size: 0.95rem;
+  }
+
+  .step-chevron {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 /* ========== EXAMPLE BOX ========== */

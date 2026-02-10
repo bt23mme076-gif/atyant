@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useEffect as useEffectReact, useState as useStateReact } from 'react';
-import { Download, Mail, ExternalLink, Search, Filter, Building2, GraduationCap, ChevronLeft, ChevronRight, Quote, Lock } from 'lucide-react';
+import { Download, Mail, ExternalLink, Search, Filter, Building2, GraduationCap, ChevronLeft, ChevronRight, Quote, Lock, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
 import SEO from './SEO';
@@ -29,6 +29,17 @@ const InternshipPage = () => {
 
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
+
+  // ✅ ADD STATE FOR COLLAPSIBLE STEPS
+  const [expandedSteps, setExpandedSteps] = useState([]);
+
+  const toggleStep = (stepNumber) => {
+    setExpandedSteps(prev => 
+      prev.includes(stepNumber) 
+        ? prev.filter(s => s !== stepNumber)
+        : [...prev, stepNumber]
+    );
+  };
 
   // ✅ ADD useEffect FOR INITIAL LOADING
   useEffect(() => {
@@ -429,19 +440,175 @@ Resume Link: [Resume Link]
     ]
   };
 
+  // ========== SEO STRUCTURED DATA ==========
+  const generateSchemaMarkup = () => {
+    return {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "@id": "https://atyant.in/internships",
+          "url": "https://atyant.in/internships",
+          "name": "IIT IIM Research Internship Portal - Direct Faculty Contact",
+          "description": "Get research internships at IIT & IIM through direct cold emailing. Access 1000+ professor emails, email templates, and proven strategies from successful students.",
+          "isPartOf": {
+            "@id": "https://atyant.in/#website"
+          },
+          "about": {
+            "@type": "Thing",
+            "name": "Research Internships at IIT and IIM"
+          },
+          "breadcrumb": {
+            "@id": "https://atyant.in/internships#breadcrumb"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://atyant.in/internships#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://atyant.in/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Research Internships",
+              "item": "https://atyant.in/internships"
+            }
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How to get research internship at IIT?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "To get a research internship at IIT: 1) Select the IIT and professor whose research interests you, 2) Write a personalized cold email mentioning their specific research work, 3) Attach your resume with relevant projects, 4) Follow up politely after 7-10 days, 5) Send 50-70 emails for better response rate."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can NIT students get internships at IIT?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes! IIT professors value passion and skills over college name. NIT students regularly secure IIT internships by: demonstrating genuine research interest, showing relevant skills/projects, writing personalized emails that prove you've studied their work, and maintaining professionalism throughout."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How to write cold email for IIM internship?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Write effective IIM cold emails by: 1) Using a clear subject mentioning internship and domain, 2) Addressing professor respectfully, 3) Showing knowledge of their specific research/publications, 4) Highlighting relevant skills like data analysis, consulting, business research, 5) Keeping it concise (150-200 words), 6) Attaching resume with measurable achievements."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is the success rate of cold emailing for internships?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Cold emailing success rate ranges from 5-10% for research internships. Students typically send 60-80 emails and receive 4-8 positive responses. Success increases with: personalized content, early timing (4 months before summer), relevant skills showcase, and following up strategically."
+              }
+            }
+          ]
+        },
+        {
+          "@type": "HowTo",
+          "name": "How to Get Research Internship at IIT or IIM Through Cold Emailing",
+          "description": "Step-by-step guide to secure research internships at premier institutions like IIT and IIM through effective cold emailing strategy",
+          "step": [
+            {
+              "@type": "HowToStep",
+              "position": 1,
+              "name": "Select Target Institution and Professor",
+              "text": "Choose IIT/IIM based on research interest. Browse faculty profiles, read recent publications, and identify professors whose work aligns with your interests."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 2,
+              "name": "Research Professor's Work",
+              "text": "Study 2-3 recent papers, understand their research methodology, and identify specific aspects that genuinely interest you. This shows authentic engagement."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 3,
+              "name": "Craft Personalized Email",
+              "text": "Write concise email (150-200 words) with: clear subject, respectful greeting, specific mention of their research, your relevant skills/projects, and resume link."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 4,
+              "name": "Send at Optimal Time",
+              "text": "Send emails 4 months before intended internship period. Best days are Tuesday-Thursday, time between 9-11 AM when professors check emails."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 5,
+              "name": "Follow Up Strategically",
+              "text": "If no response in 7-10 days, send polite follow-up referencing original email. Maximum 1-2 follow-ups per professor."
+            }
+          ],
+          "totalTime": "P3M"
+        },
+        {
+          "@type": "ItemList",
+          "name": "Student Success Stories",
+          "itemListElement": testimonials.map((testimonial, index) => ({
+            "@type": "Review",
+            "position": index + 1,
+            "author": {
+              "@type": "Person",
+              "name": testimonial.name
+            },
+            "reviewRating": {
+              "@type": "Rating",
+              "ratingValue": "5",
+              "bestRating": "5"
+            },
+            "reviewBody": testimonial.review,
+            "itemReviewed": {
+              "@type": "Service",
+              "name": "IIT IIM Internship Cold Email Strategy"
+            }
+          }))
+        }
+      ]
+    };
+  };
+
   // ✅ ADD LOADING CHECK BEFORE RETURN
   if (loading) {
     return <LoadingSpinner fullScreen={true} message="Loading Internship Portal..." />;
   }
 
   return (
-    <div className="internship-page">
+    <>
+      {/* SEO Component */}
+      <SEO 
+        title="IIT IIM Research Internship | Professor Emails & Templates"
+        description="Get research internships at IIT & IIM. Access 1000+ professor emails across all IITs & IIMs, proven email templates, and strategies from successful students. Direct cold emailing guide for core & non-core branches."
+        keywords="IIT internship, IIM internship, research internship IIT, IIT summer internship, IIM summer internship, cold emailing professors, professor email IIT, faculty contact IIT IIM, research internship India, NIT to IIT internship, engineering internship IIT, business internship IIM, how to get IIT internship, IIT professor email list, IIM faculty emails"
+        url="https://atyant.in/internships"
+        image="https://res.cloudinary.com/dny6dtmox/image/upload/v1738764320/internship-og-image.png"
+      />
+      
+      {/* Schema.org Structured Data */}
+      <script type="application/ld+json">
+        {JSON.stringify(generateSchemaMarkup())}
+      </script>
+
+      <article className="internship-page" itemScope itemType="https://schema.org/WebPage">
       {/* ========== HERO SECTION ========== */}
-      <div className="internship-hero">
+      <header className="internship-hero" role="banner">
         <div className="hero-content">
-          <GraduationCap size={64} className="hero-icon" />
-          <h1>Research Internship Portal</h1>
-          <p>Connect with faculty at IITs & IIMs - Focus on Core & Non-Core Branches</p>
+          <GraduationCap size={64} className="hero-icon" aria-hidden="true" />
+          <h1 itemProp="name">IIT & IIM Research Internship Portal</h1>
+          <p itemProp="description">Direct access to 1000+ professor emails at IITs & IIMs - For Core & Non-Core Branches</p>
           {isLoggedIn && user && (
             <div style={{ marginBottom: '16px', color: '#4ade80', fontSize: '1rem', fontWeight: '600' }}>
               ✅ Welcome {user.name}!
@@ -450,8 +617,9 @@ Resume Link: [Resume Link]
           <button 
             onClick={handleDownloadTemplate}
             className={`download-template-btn ${!isLoggedIn ? 'locked' : ''}`}
+            aria-label={isLoggedIn ? 'Download IIT IIM internship email templates' : 'Login required to download email templates'}
           >
-            {isLoggedIn ? <Download size={20} /> : <Lock size={20} />}
+            {isLoggedIn ? <Download size={20} aria-hidden="true" /> : <Lock size={20} aria-hidden="true" />}
             <span>{isLoggedIn ? 'Download Email Template' : 'Login to Download Template'}</span>
           </button>
           {!isLoggedIn && (
@@ -460,29 +628,32 @@ Resume Link: [Resume Link]
             </p>
           )}
         </div>
-      </div>
+      </header>
 
-      {/* ========== NEW FILTER: CATEGORY & COLLEGE, THEN SHOW EMAILS ========== */}
-      <div className="faculty-directory-combined filter-section-prominent">
-        <div className="faculty-directory-filter-bar">
-          <label htmlFor="category-select">Category: </label>
+      {/* ========== PROFESSOR DIRECTORY SECTION ========== */}
+      <section className="faculty-directory-combined filter-section-prominent" aria-label="IIT IIM Faculty Directory">
+        <h2 className="sr-only">Search IIT and IIM Professor Emails by Institution</h2>
+        <div className="faculty-directory-filter-bar" role="search">
+          <label htmlFor="category-select">Institution Type: </label>
           <select
             id="category-select"
             value={category}
             onChange={e => setCategory(e.target.value)}
             className="filter-dropdown"
+            aria-label="Select institution type - IIT or IIM"
           > 
-            <option value="IIT">IIT</option>
-            <option value="IIM">IIM</option>
+            <option value="IIT">IIT (Indian Institute of Technology)</option>
+            <option value="IIM">IIM (Indian Institute of Management)</option>
           </select>
-          <label htmlFor="college-select">College: </label>
+          <label htmlFor="college-select">Select Institution: </label>
           <select
             id="college-select"
             value={college}
             onChange={handleCollegeSelect}
             className="filter-dropdown"
+            aria-label="Select specific IIT or IIM institution"
           >
-            <option value="">Select College</option>
+            <option value="">-- Choose {category} --</option>
             {colleges.map(c => (
               <option key={c} value={c}>{c}</option>
             ))}
@@ -565,182 +736,131 @@ Resume Link: [Resume Link]
             )
           )}
         </div>
-      </div>
+      </section>
+      
       {/* ========== HOW TO COLD EMAIL - STEP BY STEP ========== */}
-      <div className="how-to-section">
-        <h3>📧 How to Cold Email - Step by Step Guide</h3>
-        <div className="steps-container">
+      <section className="how-to-section" itemScope itemType="https://schema.org/HowTo" aria-labelledby="cold-email-guide">
+        <h2 id="cold-email-guide" itemProp="name">📧 How to Cold Email Professors - Complete Step-by-Step Guide for IIT IIM Internships</h2>
+        <meta itemProp="description" content="Proven 6-step strategy to write effective cold emails to IIT and IIM professors for research internships" />
+        <p className="steps-instruction">👇 Click on each step below to expand and see detailed instructions</p>
+        <div className="steps-container" itemProp="step" itemScope itemType="https://schema.org/HowToSection">
           
-          <div className="step-card">
-            <div className="step-number">1</div>
-            <div className="step-content">
-              <h4>🌐 Visit College Website</h4>
-              <p>Go to the department page of your target IIT/IIM</p>
-              <ul>
-                <li>Navigate to "Faculty" or "People" section</li>
-                <li>Look for professors in your field of interest</li>
-                <li>Example: <code>www.iitb.ac.in → Chemical Engg → Faculty</code></li>
-              </ul>
+          <article className={`step-card ${expandedSteps.includes(1) ? 'expanded' : ''}`} itemProp="step" itemScope itemType="https://schema.org/HowToStep">
+            <div className="step-header" onClick={() => toggleStep(1)}>
+              <div className="step-number" aria-label="Step 1">1</div>
+              <h3 itemProp="name">🌐 Visit College Website</h3>
+              <ChevronDown className={`step-chevron ${expandedSteps.includes(1) ? 'rotated' : ''}`} size={20} />
             </div>
-          </div>
-
-          <div className="step-card">
-            <div className="step-number">2</div>
-            <div className="step-content">
-              <h4>🔍 Search Professor in Your Domain</h4>
-              <p>Find professors whose research matches your interest</p>
-              <ul>
-                <li>Click on professor's profile page</li>
-                <li>Read their bio and current projects</li>
-                <li>Check recent publications (Google Scholar)</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="step-card">
-            <div className="step-number">3</div>
-            <div className="step-content">
-              <h4>📋 Copy Their Research Interests</h4>
-              <p>Note down specific research topics from their profile</p>
-              <ul>
-                <li>Copy 2-3 specific research areas</li>
-                <li>Note recent paper titles (last 2 years)</li>
-                <li>Example: "Nanomaterials for Energy Storage"</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="step-card">
-            <div className="step-number">4</div>
-            <div className="step-content">
-              <h4>✍️ Personalize Your Email</h4>
-              <p>Customize the email template with their research</p>
-              <ul>
-                <li>Mention specific paper/project that interested you</li>
-                <li>Explain why their work fascinates you (2-3 lines)</li>
-                <li>Connect it with your skills/experience</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="step-card">
-            <div className="step-number">5</div>
-            <div className="step-content">
-              <h4>📎 Attach Tailored Resume</h4>
-              <p>Update resume to highlight relevant skills</p>
-              <ul>
-                <li>Add relevant coursework matching their research</li>
-                <li>Highlight projects in similar domain</li>
-                <li>Keep it 1 page, use clean format</li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="step-card">
-            <div className="step-number">6</div>
-            <div className="step-content">
-              <h4>📧 Send Email & Follow Up</h4>
-              <p>Send during working hours, follow up politely</p>
-              <ul>
-                <li>Best time: Tuesday-Thursday, 10 AM - 4 PM</li>
-                <li>Subject line: Clear & specific</li>
-                <li>Follow up after 7-10 days if no response</li>
-                <li>Send 50+ emails, expect 2-3 replies</li>
-              </ul>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-
-
-      {/* ========== TESTIMONIALS ========== */}
-      <div className="testimonials-section">
-        <h2>🎓 Success Stories from Real Students</h2>
-        <p className="testimonials-subtitle">
-          Learn from students who successfully secured internships at top institutions
-        </p>
-
-        <div className="testimonial-slider">
-          {/* Previous Button */}
-          <button 
-            className="slider-btn"
-            onClick={prevTestimonial}
-            aria-label="Previous testimonial"
-          >
-            <ChevronLeft size={24} />
-          </button>
-
-          {/* ✅ ADD SWIPE HANDLERS HERE */}
-          <div 
-            className={`testimonial-card-active ${swiped ? 'swiped' : ''}`}
-            onTouchStart={onTouchStart}
-            onTouchMove={onTouchMove}
-            onTouchEnd={onTouchEnd}
-          >
-            <div className="testimonial-header">
-              <img
-                src={testimonials[currentTestimonial].image}
-                alt={testimonials[currentTestimonial].name}
-                className="testimonial-avatar"
-              />
-              <div className="testimonial-info">
-                <h3>{testimonials[currentTestimonial].name}</h3>
-                <p className="college-tag">
-                  {testimonials[currentTestimonial].college}
-                </p>
-                <p className="branch-tag">
-                  {testimonials[currentTestimonial].branch}
-                </p>
-                <span className="intern-badge">
-                  <GraduationCap size={14} />
-                  Interned at {testimonials[currentTestimonial].internAt}
-                </span>
+            {expandedSteps.includes(1) && (
+              <div className="step-content">
+                <p itemProp="text">Go to the department page of your target IIT/IIM</p>
+                <ul>
+                  <li>Navigate to "Faculty" or "People" section</li>
+                  <li>Look for professors in your field of interest</li>
+                  <li>Example: <code>www.iitb.ac.in → Chemical Engg → Faculty</code></li>
+                </ul>
               </div>
-            </div>
+            )}
+          </article>
 
-            <div className="testimonial-content">
-              <Quote className="quote-icon" size={40} />
-              <p className="review-text">
-                {testimonials[currentTestimonial].review}
-              </p>
-              
-              <div className="tips-box">
-                <h4>
-                  💡 Pro Tip:
-                </h4>
-                <p>{testimonials[currentTestimonial].tips}</p>
+          <article className={`step-card ${expandedSteps.includes(2) ? 'expanded' : ''}`} itemProp="step" itemScope itemType="https://schema.org/HowToStep">
+            <div className="step-header" onClick={() => toggleStep(2)}>
+              <div className="step-number" aria-label="Step 2">2</div>
+              <h3 itemProp="name">🔍 Search Professor in Your Domain</h3>
+              <ChevronDown className={`step-chevron ${expandedSteps.includes(2) ? 'rotated' : ''}`} size={20} />
+            </div>
+            {expandedSteps.includes(2) && (
+              <div className="step-content">
+                <p itemProp="text">Find professors whose research matches your interest</p>
+                <ul>
+                  <li>Click on professor's profile page</li>
+                  <li>Read their bio and current projects</li>
+                  <li>Check recent publications (Google Scholar)</li>
+                </ul>
               </div>
+            )}
+          </article>
+
+          <article className={`step-card ${expandedSteps.includes(3) ? 'expanded' : ''}`} itemProp="step" itemScope itemType="https://schema.org/HowToStep">
+            <div className="step-header" onClick={() => toggleStep(3)}>
+              <div className="step-number" aria-label="Step 3">3</div>
+              <h3 itemProp="name">📋 Copy Their Research Interests</h3>
+              <ChevronDown className={`step-chevron ${expandedSteps.includes(3) ? 'rotated' : ''}`} size={20} />
             </div>
-          </div>
+            {expandedSteps.includes(3) && (
+              <div className="step-content">
+                <p itemProp="text">Note down specific research topics from their profile</p>
+                <ul>
+                  <li>Copy 2-3 specific research areas</li>
+                  <li>Note recent paper titles (last 2 years)</li>
+                  <li>Example: "Nanomaterials for Energy Storage"</li>
+                </ul>
+              </div>
+            )}
+          </article>
 
-          {/* Next Button */}
-          <button 
-            className="slider-btn"
-            onClick={nextTestimonial}
-            aria-label="Next testimonial"
-          >
-            <ChevronRight size={24} />
-          </button>
-        </div>
+          <article className={`step-card ${expandedSteps.includes(4) ? 'expanded' : ''}`} itemProp="step" itemScope itemType="https://schema.org/HowToStep">
+            <div className="step-header" onClick={() => toggleStep(4)}>
+              <div className="step-number" aria-label="Step 4">4</div>
+              <h3 itemProp="name">✍️ Personalize Your Email</h3>
+              <ChevronDown className={`step-chevron ${expandedSteps.includes(4) ? 'rotated' : ''}`} size={20} />
+            </div>
+            {expandedSteps.includes(4) && (
+              <div className="step-content">
+                <p itemProp="text">Customize the email template with their research</p>
+                <ul>
+                  <li>Mention specific paper/project that interested you</li>
+                  <li>Explain why their work fascinates you (2-3 lines)</li>
+                  <li>Connect it with your skills/experience</li>
+                </ul>
+              </div>
+            )}
+          </article>
 
-        {/* Dots Navigation */}
-        <div className="slider-dots">
-          {testimonials.map((_, index) => (
-            <button
-              key={index}
-              className={`dot ${index === currentTestimonial ? 'active' : ''}`}
-              onClick={() => setCurrentTestimonial(index)}
-              aria-label={`Go to testimonial ${index + 1}`}
-            />
-          ))}
+          <article className={`step-card ${expandedSteps.includes(5) ? 'expanded' : ''}`} itemProp="step" itemScope itemType="https://schema.org/HowToStep">
+            <div className="step-header" onClick={() => toggleStep(5)}>
+              <div className="step-number" aria-label="Step 5">5</div>
+              <h3 itemProp="name">📎 Attach Tailored Resume</h3>
+              <ChevronDown className={`step-chevron ${expandedSteps.includes(5) ? 'rotated' : ''}`} size={20} />
+            </div>
+            {expandedSteps.includes(5) && (
+              <div className="step-content">
+                <p itemProp="text">Update resume to highlight relevant skills</p>
+                <ul>
+                  <li>Add relevant coursework matching their research</li>
+                  <li>Highlight projects in similar domain</li>
+                  <li>Keep it 1 page, use clean format</li>
+                </ul>
+              </div>
+            )}
+          </article>
+
+          <article className={`step-card ${expandedSteps.includes(6) ? 'expanded' : ''}`} itemProp="step" itemScope itemType="https://schema.org/HowToStep">
+            <div className="step-header" onClick={() => toggleStep(6)}>
+              <div className="step-number" aria-label="Step 6">6</div>
+              <h3 itemProp="name">📧 Send Email & Follow Up</h3>
+              <ChevronDown className={`step-chevron ${expandedSteps.includes(6) ? 'rotated' : ''}`} size={20} />
+            </div>
+            {expandedSteps.includes(6) && (
+              <div className="step-content">
+                <p itemProp="text">Send during working hours, follow up politely</p>
+                <ul>
+                  <li>Best time: Tuesday-Thursday, 10 AM - 4 PM</li>
+                  <li>Subject line: Clear & specific</li>
+                  <li>Follow up after 7-10 days if no response</li>
+                  <li>Send 50+ emails, expect 2-3 replies</li>
+                </ul>
+              </div>
+            )}
+          </article>
+
         </div>
-      </div>
+      </section>
+
 
       {/* ========== SKILLS REQUIRED SECTION ========== */}
-      <div className="skills-section">
-        <h2>🎯 Skills Required for Internships</h2>
+      <section className="skills-section" aria-labelledby="skills-heading">
+        <h2 id="skills-heading">🎯 Skills Required for Internships</h2>
         <p className="skills-subtitle">
           Essential skills that increase your chances of getting selected
         </p>
@@ -809,25 +929,119 @@ Resume Link: [Resume Link]
             </div>
           </div>
         </div>
-      </div>
+      </section>
+      {/* ========== TESTIMONIALS ========== */}
+      <section className="testimonials-section" aria-labelledby="success-stories">
+        <h2 id="success-stories">🎓 Success Stories from Real Students</h2>
+        <p className="testimonials-subtitle">
+          Learn from students who successfully secured research internships at IIT and IIM through cold emailing
+        </p>
+
+        <div className="testimonial-slider" role="region" aria-label="Student testimonials carousel">
+          {/* Previous Button */}
+          <button 
+            className="slider-btn"
+            onClick={prevTestimonial}
+            aria-label="View previous student success story"
+            title="Previous testimonial"
+          >
+            <ChevronLeft size={24} aria-hidden="true" />
+          </button>
+
+          {/* ✅ ADD SWIPE HANDLERS HERE */}
+          <article 
+            className={`testimonial-card-active ${swiped ? 'swiped' : ''}`}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
+            itemScope 
+            itemType="https://schema.org/Review"
+            role="article"
+            aria-label={`Success story from ${testimonials[currentTestimonial].name}`}
+          >
+            <div className="testimonial-header">
+              <img
+                src={testimonials[currentTestimonial].image}
+                alt={`${testimonials[currentTestimonial].name} - ${testimonials[currentTestimonial].college} student who got internship at ${testimonials[currentTestimonial].internAt}`}
+                className="testimonial-avatar"
+                loading="lazy"
+                itemProp="image"
+              />
+              <div className="testimonial-info" itemProp="author" itemScope itemType="https://schema.org/Person">
+                <h3 itemProp="name">{testimonials[currentTestimonial].name}</h3>
+                <p className="college-tag" itemProp="affiliation">
+                  🏛️ {testimonials[currentTestimonial].college}
+                </p>
+                <p className="branch-tag" itemProp="jobTitle">
+                  {testimonials[currentTestimonial].branch}
+                </p>
+                <span className="intern-badge">
+                  <GraduationCap size={14} aria-hidden="true" />
+                  Interned at {testimonials[currentTestimonial].internAt}
+                </span>
+              </div>
+            </div>
+
+            <div className="testimonial-content">
+              <Quote className="quote-icon" size={40} aria-hidden="true" />
+              <p className="review-text" itemProp="reviewBody">
+                {testimonials[currentTestimonial].review}
+              </p>
+              <meta itemProp="reviewRating" itemScope itemType="https://schema.org/Rating" content="5" />
+              
+              <div className="tips-box">
+                <h4>
+                  💡 Pro Tip:
+                </h4>
+                <p>{testimonials[currentTestimonial].tips}</p>
+              </div>
+            </div>
+          </article>
+
+          {/* Next Button */}
+          <button 
+            className="slider-btn"
+            onClick={nextTestimonial}
+            aria-label="View next student success story"
+            title="Next testimonial"
+          >
+            <ChevronRight size={24} aria-hidden="true" />
+          </button>
+        </div>
+
+        {/* Dots Navigation */}
+        <div className="slider-dots" role="tablist" aria-label="Testimonial navigation">
+          {testimonials.map((_, index) => (
+            <button
+              key={index}
+              className={`dot ${index === currentTestimonial ? 'active' : ''}`}
+              onClick={() => setCurrentTestimonial(index)}
+              aria-label={`View testimonial ${index + 1} of ${testimonials.length}`}
+              aria-current={index === currentTestimonial ? 'true' : 'false'}
+              role="tab"
+            />
+          ))}
+        </div>
+      </section>
 
       {/* ========== EXAMPLE SECTION ========== */}
-      <div className="example-section">
+      <section className="example-section" aria-labelledby="email-examples">
         <div className="example-box">
-          <h4>💡 Example: Personalization</h4>
+          <h2 id="email-examples">💡 Email Personalization: Good vs Bad Examples</h2>
           <div className="example-content">
-            <div className="bad-example">
-              <span className="badge bad">❌ Generic</span>
+            <article className="bad-example">
+              <span className="badge bad" aria-label="Bad example">❌ Generic</span>
               <p>"I am interested in doing an internship in your lab."</p>
-            </div>
-            <div className="good-example">
-              <span className="badge good">✅ Personalized</span>
+            </article>
+            <article className="good-example">
+              <span className="badge good" aria-label="Good example">✅ Personalized</span>
               <p>"I read your recent publication on 'Graphene-based sensors for biomedical applications' in Nature Materials (2024). Your approach to functionalizing graphene sheets particularly intrigued me, as I have worked on similar nanomaterial synthesis in my recent project on carbon nanotubes."</p>
-            </div>
+            </article>
           </div>
         </div>
-      </div>
-    </div>
+      </section>
+    </article>
+    </>
   );
 };
 
