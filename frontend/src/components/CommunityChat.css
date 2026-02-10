@@ -171,6 +171,31 @@
   transform: translateY(-2px);
 }
 
+/* Login Button in Header */
+.login-button-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  color: #667eea;
+  padding: 10px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.3);
+}
+
+.login-button-header:hover {
+  background: white;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+}
+
 .close-button {
   background: rgba(255, 255, 255, 0.2);
   border: none;
@@ -419,6 +444,62 @@
   background: linear-gradient(to right, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
   border-top: 2px solid rgba(102, 126, 234, 0.15);
   backdrop-filter: blur(10px);
+  position: relative;
+}
+
+/* Login Prompt Overlay */
+.login-prompt-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 0;
+  z-index: 10;
+  animation: fadeInSlideUp 0.4s ease-out;
+}
+
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.login-prompt-button {
+  background: white;
+  color: #667eea;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  margin-left: 8px;
+}
+
+.login-prompt-button:hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.login-prompt-button:active {
+  transform: scale(0.95);
 }
 
 .anonymous-indicator {
@@ -487,6 +568,20 @@
 .send-button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.spinner-small {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.input-disabled {
+  cursor: not-allowed !important;
+  user-select: none;
 }
 
 /* Online Users Sidebar */
@@ -670,6 +765,12 @@
     gap: 6px;
   }
   
+  .login-button-header {
+    padding: 8px 14px;
+    font-size: 13px;
+    gap: 6px;
+  }
+  
   .close-button {
     width: 36px;
     height: 36px;
@@ -735,6 +836,17 @@
     padding: 6px 12px;
     font-size: 12px;
     gap: 5px;
+  }
+  
+  .login-button-header {
+    padding: 6px 12px;
+    font-size: 12px;
+    gap: 5px;
+  }
+  
+  .login-button-header svg {
+    width: 16px;
+    height: 16px;
   }
   
   .anonymous-toggle svg {
@@ -823,6 +935,19 @@
   .send-button svg {
     width: 18px;
     height: 18px;
+  }
+  
+  .login-prompt-overlay {
+    font-size: 13px;
+    gap: 8px;
+    flex-direction: column;
+    padding: 16px;
+  }
+  
+  .login-prompt-button {
+    padding: 8px 20px;
+    font-size: 13px;
+    margin-left: 0;
   }
 }
 

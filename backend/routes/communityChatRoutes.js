@@ -7,10 +7,7 @@ import auth from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Apply authentication to all routes
-router.use(auth);
-
-// Middleware to check message content
+// Middleware to check message content (only for POST requests)
 const messageContentMiddleware = (req, res, next) => {
     const messageText = req.body.text || req.body.content || req.body.message;
     
@@ -28,16 +25,9 @@ const messageContentMiddleware = (req, res, next) => {
     next();
 };
 
-// Apply content moderation to all routes
-router.use(messageContentMiddleware);
-
-// Get community chat messages (last 100 or specified limit)
+// Get community chat messages (PUBLIC - no auth required for viewing)
 router.get('/messages', chatInfoLimiter, async (req, res) => {
   try {
-    if (!req.user?._id) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     const limit = parseInt(req.query.limit) || 100;
 
     const messages = await Message.find({ 
@@ -57,8 +47,8 @@ router.get('/messages', chatInfoLimiter, async (req, res) => {
   }
 });
 
-// Send a message to community chat
-router.post('/send', chatMessageLimiter, async (req, res) => {
+// Send a message to community chat (PROTECTED - requires auth)
+router.post('/send', auth, chatMessageLimiter, messageContentMiddleware, async (req, res) => {
   try {
     if (!req.user?._id) {
       return res.status(401).json({ error: 'Unauthorized' });
@@ -93,13 +83,9 @@ router.post('/send', chatMessageLimiter, async (req, res) => {
   }
 });
 
-// Get online users (users who sent messages in last 10 minutes)
+// Get online users (PUBLIC - users who sent messages in last 10 minutes)
 router.get('/online-users', chatInfoLimiter, async (req, res) => {
   try {
-    if (!req.user?._id) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
 
     // Find unique users who sent messages recently
@@ -116,16 +102,6 @@ router.get('/online-users', chatInfoLimiter, async (req, res) => {
       .select('name username email profilePicture role')
       .lean();
 
-    // Add current user if not in the list (they're online by viewing the chat)
-    const currentUserInList = onlineUsers.some(u => u._id.toString() === req.user._id.toString());
-    if (!currentUserInList) {
-      const currentUser = await User.findById(req.user._id)
-        .select('name username email profilePicture role')
-        .lean();
-      if (currentUser) {
-        onlineUsers.unshift(currentUser);
-      }
-    }
     res.json(onlineUsers);
   } catch (error) {
     console.error('❌ Error fetching online users:', error);
@@ -133,8 +109,8 @@ router.get('/online-users', chatInfoLimiter, async (req, res) => {
   }
 });
 
-// Delete a message (only own messages)
-router.delete('/delete/:messageId', async (req, res) => {
+// Delete a message (PROTECTED - only own messages)
+router.delete('/delete/:messageId', auth, async (req, res) => {
   try {
     if (!req.user?._id) {
       return res.status(401).json({ error: 'Unauthorized' });

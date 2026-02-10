@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useContext, memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
-import { Send, Users, Smile, X, UserX, Trash2 } from 'lucide-react';
+import { Send, Users, Smile, X, UserX, Trash2, LogIn } from 'lucide-react';
 import './CommunityChat.css';
 import UserAvatar from './UserAvatar';
 
@@ -8,6 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const CommunityChat = ({ onClose }) => {
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ const CommunityChat = ({ onClose }) => {
     }
   }, [messages]);
 
-  // Fetch messages
+  // Fetch messages (PUBLIC - no auth required)
   const fetchMessages = async () => {
     // Prevent duplicate simultaneous calls
     if (isFetchingRef.current || !mountedRef.current) return;
@@ -48,17 +50,7 @@ const CommunityChat = ({ onClose }) => {
     isFetchingRef.current = true;
     
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('❌ No token found');
-        return;
-      }
-
-      const response = await fetch(`${API_URL}/api/community-chat/messages`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetch(`${API_URL}/api/community-chat/messages`);
 
       if (response.ok && mountedRef.current) {
         const data = await response.json();
@@ -77,7 +69,7 @@ const CommunityChat = ({ onClose }) => {
     }
   };
 
-  // Fetch online users
+  // Fetch online users (PUBLIC - no auth required)
   const fetchOnlineUsers = async () => {
     // Prevent duplicate simultaneous calls
     if (isOnlineCheckRef.current || !mountedRef.current) return;
@@ -85,17 +77,7 @@ const CommunityChat = ({ onClose }) => {
     isOnlineCheckRef.current = true;
     
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('❌ No token found');
-        return;
-      }
-
-      const response = await fetch(`${API_URL}/api/community-chat/online-users`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await fetch(`${API_URL}/api/community-chat/online-users`);
 
       if (response.ok && mountedRef.current) {
         const data = await response.json();
@@ -179,6 +161,19 @@ const CommunityChat = ({ onClose }) => {
     e.preventDefault();
     if (!newMessage.trim() || sending) return;
 
+    // Check if user is logged in
+    if (!user) {
+      console.log('❌ User not logged in - showing login prompt');
+      const shouldLogin = confirm(
+        '🔒 Login Required!\n\nYou need to login to send messages in community chat.\n\nClick OK to go to login page.'
+      );
+      if (shouldLogin) {
+        navigate('/login', { state: { from: '/community-chat' } });
+      }
+      return;
+    }
+
+    console.log('✅ User logged in:', user.name || user.username);
     setSending(true);
     const messageText = newMessage.trim();
     setNewMessage(''); // Clear input immediately for better UX
@@ -186,9 +181,15 @@ const CommunityChat = ({ onClose }) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.error('❌ No token found');
-        alert('Please login to send messages');
+        console.error('❌ No token found - session may have expired');
+        const shouldRelogin = confirm(
+          '🔒 Session Expired!\n\nYour login session has expired. Please login again.\n\nClick OK to go to login page.'
+        );
+        if (shouldRelogin) {
+          navigate('/login', { state: { from: '/community-chat' } });
+        }
         setNewMessage(messageText); // Restore message on error
+        setSending(false);
         return;
       }
 
@@ -213,7 +214,18 @@ const CommunityChat = ({ onClose }) => {
       } else {
         const error = await response.json();
         console.error('❌ Failed to send message:', error);
-        alert(error.error || 'Failed to send message');
+        
+        // Handle authentication errors
+        if (response.status === 401) {
+          const shouldRelogin = confirm(
+            '🔒 Authentication Failed!\n\nYour session has expired. Please login again.\n\nClick OK to go to login page.'
+          );
+          if (shouldRelogin) {
+            navigate('/login', { state: { from: '/community-chat' } });
+          }
+        } else {
+          alert(error.error || error.message || 'Failed to send message');
+        }
         setNewMessage(messageText); // Restore message on error
       }
     } catch (error) {
@@ -258,14 +270,26 @@ const CommunityChat = ({ onClose }) => {
                 </p>
               </div>
               <div className="header-right">
-                <button 
-                  className={`anonymous-toggle ${isAnonymous ? 'active' : ''}`}
-                  onClick={() => setIsAnonymous(!isAnonymous)}
-                  title={isAnonymous ? "Switch to public mode" : "Switch to anonymous mode"}
-                >
-                  <UserX size={20} />
-                  {isAnonymous ? 'Anonymous Mode' : 'Public Mode'}
-                </button>
+                {user && (
+                  <button 
+                    className={`anonymous-toggle ${isAnonymous ? 'active' : ''}`}
+                    onClick={() => setIsAnonymous(!isAnonymous)}
+                    title={isAnonymous ? "Switch to public mode" : "Switch to anonymous mode"}
+                  >
+                    <UserX size={20} />
+                    {isAnonymous ? 'Anonymous Mode' : 'Public Mode'}
+                  </button>
+                )}
+                {!user && (
+                  <button 
+                    className="login-button-header"
+                    onClick={() => navigate('/login', { state: { from: '/community-chat' } })}
+                    title="Login to send messages"
+                  >
+                    <LogIn size={20} />
+                    Login to Chat
+                  </button>
+                )}
                 <button className="close-button" onClick={onClose}>
                   <X size={24} />
                 </button>
@@ -332,7 +356,20 @@ const CommunityChat = ({ onClose }) => {
 
                 {/* Message Input */}
                 <form className="message-input-form" onSubmit={sendMessage}>
-                  {isAnonymous && (
+                  {!user && (
+                    <div className="login-prompt-overlay">
+                      <LogIn size={20} />
+                      <span>Login to send messages</span>
+                      <button 
+                        type="button"
+                        className="login-prompt-button"
+                        onClick={() => navigate('/login', { state: { from: '/community-chat' } })}
+                      >
+                        Login Now
+                      </button>
+                    </div>
+                  )}
+                  {isAnonymous && user && (
                     <div className="anonymous-indicator">
                       <UserX size={14} />
                       <span>Anonymous mode</span>
@@ -343,16 +380,22 @@ const CommunityChat = ({ onClose }) => {
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder={isAnonymous ? "Send anonymous message..." : "Type your message..."}
+                    placeholder={!user ? "Login to send messages..." : (isAnonymous ? "Send anonymous message..." : "Type your message...")}
                     maxLength={1000}
-                    disabled={sending}
+                    disabled={sending || !user}
+                    className={!user ? 'input-disabled' : ''}
                   />
                   <button 
                     type="submit" 
-                    disabled={!newMessage.trim() || sending}
+                    disabled={!newMessage.trim() || sending || !user}
                     className="send-button"
+                    title={!user ? "Login required to send messages" : (sending ? "Sending..." : "Send message")}
                   >
-                    <Send size={20} />
+                    {sending ? (
+                      <div className="spinner-small"></div>
+                    ) : (
+                      <Send size={20} />
+                    )}
                   </button>
                 </form>
               </div>

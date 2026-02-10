@@ -293,8 +293,8 @@ function App() {
       {!isChatPage && <Footer />}
       <Analytics />
       
-      {/* Community Chat Floating Button - Only on Home Page */}
-      {user && !showCommunityChat && isHomePage && (
+      {/* Community Chat Floating Button - Only on Home Page (visible to everyone) */}
+      {!showCommunityChat && isHomePage && (
         <button 
           className={`community-chat-fab ${newMessageCount > 0 ? 'has-new-messages' : ''}`}
           onClick={handleToggleCommunityChat}
