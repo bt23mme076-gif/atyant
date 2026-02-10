@@ -14,13 +14,125 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
-  z-index: 99999;
+  z-index: 999999; /* Increased z-index to stay above all content */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   -webkit-tap-highlight-color: transparent;
+  isolation: isolate; /* Create new stacking context */
   
   /* Entrance + Continuous Float */
-  animation: popEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+  animation: popEntrance 0.6s cubic-bezier(0.5, 1.5, 0.64, 1), 
              float 3s ease-in-out infinite 0.6s;
+}
+
+/* Flying Pop-Pop Notification Tooltip */
+.community-chat-fab .flying-notification {
+  position: absolute;
+  bottom: 75px;
+  right: -10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 18px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6), 
+              0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  pointer-events: none;
+  z-index: 1000001; /* Above everything */
+  max-width: 280px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  
+  /* Pop-pop entrance with wiggle - restarts on each message change */
+  opacity: 0;
+  transform: translateY(20px) scale(0.3);
+  animation: flyPopPop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+             wiggle 0.6s ease-in-out 1.5s 2;
+}
+
+/* Speech bubble arrow */
+.community-chat-fab .flying-notification::before {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  right: 30px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid #764ba2;
+  filter: drop-shadow(0 4px 8px rgba(102, 126, 234, 0.4));
+  z-index: -1;
+}
+
+/* Sparkle effect */
+.community-chat-fab .flying-notification::after {
+  content: '✨';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 20px;
+  animation: sparkleRotate 1s ease-in-out infinite;
+}
+
+/* Flying Pop-Pop Animation */
+@keyframes flyPopPop {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.3);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1.12);
+  }
+  60% {
+    transform: translateY(2px) scale(0.96);
+  }
+  75% {
+    transform: translateY(-2px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Wiggle to catch attention */
+@keyframes wiggle {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-4px) rotate(-2deg); }
+  75% { transform: translateX(4px) rotate(2deg); }
+}
+
+/* Sparkle rotation */
+@keyframes sparkleRotate {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-15deg) scale(1.2); }
+  50% { transform: rotate(0deg) scale(1); }
+  75% { transform: rotate(15deg) scale(1.2); }
+}
+
+/* Mobile-specific pop animation with centered transform */
+@keyframes flyPopPopMobile {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px) scale(0.3);
+  }
+  40% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-5px) scale(1.12);
+  }
+  60% {
+    transform: translateX(-50%) translateY(2px) scale(0.96);
+  }
+  75% {
+    transform: translateX(-50%) translateY(-2px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
 }
 
 /* Entrance Animation */
@@ -41,7 +153,8 @@
 
 .community-chat-fab:hover {
   transform: scale(1.1) translateY(-2px);
-  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+  z-index: 1000000; /* Higher on hover */
 }
 
 .community-chat-fab:active {
@@ -107,6 +220,7 @@
   border-radius: 50%;
   animation: pulse 2s ease-out infinite;
   opacity: 0;
+  z-index: -1; /* Behind button */
 }
 
 @keyframes pulse {
@@ -228,6 +342,25 @@
     height: 26px;
     font-size: 13px;
   }
+  
+  /* Flying notification tablet adjustments */
+  .community-chat-fab .flying-notification {
+    bottom: 72px;
+    right: -8px;
+    font-size: 12px;
+    padding: 10px 15px;
+    max-width: 240px;
+    white-space: normal;
+    line-height: 1.3;
+  }
+  
+  .community-chat-fab .flying-notification::before {
+    right: 28px;
+  }
+  
+  .community-chat-fab .flying-notification::after {
+    font-size: 17px;
+  }
 }
 
 /* Mobile adjustments */
@@ -246,52 +379,166 @@
   }
   
   .community-chat-fab .notification-badge {
-    min-width: 24px;
-    height: 24px;
-    font-size: 12px;
-    top: -4px;
-    right: -4px;
+    min-width: 22px;
+    height: 22px;
+    font-size: 11px;
+    top: -3px;
+    right: -3px;
+    border: 2px solid white;
   }
   
   .community-chat-fab .new-message-text {
-    font-size: 10px;
-    padding: 3px 10px;
+    font-size: 9px;
+    padding: 3px 8px;
+  }
+  
+  /* Flying notification mobile adjustments */
+  .community-chat-fab .flying-notification {
+    bottom: 68px;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px) scale(0.3);
+    font-size: 11px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: calc(100vw - 80px);
+    white-space: normal;
+    text-align: center;
+    line-height: 1.3;
+    box-shadow: 0 10px 28px rgba(102, 126, 234, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    animation: flyPopPopMobile 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+               wiggle 0.6s ease-in-out 1.5s 2;
+  }
+  
+  .community-chat-fab .flying-notification::before {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #764ba2;
+  }
+  
+  .community-chat-fab .flying-notification::after {
+    font-size: 14px;
+    top: -5px;
+    right: -5px;
   }
 }
 
 /* Small mobile devices */
 @media (max-width: 480px) {
   .community-chat-fab {
-    bottom: 20px;
-    right: 20px;
-    width: 56px;
-    height: 56px;
+    bottom: 16px;
+    right: 16px;
+    width: 52px;
+    height: 52px;
   }
   
   .community-chat-fab .pulse-ring {
-    width: 66px;
-    height: 66px;
+    width: 62px;
+    height: 62px;
   }
   
   .community-chat-fab .notification-badge {
-    min-width: 22px;
-    height: 22px;
-    font-size: 11px;
-    top: -3px;
-    right: -3px;
+    min-width: 20px;
+    height: 20px;
+    font-size: 10px;
+    top: -2px;
+    right: -2px;
+    border: 2px solid white;
   }
   
   .community-chat-fab .new-message-text {
+    font-size: 9px;
+    padding: 2px 8px;
+    bottom: -24px;
+  }
+  
+  /* Flying notification - compact for small screens */
+  .community-chat-fab .flying-notification {
+    bottom: 64px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%) translateY(20px) scale(0.3);
     font-size: 10px;
-    padding: 3px 10px;
-    bottom: -26px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    max-width: calc(100vw - 60px);
+    white-space: normal;
+    text-align: center;
+    line-height: 1.3;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  }
+  
+  .community-chat-fab .flying-notification::before {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid #764ba2;
+    bottom: -6px;
+  }
+  
+  .community-chat-fab .flying-notification::after {
+    font-size: 12px;
+    top: -4px;
+    right: -4px;
+  }
+}
+
+/* Extra small devices (landscape phones, less than 380px) */
+@media (max-width: 380px) {
+  .community-chat-fab {
+    bottom: 12px;
+    right: 12px;
+    width: 48px;
+    height: 48px;
+  }
+  
+  .community-chat-fab .flying-notification {
+    bottom: 60px;
+    font-size: 9px;
+    padding: 6px 9px;
+    max-width: calc(100vw - 50px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  }
+  
+  .community-chat-fab .flying-notification::before {
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #764ba2;
+  }
+  
+  .community-chat-fab .flying-notification::after {
+    font-size: 11px;
+    top: -3px;
+    right: -3px;
   }
 }
 
 /* Safe area support for notched devices */
 @supports (padding: env(safe-area-inset-bottom)) {
   .community-chat-fab {
-    bottom: calc(25px + env(safe-area-inset-bottom));
-    right: calc(25px + env(safe-area-inset-right));
+    bottom: max(25px, calc(16px + env(safe-area-inset-bottom)));
+    right: max(25px, calc(16px + env(safe-area-inset-right)));
+  }
+  
+  @media (max-width: 768px) {
+    .community-chat-fab {
+      bottom: max(20px, calc(12px + env(safe-area-inset-bottom)));
+      right: max(20px, calc(12px + env(safe-area-inset-right)));
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .community-chat-fab {
+      bottom: max(16px, calc(10px + env(safe-area-inset-bottom)));
+      right: max(16px, calc(10px + env(safe-area-inset-right)));
+    }
   }
 }

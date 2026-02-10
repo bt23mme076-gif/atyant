@@ -49,6 +49,25 @@ function App() {
   const [showCommunityChat, setShowCommunityChat] = useState(false);
   const [newMessageCount, setNewMessageCount] = useState(0);
   const [lastMessageId, setLastMessageId] = useState(null);
+  const [currentNotification, setCurrentNotification] = useState(0);
+  
+  // Random community activity messages
+  const communityNotifications = [
+    '💬 Join the Community Chat!',
+    '👋 Hello from VNIT students!',
+    '🙋‍♀️ Shwati: Need placement help',
+    '🎉 Priyanka got intern at IIM!',
+    '🔬 Ravi got IIT research intern!',
+    '💼 Arjun cracked Google SDE role',
+    '🚀 Live discussions happening now',
+    '🎓 MANIT students sharing tips',
+    '✨ Get instant career guidance',
+    '🤝 Connect with 500+ students',
+    '📚 Rohan sharing coding resources',
+    '💡 Neha got Microsoft internship',
+    '🏆 Success stories daily shared',
+    '🔥 Active mentors online now!',
+  ];
   const isChatPage = location.pathname === '/chat';
   const isHomePage = location.pathname === '/';
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -77,6 +96,17 @@ function App() {
     setShowCommunityChat(prev => !prev);
     setNewMessageCount(0); // Reset count when opening chat
   }, []);
+
+  // Rotate notification messages every 5 seconds (only on homepage)
+  React.useEffect(() => {
+    if (!isHomePage || showCommunityChat) return;
+
+    const interval = setInterval(() => {
+      setCurrentNotification(prev => (prev + 1) % communityNotifications.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isHomePage, showCommunityChat, communityNotifications.length]);
 
   // Check for new community messages
   React.useEffect(() => {
@@ -281,6 +311,10 @@ function App() {
               <span className="new-message-text">New!</span>
             </>
           )}
+          {/* Flying Pop-Pop Notification - Shows after 2 seconds */}
+          <span className="flying-notification" key={currentNotification}>
+            {communityNotifications[currentNotification]}
+          </span>
         </button>
       )}
 

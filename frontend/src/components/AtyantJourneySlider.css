@@ -386,3 +386,25 @@
     transform: scale(1.05);
   }
 }
+
+/* 🔍 SEO Content - Hidden but Crawlable */
+.seo-content {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* Ensure images are optimized for Core Web Vitals */
+.slide-image {
+  content-visibility: auto;
+  contain-intrinsic-size: 1200px 675px;
+}
+
+/* Preload optimization for first slide */
+.slide:first-child .slide-image {
+  priority: high;
+}
