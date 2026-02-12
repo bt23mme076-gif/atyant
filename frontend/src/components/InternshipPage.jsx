@@ -749,7 +749,7 @@ Resume Link: [Resume Link]
           <p className="video-tutorial-description">Learn the entire cold emailing process step-by-step in this comprehensive video guide</p>
           <div className="video-wrapper">
             <iframe
-              src="https://www.youtube.com/embed/vjcq-qS8rAY"
+              src="https://www.youtube.com/embed/YnqDSDOjMnQ?si=qEWs6Q4dpwx8mmBt"
               title="How to Cold Email Professors for IIT IIM Internships - Complete Guide"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
