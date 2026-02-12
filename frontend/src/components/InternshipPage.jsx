@@ -742,6 +742,23 @@ Resume Link: [Resume Link]
       <section className="how-to-section" itemScope itemType="https://schema.org/HowTo" aria-labelledby="cold-email-guide">
         <h2 id="cold-email-guide" itemProp="name">📧 How to Cold Email Professors - Complete Step-by-Step Guide for IIT IIM Internships</h2>
         <meta itemProp="description" content="Proven 6-step strategy to write effective cold emails to IIT and IIM professors for research internships" />
+        
+        {/* ========== VIDEO TUTORIAL ========== */}
+        <div className="video-tutorial-container">
+          <h3 className="video-tutorial-heading">🎥 Watch Complete Video Tutorial</h3>
+          <p className="video-tutorial-description">Learn the entire cold emailing process step-by-step in this comprehensive video guide</p>
+          <div className="video-wrapper">
+            <iframe
+              src="https://www.youtube.com/embed/vjcq-qS8rAY"
+              title="How to Cold Email Professors for IIT IIM Internships - Complete Guide"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              loading="lazy"
+            ></iframe>
+          </div>
+        </div>
+        
         <p className="steps-instruction">👇 Click on each step below to expand and see detailed instructions</p>
         <div className="steps-container" itemProp="step" itemScope itemType="https://schema.org/HowToSection">
           
