@@ -632,6 +632,9 @@ Resume Link: [Resume Link]
 
       {/* ========== PROFESSOR DIRECTORY SECTION ========== */}
       <section className="faculty-directory-combined filter-section-prominent" aria-label="IIT IIM Faculty Directory">
+      <h2 className="professor-directory-info-heading" style={{marginTop: 24, marginBottom: 18, fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.01em'}}>
+              Select a college to view all official professor email addresses and use the search to filter by name or academic area.
+            </h2>
         <h2 className="sr-only">Search IIT and IIM Professor Emails by Institution</h2>
         <div className="faculty-directory-filter-bar" role="search">
           <label htmlFor="category-select">Institution Type: </label>
@@ -660,11 +663,7 @@ Resume Link: [Resume Link]
           </select>
         </div>
         <div className="faculty-directory-content">
-          {category && !college && (
-            <h2 className="professor-directory-info-heading" style={{marginTop: 24, marginBottom: 18, fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.01em'}}>
-              Select a college to view all official professor email addresses and use the search to filter by name or academic area.
-            </h2>
-          )}
+          
           {college && (
             <>
               <div className="iim-directory-controls" style={{marginBottom: 16}}>

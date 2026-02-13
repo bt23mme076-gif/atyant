@@ -15,37 +15,36 @@
 /* ========== PROFESSOR DIRECTORY ========== */
 .professor-directory-info-heading {
   text-align: center;
-  margin: 18px 0 8px 0;
-  font-weight: 700;
-  font-size: 1.18rem;
-  color: #174ea6;
-  background: #f3f6fa;
-  border-radius: 10px;
-  padding: 14px 22px;
-  box-shadow: 0 1px 6px rgba(37,99,235,0.06);
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 24px auto 16px;
+  font-weight: 600;
+  font-size: 1.25rem;
+  color: #1e293b;
+  background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%);
+  border-radius: 16px;
+  padding: 20px 32px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+  max-width: 700px;
+  border: 1px solid #e0f2fe;
   word-break: break-word;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 @media (max-width: 600px) {
   .professor-directory-info-heading {
-    font-size: 1rem;
-    padding: 10px 8px;
-    margin: 14px 0 6px 0;
-    max-width: 98vw;
-    border-radius: 8px;
+    font-size: 1.05rem;
+    padding: 16px 20px;
+    margin: 16px auto 12px;
+    max-width: 95%;
+    border-radius: 12px;
   }
 }
 /* ========== NEW FILTER & EMAIL LIST SECTION ========== */
 .filter-section-prominent {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(37,99,235,0.08);
-  padding: 32px 24px 24px 24px;
-  margin-bottom: 40px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.06);
+  padding: 40px 32px;
+  margin-bottom: 48px;
   max-width: 100vw;
   width: 100vw;
   margin-left: calc(-50vw + 50%);
@@ -53,141 +52,226 @@
 }
 
 .faculty-directory-filter-bar {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: auto 1fr auto 1fr;
   align-items: center;
-  gap: 22px;
-  margin-bottom: 0;
-  font-size: 1.13rem;
-  font-weight: 700;
-  background: #f7fafd;
+  gap: 20px 16px;
+  margin: 0 auto;
+  font-size: 1rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(37,99,235,0.07);
-  padding: 24px 28px 18px 28px;
-  width: 100%;
-  max-width: 900px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 0;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.04);
+  padding: 28px 32px;
+  max-width: 1000px;
 }
 
 .filter-dropdown {
-  padding: 12px 20px;
-  border-radius: 12px;
-  border: 2px solid #e2e8f0;
-  font-size: 1.08rem;
-  background: #f7fafc;
-  color: #174ea6;
-  font-weight: 600;
-  transition: border 0.2s, box-shadow 0.2s;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.04);
+  padding: 13px 18px;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  font-size: 0.95rem;
+  background: #ffffff;
+  color: #1e293b;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   outline: none;
-  margin-right: 8px;
+  cursor: pointer;
 }
+
+.filter-dropdown:hover {
+  border-color: #94a3b8;
+}
+
 .filter-dropdown:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37,99,235,0.13);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: #ffffff;
 }
+
 .faculty-directory-filter-bar label {
-  color: #1a365d;
-  font-size: 1.13rem;
-  font-weight: 700;
-  margin-right: 6px;
+  color: #475569;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .faculty-directory-filter-bar select.filter-dropdown {
-  min-width: 120px;
-  max-width: 340px;
+  width: 100%;
+  min-width: 180px;
 }
 
 .faculty-directory-filter-bar input.filter-dropdown {
   display: none;
 }
+
 .faculty-directory-filter-bar input.filter-dropdown:focus {
   display: none;
 }
 
 .faculty-directory-content {
-  margin-top: 0;
+  margin-top: 32px;
 }
+
+/* Responsive styles for faculty directory filter bar */
+@media (max-width: 768px) {
+  .faculty-directory-filter-bar {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px;
+  }
+  
+  .faculty-directory-filter-bar label {
+    font-size: 0.9rem;
+  }
+  
+  .faculty-directory-filter-bar select.filter-dropdown {
+    min-width: 100%;
+  }
+  
+  .filter-section-prominent {
+    padding: 24px 16px;
+    margin-bottom: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+  .faculty-directory-filter-bar {
+    padding: 16px;
+    gap: 12px;
+  }
+  
+  .filter-dropdown {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .professor-email-list {
+    padding: 16px;
+  }
+  
+  .email-list-li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .email-list-prof-name {
+    min-width: auto;
+  }
+}
+
 .iim-directory-controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 24px 0 18px 0;
+  margin: 32px 0 24px 0;
   width: 100%;
 }
+
 .iim-directory-controls input.filter-dropdown {
-  min-width: 320px;
-  max-width: 420px;
-  font-size: 1.08rem;
+  min-width: 300px;
+  max-width: 500px;
+  font-size: 1rem;
   font-weight: 500;
-  background: #f3f6fa;
-  border: 2px solid #e2e8f0;
-  color: #174ea6;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  color: #1e293b;
   border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.04);
-  padding: 14px 22px;
-  transition: border 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 16px 24px;
+  transition: all 0.2s ease;
   text-align: center;
 }
+
+.iim-directory-controls input.filter-dropdown:hover {
+  border-color: #94a3b8;
+}
+
 .iim-directory-controls input.filter-dropdown:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37,99,235,0.13);
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: #ffffff;
 }
 
 .email-list-loading {
   text-align: center;
-  color: #2563eb;
+  color: #3b82f6;
   font-weight: 600;
-  padding: 18px 0;
+  padding: 24px 0;
+  font-size: 0.95rem;
 }
+
 .professor-email-list {
-  background: #f7fafc;
-  border-radius: 12px;
-  padding: 18px 18px 10px 18px;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.04);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.06);
+  border: 1px solid #e2e8f0;
+  margin-top: 24px;
 }
+
 .email-list-title {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #1a365d;
-  margin-bottom: 12px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 16px;
 }
+
 .email-list-ul {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
+
 .email-list-li {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  font-size: 1rem;
-  background: #fff;
-  border-radius: 8px;
-  padding: 8px 12px;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.04);
+  gap: 12px;
+  font-size: 0.95rem;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
 }
+
+.email-list-li:hover {
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.1);
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
 .email-list-prof-name {
   font-weight: 600;
-  color: #2563eb;
+  color: #3b82f6;
+  min-width: 150px;
 }
+
 .email-list-email {
-  color: #174ea6;
-  font-weight: 600;
+  color: #475569;
+  font-weight: 500;
   text-decoration: none;
   transition: color 0.2s;
 }
+
 .email-list-email:hover {
-  color: #0a2540;
+  color: #1e293b;
   text-decoration: underline;
 }
+
 .email-list-empty {
-  color: #b91c1c;
+  color: #dc2626;
   font-weight: 500;
-  padding: 10px 0;
+  padding: 16px 0;
+  text-align: center;
+  font-size: 0.95rem;
 }
 
 /* ========== INTERNSHIP PAGE ========== */
@@ -1810,135 +1894,140 @@
   align-items: center;
   width: 100%;
 }
+
 .professor-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 36px 28px;
-  .professor-card-number {
-    font-size: 1.08rem;
-    font-weight: 700;
-    color: #2563eb;
-    margin-right: 8px;
-    flex-shrink: 0;
-  }
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 16px 0 16px;
+  padding: 24px 16px;
 }
+
 .professor-card {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 18px rgba(37,99,235,0.13);
-  padding: 22px 18px 18px 18px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  min-width: 0;
-  transition: box-shadow 0.18s, transform 0.18s;
-  height: 240px;
-  min-height: 240px;
-  max-height: 260px;
-  min-width: 220px;
-  max-width: 260px;
-  width: 100%;
-  border: 1px solid #e3e8ee;
-  justify-content: flex-start;
-  box-sizing: border-box;
-  position: relative;
-  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid #e2e8f0;
+  height: auto;
+  min-height: 200px;
 }
+
 .professor-card:hover {
-  box-shadow: 0 12px 36px rgba(37,99,235,0.22);
-  transform: translateY(-6px) scale(1.045);
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+  transform: translateY(-4px);
+  border-color: #cbd5e1;
 }
+
 .professor-card-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  width: 100%;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 100%;
 }
+
 .professor-card-name {
-  font-size: 1.12rem;
-  font-weight: 700;
-  color: #174ea6;
-  margin-right: 2px;
-  letter-spacing: 0.01em;
-  flex: 1 1 auto;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: normal;
-}
-.department-badge {
-  background: linear-gradient(90deg, #90cdf4 0%, #c3dafe 100%);
-  color: #174ea6;
+  font-size: 1.1rem;
   font-weight: 600;
-  font-size: 0.92rem;
-  border-radius: 999px;
-  padding: 3px 14px;
-  margin-left: 0;
-  margin-right: 0;
-  box-shadow: 0 1px 4px rgba(37,99,235,0.10);
+  color: #1e293b;
+  line-height: 1.4;
+  flex: 1;
+  word-wrap: break-word;
+}
+
+.department-badge {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  font-weight: 600;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  padding: 4px 12px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
+
 .professor-card-college {
-  font-size: 0.92rem;
-  color: #1a365d;
-  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 12px;
+  line-height: 1.4;
 }
+
 .professor-card-email-row {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
-  margin-top: 18px;
-  width: 100%;
-  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
 }
+
 .professor-card-email-label {
-  font-size: 0.97rem;
-  color: #64748b;
+  font-size: 0.85rem;
+  color: #94a3b8;
   font-weight: 500;
-  margin-right: 2px;
 }
+
 .professor-card-email {
-  color: #2563eb;
-  font-weight: 600;
+  color: #3b82f6;
+  font-weight: 500;
   text-decoration: none;
-  font-size: 1.04rem;
+  font-size: 0.95rem;
   transition: color 0.2s;
   word-break: break-all;
+  line-height: 1.4;
 }
+
 .professor-card-email:hover {
-  color: #0a2540;
+  color: #1e40af;
   text-decoration: underline;
 }
+
 .email-copy-btn {
-  background: none;
-  border: none;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
   cursor: pointer;
-  padding: 0;
-  margin-left: 2px;
-  display: flex;
+  padding: 6px 10px;
+  display: inline-flex;
   align-items: center;
-  transition: transform 0.15s;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #475569;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
+
+.email-copy-btn:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
 .email-copy-btn:active {
-  transform: scale(0.92);
+  transform: scale(0.95);
 }
+
 .copied-msg {
   color: #10b981;
-  font-size: 0.92rem;
-  margin-left: 6px;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 /* ========== RESPONSIVE ========== */
 @media (max-width: 1200px) {
   .skills-container {
     grid-template-columns: 1fr;
+  }
+  
+  .professor-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 }
 
@@ -1980,6 +2069,31 @@
 
   .skills-tips {
     padding: 24px 20px;
+  }
+  
+  .professor-card-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .professor-card {
+    padding: 20px;
+  }
+  
+  .professor-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .professor-card-name {
+    font-size: 1.05rem;
+  }
+  
+  .department-badge {
+    font-size: 0.75rem;
+    padding: 3px 10px;
   }
 }
 
