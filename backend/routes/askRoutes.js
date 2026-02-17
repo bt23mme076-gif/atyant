@@ -6,6 +6,7 @@ import { extractKeywords } from '../utils/keywordExtractor.js';
 import protect from '../middleware/authMiddleware.js';
 import AnswerCard from '../models/AnswerCard.js';
 import { sendUserAnswerReadyNotification } from '../utils/emailNotifications.js';
+import { getQuestionEmbedding } from '../services/AIService.js';
 
 import path from 'path';
 import fs from 'fs';
@@ -109,12 +110,38 @@ router.post('/mentor/submit-audio-answer', protect, upload.single('audio'), asyn
         parsedContent.actionableSteps = parsedContent.actionableSteps[0];
       }
     }
+    
+    // 🔥 GENERATE EMBEDDING FOR VECTOR SEARCH
+    let embedding = null;
+    try {
+      console.log('🔍 Generating embedding for AnswerCard...');
+      const embeddingText = [
+        parsedContent.mainAnswer,
+        parsedContent.situation,
+        parsedContent.firstAttempt,
+        parsedContent.whatWorked,
+        parsedContent.differentApproach,
+        parsedContent.additionalNotes
+      ].filter(Boolean).join(' ');
+      
+      if (embeddingText.length > 20) {
+        embedding = await getQuestionEmbedding(embeddingText);
+        console.log(`✅ Embedding generated: ${embedding?.length || 0} dimensions`);
+      } else {
+        console.log('⚠️ Content too short for embedding');
+      }
+    } catch (embErr) {
+      console.error('❌ Embedding generation failed:', embErr.message);
+      // Continue without embedding - won't be used for instant answers
+    }
+    
     const answerCardData = {
       questionId,
       mentorId,
       answerContent: parsedContent,
       audioUrl,
-      transcript
+      transcript,
+      embedding  // 🔥 ADD EMBEDDING
     };
     if (mentorExperienceId && mentorExperienceId !== '') {
       answerCardData.mentorExperienceId = mentorExperienceId;

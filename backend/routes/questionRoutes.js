@@ -5,6 +5,7 @@ import Question from '../models/Question.js';
 import User from '../models/User.js';
 import { sendMentorNewQuestionNotification } from '../utils/emailNotifications.js';
 import atyantEngine from '../services/AtyantEngine.js';
+import { getQuestionEmbedding } from '../services/AIService.js';
 
 const router = express.Router();
 
@@ -67,9 +68,60 @@ router.post('/preview-match', questionLimiter, protect, async (req, res) => {
     
     // Extract keywords for matching
     const keywords = atyantEngine.extractBetterKeywords(description);
+    const questionCategory = req.body.category || null;
     
-    // Find best mentor (don't assign yet, just preview)
-    const bestMentor = await atyantEngine.findBestMentor(req.user.userId, keywords);
+    // 🔥 TRY VECTOR SEMANTIC SEARCH FIRST
+    let instantMatch = null;
+    try {
+      console.log('🔍 Step 1: Generating embedding for question...');
+      const vector = await getQuestionEmbedding(description);
+      
+      if (vector && vector.length > 0) {
+        console.log(`✅ Embedding generated: ${vector.length} dimensions`);
+        console.log('🔍 Step 2: Searching for similar answers in vector database...');
+        
+        instantMatch = await atyantEngine.findBestSemanticMatch(
+          req.user.userId, 
+          vector, 
+          description
+        );
+        
+        if (instantMatch) {
+          console.log('⚡ INSTANT ANSWER FOUND!');
+          console.log(`   Mentor: ${instantMatch.mentorProfile?.username}`);
+          console.log(`   Match Score: ${(instantMatch.finalScore * 100).toFixed(1)}%`);
+        } else {
+          console.log('❌ No instant answer found in vector database');
+          console.log('   Reason: No AnswerCards with high enough similarity (>88%)');
+        }
+      } else {
+        console.log('❌ Embedding generation failed - vector is empty');
+      }
+    } catch (err) {
+      console.log('⚠️ Vector search error:', err.message);
+      console.log('   Falling back to live mentor routing...');
+    }
+    
+    // If instant match found, return it
+    if (instantMatch) {
+      return res.json({
+        success: true,
+        mentorFound: true,
+        instantAnswer: true,
+        mentor: {
+          id: instantMatch.mentorProfile._id,
+          name: instantMatch.mentorProfile.name || instantMatch.mentorProfile.username,
+          bio: instantMatch.mentorProfile.bio,
+          expertise: instantMatch.mentorProfile.expertise,
+          profileImage: instantMatch.mentorProfile.profilePicture,
+          matchPercentage: Math.round(instantMatch.finalScore * 100)
+        },
+        answerPreview: instantMatch.answerContent.substring(0, 200) + '...'
+      });
+    }
+    
+    // 🔥 FALLBACK TO LIVE MENTOR ROUTING
+    const bestMentor = await atyantEngine.findBestMentor(req.user.userId, keywords, questionCategory);
     
     if (!bestMentor) {
       return res.json({
@@ -82,6 +134,7 @@ router.post('/preview-match', questionLimiter, protect, async (req, res) => {
     res.json({
       success: true,
       mentorFound: true,
+      instantAnswer: false,
       mentor: {
         id: bestMentor._id,
         name: bestMentor.name || bestMentor.username,
@@ -196,6 +249,75 @@ router.post('/submit', questionLimiter, protect, async (req, res) => {
     // Extract keywords
     const keywords = atyantEngine.extractBetterKeywords(description);
     
+    // 🔥 TRY VECTOR SEARCH FIRST FOR INSTANT ANSWER
+    let instantMatch = null;
+    let vector = null;
+    
+    try {
+      console.log('🔍 [SUBMIT] Step 1: Generating embedding for question...');
+      vector = await getQuestionEmbedding(description);
+      
+      if (vector && vector.length > 0) {
+        console.log(`✅ [SUBMIT] Embedding generated: ${vector.length} dimensions`);
+        console.log('🔍 [SUBMIT] Step 2: Searching for instant answer...');
+        
+        instantMatch = await atyantEngine.findBestSemanticMatch(
+          req.user.userId,
+          vector,
+          description
+        );
+        
+        if (instantMatch) {
+          console.log('⚡ [SUBMIT] INSTANT ANSWER FOUND - Creating instant answer question');
+          console.log(`   Mentor: ${instantMatch.mentorProfile?.username}`);
+          console.log(`   Match Score: ${(instantMatch.finalScore * 100).toFixed(1)}%`);
+        } else {
+          console.log('ℹ️ [SUBMIT] No instant answer found, will route to live mentor');
+        }
+      }
+    } catch (err) {
+      console.log('⚠️ [SUBMIT] Vector search failed:', err.message);
+    }
+    
+    // 🔥 IF INSTANT MATCH FOUND - Create question with instant answer
+    if (instantMatch) {
+      const question = new Question({
+        userId: req.user.userId,
+        title,
+        questionText: description,
+        category,
+        reason: reason || '',
+        qualityScore: qualityScore || 0,
+        keywords,
+        selectedMentorId: instantMatch.mentorProfile._id,
+        answerCardId: instantMatch._id,
+        status: 'answered_instantly',
+        isInstant: true,
+        matchScore: Math.round(instantMatch.finalScore * 100),
+        matchMethod: 'vector_semantic'
+      });
+      
+      await question.save();
+      
+      // Deduct credit
+      await User.findByIdAndUpdate(req.user.userId, {
+        $inc: { credits: -1 }
+      });
+      
+      console.log('✅ [SUBMIT] Instant answer delivered, credit deducted');
+      
+      return res.json({
+        success: true,
+        instantAnswer: true,
+        questionId: question._id,
+        answerCardId: instantMatch._id,
+        message: 'Great news! We found an instant answer from a mentor who solved the same problem!'
+      });
+    }
+    
+    // 🔥 NO INSTANT MATCH - Create question and route to live mentor
+    console.log('📋 [SUBMIT] Creating question for live mentor routing...');
+    
     // Create question
     const question = new Question({
       userId: req.user.userId,
@@ -206,12 +328,13 @@ router.post('/submit', questionLimiter, protect, async (req, res) => {
       qualityScore: qualityScore || 0,
       keywords,
       selectedMentorId: mentorId || null,
-      status: 'submitted'
+      status: 'submitted',
+      matchMethod: 'live_routing'
     });
     
     // If no mentor provided, find best match
     if (!mentorId) {
-      const bestMentor = await atyantEngine.findBestMentor(req.user.userId, keywords);
+      const bestMentor = await atyantEngine.findBestMentor(req.user.userId, keywords, category);
       
       if (bestMentor) {
         question.selectedMentorId = bestMentor._id;

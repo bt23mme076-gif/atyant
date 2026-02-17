@@ -7,12 +7,12 @@ import './EnhancedAskQuestion.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const CATEGORIES = [
-  'Academic & College Life',
-  'Technical Skills',
-  'Career Growth',
-  'Personal Development',
-  'Entrepreneurship'
+const COMPANY_DOMAINS = [
+  { label: 'Tech', value: 'Tech', icon: '💻' },
+  { label: 'Data Analytics', value: 'Data Analytics', icon: '📊' },
+  { label: 'Consulting', value: 'Consulting', icon: '🧑‍💼' },
+  { label: 'Product', value: 'Product', icon: '📦' },
+  { label: 'Core Engineering', value: 'Core Engineering', icon: '⚙️' }
 ];
 
 const EnhancedAskQuestion = () => {
@@ -146,7 +146,7 @@ const EnhancedAskQuestion = () => {
     }
     
     if (!formData.category) {
-      newErrors.category = 'Please select a category';
+      newErrors.category = 'Please select a company domain';
     }
     
     setErrors(newErrors);
@@ -392,8 +392,16 @@ const EnhancedAskQuestion = () => {
       const data = await response.json();
       
       if (data.success) {
-        alert('✅ Question submitted successfully! You will receive an answer within 24 hours.');
-        navigate('/my-questions');
+        if (data.instantAnswer) {
+          // 🔥 INSTANT ANSWER DELIVERED
+          alert('⚡ Great news! We found an instant answer from a mentor who solved the same problem!');
+          // Navigate directly to answer page
+          navigate(`/question-status/${data.questionId}`);
+        } else {
+          // Regular mentor assignment
+          alert('✅ Question submitted successfully! You will receive an answer within 24 hours.');
+          navigate('/my-questions');
+        }
       } else {
         alert('❌ ' + data.error);
       }
@@ -509,21 +517,25 @@ const EnhancedAskQuestion = () => {
         </div>
         
         <div className="form-group">
-          <label htmlFor="category">
-            Category <span className="required">*</span>
+          <label>
+            Company Domain <span className="required">*</span>
           </label>
-          <select
-            id="category"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className={errors.category ? 'error' : ''}
-          >
-            <option value="">Select a category</option>
-            {CATEGORIES.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+          <div className="domain-cards">
+            {COMPANY_DOMAINS.map(domain => (
+              <button
+                type="button"
+                key={domain.value}
+                className={`domain-card${formData.category === domain.value ? ' selected' : ''}`}
+                onClick={() => {
+                  setFormData({ ...formData, category: domain.value });
+                  setErrors({ ...errors, category: '' });
+                }}
+              >
+                <span className="domain-icon">{domain.icon}</span>
+                {domain.label}
+              </button>
             ))}
-          </select>
+          </div>
           {errors.category && <span className="error-message">{errors.category}</span>}
         </div>
         
@@ -561,17 +573,33 @@ const EnhancedAskQuestion = () => {
             {/* Step Progress */}
             <div className="step-indicator">
               <div className="step-header">
-                <h3>Step 2 of {totalSteps} | Meet Your Mentor</h3>
+                <h3>Step 2 of {totalSteps} | {mentorPreview.instantAnswer ? '⚡ Instant Answer Found!' : 'Meet Your Mentor'}</h3>
                 <div className="progress-bar">
                   <div className="progress-fill" style={{ width: `${(2 / totalSteps) * 100}%` }}></div>
                 </div>
               </div>
-              <p className="next-step-hint">Next: Quality Check & Review 📝</p>
+              <p className="next-step-hint">
+                {mentorPreview.instantAnswer 
+                  ? 'This mentor has already answered a similar question! 🎯' 
+                  : 'Next: Quality Check & Review 📝'}
+              </p>
             </div>
             
             {mentorPreview.mentorFound ? (
               <>
-                <h2>✨ We found the best mentor for your question!</h2>
+                <h2>
+                  {mentorPreview.instantAnswer 
+                    ? '⚡ Instant Answer Available!' 
+                    : '✨ We found the best mentor for your question!'}
+                </h2>
+                
+                {mentorPreview.instantAnswer && mentorPreview.answerPreview && (
+                  <div className="instant-answer-preview">
+                    <h4>📝 Answer Preview:</h4>
+                    <p>{mentorPreview.answerPreview}</p>
+                    <span className="instant-badge">✨ Based on similar question</span>
+                  </div>
+                )}
                 
                 <div className="mentor-card-preview">
                   <div className="mentor-avatar">

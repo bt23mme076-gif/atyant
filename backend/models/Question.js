@@ -30,18 +30,24 @@ const questionSchema = new mongoose.Schema({
     maxlength: 1000
   },
   
-  // NEW: Category
+  // NEW: Category (Company Domain)
   category: {
     type: String,
     required: false, // Not required for backward compatibility
     enum: [
+      'Tech',
+      'Data Analytics',
+      'Consulting',
+      'Product',
+      'Core Engineering',
+      // Keep old categories for backward compatibility
       'Academic & College Life',
       'Technical Skills',
       'Career Growth',
       'Personal Development',
       'Entrepreneurship'
     ],
-    default: 'Career Growth'
+    default: 'Tech'
   },
   
   // NEW: Reason for asking
@@ -166,6 +172,25 @@ const questionSchema = new mongoose.Schema({
   isEditable: {
     type: Boolean,
     default: true
+  },
+  
+  // 🔥 VECTOR SEARCH TRACKING
+  isInstant: {
+    type: Boolean,
+    default: false
+  },
+  
+  matchScore: {
+    type: Number,
+    min: 0,
+    max: 100,
+    default: null
+  },
+  
+  matchMethod: {
+    type: String,
+    enum: ['vector_semantic', 'live_routing', null],
+    default: null
   },
   
   // Metadata

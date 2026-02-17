@@ -80,11 +80,33 @@ router.post('/answer', protect, async (req, res) => {
   const { questionId, mentorId, answerContent } = req.body;
   if (!questionId || !mentorId || !answerContent) return res.status(400).json({ success: false, error: 'Missing fields' });
   try {
+    // 🔥 GENERATE EMBEDDING FOR VECTOR SEARCH
+    let embedding = null;
+    try {
+      const { getQuestionEmbedding } = await import('../services/AIService.js');
+      const embeddingText = [
+        answerContent.mainAnswer,
+        answerContent.situation,
+        answerContent.firstAttempt,
+        answerContent.whatWorked,
+        answerContent.differentApproach,
+        answerContent.additionalNotes
+      ].filter(Boolean).join(' ');
+      
+      if (embeddingText.length > 20) {
+        embedding = await getQuestionEmbedding(embeddingText);
+        console.log(`✅ Admin answer - Embedding generated: ${embedding?.length || 0} dimensions`);
+      }
+    } catch (embErr) {
+      console.error('❌ Embedding generation failed:', embErr.message);
+    }
+    
     // Create AnswerCard
     const answerCard = await AnswerCard.create({
       questionId,
       mentorId,
       answerContent,
+      embedding,  // 🔥 ADD EMBEDDING
       publishedBy: req.user._id,
       publishedAt: new Date(),
       status: 'published',
