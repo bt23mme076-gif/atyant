@@ -43,6 +43,9 @@ const app = express();
 import path from 'path';
 const PORT = process.env.PORT || 3000;
 
+// Enable trust proxy for deployment behind reverse proxy (Render, Heroku, etc.)
+app.set('trust proxy', 1);
+
 // Serve uploads directory for audio answers
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
