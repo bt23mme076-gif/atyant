@@ -6,6 +6,8 @@ import User from '../models/User.js';
 import { sendMentorNewQuestionNotification } from '../utils/emailNotifications.js';
 import atyantEngine from '../services/AtyantEngine.js';
 import { getQuestionEmbedding } from '../services/AIService.js';
+import { getRedditStats } from '../utils/redditStats.js';
+
 
 const router = express.Router();
 
@@ -102,6 +104,9 @@ router.post('/preview-match', questionLimiter, protect, async (req, res) => {
       console.log('   Falling back to live mentor routing...');
     }
     
+    // Reddit stats fetch karo (parallel)
+    const redditStats = await getRedditStats(description);
+
     // If instant match found, return it
     if (instantMatch) {
       return res.json({
@@ -116,7 +121,8 @@ router.post('/preview-match', questionLimiter, protect, async (req, res) => {
           profileImage: instantMatch.mentorProfile.profilePicture,
           matchPercentage: Math.round(instantMatch.finalScore * 100)
         },
-        answerPreview: instantMatch.answerContent.substring(0, 200) + '...'
+        answerPreview: instantMatch.answerContent.substring(0, 200) + '...',
+        redditStats: redditStats
       });
     }
     
@@ -142,7 +148,8 @@ router.post('/preview-match', questionLimiter, protect, async (req, res) => {
         expertise: bestMentor.expertise,
         profileImage: bestMentor.profilePicture,
         matchPercentage: bestMentor.matchScore || 85
-      }
+      },
+      redditStats: redditStats
     });
   } catch (error) {
     console.error('❌ Mentor preview error:', error);

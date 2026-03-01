@@ -36,8 +36,8 @@ export const getQuestionEmbedding = async (text) => {
 class AIService {
   constructor() {
     this.apiKey = process.env.GEMINI_API_KEY;
-    // Use gemini-pro for v1beta endpoint compatibility (public API key)
-    this.model = 'gemini-pro';
+    // Use gemini-1.5-flash for v1beta endpoint compatibility (public API key)
+    this.model = 'gemini-1.5-flash';
     
     if (!this.apiKey) {
       console.error('❌ GEMINI_API_KEY not found in .env!');
@@ -79,8 +79,8 @@ async refineExperience(rawData) {
     
     RAW DATA: ${JSON.stringify(rawData)}`;
 
-    // Use v1beta endpoint with correct model name format
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+    // Use v1 endpoint for gemini-1.5-flash
+    const url = `https://generativelanguage.googleapis.com/v1/models/${this.model}:generateContent?key=${this.apiKey}`;
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -127,8 +127,8 @@ async refineExperience(rawData) {
       if (platformInfo) {
         aiResponse = platformInfo.type === 'faq' ? platformInfo.content.answer : "I can help with that Atyant feature!";
       } else {
-        // Gemini API logic - use v1beta endpoint with correct model name
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
+        // Gemini API logic - use v1 endpoint for gemini-1.5-flash
+        const url = `https://generativelanguage.googleapis.com/v1/models/${this.model}:generateContent?key=${this.apiKey}`;
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

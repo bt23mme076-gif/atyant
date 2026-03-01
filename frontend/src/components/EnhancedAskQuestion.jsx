@@ -587,6 +587,68 @@ const EnhancedAskQuestion = () => {
             
             {mentorPreview.mentorFound ? (
               <>
+                {/* Reddit Stats Banner */}
+                {mentorPreview?.redditStats && (
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-around',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    marginBottom: '20px',
+                    color: 'white'
+                  }}>
+                    
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '28px', fontWeight: 'bold' }}>
+                        {mentorPreview.redditStats.totalSolved}+
+                      </div>
+                      <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                        students solved this
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '28px', fontWeight: 'bold' }}>
+                        {mentorPreview.mentor?.matchPercentage}%
+                      </div>
+                      <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                        profile match
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '28px', fontWeight: 'bold' }}>
+                        {mentorPreview.redditStats.totalThreads || 0}                      </div>
+                      <div style={{ fontSize: '12px', opacity: 0.9 }}>
+                        Reddit threads found
+                      </div>
+                    </div>
+
+                  </div>
+                )}
+
+                {mentorPreview?.redditStats?.aiSummary &&
+ !mentorPreview.redditStats.aiSummary.includes("here to help") && (
+                  <div style={{
+                    background: '#f8f9ff',
+                    border: '1px solid #e0e3ff',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    marginBottom: '20px',
+                    fontSize: '14px',
+                    lineHeight: '1.6',
+                    color: '#333'
+                  }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+                      💡 What others did in your situation:
+                    </div>
+                    <p style={{ margin: 0 }}>
+                      {mentorPreview.redditStats.aiSummary}
+                    </p>
+                  </div>
+                )}
+
                 <h2>
                   {mentorPreview.instantAnswer 
                     ? '⚡ Instant Answer Available!' 
