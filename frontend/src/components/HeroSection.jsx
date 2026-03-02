@@ -24,20 +24,20 @@ const HeroSection = () => {
   const { user } = useAuth();
 
   const rotatingQuestions = [
-   'Why am I not getting interview calls?',
-   'How did seniors from my branch crack this role?',
-   'What should I build in 2–3 months to get shortlisted?',
-   'Why am I getting rejected after interviews?',
-   'What exactly do recruiters notice in resumes like mine?',
-  ];
+  'How can I get an IIM internship?',
+   'How can I get an IIT internship?',
+  'How did seniors from my branch crack Google or Amazon?',
+  'What projects help get internship shortlists?',
+  'Why am I getting rejected in placements?'
+];
 
-  const fallbackQuestions = [
-    "How to build a resume for placements?",
-    "Interview preparation roadmap?",
-    "DSA practice strategy for beginners",
-    "Web Development career path",
-    "Data Science learning steps",
-  ];
+const fallbackQuestions = [
+  "Placement roadmap from 1st–4th year",
+  "Resume tips for top companies",
+  "How to crack Google from my branch?",
+  "How to crack Amazon placements?",
+  "How to get shortlisted for internships?"
+];
 
   // Typewriter effect
   useEffect(() => {
