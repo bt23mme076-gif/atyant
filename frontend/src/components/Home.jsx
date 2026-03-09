@@ -6,7 +6,6 @@ import AboutUs from './AboutUs';
 import HowItWorks from './HowItWorks';
 import WhyChooseUs from './WhyChooseUs';
 import FeedbackForm from './FeedbackForm';
-import MentorGallery from '../components/MentorGallery';
 import ReviewsSlider from './ReviewsSlider';
 import AtyantJourneySlider from './AtyantJourneySlider';
 
@@ -22,7 +21,6 @@ const Home = () => {
       />
 
       <div id="home"><HeroSection /></div>
-      <MentorGallery />
       <AtyantJourneySlider />
       <div id="about"><AboutUs /></div>
       <div id="how-it-works"><HowItWorks /></div>
