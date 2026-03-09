@@ -25,16 +25,24 @@ const signUserToken = (user) => {
 
 router.post('/signup', async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, email, password, role, phone } = req.body;
     
     // ✅ Add validation
-    if (!username || !email || !password) {
-      return res.status(400).json({ message: 'All fields required' });
+    if (!username || !email || !password || !phone) {
+      return res.status(400).json({ message: 'All fields required including mobile number' });
+    }
+
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ message: 'Enter a valid 10-digit Indian mobile number' });
     }
     
     // Check existing user
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    const existingUser = await User.findOne({ $or: [{ email }, { username }, { phone }] });
     if (existingUser) {
+      if (existingUser.phone === phone) {
+        return res.status(400).json({ message: 'Mobile number already registered' });
+      }
       return res.status(400).json({ message: 'User already exists' });
     }
     
@@ -46,6 +54,7 @@ router.post('/signup', async (req, res) => {
       username,
       email,
       password: hashedPassword,
+      phone,
       role: role || 'student'
     });
     

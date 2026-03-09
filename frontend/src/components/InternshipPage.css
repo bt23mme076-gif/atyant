@@ -1714,6 +1714,7 @@
   margin-bottom: 10px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -2112,6 +2113,7 @@
   margin-bottom: 10px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -2459,7 +2461,6 @@
   .tips-box p {
     font-size: 0.85rem;
   }
-  transition: background 0.18s, color 0.18s, box-shadow 0.18s;
 }
  .department-badge:hover {
   background: linear-gradient(90deg, #63b3ed 0%, #bee3f8 100%);

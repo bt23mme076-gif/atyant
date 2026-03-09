@@ -126,7 +126,8 @@
 /* Inputs */
 .auth-form input[type="text"],
 .auth-form input[type="email"],
-.auth-form input[type="password"] {
+.auth-form input[type="password"],
+.auth-form input[type="tel"] {
   width: 100%;
   min-height: 44px;
   padding: 14px 14px;
@@ -143,6 +144,44 @@
 .auth-form input:focus {
   border-color: #4f46e5;
   box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.16);
+}
+
+/* Phone input wrapper with +91 prefix */
+.phone-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid #cfd6e0;
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.phone-input-row:focus-within {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.16);
+}
+.phone-prefix {
+  padding: 0 10px 0 14px;
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #374151;
+  background: #f8faff;
+  border-right: 1px solid #cfd6e0;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.phone-input-row input[type="tel"] {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 10px 10px 0 !important;
+  flex: 1;
+  min-width: 0;
+  background: transparent;
 }
 
 /* Error text & messages */
@@ -197,8 +236,24 @@
 }
 
 /* Password groups with eye inside */
-.password-group { position: relative; display: flex; align-items: center; }
-.password-group input { padding-right: 44px; }
+.password-group {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.password-group > label {
+  width: 100%;
+  flex-shrink: 0;
+}
+.password-group > input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 44px;
+}
+.password-group > .error-text {
+  width: 100%;
+}
 .password-toggle-btn {
   position: absolute;
   right: 8px;
@@ -215,6 +270,11 @@
   align-items: center;
   justify-content: center;
   transition: background 0.2s ease, color 0.2s ease, transform 0.06s ease;
+}
+/* When label is present, shift button down past the label */
+.password-group:has(> label) .password-toggle-btn {
+  top: calc(30px + 22px); /* label ~30px + half input height ~22px */
+  transform: translateY(-50%);
 }
 .password-toggle-btn:hover { background: #f3f4f6; color: #374151; }
 .password-toggle-btn:active { transform: translateY(calc(-50% + 1px)); }
@@ -281,13 +341,32 @@
   .form-group label { color: #cbd5e1; }
   .auth-form input[type="text"],
   .auth-form input[type="email"],
-  .auth-form input[type="password"] {
+  .auth-form input[type="password"],
+  .auth-form input[type="tel"] {
     background: rgba(2, 6, 23, 0.6);
     color: #e5e7eb;
     border-color: #334155;
   }
   .auth-form input::placeholder { color: #94a3b8; }
   .auth-form input:focus { border-color: #818cf8; box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.18); }
+
+  .phone-input-row {
+    background: rgba(2, 6, 23, 0.6);
+    border-color: #334155;
+  }
+  .phone-input-row:focus-within {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.18);
+  }
+  .phone-prefix {
+    background: rgba(15, 23, 42, 0.6);
+    border-right-color: #334155;
+    color: #94a3b8;
+  }
+  .phone-input-row input[type="tel"] {
+    background: transparent;
+    color: #e5e7eb;
+  }
 
   .role-button { background: rgba(2, 6, 23, 0.35); border-color: #334155; color: #cbd5e1; }
   .role-button:hover { background: rgba(30, 41, 59, 0.55); border-color: #475569; }

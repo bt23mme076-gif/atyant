@@ -9,6 +9,7 @@ const Signup = () => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
     // Purane code ke mutabik trailing space. Agar backend ko yehi chahiye to isko rakho.
@@ -35,6 +36,12 @@ const Signup = () => {
       newErrors.email = "Email is required";
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = "Enter a valid email";
+    }
+    const phoneRegex = /^[6-9]\d{9}$/;
+    if (!formData.phone) {
+      newErrors.phone = "Mobile number is required";
+    } else if (!phoneRegex.test(formData.phone)) {
+      newErrors.phone = "Enter a valid 10-digit Indian mobile number";
     }
     if (!formData.password) {
       newErrors.password = "Password is required";
@@ -204,6 +211,24 @@ const Signup = () => {
             required
           />
           {errors.email && <p className="error-text">{errors.email}</p>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="phone">Mobile Number</label>
+          <div className="phone-input-row">
+            <span className="phone-prefix">🇮🇳 +91</span>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="10-digit mobile number"
+              value={formData.phone}
+              onChange={handleChange}
+              maxLength={10}
+              required
+            />
+          </div>
+          {errors.phone && <p className="error-text">{errors.phone}</p>}
         </div>
 
         <div className="form-group password-group">

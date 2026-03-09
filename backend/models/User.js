@@ -46,6 +46,12 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 8
   },
+  phone: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true
+  },
   role: {
     type: String,
     enum: ['user', 'mentor', 'admin'],
