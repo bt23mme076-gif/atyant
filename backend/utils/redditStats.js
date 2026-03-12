@@ -1,5 +1,28 @@
 import axios from 'axios';
-import aiService from '../services/AIService.js';
+import fetch from 'node-fetch';
+
+// Direct Gemini call — no chat wrapper, no system prompt baggage
+const summarizeWithGemini = async (prompt) => {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return null;
+
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    });
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    return text && text.trim().length > 10 ? text.trim() : null;
+  } catch (err) {
+    console.log('Gemini summary failed:', err.message);
+    return null;
+  }
+};
 
 // Reddit se posts fetch karo
 const fetchRedditPosts = async (questionText) => {
@@ -20,11 +43,20 @@ const fetchRedditPosts = async (questionText) => {
   const engagementScore = totalUpvotes + totalComments;
 
   return {
+    // top 3 used for AI summarisation (includes selftext)
     posts: posts.slice(0, 3).map(post => ({
       title: post.data?.title,
       selftext: post.data?.selftext?.substring(0, 300) || '',
       url: `https://reddit.com${post.data?.permalink}`,
-      ups: post.data?.ups
+      ups: post.data?.ups || 0
+    })),
+    // top 10 shown as clickable list in UI
+    top10Posts: posts.slice(0, 10).map(post => ({
+      title: post.data?.title,
+      url: `https://reddit.com${post.data?.permalink}`,
+      ups: post.data?.ups || 0,
+      numComments: post.data?.num_comments || 0,
+      subreddit: post.data?.subreddit_name_prefixed || 'r/unknown'
     })),
     totalSolved: engagementScore > 50 ? engagementScore : Math.max(posts.length * 45, 120),
     totalThreads: posts.length
@@ -34,7 +66,7 @@ const fetchRedditPosts = async (questionText) => {
 // Main function
 export const getRedditStats = async (questionText) => {
   try {
-    const { posts, totalSolved, totalThreads } = await fetchRedditPosts(questionText);
+    const { posts, top10Posts, totalSolved, totalThreads } = await fetchRedditPosts(questionText);
     console.log(`✅ Reddit: ${totalThreads} posts fetched, totalSolved=${totalSolved}`);
 
     let summary = null;
@@ -44,33 +76,23 @@ export const getRedditStats = async (questionText) => {
         `Post ${i+1}: ${p.title}\n${p.selftext}`
       ).join('\n\n');
 
-      const prompt = `A student asked this question:
+      const prompt = `A student asked: "${questionText}"
 
-"${questionText}"
-
-Here are Reddit discussions about it:
+Here are the top Reddit discussions on this topic:
 
 ${postsText}
 
-Summarize the practical advice students gave.
-Write ONLY 3 short clear lines in simple English.
-No introduction. Direct answer.`;
+Based on these Reddit threads, write a 3-point summary of the most practical advice students shared.
+Be direct and specific. No intro sentence. Plain English only.`;
 
-      const result = await aiService.chat('000000000000000000000000', prompt);
-
-      if (result && result.success) {
-        summary = result.response;
-      } else {
-        summary = null;
-      }
-
+      summary = await summarizeWithGemini(prompt);
       console.log('✅ Summary:', summary?.substring(0, 80) || 'NULL');
     }
 
-    return { totalSolved, totalThreads, topPosts: posts, aiSummary: summary };
+    return { totalSolved, totalThreads, topPosts: posts, top10Posts, aiSummary: summary };
 
   } catch (err) {
     console.log('Reddit search failed:', err.message);
-    return { totalSolved: 120, totalThreads: 0, topPosts: [], aiSummary: null };
+    return { totalSolved: 120, totalThreads: 0, topPosts: [], top10Posts: [], aiSummary: null };
   }
 };

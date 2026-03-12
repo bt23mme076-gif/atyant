@@ -628,8 +628,7 @@ const EnhancedAskQuestion = () => {
                   </div>
                 )}
 
-                {mentorPreview?.redditStats?.aiSummary &&
- !mentorPreview.redditStats.aiSummary.includes("here to help") && (
+                {mentorPreview?.redditStats?.aiSummary && (
                   <div style={{
                     background: '#f8f9ff',
                     border: '1px solid #e0e3ff',
@@ -649,6 +648,57 @@ const EnhancedAskQuestion = () => {
                   </div>
                 )}
 
+                {/* Top 10 Reddit Threads */}
+                {mentorPreview?.redditStats?.top10Posts?.length > 0 && (
+                  <div style={{
+                    background: '#fff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    marginBottom: '20px'
+                  }}>
+                    <div style={{ fontWeight: 'bold', marginBottom: '12px', fontSize: '14px', color: '#333', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <svg width="18" height="18" viewBox="0 0 20 20" fill="#ff4500" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="10" fill="#ff4500"/><text x="5" y="15" fontSize="12" fill="white" fontWeight="bold">r/</text></svg>
+                      Top Reddit Threads matching your question
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {mentorPreview.redditStats.top10Posts.map((post, idx) => (
+                        <a
+                          key={idx}
+                          href={post.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            gap: '10px',
+                            padding: '10px 12px',
+                            background: '#f9fafb',
+                            borderRadius: '8px',
+                            textDecoration: 'none',
+                            color: '#111',
+                            border: '1px solid #f0f0f0',
+                            transition: 'background 0.15s'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#f0f4ff'}
+                          onMouseLeave={e => e.currentTarget.style.background = '#f9fafb'}
+                        >
+                          <span style={{ minWidth: '22px', fontWeight: 'bold', color: '#6b7280', fontSize: '13px', paddingTop: '1px' }}>{idx + 1}.</span>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '13px', fontWeight: '500', lineHeight: '1.4', marginBottom: '4px' }}>{post.title}</div>
+                            <div style={{ display: 'flex', gap: '10px', fontSize: '11px', color: '#9ca3af' }}>
+                              <span>⬆ {post.ups.toLocaleString()}</span>
+                              <span>💬 {post.numComments.toLocaleString()}</span>
+                              <span>{post.subreddit}</span>
+                            </div>
+                          </div>
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" strokeWidth="2" style={{ marginTop: '3px', flexShrink: 0 }}><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <h2>
                   {mentorPreview.instantAnswer 
                     ? '⚡ Instant Answer Available!' 
@@ -660,6 +710,36 @@ const EnhancedAskQuestion = () => {
                     <h4>📝 Answer Preview:</h4>
                     <p>{mentorPreview.answerPreview}</p>
                     <span className="instant-badge">✨ Based on similar question</span>
+                    {mentorPreview.answerCardId && (
+                      <button 
+                        className="view-answer-btn"
+                        style={{
+                          marginTop: '12px',
+                          padding: '8px 16px',
+                          background: '#4f46e5',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '13px',
+                          fontWeight: '600', 
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                          width: '100%',
+                          transition: 'background 0.2s'
+                        }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          window.open(`/answer/${mentorPreview.answerCardId}`, '_blank');
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#4338ca'}
+                        onMouseLeave={e => e.currentTarget.style.background = '#4f46e5'}
+                      >
+                        See Full Answer Card ↗
+                      </button>
+                    )}
                   </div>
                 )}
                 

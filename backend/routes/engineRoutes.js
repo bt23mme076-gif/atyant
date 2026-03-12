@@ -148,6 +148,8 @@ router.get('/mentor/answered-questions', protect, async (req, res) => {
 router.post('/mentor/submit-experience', protect, async (req, res) => {
   try {
     const { questionId, rawExperience } = req.body;
+// ... (existing code, I just need to find where to insert)
+
     console.log('DEBUG: Received rawExperience:', rawExperience);
     const question = await Question.findOne({ _id: questionId, selectedMentorId: req.user.userId });
     if (!question) return res.status(404).json({ success: false, error: 'Unauthorized or question not found' });
@@ -281,6 +283,50 @@ router.post('/submit-follow-up', protect, async (req, res) => {
 
     res.json({ success: true, originalQuestionId: originalQuestion._id });
   } catch (e) { res.status(500).json({ success: false }); }
+});
+
+/**
+ * 7. VIEW ANSWER CARD (Public/Shared)
+ * Allows viewing an answer card by ID without being the question owner.
+ */
+router.get('/answer-card/:answerCardId', protect, async (req, res) => {
+  try {
+    const { answerCardId } = req.params;
+    
+    const answerCard = await AnswerCard.findById(answerCardId)
+      .populate('mentorId', 'name username bio expertise profileImage ratings');
+      
+    if (!answerCard) {
+      return res.status(404).json({ success: false, error: 'Answer card not found' });
+    }
+
+    const question = await Question.findById(answerCard.questionId).select('questionText');
+    
+    // Format similar to question-status response
+    const formattedAnswer = {
+      ...answerCard.toObject(),
+      id: answerCard._id,
+      mentor: answerCard.mentorId,
+      content: typeof answerCard.answerContent === 'object'
+        ? answerCard.answerContent
+        : { mainAnswer: answerCard.answerContent },
+      isInstant: true,
+      matchScore: answerCard.matchScore || 100
+    };
+
+    res.json({
+      success: true,
+      question: { 
+        id: question ? question._id : null, 
+        text: question ? question.questionText : 'Original question details unavailable', 
+        status: 'delivered' 
+      },
+      answerCard: formattedAnswer
+    });
+  } catch (error) {
+    console.error('Error fetching answer card:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch answer card' });
+  }
 });
 
 export default router;

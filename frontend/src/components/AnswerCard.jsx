@@ -348,24 +348,26 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
         </div>
       )}
 
-      {/* ACTION FOOTER */}
-      <div className="follow-up-input-container">
-        {answerCard.followUpCount < 2 ? (
-          <>
-            <input 
-              type="text" 
-              placeholder="Ask a quick follow-up..." 
-              value={followUpText}
-              onChange={(e) => setFollowUpText(e.target.value)}
-            />
-            <button className="send-fu-btn" onClick={submitFollowUp} disabled={followUpLoading}>
-              {followUpLoading ? '...' : '↗'}
-            </button>
-          </>
-        ) : (
-          <div className="text-center w-full text-gray-400 text-sm">Follow-up limit reached.</div>
-        )}
-      </div>
+      {/* ACTION FOOTER - Only show if we have a valid question ID (owner view) */}
+      {questionId && (
+        <div className="follow-up-input-container">
+          {answerCard.followUpCount < 2 ? (
+            <>
+              <input 
+                type="text" 
+                placeholder="Ask a quick follow-up..." 
+                value={followUpText}
+                onChange={(e) => setFollowUpText(e.target.value)}
+              />
+              <button className="send-fu-btn" onClick={submitFollowUp} disabled={followUpLoading}>
+                {followUpLoading ? '...' : '↗'}
+              </button>
+            </>
+          ) : (
+            <div className="text-center w-full text-gray-400 text-sm">Follow-up limit reached.</div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

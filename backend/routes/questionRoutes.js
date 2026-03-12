@@ -113,6 +113,8 @@ router.post('/preview-match', questionLimiter, protect, async (req, res) => {
         success: true,
         mentorFound: true,
         instantAnswer: true,
+        answerCardId: instantMatch._id,
+        originalQuestionId: instantMatch.questionId,
         mentor: {
           id: instantMatch.mentorProfile._id,
           name: instantMatch.mentorProfile.name || instantMatch.mentorProfile.username,
@@ -121,7 +123,9 @@ router.post('/preview-match', questionLimiter, protect, async (req, res) => {
           profileImage: instantMatch.mentorProfile.profilePicture,
           matchPercentage: Math.round(instantMatch.finalScore * 100)
         },
-        answerPreview: instantMatch.answerContent.substring(0, 200) + '...',
+        answerPreview: (instantMatch.answerContent?.mainAnswer || 
+          (typeof instantMatch.answerContent === 'string' ? instantMatch.answerContent : 'This answer is being generated for you.'))
+          .substring(0, 200) + '...',
         redditStats: redditStats
       });
     }

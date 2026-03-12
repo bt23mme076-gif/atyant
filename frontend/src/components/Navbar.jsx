@@ -96,17 +96,21 @@ const Navbar = () => {
             {!isMobile && <GraduationCap size={18} />}
             Internships
           </Link>
+          <Link to="/career-guides" className="nav-link career-guides-link" onClick={linkAction}>
+            {!isMobile && <GraduationCap size={18} style={{ color: '#9d50bb' }} />} Career Guides
+          </Link>
          
         </>
       ) : (
         <>         
           <Link to="/my-questions" className="nav-link" onClick={linkAction}>My Questions</Link>
-          <Link to="/internship-journey" className="nav-link internship-journey-link" onClick={linkAction}>
-            Internship Journey
-          </Link>
+          
           <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
             {!isMobile && <GraduationCap size={18} />}
             Internships
+          </Link>
+          <Link to="/career-guides" className="nav-link career-guides-link" onClick={linkAction}>
+            {!isMobile && <GraduationCap size={18} style={{ color: '#9d50bb' }} />} Career Guides
           </Link>      
         </>
       );
@@ -114,12 +118,13 @@ const Navbar = () => {
     
     return (
       <>
-        <Link to="/internship-journey" className="nav-link internship-journey-link" onClick={linkAction}>
-          Internship Journey
-        </Link>
+       
         <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
           {!isMobile && <GraduationCap size={18} />}
           Internships
+        </Link>
+        <Link to="/career-guides" className="nav-link career-guides-link" onClick={linkAction}>
+          {!isMobile && <GraduationCap size={18} style={{ color: '#9d50bb' }} />} Career Guides
         </Link>
         <Link to="/login" className="nav-button" onClick={linkAction}>Login</Link>
         <Link to="/signup" className="nav-button primary" onClick={linkAction}>Sign Up</Link>

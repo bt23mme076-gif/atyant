@@ -6,8 +6,8 @@ import AnswerCard from './AnswerCard';
 import LoadingSpinner from './LoadingSpinner';
 import './EngineView.css';
 
-const EngineView = () => {
-  const { questionId } = useParams();
+const EngineView = ({ isAnswerView }) => {
+  const { questionId, answerCardId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   
@@ -22,17 +22,51 @@ const EngineView = () => {
       return;
     }
     
-    fetchQuestionStatus();
-    
-    // Poll for updates every 5 seconds if answer not ready
-    const interval = setInterval(() => {
-      if (!answerCard) {
-        fetchQuestionStatus();
+    if (isAnswerView && answerCardId) {
+      fetchAnswerCard();
+    } else {
+      fetchQuestionStatus();
+      
+      // Poll for updates every 5 seconds if answer not ready
+      const interval = setInterval(() => {
+        if (!answerCard) {
+          fetchQuestionStatus();
+        }
+      }, 5000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [questionId, answerCardId, user]);
+
+  const fetchAnswerCard = async () => {
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${API_URL}/api/engine/answer-card/${answerCardId}`, {
+        headers: {
+          'Authorization': `Bearer ${user.token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch answer card');
       }
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, [questionId, user]);
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setQuestion(data.question);
+        setAnswerCard(data.answerCard);
+        setError(null);
+      } else {
+        setError(data.error);
+      }
+    } catch (err) {
+      console.error('Error fetching answer card:', err);
+      setError('Failed to load answer card');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchQuestionStatus = async () => {
     try {

@@ -35,11 +35,8 @@ const MentorDashboard = lazy(() => import('./components/MentorDashboard')); // �
 const MyQuestions = lazy(() => import('./components/MyQuestions')); // ✅ USER QUESTIONS LIST
 const EnhancedAskQuestion = lazy(() => import('./components/EnhancedAskQuestion')); // ✅ NEW ENHANCED ASK FLOW
 const InternshipJourney = lazy(() => import('./components/InternshipJourney'));
-const IITLinksPage = lazy(() => import('./components/IITLinksPage'));
-const IIMLinksPage = lazy(() => import('./components/IIMLinksPage'));
-const IIMDirectory = lazy(() => import('./components/IIMDirectory'));
-const IITDirectory = lazy(() => import('./components/IITDirectory'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const CareerGuidesPage = lazy(() => import('./components/CareerGuidesPage'));
 
 
 function App() {
@@ -204,11 +201,8 @@ function App() {
               {/* ✅ INTERNSHIP PAGE - PUBLIC (but links are protected) */}
               <Route path="/internships" element={<InternshipPage />} />
               <Route path="/internship-journey" element={<InternshipJourney />} />
-              <Route path="/iit-links" element={<IITLinksPage />} />
-              <Route path="/iim-links" element={<IIMLinksPage />} />
-              <Route path="/iim-directory" element={<IIMDirectory />} />
-              <Route path="/iim-list" element={<IIMDirectory />} />
-              <Route path="/iit-list"  element={<IITDirectory />} />
+              <Route path="/career-guides" element={<CareerGuidesPage />} />
+              
 
               
               {/* ========== PROTECTED ROUTES ========== */}
@@ -254,6 +248,11 @@ function App() {
               <Route path="/engine/:questionId" element={
                 <ProtectedRoute>
                   <EngineView />
+                </ProtectedRoute>
+              } />
+              <Route path="/answer/:answerCardId" element={
+                <ProtectedRoute>
+                  <EngineView isAnswerView={true} />
                 </ProtectedRoute>
               } />
               
