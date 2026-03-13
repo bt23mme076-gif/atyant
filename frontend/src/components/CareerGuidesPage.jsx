@@ -1,4 +1,98 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import MentorRecommendationBlock from "./MentorRecommendationBlock";
 import "./career-guides.css";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+const trackMentorKeywords = {
+  analytics: [
+    "analytics",
+    "data",
+    "sql",
+    "power bi",
+    "tableau",
+    "dashboard",
+    "business analyst",
+    "eda",
+    "statistics",
+  ],
+  "cse-internship": [
+    "intern",
+    "sde",
+    "software",
+    "dsa",
+    "react",
+    "node",
+    "backend",
+    "frontend",
+    "development",
+  ],
+  "cse-placement": [
+    "placement",
+    "sde",
+    "software engineer",
+    "dsa",
+    "system design",
+    "oop",
+    "dbms",
+    "interview",
+  ],
+  product: [
+    "product",
+    "pm",
+    "strategy",
+    "growth",
+    "product analyst",
+    "metrics",
+    "figma",
+    "case study",
+  ],
+  aiml: [
+    "ai",
+    "ml",
+    "machine learning",
+    "deep learning",
+    "python",
+    "tensorflow",
+    "pytorch",
+    "nlp",
+  ],
+};
+
+const toSearchText = (mentor) => {
+  const values = [
+    mentor.name,
+    mentor.username,
+    mentor.bio,
+    ...(mentor.expertise || []),
+    ...(mentor.skills || []),
+  ];
+
+  return values
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+};
+
+const getMentorScore = (mentor, keywords) => {
+  const text = toSearchText(mentor);
+  return keywords.reduce((score, keyword) => {
+    if (text.includes(keyword.toLowerCase())) {
+      return score + 1;
+    }
+    return score;
+  }, 0);
+};
+
+const getMentorName = (mentor) => mentor.name || mentor.username || "Atyant Mentor";
+
+const normalizeMentorForCard = (mentor, score) => ({
+  ...mentor,
+  name: getMentorName(mentor),
+  avatar: mentor.profilePicture || mentor.profileImage || "",
+  tag: score >= 3 ? "Solved this" : "Done this before",
+});
 
 const tracks = [
   {
@@ -191,7 +285,7 @@ const tracks = [
       "Notes App with Authentication",
     ],
     resources: [
-      { name: "Love Babbar", url: "https://www.youtube.com/c/LoveBabbar" },
+      { name: "Love Babbar", url: "https://www.youtube.com/watch?v=WQoB2z67hvY&list=PLDzeHZWIZsTryvtXdMr6rPh4IDexB5NIA" },
       { name: "Codeforces", url: "https://codeforces.com/" },
       { name: "HackerRank", url: "https://www.hackerrank.com/" },
       { name: "System Design Primer", url: "https://github.com/donnemartin/system-design-primer" },
@@ -335,6 +429,67 @@ const quickSupport = [
 ];
 
 export default function CareerGuidesPage() {
+  const navigate = useNavigate();
+  const [mentors, setMentors] = useState([]);
+
+  useEffect(() => {
+    const fetchMentors = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/users/mentors`);
+        if (!res.ok) {
+          return;
+        }
+        const data = await res.json();
+        setMentors(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to load mentor recommendations:", error);
+      }
+    };
+
+    fetchMentors();
+  }, []);
+
+  const mentorRecommendations = useMemo(() => {
+    if (!mentors.length) {
+      return {};
+    }
+
+    return tracks.reduce((result, track) => {
+      const keywords = trackMentorKeywords[track.id] || [];
+      const scored = mentors
+        .map((mentor) => ({
+          mentor,
+          score: getMentorScore(mentor, keywords),
+        }))
+        .sort((a, b) => b.score - a.score);
+
+      const bestMatch = scored[0];
+      if (!bestMatch || !bestMatch.mentor) {
+        result[track.id] = null;
+        return result;
+      }
+
+      result[track.id] = normalizeMentorForCard(bestMatch.mentor, bestMatch.score);
+      return result;
+    }, {});
+  }, [mentors]);
+
+  const handleLearnFromMentor = (mentor) => {
+    if (mentor?.username) {
+      navigate(`/profile/${encodeURIComponent(mentor.username)}`);
+      return;
+    }
+    navigate("/mentors");
+  };
+
+  const handleAskMentor = (mentor) => {
+    if (mentor?._id) {
+      navigate(`/chat/${mentor._id}`);
+      return;
+    }
+    navigate("/chat");
+  };
+
   return (
     <div className="career-page">
       <section className="career-hero">
@@ -512,6 +667,15 @@ export default function CareerGuidesPage() {
                   ))}
                 </div>
               </div>
+            </div>
+
+            <div className="mentor-recommend-wrap">
+              <MentorRecommendationBlock
+                mentor={mentorRecommendations[track.id]}
+                topicLabel={track.badge}
+                onLearn={() => handleLearnFromMentor(mentorRecommendations[track.id])}
+                onAsk={() => handleAskMentor(mentorRecommendations[track.id])}
+              />
             </div>
           </div>
         </section>

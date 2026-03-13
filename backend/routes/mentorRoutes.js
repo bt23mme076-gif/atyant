@@ -40,7 +40,7 @@ router.get('/mentors', async (req, res) => {
 
     // ✅ PERFORMANCE: Optimized query
     const mentors = await User.find({ role: 'mentor' })
-      .select('username profilePicture bio city expertise skills isOnline lastActive yearsOfExperience price location')
+      .select('name username profilePicture profileImage bio city expertise skills isOnline lastActive yearsOfExperience price location')
       .lean() // ✅ Returns plain JS objects (30% faster)
       .sort({ _id: 1 }); // ✅ Oldest mentor first
 

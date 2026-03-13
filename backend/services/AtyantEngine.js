@@ -484,7 +484,7 @@ class AtyantEngine {
       // 🔥 FETCH MENTOR DATA IN BULK (Performance optimization)
       const mentorIds = [...new Set(candidates.map(c => c.mentorId.toString()))];
       const mentors = await User.find({ _id: { $in: mentorIds }, role: 'mentor' })
-        .select('username avatar bio education primaryDomain topCompanies milestones specialTags expertise rating responseRate lastActive successfulMatches')
+        .select('username avatar bio education primaryDomain topCompanies milestones specialTags expertise rating responseRate lastActive successfulMatches companyDomain')
         .lean();
       
       const mentorMap = new Map(mentors.map(m => [m._id.toString(), m]));
@@ -574,7 +574,8 @@ class AtyantEngine {
         }
 
         // 🔥 8. SAME BRANCH
-        if (sEdu.field && mEdu.field && sEdu.field.toLowerCase() === mEdu.field.toLowerCase()) {
+        if (sEdu.field && mEdu.field && 
+            sEdu.field.toLowerCase() === mEdu.field.toLowerCase()) {
           totalBonus += W.SAME_BRANCH;
           bonusLogs.push(`Branch(+${(W.SAME_BRANCH*100).toFixed(1)}%)`);
         }
@@ -1135,7 +1136,24 @@ intent, confidence, mentionedCompanies, relatedCompanies,
         };
       }
 
-      // 🔥 FALLBACK: GLOBAL POOL
+      // 🔥 FALLBACK: GLOBAL POOL or ATYANT ENGINE
+      // Try to assign to Atyant Engine fallback user if no mentor found
+      const atyantEngineUser = await User.findOne({ username: 'Atyant Engine', email: 'atyant.in@gmail.com' });
+      if (atyantEngineUser) {
+        question.selectedMentorId = atyantEngineUser._id;
+        question.status = 'mentor_assigned';
+        await question.save();
+        dlog(`\n⚠️ ========== ASSIGNED TO ATYANT ENGINE USER ==========`);
+        return {
+          success: true,
+          questionId: question._id,
+          message: 'No mentor found. Assigned to Atyant Engine.',
+          mentorId: atyantEngineUser._id,
+          mentorUsername: atyantEngineUser.username,
+          matchMethod: 'atyant_engine_fallback'
+        };
+      }
+      // If fallback user not found, keep in global pool
       await question.save();
       
       dlog(`\n⚠️ ========== MOVED TO GLOBAL POOL ==========`);

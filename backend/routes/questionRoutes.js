@@ -5,6 +5,7 @@ import Question from '../models/Question.js';
 import User from '../models/User.js';
 import { sendMentorNewQuestionNotification } from '../utils/emailNotifications.js';
 import atyantEngine from '../services/AtyantEngine.js';
+import Mentor from '../models/Mentor.js';
 import { getQuestionEmbedding } from '../services/AIService.js';
 import { getRedditStats } from '../utils/redditStats.js';
 
@@ -134,13 +135,32 @@ router.post('/preview-match', questionLimiter, protect, async (req, res) => {
     const bestMentor = await atyantEngine.findBestMentor(req.user.userId, keywords, questionCategory);
     
     if (!bestMentor) {
-      return res.json({
-        success: true,
-        mentorFound: false,
-        message: 'No mentor match found. We will find one after submission.'
-      });
+      // Fallback: Return real Atyant Engine mentor from DB
+      const atyantMentor = await Mentor.findOne({ username: 'Atyant Engine' });
+      if (atyantMentor) {
+        return res.json({
+          success: true,
+          mentorFound: false,
+          mentor: {
+            id: atyantMentor._id,
+            name: atyantMentor.username,
+            bio: atyantMentor.bio,
+            profileImage: atyantMentor.profilePicture,
+            expertise: atyantMentor.expertise,
+            matchPercentage: 100
+          },
+          message: 'No mentor match found. Your question will be answered by Atyant Engine.',
+          redditStats: redditStats
+        });
+      } else {
+        return res.json({
+          success: true,
+          mentorFound: false,
+          message: 'No mentor match found. We will find one after submission.',
+          redditStats: redditStats
+        });
+      }
     }
-    
     res.json({
       success: true,
       mentorFound: true,

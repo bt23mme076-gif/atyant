@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const mentorSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -26,4 +26,4 @@ const mentorSchema = new mongoose.Schema({
 
 const Mentor = mongoose.model('Mentor', mentorSchema);
 
-module.exports = Mentor;
+export default Mentor;
