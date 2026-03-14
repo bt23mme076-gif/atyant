@@ -1,20 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
 
-  <!-- Homepage -->
+  <!-- ===== HOMEPAGE ===== -->
   <url>
     <loc>https://atyant.in/</loc>
-    <lastmod>2025-01-02</lastmod>
+    <lastmod>2026-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- Internships Page -->
+  <!-- ===== INTERNSHIPS ===== -->
   <url>
     <loc>https://atyant.in/internships</loc>
-    <lastmod>2025-01-02</lastmod>
-    <changefreq>daily</changefreq>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
+
+  <!-- ===== CAREER GUIDES ===== -->
+  <url>
+    <loc>https://atyant.in/career-guides</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- ===== NEARBY MENTORS ===== -->
+  <url>
+    <loc>https://atyant.in/nearby-mentors</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- ===== SIGNUP / LOGIN (for indexing brand) ===== -->
+  <!-- Remove these if you don't want them indexed -->
+  <!-- 
+  <url>
+    <loc>https://atyant.in/Signup</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  -->
 
 </urlset>

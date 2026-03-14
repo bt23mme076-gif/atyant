@@ -34,14 +34,6 @@ const AtyantJourneySlider = () => {
       description: 'Interactive mentorship workshop at GHRC where students connect with experienced seniors'
     },
     { 
-      id: 4, 
-      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1770470902/IMG_20251107_164833_bbtgnf.jpg', 
-      caption: 'Campus Moments GHRC 🎓', 
-      type: 'image',
-      alt: 'Atyant team at GHRC campus - building student mentorship community',
-      description: 'Atyant building strong peer-to-peer learning community at GHRC engineering college'
-    },
-    { 
       id: 5, 
       src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1770470902/IMG_20260202_140753_vb8fj4.jpg', 
       caption: 'ATYANT AT MANIT 🔥', 

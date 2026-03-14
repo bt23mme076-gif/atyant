@@ -3,36 +3,37 @@
 # https://atyant.in
 
 User-agent: *
+
+# ===== ALLOW PUBLIC PAGES =====
 Allow: /
 Allow: /internships
+Allow: /career-guides
 Allow: /nearby-mentors
-Allow: /profile/*
 
-# Block Authentication Pages
+# ===== BLOCK AUTH PAGES =====
 Disallow: /login
 Disallow: /signup
+Disallow: /Signup
 Disallow: /forgot-password
-Disallow: /reset-password/
+Disallow: /reset-password
 
-# Block Private/Protected Routes
+# ===== BLOCK PRIVATE ROUTES =====
 Disallow: /dashboard
 Disallow: /chat
-Disallow: /chat/
 Disallow: /mentors
-Disallow: /engine/
+Disallow: /engine
 Disallow: /my-questions
 Disallow: /mentor-dashboard
-Disallow: /profile$
+Disallow: /profile
 
-# Block API & System Files
+# ===== BLOCK SYSTEM FILES =====
 Disallow: /api/
-Disallow: /*.json$
 Disallow: /sw.js
 
-# Block URL Parameters (Duplicate Content)
+# ===== BLOCK DUPLICATE CONTENT =====
 Disallow: /*?*
 
-# Sitemap Location
+# ===== SITEMAP =====
 Sitemap: https://atyant.in/sitemap.xml
 
 # Crawl Delay
