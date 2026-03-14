@@ -58,14 +58,6 @@ const AtyantJourneySlider = () => {
       description: 'Strategic collaboration between Atyant and E-Cell MANIT for student career development'
     },
     { 
-      id: 7, 
-      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1770470902/IMG_20251101_175501_fqxko5.jpg', 
-      caption: 'Innovation INTER NIT\'25 🚀', 
-      type: 'image',
-      alt: 'Atyant at Inter NIT 2025 - showcasing AI student mentorship platform to NITs across India',
-      description: 'Atyant presenting innovative AI-powered mentorship solution at Inter NIT Innovation Summit 2025'
-    },
-    { 
       id: 8, 
       src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1770470903/IMG_20260202_140103_zkemae.jpg', 
       caption: 'Workshop Sessions 💡', 
