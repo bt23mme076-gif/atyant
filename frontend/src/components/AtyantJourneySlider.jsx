@@ -11,7 +11,7 @@ const AtyantJourneySlider = () => {
   const campusPhotos = [
     { 
       id: 1, 
-      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1770470901/Screenshot_2026-02-07_180016_waytsl.png', 
+      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1773683474/Yellow_Modern_Untold_Mystery_YouTube_Thumbnail_5_1_eyzls9.png', 
       caption: 'Atyant Journey 💻', 
       type: 'image',
       alt: 'Atyant AI-powered student mentorship platform journey - connecting students with senior mentors for career guidance',
@@ -19,7 +19,7 @@ const AtyantJourneySlider = () => {
     },
     { 
       id: 2, 
-      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1770470902/IMG_20251107_172259_sewvlp.jpg', 
+      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1773681257/IMG_20251107_172259_sgixft.jpg', 
       caption: 'Campus Moments PCE 🎓', 
       type: 'image',
       alt: 'Atyant campus workshop at PCE - students learning about internships and placements guidance',
@@ -27,7 +27,7 @@ const AtyantJourneySlider = () => {
     },
     { 
       id: 3, 
-      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1770472116/IMG_20251107_164843_1_xvslan.jpg', 
+      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1773680981/WhatsApp_Image_2026-03-16_at_10.38.48_PM_pc7vaj.jpg', 
       caption: 'Workshop Sessions At GHRC', 
       type: 'image',
       alt: 'Atyant career guidance workshop at GHRC - student mentor interaction sessions',
@@ -35,7 +35,7 @@ const AtyantJourneySlider = () => {
     },
     { 
       id: 5, 
-      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1770470902/IMG_20260202_140753_vb8fj4.jpg', 
+      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1773682691/IMG_20260202_140103_1_pqtfmc.jpg', 
       caption: 'ATYANT AT MANIT 🔥', 
       type: 'image',
       alt: 'Atyant at MANIT Bhopal - NIT student mentorship and placement guidance program',
@@ -43,19 +43,11 @@ const AtyantJourneySlider = () => {
     },
     { 
       id: 6, 
-      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1770470902/IMG_20260202_135846_hk6fyi.jpg', 
+      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1773680772/IMG_20260202_135846_bf3lyw.jpg', 
       caption: 'ECELL MANIT + ATYANT Together 📚', 
       type: 'image',
       alt: 'Atyant partnership with E-Cell MANIT for entrepreneurship and career mentorship',
       description: 'Strategic collaboration between Atyant and E-Cell MANIT for student career development'
-    },
-    { 
-      id: 8, 
-      src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1770470903/IMG_20260202_140103_zkemae.jpg', 
-      caption: 'Workshop Sessions 💡', 
-      type: 'image',
-      alt: 'Atyant interactive workshop on placement preparation and career roadmaps',
-      description: 'Students engaging in Atyant workshop learning about structured career guidance and mentorship'
     },
     { 
       id: 9, 
@@ -68,10 +60,10 @@ const AtyantJourneySlider = () => {
     { 
       id: 10, 
       src: 'https://www.youtube.com/embed/NziKXiqjqBQ', 
-      caption: 'Watch Our Journey 🎥', 
+      caption: 'Watch Our First Pitch🎥', 
       type: 'video',
-      alt: 'Atyant journey video - how AI matches students with senior mentors for career success',
-      description: 'Video showcasing Atyant complete journey in revolutionizing student mentorship through AI'
+      alt: 'Atyant First Pitchvideo - how AI matches students with senior mentors for career success',
+      description: 'Video showcasing Atyant First Pitch in revolutionizing student mentorship through AI'
     },
   ];
 
