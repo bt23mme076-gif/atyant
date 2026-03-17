@@ -818,7 +818,8 @@
 .flow-split {
   width: 100%;
   max-width: 720px;
-  background: #ffffff;
+  /* Force neutral white background to remove purple appearance */
+  background: #ffffff !important;
   border-radius: 28px;
   padding: 32px;
   box-shadow: 0 10px 50px rgba(0, 0, 0, 0.08);
@@ -829,23 +830,13 @@
 
 /* Animated border glow */
 .flow-split::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7, #8b5cf6, #6366f1);
-  background-size: 400% 400%;
-  border-radius: 30px;
-  z-index: -1;
-  animation: borderGlow 6s linear infinite;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  /* Removed purple gradient overlay to keep split block neutral */
+  display: none !important;
 }
 
 .flow-split:hover::before {
-  opacity: 1;
+  /* Disabled hover glow */
+  display: none !important;
 }
 
 @keyframes borderGlow {
@@ -930,8 +921,7 @@
 }
 
 .path-box:hover .path-glow {
-  opacity: 0.3;
-  animation: glowMove 2s ease-in-out infinite;
+  /* Removed hover effect */
 }
 
 @keyframes glowMove {
@@ -940,27 +930,27 @@
 }
 
 .path-box:hover {
-  transform: translateY(-8px) scale(1.02);
+  /* Removed hover effect */
 }
 
 .path-instant {
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(56, 189, 248, 0.02));
-  border: 1px solid rgba(56, 189, 248, 0.2);
+  /* Neutralize color: remove blue/purple gradient */
+  background: #f8fbff;
+  border: 1px solid rgba(0,0,0,0.06);
 }
 
 .path-instant:hover {
-  border-color: rgba(56, 189, 248, 0.5);
-  box-shadow: 0 15px 40px rgba(56, 189, 248, 0.2);
+  /* Removed hover effect */
 }
 
 .path-mentor {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.02));
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  /* Neutralize color: remove purple gradient */
+  background: #f8fbff;
+  border: 1px solid rgba(0,0,0,0.06);
 }
 
 .path-mentor:hover {
-  border-color: rgba(139, 92, 246, 0.5);
-  box-shadow: 0 15px 40px rgba(139, 92, 246, 0.2);
+  /* Removed hover effect */
 }
 
 .path-icon {
@@ -997,7 +987,7 @@
 }
 
 .path-box:hover ul li {
-  transform: translateX(5px);
+  /* Removed hover effect */
 }
 
 .path-box ul li::before {
@@ -1010,7 +1000,7 @@
 }
 
 .path-box:hover ul li::before {
-  transform: translateX(3px);
+  /* Removed hover effect */
 }
 
 .path-tag {
@@ -1023,7 +1013,7 @@
 }
 
 .path-box:hover .path-tag {
-  transform: scale(1.05);
+  /* Removed hover effect */
 }
 
 .path-instant .path-tag {
