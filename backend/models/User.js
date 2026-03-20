@@ -1,291 +1,229 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-    // 🚀 NAYE STRUCTURED FIELDS
-    primaryDomain: { 
-      type: String, 
-      enum: ['placement', 'internship', 'both'], 
-      default: null 
-    },
-    topCompanies: [{ 
-      type: String // e.g., ["Meta", "Amazon", "Google", "ZS"]
-    }],
-    milestones: [{ 
-      type: String // e.g., ["PPO", "Off-campus Winner", "6-Month Internship"]
-    }],
-    specialTags: [{ 
-    type: String,
-    default: [] // 🔥 NAYA: ["Foreign Internship 🌍", "IIT Research Intern", "IIM MBA Intern"]
-    }],
-    companyDomain: { 
-      type: String, 
-      enum: ['Tech', 'Data Analytics', 'Consulting', 'Product', 'Core Engineering'], 
-      default: null 
-    },
-    tier: { 
-      type: Number, 
-      default: 1 // 1: Beginner, 2: Intermediate, 3: Expert (Authority indicator)
-    },
+
+  // ─── ROLE & IDENTITY ───────────────────────
+  role: {
+    type   : String,
+    enum   : ['user', 'mentor', 'admin'],
+    default: 'user',
+    index  : true   // 🔴 FIX: heavily queried in AtyantEngine
+  },
+
   username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
+    type     : String,
+    required : true,
+    unique   : true,
+    trim     : true,
     minlength: 3,
     maxlength: 50
   },
+
   email: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true,
+    type     : String,
+    required : true,
+    unique   : true,
+    trim     : true,
     lowercase: true
   },
+
   password: {
-    type: String,
-    required: true,
-    minlength: 8
+    type     : String,
+    required : true,
+    minlength: 8,
+    select   : false   // 🔴 FIX: never leak password in queries
   },
+
   phone: {
-    type: String,
+    type  : String,
     unique: true,
     sparse: true,
-    trim: true
+    trim  : true
   },
-  role: {
+
+  // ─── MENTOR MATCHING FIELDS ────────────────
+  primaryDomain: {
     type: String,
-    enum: ['user', 'mentor', 'admin'],
-    default: 'user'
-  },
-  
-  // ========== PROFILE FIELDS (All Optional) ==========
-  profilePicture: {
-    type: String,
+    enum: ['placement', 'internship', 'both', null],
     default: null
   },
-  bio: {
-    type: String,
-    default: null,
-    maxlength: 500
-  },
-  city: {
-    type: String,
-    default: ''
-  },
-  
-  // ========== SKILLS & EXPERTISE (All Optional) ==========
-  skills: [{
-    type: String,
-    trim: true
-  }],
-  expertise: {
-    type: [String],
-    default: []
-  },
-  interests: {
-    type: [String],
-    default: []
-  },
-  domainExperience: {
-    type: [String],
-    default: []
-  },
-  
-  // ========== EDUCATION (Optional) ==========
-  education: [{
-    institution: { type: String }, // College name matching ke liye
-    degree: { type: String },
-    field: { type: String },      // Branch matching ke liye
-    year: { type: String },
-    cgpa: { type: Number }        // 🚀 Matching logic ke liye zaroori
-  }],
-  
-  // ========== SOCIAL LINKS (Optional) ==========
-  linkedinProfile: {
-    type: String,
-    default: ''
-  },
-  socialLinks: {
-    type: Map,
-    of: String,
-    default: {}
-  },
-  
-  // ========== VERIFICATION ==========
-  isVerified: {
-    type: Boolean,
-    default: false
-  },
-  verificationToken: {
-    type: String
-  },
-  
-  // ========== PASSWORD RESET ==========
-  passwordResetToken: {
-    type: String
-  },
-  passwordResetExpires: {
-    type: Date
+
+  topCompanies: [{ type: String }],
+  milestones  : [{ type: String }],
+  specialTags : [{ type: String }],
+
+  companyDomain: {
+    type   : String,
+    enum   : ['Tech', 'Data Analytics', 'Consulting', 'Product', 'Core Engineering', null],
+    default: null
   },
 
-  // ========== LOCATION SCHEMA ==========
+  tier: { type: Number, default: 1 },
+
+  // ─── PROFILE ───────────────────────────────
+  profilePicture: { type: String, default: null },
+  bio           : { type: String, default: null, maxlength: 500 },
+  city          : { type: String, default: '' },
+
+  // ─── SKILLS ────────────────────────────────
+  skills        : [{ type: String, trim: true }],
+  expertise     : { type: [String], default: [] },
+  interests     : { type: [String], default: [] },
+  domainExperience: { type: [String], default: [] },
+
+  // ─── EDUCATION ─────────────────────────────
+  education: [{
+    // 🔴 FIX: renamed 'institution' → 'institutionName' to match AtyantEngine
+    institutionName: { type: String },
+    institution    : { type: String }, // kept for backward compat
+    degree         : { type: String },
+    field          : { type: String },
+    year           : { type: String },
+    cgpa           : { type: Number }
+  }],
+
+  // ─── SOCIAL ────────────────────────────────
+  linkedinProfile: { type: String, default: '' },
+  socialLinks    : { type: Map, of: String, default: {} },
+
+  // ─── VERIFICATION ──────────────────────────
+  isVerified       : { type: Boolean, default: false },
+  verificationToken: { type: String, select: false },
+
+  // ─── PASSWORD RESET ────────────────────────
+  passwordResetToken  : { type: String, select: false },
+  passwordResetExpires: { type: Date,   select: false },
+
+  // ─── LOCATION ──────────────────────────────
   location: {
     type: {
-      type: String,
-      enum: ['Point'],
-      required: function() {
-        // Only require type if coordinates exist
-        return this.location && this.location.coordinates && this.location.coordinates.length === 2;
-      }
+      type       : String,
+      enum       : ['Point'],
+      required   : false
     },
     coordinates: {
-      type: [Number], // [longitude, latitude]
-      required: false, // ✅ Optional - no default
+      type    : [Number],
+      required: false,
       validate: {
-        validator: function(v) {
-          // Allow empty/null or valid [lng, lat] array
-          return !v || v.length === 0 || (Array.isArray(v) && v.length === 2 && !isNaN(v[0]) && !isNaN(v[1]));
-        },
-        message: 'Coordinates must be [longitude, latitude] with valid numbers'
+        validator: v => !v || v.length === 0 || (Array.isArray(v) && v.length === 2 && !isNaN(v[0]) && !isNaN(v[1])),
+        message  : 'Coordinates must be [longitude, latitude]'
       }
     },
-    city: {
-      type: String,
-      default: null
-    },
-    state: {
-      type: String,
-      default: null
-    },
-    country: {
-      type: String,
-      default: 'India'
-    },
-    lastUpdated: {
-      type: Date,
-      default: null
-    }
+    city       : { type: String, default: null },
+    state      : { type: String, default: null },
+    country    : { type: String, default: 'India' },
+    lastUpdated: { type: Date,   default: null }
   },
-  
-  // ========== MENTOR SPECIFIC FIELDS ==========
-  price: {
-    type: Number,
-    default: 0,
-    min: 0
+
+  // ─── MENTOR OPERATIONAL FIELDS ─────────────
+  price              : { type: Number, default: 0, min: 0 },
+  acceptsCredits     : { type: Boolean, default: false },
+  isOnline           : { type: Boolean, default: false },
+  lastActive         : { type: Date, default: Date.now, index: true }, // 🔴 FIX: indexed
+  yearsOfExperience  : { type: Number, default: 0 },
+
+  // ─── MENTOR STATS ──────────────────────────
+  profileViews  : { type: Number, default: 0 },
+  totalChats    : { type: Number, default: 0 },
+
+  // 🔴 FIX: These 3 fields were MISSING but AtyantEngine uses them
+  rating        : { type: Number, default: 0, min: 0, max: 5 },
+  responseRate  : { type: Number, default: 0, min: 0, max: 100 },
+  activeQuestions: { type: Number, default: 0, min: 0 },
+  successfulMatches: { type: Number, default: 0, min: 0 },
+
+  // ─── MENTOR STRATEGY ───────────────────────
+  strategy: {
+    tone          : String,
+    language      : String,
+    hardTruth     : String,
+    timeWaste     : String,
+    roadmap       : String,
+    resumeTip     : String,
+    neverRecommend: String,
+    permission    : Boolean
   },
-  acceptsCredits: {
-    type: Boolean,
-    default: false
-  },
-  isOnline: {
-    type: Boolean,
-    default: false
-  },
-  lastActive: {
-    type: Date,
-    default: Date.now
-  },
-  yearsOfExperience: {
-    type: Number,
-    default: 0
-  },
-  
-  // ========== MENTOR STATISTICS ==========
-  profileViews: {
-    type: Number,
-    default: 0
-  },
-  totalChats: {
-    type: Number,
-    default: 0
-  },
-   // Mentor Schema update
-   strategy: {
-     tone: String,          // Blunt, Friendly, or Strategist
-     language: String,      // Hinglish or English
-     hardTruth: String,     // One harsh truth
-     timeWaste: String,     // Biggest time waste for students
-     roadmap: String,       // Their 100-day roadmap
-     resumeTip: String,     // One killer resume signal
-     neverRecommend: String, // Forbidden advice
-     permission: Boolean    // Admin drafting consent
-},
-  // ========== MESSAGE CREDITS ==========
-  messageCredits: {
-    type: Number,
-    default: 5
-  },
-  
-  // ========== QUESTION CREDITS ==========
-  credits: {
-    type: Number,
-    default: 3,
-    min: 0
-  },
-  
-  profileStrength: {
-    type: Number,
-    min: 0,
-    max: 100,
-    default: 0
-  }
-  
-}, { 
-  timestamps: true 
+
+  // ─── CREDITS ───────────────────────────────
+  messageCredits: { type: Number, default: 5 },
+  credits       : { type: Number, default: 3, min: 0 },
+
+  // ─── PROFILE STRENGTH ──────────────────────
+  profileStrength: { type: Number, min: 0, max: 100, default: 0 }
+
+}, {
+  timestamps: true
 });
 
-// Method to calculate profile strength
-userSchema.methods.calculateProfileStrength = function() {
-  let strength = 0;
-  const checks = {
-    username: 10,
-    bio: 15,
-    profilePicture: 10,
-    education: 20,
-    interests: 15,
-    city: 10,
-    linkedinProfile: 10,
-    expertise: 10
-  };
-  
-  for (const [field, points] of Object.entries(checks)) {
-    if (field === 'education') {
-      if (this.education && this.education.length > 0 && this.education[0].institution) {
-        strength += points;
-      }
-    } else if (field === 'interests') {
-      if (this.interests && this.interests.length > 0) {
-        strength += points;
-      }
-    } else if (field === 'expertise') {
-      if (this.role === 'mentor' && this.expertise && this.expertise.length > 0) {
-        strength += points;
-      }
-    } else if (this[field]) {
-      strength += points;
-    }
-  }
-  
-  return Math.min(100, strength);
-};
-
-// ✅ Sparse index - only indexes documents where coordinates exist
+// ─────────────────────────────────────────────
+//  INDEXES
+// ─────────────────────────────────────────────
+// 2dsphere for geo queries
 userSchema.index({ 'location.coordinates': '2dsphere' }, { sparse: true });
 
-// Remove invalid location objects before saving (must be after userSchema is defined)
-userSchema.pre('save', function(next) {
-  if (this.location && (!this.location.type || !Array.isArray(this.location.coordinates) || this.location.coordinates.length !== 2)) {
+// AtyantEngine mentor fetch query
+userSchema.index({ role: 1, lastActive: -1, activeQuestions: 1 });
+
+// Matching engine — company lookup
+userSchema.index({ role: 1, topCompanies: 1 });
+
+// ─────────────────────────────────────────────
+//  PRE-SAVE HOOKS
+// ─────────────────────────────────────────────
+userSchema.pre('save', function (next) {
+  // Strip invalid location objects
+  if (
+    this.location &&
+    (!this.location.type ||
+      !Array.isArray(this.location.coordinates) ||
+      this.location.coordinates.length !== 2)
+  ) {
     this.location = undefined;
   }
-  // Update profile strength automatically
+  // Auto-sync institutionName ↔ institution (backward compat)
+  if (Array.isArray(this.education)) {
+    this.education.forEach(e => {
+      if (e.institutionName && !e.institution) e.institution = e.institutionName;
+      if (e.institution && !e.institutionName) e.institutionName = e.institution;
+    });
+  }
+  // Recalculate profile strength
   this.profileStrength = this.calculateProfileStrength();
   next();
 });
 
-// Remove duplicate indexes if any:
-// userSchema.index({ email: 1 }); // Remove if using unique: true in field definition
-// userSchema.index({ username: 1 }); // Remove if using unique: true in field definition
+// ─────────────────────────────────────────────
+//  METHODS
+// ─────────────────────────────────────────────
+userSchema.methods.calculateProfileStrength = function () {
+  let strength = 0;
+  const checks = {
+    username      : 10,
+    bio           : 15,
+    profilePicture: 10,
+    education     : 20,
+    interests     : 15,
+    city          : 10,
+    linkedinProfile: 10,
+    expertise     : 10
+  };
+
+  for (const [field, points] of Object.entries(checks)) {
+    if (field === 'education') {
+      if (this.education?.length > 0 && (this.education[0].institutionName || this.education[0].institution)) {
+        strength += points;
+      }
+    } else if (field === 'interests') {
+      if (this.interests?.length > 0) strength += points;
+    } else if (field === 'expertise') {
+      if (this.role === 'mentor' && this.expertise?.length > 0) strength += points;
+    } else if (this[field]) {
+      strength += points;
+    }
+  }
+
+  return Math.min(100, strength);
+};
 
 const User = mongoose.model('User', userSchema);
-
 export default User;

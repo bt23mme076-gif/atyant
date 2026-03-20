@@ -310,8 +310,12 @@ router.post('/submit', questionLimiter, protect, async (req, res) => {
       console.log('⚠️ [SUBMIT] Vector search failed:', err.message);
     }
     
-    // 🔥 IF INSTANT MATCH FOUND - Create question with instant answer
-    if (instantMatch) {
+    // Respect client's preference: if they asked to force live routing (e.g. they
+    // saw an instant answer but explicitly chose to continue), skip instant branch.
+    const { forceLive } = req.body || {};
+
+    // 🔥 IF INSTANT MATCH FOUND - Create question with instant answer (unless forced live)
+    if (instantMatch && !forceLive) {
       const question = new Question({
         userId: req.user.userId,
         title,
@@ -387,8 +391,7 @@ router.post('/submit', questionLimiter, protect, async (req, res) => {
     await question.save();
     
     // Deduct credit
-    user.credits -= 1;
-    await user.save();
+    await User.findByIdAndUpdate(req.user.userId, { $inc: { credits: -1 } });
 
     // Notify assigned mentor (if any)
     if (question.selectedMentorId) {

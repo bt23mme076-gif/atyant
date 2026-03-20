@@ -1,89 +1,119 @@
 import express from 'express';
-import Question from '../models/Question.js';
+import Question   from '../models/Question.js';
 import AnswerCard from '../models/AnswerCard.js';
-import User from '../models/User.js';
-import protect from '../middleware/authMiddleware.js';
+import User       from '../models/User.js';
+import protect    from '../middleware/authMiddleware.js';
+import { getQuestionEmbedding } from '../services/AIService.js';  // 🔴 FIX: static import
 
 const router = express.Router();
 
-// GET: List all published AnswerCards for admin selection
-router.get('/answercards', protect, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ success: false, error: 'Forbidden' });
+// ─── Guard middleware — apply once for all admin routes ─────────────────────
+router.use(protect, (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ success: false, error: 'Forbidden' });
+  }
+  next();
+});
+
+// ─────────────────────────────────────────────
+//  GET all published AnswerCards
+// ─────────────────────────────────────────────
+router.get('/answercards', async (req, res) => {
   try {
     const answerCards = await AnswerCard.find({ status: 'published' })
+      .select('answerContent mentorId createdAt')
       .sort({ createdAt: -1 })
       .populate('mentorId', 'username')
       .lean();
-    const result = answerCards.map(card => ({
-      id: card._id,
-      mainAnswer: card.answerContent?.mainAnswer || '',
-      mentorName: card.mentorId?.username || '',
-      createdAt: card.createdAt,
-    }));
-    res.json({ success: true, answerCards: result });
+
+    res.json({
+      success    : true,
+      answerCards: answerCards.map(card => ({
+        id        : card._id,
+        mainAnswer: card.answerContent?.mainAnswer || '',
+        mentorName: card.mentorId?.username || '',
+        createdAt : card.createdAt
+      }))
+    });
   } catch (e) {
+    console.error('admin/answercards error:', e);
     res.status(500).json({ success: false, error: e.message });
   }
 });
 
-// GET: List all pending questions for admin
-router.get('/pending-questions', protect, async (req, res) => {
-  // Only allow admin
-  if (req.user.role !== 'admin') return res.status(403).json({ success: false, error: 'Forbidden' });
+// ─────────────────────────────────────────────
+//  GET all pending questions
+// ─────────────────────────────────────────────
+router.get('/pending-questions', async (req, res) => {
   try {
-    // Include all relevant statuses
-    const questions = await Question.find({ status: { $in: ['pending', 'mentor_assigned', 'answered_instantly'] } })
-      .sort({ createdAt: -1 }) // Newest first
+    const questions = await Question.find({
+      status: { $in: ['pending', 'mentor_assigned', 'answered_instantly'] }
+    })
+      .select('questionText selectedMentorId answerCardId isFollowUp parentQuestionId createdAt')
+      .sort({ createdAt: -1 })
       .lean();
 
-    // Collect mentorIds from selectedMentorId and from answerCard.mentorId for instant answers
-    const answerCardIds = questions.filter(q => !q.selectedMentorId && q.answerCardId).map(q => q.answerCardId);
-    let answerCardMentorMap = {};
-    if (answerCardIds.length > 0) {
-      const answerCards = await AnswerCard.find({ _id: { $in: answerCardIds } }).lean();
-      answerCardMentorMap = Object.fromEntries(answerCards.map(card => [card._id.toString(), card.mentorId?.toString()]));
-    }
+    // Bulk-fetch mentors for assigned questions
+    const mentorIds = [...new Set(
+      questions.map(q => q.selectedMentorId?.toString()).filter(Boolean)
+    )];
 
-    const mentorIds = [
-      ...questions.map(q => q.selectedMentorId).filter(Boolean).map(id => id.toString()),
-      ...Object.values(answerCardMentorMap).filter(Boolean)
-    ];
-    const mentors = await User.find({ _id: { $in: mentorIds } }).lean();
-    const mentorMap = Object.fromEntries(mentors.map(m => [m._id.toString(), m]));
+    // Also fetch mentorIds from AnswerCards for instant answers
+    const cardIds = questions
+      .filter(q => !q.selectedMentorId && q.answerCardId)
+      .map(q => q.answerCardId);
+
+    const [mentors, cards] = await Promise.all([
+      mentorIds.length
+        ? User.find({ _id: { $in: mentorIds } }).select('username name').lean()
+        : [],
+      cardIds.length
+        ? AnswerCard.find({ _id: { $in: cardIds } }).select('mentorId').lean()
+        : []
+    ]);
+
+    const mentorMap  = new Map(mentors.map(m => [m._id.toString(), m]));
+    const cardMentor = new Map(cards.map(c => [c._id.toString(), c.mentorId?.toString()]));
 
     const result = questions.map(q => {
       let mentorId = q.selectedMentorId?.toString();
-      if (!mentorId && q.answerCardId && answerCardMentorMap[q.answerCardId.toString()]) {
-        mentorId = answerCardMentorMap[q.answerCardId.toString()];
+      if (!mentorId && q.answerCardId) {
+        mentorId = cardMentor.get(q.answerCardId.toString());
       }
+      const mentor = mentorId ? mentorMap.get(mentorId) : null;
       return {
-        id: q._id,
-        text: q.questionText,
-        userGoal: q.userGoal || '',
-        matchedMentorId: mentorId,
-        matchedMentorName: mentorId ? (mentorMap[mentorId]?.name || mentorMap[mentorId]?.username || '') : '',
-        matchConfidence: q.matchConfidence || 90,
-        createdAt: q.createdAt,
-        isFollowUp: q.isFollowUp || false,
-        parentQuestionId: q.parentQuestionId || null
+        id               : q._id,
+        text             : q.questionText,
+        matchedMentorId  : mentorId || null,
+        matchedMentorName: mentor ? (mentor.name || mentor.username) : '',
+        matchConfidence  : 90,
+        createdAt        : q.createdAt,
+        isFollowUp       : q.isFollowUp || false,
+        parentQuestionId : q.parentQuestionId || null
       };
     });
+
     res.json({ success: true, questions: result });
   } catch (e) {
+    console.error('admin/pending-questions error:', e);
     res.status(500).json({ success: false, error: e.message });
   }
 });
 
-// POST: Publish answer as AnswerCard (admin only)
-router.post('/answer', protect, async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ success: false, error: 'Forbidden' });
-  const { questionId, mentorId, answerContent } = req.body;
-  if (!questionId || !mentorId || !answerContent) return res.status(400).json({ success: false, error: 'Missing fields' });
+// ─────────────────────────────────────────────
+//  POST publish answer as AnswerCard
+// ─────────────────────────────────────────────
+router.post('/answer', async (req, res) => {
   try {
-    // 🔥 GENERATE EMBEDDING FOR VECTOR SEARCH
+    const { questionId, mentorId, answerContent } = req.body;
+
+    if (!questionId || !mentorId || !answerContent) {
+      return res.status(400).json({ success: false, error: 'questionId, mentorId, answerContent required' });
+    }
+
+    // Generate embedding (non-blocking fail — card still saves)
     let embedding = null;
     try {
-      const { getQuestionEmbedding } = await import('../services/AIService.js');
       const embeddingText = [
         answerContent.mainAnswer,
         answerContent.situation,
@@ -92,29 +122,33 @@ router.post('/answer', protect, async (req, res) => {
         answerContent.differentApproach,
         answerContent.additionalNotes
       ].filter(Boolean).join(' ');
-      
+
       if (embeddingText.length > 20) {
         embedding = await getQuestionEmbedding(embeddingText);
-        console.log(`✅ Admin answer - Embedding generated: ${embedding?.length || 0} dimensions`);
+        console.log(`✅ Admin answer embedding: ${embedding?.length || 0} dims`);
       }
     } catch (embErr) {
-      console.error('❌ Embedding generation failed:', embErr.message);
+      console.error('⚠️ Embedding failed (card will save without it):', embErr.message);
     }
-    
-    // Create AnswerCard
+
     const answerCard = await AnswerCard.create({
       questionId,
       mentorId,
       answerContent,
-      embedding,  // 🔥 ADD EMBEDDING
+      ...(embedding ? { embedding } : {}),
       publishedBy: req.user._id,
       publishedAt: new Date(),
-      status: 'published',
+      status     : 'published'
     });
-    // Update question status
-    await Question.findByIdAndUpdate(questionId, { status: 'answered', answerCardId: answerCard._id });
+
+    await Question.findByIdAndUpdate(questionId, {
+      status      : 'delivered',
+      answerCardId: answerCard._id
+    });
+
     res.json({ success: true, answerCard });
   } catch (e) {
+    console.error('admin/answer error:', e);
     res.status(500).json({ success: false, error: e.message });
   }
 });

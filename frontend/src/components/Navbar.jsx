@@ -1,210 +1,156 @@
 // src/components/Navbar.jsx
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
-import UserAvatar from './UserAvatar'; // ✅ Already imported
-import { Menu, User as UserIcon, GraduationCap, LogOut, Settings } from 'lucide-react';
+import UserAvatar from './UserAvatar';
+import { Menu, User as UserIcon, GraduationCap, LogOut } from 'lucide-react';
 import './Navbar.css';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 const Navbar = () => {
-  const navigate = useNavigate();
+  const navigate    = useNavigate();
   const { user, logout } = useContext(AuthContext);
-  const [open, setOpen] = useState(false);
-  const panelRef = useRef(null);
+  const [open,         setOpen]         = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [userPhoto,    setUserPhoto]    = useState(null);
   const dropdownRef = useRef(null);
-  const avatarBtnRef = useRef(null);
-  const [userPhoto, setUserPhoto] = useState(null); // ✅ Shared photo state
+  const panelRef    = useRef(null);
 
-  console.log('🔍 Navbar - Current User:', user);
-  console.log('📋 User Details:', {
-    name: user?.name,
-    username: user?.username,
-    email: user?.email,
-    role: user?.role
-  });
-
-  // ✅ Fetch profile photo once for both avatars
+  // 🔴 FIX: Removed console.logs from render — only fetch photo when needed
   useEffect(() => {
-    const fetchPhoto = async () => {
-      if (user?.profilePicture) {
-        setUserPhoto(user.profilePicture);
-        return;
-      }
-      
-      const token = localStorage.getItem('token');
-      if (!token || !user) return;
+    if (!user) { setUserPhoto(null); return; }
+    if (user.profilePicture) { setUserPhoto(user.profilePicture); return; }
 
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/profile/me`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.profilePicture) {
-            setUserPhoto(data.profilePicture);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching profile photo:', error);
-      }
-    };
+    const token = localStorage.getItem('token');
+    if (!token) return;
 
-    fetchPhoto();
-  }, [user?.id]); // Only when user ID changes
+    let cancelled = false;
+    fetch(`${API_URL}/api/profile/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (!cancelled && data?.profilePicture) setUserPhoto(data.profilePicture); })
+      .catch(() => {});
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+    return () => { cancelled = true; };
+  }, [user?.id || user?._id]);   // Only re-fetch when user ID changes
 
+  // Close dropdown on outside click
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && showDropdown) {
+    if (!showDropdown) return;
+    const handler = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setShowDropdown(false);
       }
     };
-
-    if (showDropdown) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, [showDropdown]);
 
+  // Listen for community chat event
+  useEffect(() => {
+    const handler = () => {};
+    window.addEventListener('openCommunityChat', handler);
+    return () => window.removeEventListener('openCommunityChat', handler);
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    logout();
+    navigate('/login');
+  }, [logout, navigate]);
+
+  const openCommunityChat = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('openCommunityChat'));
+    setOpen(false);
+  }, []);
+
   const renderLinks = (isMobile = false) => {
-    const linkAction = () => isMobile && setOpen(false);
-    
-    const openCommunityChat = () => {
-      window.dispatchEvent(new CustomEvent('openCommunityChat'));
-      if (isMobile) setOpen(false);
-    };
-    
-    if (user) {
-      return user.role === 'mentor' ? (
-        <>
-          <Link to="/dashboard" className="nav-link dashboard-link" onClick={linkAction}>
-            {!isMobile && ''}
-            Dashboard
-          </Link>
-          <Link to="/chat" className="nav-link mentor-chat-link" onClick={linkAction}>
-            {!isMobile && ''}
-            Student Chats
-          </Link>
-          <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
-            {!isMobile && <GraduationCap size={18} />}
-            Internships
-          </Link>
-          <Link to="/career-guides" className="nav-link career-guides-link" onClick={linkAction}>
-            {!isMobile && <GraduationCap size={18} style={{ color: '#9d50bb' }} />} Career Guides
-          </Link>
-         
-        </>
-      ) : (
-        <>         
-          <Link to="/my-questions" className="nav-link" onClick={linkAction}>My Questions</Link>
-          
-          <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
-            {!isMobile && <GraduationCap size={18} />}
-            Internships
-          </Link>
-          <Link to="/career-guides" className="nav-link career-guides-link" onClick={linkAction}>
-            {!isMobile && <GraduationCap size={18} style={{ color: '#9d50bb' }} />} Career Guides
-          </Link>      
-        </>
-      );
-    }
-    
+    const close = () => isMobile && setOpen(false);
+
+    if (!user) return (
+      <>
+        <Link to="/internships"   className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/career-guides" className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
+        <Link to="/login"         className="nav-button"                  onClick={close}>Login</Link>
+        <Link to="/signup"        className="nav-button primary"          onClick={close}>Sign Up</Link>
+      </>
+    );
+
+    if (user.role === 'mentor') return (
+      <>
+        <Link to="/dashboard"      className="nav-link dashboard-link"    onClick={close}>Dashboard</Link>
+        <Link to="/chat"           className="nav-link mentor-chat-link"  onClick={close}>Student Chats</Link>
+        <Link to="/internships"    className="nav-link internship-link"   onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/career-guides"  className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
+      </>
+    );
+
     return (
       <>
-       
-        <Link to="/internships" className="nav-link internship-link" onClick={linkAction}>
-          {!isMobile && <GraduationCap size={18} />}
-          Internships
-        </Link>
-        <Link to="/career-guides" className="nav-link career-guides-link" onClick={linkAction}>
-          {!isMobile && <GraduationCap size={18} style={{ color: '#9d50bb' }} />} Career Guides
-        </Link>
-        <Link to="/login" className="nav-button" onClick={linkAction}>Login</Link>
-        <Link to="/signup" className="nav-button primary" onClick={linkAction}>Sign Up</Link>
+        <Link to="/my-questions"   className="nav-link"                   onClick={close}>My Questions</Link>
+        <Link to="/internships"    className="nav-link internship-link"   onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/career-guides"  className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
       </>
     );
   };
+
+  const avatarUser = user ? { ...user, profilePicture: userPhoto } : null;
 
   return (
     <header className="navbar">
       <Link to="/" className="brand">Atyant</Link>
 
-      {/* --- Desktop Menu --- */}
+      {/* Desktop */}
       <nav className="navbar-links desktop-only">
         {renderLinks()}
         {user && (
-          <div className="profile-menu-container">
-            <button 
-              ref={avatarBtnRef} 
-              onClick={() => setShowDropdown(v => !v)} 
-              className="profile-avatar-btn"
-            >
-              {/* ✅ Use shared userPhoto */}
-              <UserAvatar user={{...user, profilePicture: userPhoto}} size={40} />
+          <div className="profile-menu-container" ref={dropdownRef}>
+            <button onClick={() => setShowDropdown(v => !v)} className="profile-avatar-btn">
+              <UserAvatar user={avatarUser} size={40} />
             </button>
             {showDropdown && (
-              <div ref={dropdownRef} className="profile-dropdown">
+              <div className="profile-dropdown">
                 <div className="dropdown-header">
-                  {/* ✅ Use shared userPhoto */}
-                  <UserAvatar user={{...user, profilePicture: userPhoto}} size={48} />
+                  <UserAvatar user={avatarUser} size={48} />
                   <div className="dropdown-user-info">
                     <span>Signed in as</span>
                     <strong>{user.name || user.username || user.email || 'User'}</strong>
                   </div>
                 </div>
-                <Link to="/profile" className="dropdown-item">
-                  <UserIcon size={18} />
-                  My Profile
+                <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+                  <UserIcon size={18} /> My Profile
                 </Link>
-                
                 <button onClick={handleLogout} className="dropdown-item logout-btn">
-                  <LogOut size={18} />
-                  Logout
+                  <LogOut size={18} /> Logout
                 </button>
               </div>
             )}
           </div>
         )}
       </nav>
-      
-      {/* --- Mobile Hamburger & Panel --- */}
+
+      {/* Mobile hamburger */}
       <button className="hamburger mobile-only" onClick={() => setOpen(v => !v)}>
         <Menu size={22} />
       </button>
 
-      {/* Overlay for mobile menu */}
       {open && (
         <div
           className="mobile-menu-overlay"
           onClick={() => setOpen(false)}
-          style={{
-            position: 'fixed',
-            top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.18)', // halka dark, ya transparent bhi rakh sakte ho
-            zIndex: 2001
-          }}
+          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.18)', zIndex:2001 }}
         />
       )}
 
       <div ref={panelRef} className={`menu-panel mobile-only ${open ? 'open' : ''}`}>
         {renderLinks(true)}
-        {user && <hr />}
         {user && (
           <>
+            <hr />
             <Link to="/profile" className="menu-button" onClick={() => setOpen(false)}>
-              <UserIcon size={18} />
-              My Profile
+              <UserIcon size={18} /> My Profile
             </Link>
             <button onClick={handleLogout} className="menu-button">
-              <LogOut size={18} />
-              Logout
+              <LogOut size={18} /> Logout
             </button>
           </>
         )}

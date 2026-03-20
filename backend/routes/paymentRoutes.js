@@ -6,429 +6,402 @@ import User from '../models/User.js';
 import Payment from '../models/Payment.js';
 import Question from '../models/Question.js';
 import { sendMentorPaymentNotification } from '../utils/emailService.js';
-import dotenv from "dotenv";
-dotenv.config(); 
+
 const router = express.Router();
 
-// Validate Razorpay credentials
-if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-  console.error('❌ RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET not found in environment variables!');
-} else {
-  console.log('✅ Razorpay credentials loaded');
-  console.log('🔑 Key ID:', process.env.RAZORPAY_KEY_ID);
+// ─────────────────────────────────────────────
+//  RAZORPAY INIT  (fail fast if keys missing)
+// ─────────────────────────────────────────────
+const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET } = process.env;
+
+if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+  console.error('❌ RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET missing in .env');
+  // Don't crash server — routes will return 503 if called
 }
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+const razorpay = RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET
+  ? new Razorpay({ key_id: RAZORPAY_KEY_ID, key_secret: RAZORPAY_KEY_SECRET })
+  : null;
 
-// Create a payment order
+// ─────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────
+function razorpayReady(res) {
+  if (!razorpay) {
+    res.status(503).json({ success: false, error: 'Payment service not configured' });
+    return false;
+  }
+  return true;
+}
+
+function isValidObjectId(id) {
+  return id && /^[a-f\d]{24}$/i.test(id);
+}
+
+/** Verify Razorpay HMAC signature — returns boolean */
+function verifySignature(orderId, paymentId, signature) {
+  const expected = crypto
+    .createHmac('sha256', RAZORPAY_KEY_SECRET)
+    .update(`${orderId}|${paymentId}`)
+    .digest('hex');
+  // 🔴 FIX: Use timingSafeEqual to prevent timing attacks
+  return crypto.timingSafeEqual(
+    Buffer.from(expected, 'hex'),
+    Buffer.from(signature,  'hex')
+  );
+}
+
+// ─────────────────────────────────────────────
+//  1. CREATE ORDER  (credits purchase)
+// ─────────────────────────────────────────────
 router.post('/create-order', protect, async (req, res) => {
+  if (!razorpayReady(res)) return;
   try {
-    // Get amount and credits from request body, with defaults
     const { amount = 1, credits = 5 } = req.body;
-    
-    // Convert rupees to paisa (Razorpay requires amount in smallest currency unit)
-    const amountInPaisa = amount * 100;
-    
-    const options = {
-      amount: amountInPaisa, // Amount in paisa (e.g., 1.00 = 100 paisa)
+
+    if (amount <= 0 || credits <= 0) {
+      return res.status(400).json({ success: false, error: 'Invalid amount or credits' });
+    }
+
+    const order = await razorpay.orders.create({
+      amount  : Math.round(amount * 100),  // paise
       currency: 'INR',
-      receipt: `rcpt_${Date.now()}`,
-      notes: {
-        credits: credits,
-        userId: req.user.userId
-      }
-    };
-    
-    const order = await razorpay.orders.create(options);
-    
-    // Send order details back to frontend
-    res.json({
-      ...order,
-      creditsToAdd: credits
+      receipt : `cr_${Date.now().toString().slice(-10)}`,
+      notes   : { credits: String(credits), userId: req.user.userId }
     });
+
+    res.json({ ...order, creditsToAdd: credits });
   } catch (error) {
-    console.error('Error creating order:', error);
-    res.status(500).json({ message: 'Error creating order', error: error.message });
+    console.error('create-order error:', error.message);
+    res.status(500).json({ success: false, error: 'Failed to create order' });
   }
 });
 
-// Verify the payment
+// ─────────────────────────────────────────────
+//  2. VERIFY PAYMENT  (credits)
+//  🔴 FIX: Use $inc instead of read-modify-write
+//          to prevent race condition on concurrent payments
+// ─────────────────────────────────────────────
 router.post('/verify-payment', protect, async (req, res) => {
-    try {
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
-        const body = razorpay_order_id + "|" + razorpay_payment_id;
+  if (!razorpayReady(res)) return;
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
 
-        const expectedSignature = crypto
-            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-            .update(body.toString())
-            .digest('hex');
-
-        if (expectedSignature === razorpay_signature) {
-            // Fetch order details to get the credits amount
-            const order = await razorpay.orders.fetch(razorpay_order_id);
-            const creditsToAdd = parseInt(order.notes?.credits) || 5; // Default to 5 if not found
-            
-            // Add credits to user - both for messages AND questions
-            const user = await User.findById(req.user.userId);
-            if (user) {
-                // Add to both message credits (for chat) and question credits
-                user.messageCredits = (user.messageCredits || 0) + creditsToAdd;
-                user.credits = (user.credits || 0) + creditsToAdd;
-                await user.save();
-                
-                console.log(`✅ Added ${creditsToAdd} credits to user ${user.username}. Message Credits: ${user.messageCredits}, Question Credits: ${user.credits}`);
-            }
-            
-            res.json({ 
-                success: true, 
-                message: 'Payment verified successfully',
-                creditsAdded: creditsToAdd,
-                messageCredits: user.messageCredits,
-                questionCredits: user.credits
-            });
-        } else {
-            res.status(400).json({ success: false, message: 'Payment verification failed' });
-        }
-    } catch (error) {
-        console.error('Payment verification error:', error);
-        res.status(500).json({ success: false, message: 'Error verifying payment', error: error.message });
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ success: false, error: 'Missing payment fields' });
     }
+
+    // 🔴 FIX: signature lengths must match before timingSafeEqual
+    let valid = false;
+    try { valid = verifySignature(razorpay_order_id, razorpay_payment_id, razorpay_signature); }
+    catch { valid = false; }
+
+    if (!valid) {
+      return res.status(400).json({ success: false, error: 'Payment verification failed' });
+    }
+
+    const order        = await razorpay.orders.fetch(razorpay_order_id);
+    const creditsToAdd = parseInt(order.notes?.credits) || 5;
+
+    // 🔴 FIX: atomic update — no race condition
+    const user = await User.findByIdAndUpdate(
+      req.user.userId,
+      { $inc: { messageCredits: creditsToAdd, credits: creditsToAdd } },
+      { new: true, select: 'username messageCredits credits' }
+    );
+
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+
+    console.log(`✅ +${creditsToAdd} credits → ${user.username} | msg:${user.messageCredits} q:${user.credits}`);
+
+    res.json({
+      success        : true,
+      message        : 'Payment verified successfully',
+      creditsAdded   : creditsToAdd,
+      messageCredits : user.messageCredits,
+      questionCredits: user.credits
+    });
+  } catch (error) {
+    console.error('verify-payment error:', error.message);
+    res.status(500).json({ success: false, error: 'Payment verification error' });
+  }
 });
 
-// Create Razorpay order for mentorship purchase
+// ─────────────────────────────────────────────
+//  3. CREATE MENTORSHIP ORDER
+// ─────────────────────────────────────────────
 router.post('/create-mentorship-order', protect, async (req, res) => {
+  if (!razorpayReady(res)) return;
   try {
     const { amount, mentorshipType, questionId } = req.body;
-    
-    console.log('📝 Creating order for:', { amount, mentorshipType, questionId });
-    
+
     if (!amount || !mentorshipType || !questionId) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Missing required fields' 
-      });
+      return res.status(400).json({ success: false, error: 'amount, mentorshipType, questionId required' });
     }
-    
-    // Create short receipt ID (max 40 chars as per Razorpay requirement)
-    const timestamp = Date.now().toString();
-    const receipt = `M${timestamp.slice(-8)}`; // M + last 8 digits = 9 chars total
-    
-    console.log('🧾 Receipt ID:', receipt, 'Length:', receipt.length);
-    
-    // Create Razorpay order
-    const options = {
-      amount: amount * 100, // Convert to paise
+    if (!isValidObjectId(questionId)) {
+      return res.status(400).json({ success: false, error: 'Invalid questionId' });
+    }
+    if (!['chat', 'video', 'roadmap'].includes(mentorshipType)) {
+      return res.status(400).json({ success: false, error: 'Invalid mentorshipType' });
+    }
+
+    const order = await razorpay.orders.create({
+      amount  : Math.round(amount * 100),
       currency: 'INR',
-      receipt: receipt,
-      notes: {
-        questionId: questionId.toString(),
+      receipt : `M${Date.now().toString().slice(-8)}`,   // max 40 chars
+      notes   : {
+        questionId    : questionId.toString(),
         mentorshipType,
-        userId: req.user.userId.toString()
+        userId        : req.user.userId.toString()
       }
-    };
-    
-    console.log('🔧 Order options:', JSON.stringify(options, null, 2));
-    
-    const order = await razorpay.orders.create(options);
-    
-    console.log('✅ Order created successfully:', order.id);
-    
-    res.json({
-      success: true,
-      order,
-      razorpayKeyId: process.env.RAZORPAY_KEY_ID
     });
-    
+
+    res.json({ success: true, order, razorpayKeyId: RAZORPAY_KEY_ID });
   } catch (error) {
-    console.error('❌ Order creation error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: error.message || 'Failed to create order',
-      details: error.error || error
-    });
+    console.error('create-mentorship-order error:', error.message);
+    res.status(500).json({ success: false, error: error.message || 'Failed to create order' });
   }
 });
 
-// Verify mentorship payment
+// ─────────────────────────────────────────────
+//  4. VERIFY MENTORSHIP PAYMENT
+//  🔴 FIX: Idempotent — check duplicate payment before saving
+// ─────────────────────────────────────────────
 router.post('/verify-mentorship', protect, async (req, res) => {
+  if (!razorpayReady(res)) return;
   try {
-    const { 
-      razorpay_order_id, 
-      razorpay_payment_id, 
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
       razorpay_signature,
       questionId,
       mentorshipType
     } = req.body;
-    
-    console.log('🔐 Verifying payment:', { 
-      razorpay_order_id, 
-      razorpay_payment_id, 
-      questionId,
-      mentorshipType 
-    });
-    
-    // Verify signature
-    const body = razorpay_order_id + '|' + razorpay_payment_id;
-    const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(body.toString())
-      .digest('hex');
-    
-    console.log('🔑 Signature check:', { 
-      expected: expectedSignature.substring(0, 10) + '...', 
-      received: razorpay_signature.substring(0, 10) + '...',
-      match: expectedSignature === razorpay_signature
-    });
-    
-    if (expectedSignature !== razorpay_signature) {
-      console.error('❌ Invalid signature!');
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invalid payment signature' 
-      });
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !questionId || !mentorshipType) {
+      return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
-    
-    // Fetch payment details from Razorpay
-    console.log('💳 Fetching payment details from Razorpay...');
+    if (!isValidObjectId(questionId)) {
+      return res.status(400).json({ success: false, error: 'Invalid questionId' });
+    }
+
+    // Signature check
+    let valid = false;
+    try { valid = verifySignature(razorpay_order_id, razorpay_payment_id, razorpay_signature); }
+    catch { valid = false; }
+    if (!valid) return res.status(400).json({ success: false, error: 'Invalid payment signature' });
+
+    // 🔴 FIX: Idempotency — don't create duplicate Payment records
+    const existing = await Payment.findOne({ razorpayPaymentId: razorpay_payment_id });
+    if (existing) {
+      return res.json({ success: true, message: 'Already verified', payment: existing, mentorId: existing.mentorId });
+    }
+
+    // Verify with Razorpay that payment is actually captured
     const payment = await razorpay.payments.fetch(razorpay_payment_id);
-    
-    console.log('💰 Payment status:', payment.status, 'Amount:', payment.amount / 100);
-    
     if (payment.status !== 'captured') {
-      console.error('❌ Payment not captured:', payment.status);
-      return res.status(400).json({ 
-        success: false, 
-        error: `Payment not captured. Status: ${payment.status}` 
-      });
+      return res.status(400).json({ success: false, error: `Payment not captured (status: ${payment.status})` });
     }
-    
-    // Find the question to get mentor ID
-    const question = await Question.findById(questionId);
-    
-    if (!question) {
-      console.error('❌ Question not found:', questionId);
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Question not found' 
-      });
-    }
-    
-    console.log('✅ Question found. Mentor ID:', question.selectedMentorId);
-    
-    if (!question.selectedMentorId) {
-      console.error('❌ No mentor assigned to this question!');
-      return res.status(400).json({
-        success: false,
-        error: 'No mentor assigned to this question'
-      });
-    }
-    
-    // Store payment in database
+
+    const question = await Question.findById(questionId).lean();
+    if (!question)                  return res.status(404).json({ success: false, error: 'Question not found' });
+    if (!question.selectedMentorId) return res.status(400).json({ success: false, error: 'No mentor assigned' });
+
+    // Save payment record
     const paymentRecord = await Payment.create({
       razorpayPaymentId: razorpay_payment_id,
       questionId,
-      userId: req.user.userId,
-      mentorId: question.selectedMentorId,
+      userId        : req.user.userId,
+      mentorId      : question.selectedMentorId,
       mentorshipType,
-      amount: payment.amount / 100, // Convert paise to rupees
-      currency: payment.currency,
-      status: 'captured',
-      razorpayData: payment,
-      createdAt: new Date()
+      amount        : payment.amount / 100,
+      currency      : payment.currency,
+      status        : 'captured',
+      razorpayData  : payment
     });
-    
-    console.log('💾 Payment record created:', paymentRecord._id);
-    
-    // Update question with payment status
+
+    // Update question (non-blocking ok here since payment already saved)
     await Question.findByIdAndUpdate(questionId, {
-      isPaid: true,
+      isPaid            : true,
       paidMentorshipType: mentorshipType,
-      paidAt: new Date()
+      paidAt            : new Date()
     });
-    
-    console.log(`✅ Mentorship payment verified: ${mentorshipType} for question ${questionId}, Amount: ₹${paymentRecord.amount}`);
-    
-    // Get mentor and student details for email notification
-    const mentor = await User.findById(question.selectedMentorId).select('name email');
-    const student = await User.findById(req.user.userId).select('name');
-    
-    if (mentor && student) {
-      try {
-        // Send email notification to mentor
-        await sendMentorPaymentNotification(
-          mentor.email,
-          mentor.name,
-          student.name,
-          mentorshipType,
-          paymentRecord.amount,
-          question.questionText
-        );
-        console.log('📧 Payment notification email sent to mentor:', mentor.email);
-      } catch (emailError) {
-        // Log error but don't fail the payment verification
-        console.error('⚠️ Failed to send email notification:', emailError.message);
+
+    // Email mentor — non-blocking
+    Promise.all([
+      User.findById(question.selectedMentorId).select('name email').lean(),
+      User.findById(req.user.userId).select('name').lean()
+    ]).then(([mentor, student]) => {
+      if (mentor?.email && student) {
+        sendMentorPaymentNotification(
+          mentor.email, mentor.name, student.name,
+          mentorshipType, paymentRecord.amount, question.questionText
+        ).catch(err => console.error('Payment email failed:', err.message));
       }
-    }
-    
-    res.json({ 
-      success: true, 
-      message: 'Payment verified successfully',
-      payment: paymentRecord,
-      mentorId: question.selectedMentorId // Return mentor ID for frontend redirect
+    }).catch(err => console.error('Mentor/student lookup failed:', err.message));
+
+    console.log(`✅ Mentorship payment: ${mentorshipType} | ₹${paymentRecord.amount} | Q:${questionId}`);
+
+    res.json({
+      success : true,
+      message : 'Payment verified successfully',
+      payment : paymentRecord,
+      mentorId: question.selectedMentorId
     });
-    
   } catch (error) {
-    console.error('❌ Payment verification error:', error.message);
-    console.error('Stack:', error.stack);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Verification failed',
-      details: error.message
-    });
+    console.error('verify-mentorship error:', error.message);
+    res.status(500).json({ success: false, error: 'Verification failed' });
   }
 });
 
-// Razorpay webhook for mentorship payments
-router.post('/webhook', async (req, res) => {
+// ─────────────────────────────────────────────
+//  5. RAZORPAY WEBHOOK
+//  🔴 FIX: express.raw() needed for webhook signature verification
+//          (register raw body parser in server.js for /api/payment/webhook)
+// ─────────────────────────────────────────────
+router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   try {
-    // Verify webhook signature
-    const secret = process.env.RAZORPAY_WEBHOOK_SECRET || 'your_webhook_secret';
-    const shasum = crypto.createHmac('sha256', secret);
-    shasum.update(JSON.stringify(req.body));
-    const digest = shasum.digest('hex');
-    
+    const secret    = RAZORPAY_WEBHOOK_SECRET;
+    if (!secret) {
+      console.warn('⚠️ RAZORPAY_WEBHOOK_SECRET not set — webhook unverified');
+      return res.status(400).json({ error: 'Webhook secret not configured' });
+    }
+
     const signature = req.headers['x-razorpay-signature'];
-    
+    const digest    = crypto
+      .createHmac('sha256', secret)
+      .update(req.body)   // raw Buffer — not parsed JSON
+      .digest('hex');
+
     if (digest !== signature) {
       console.error('❌ Invalid webhook signature');
       return res.status(400).json({ error: 'Invalid signature' });
     }
-    
-    const event = req.body.event;
-    const paymentData = req.body.payload.payment.entity;
-    
-    console.log('📥 Webhook received:', event);
-    
-    if (event === 'payment.captured') {
-      console.log('✅ Payment captured:', paymentData.id);
-      
-      // Extract metadata from payment notes
-      const questionId = paymentData.notes?.questionId;
-      const mentorshipType = paymentData.notes?.mentorshipType;
-      const userId = paymentData.notes?.userId;
-      
+
+    const body        = JSON.parse(req.body.toString());
+    const event       = body.event;
+    const paymentData = body.payload?.payment?.entity;
+
+    console.log(`📥 Webhook: ${event}`);
+
+    if (event === 'payment.captured' && paymentData) {
+      // Idempotency — skip if already processed
+      const exists = await Payment.findOne({ razorpayPaymentId: paymentData.id });
+      if (exists) {
+        console.log(`⏭️ Webhook: already processed ${paymentData.id}`);
+        return res.json({ status: 'ok' });
+      }
+
+      const { questionId, mentorshipType, userId } = paymentData.notes || {};
       if (!questionId || !mentorshipType || !userId) {
-        console.error('❌ Missing required payment metadata');
+        console.error('❌ Webhook: missing metadata');
         return res.status(400).json({ error: 'Missing metadata' });
       }
-      
-      // Find the question to get mentor ID
-      const question = await Question.findById(questionId);
-      
-      // Store payment in database
-      const payment = await Payment.create({
+
+      const question = await Question.findById(questionId).lean();
+
+      await Payment.create({
         razorpayPaymentId: paymentData.id,
         questionId,
         userId,
-        mentorId: question?.selectedMentorId,
+        mentorId      : question?.selectedMentorId,
         mentorshipType,
-        amount: paymentData.amount / 100, // Convert paise to rupees
-        currency: paymentData.currency,
-        status: 'captured',
-        razorpayData: paymentData,
-        createdAt: new Date()
+        amount        : paymentData.amount / 100,
+        currency      : paymentData.currency,
+        status        : 'captured',
+        razorpayData  : paymentData
       });
-      
-      // Update question status
+
       if (questionId) {
         await Question.findByIdAndUpdate(questionId, {
-          isPaid: true,
+          isPaid            : true,
           paidMentorshipType: mentorshipType,
-          paidAt: new Date()
+          paidAt            : new Date()
         });
       }
-      
-      console.log(`✅ Payment recorded: ${mentorshipType} for question ${questionId}, Amount: ₹${payment.amount}`);
+
+      console.log(`✅ Webhook processed: ${mentorshipType} | ₹${paymentData.amount / 100}`);
     }
-    
+
     res.json({ status: 'ok' });
-    
   } catch (error) {
-    console.error('❌ Webhook error:', error);
+    console.error('❌ Webhook error:', error.message);
     res.status(500).json({ error: 'Webhook processing failed' });
   }
 });
 
-// Check payment status for a question
+// ─────────────────────────────────────────────
+//  6. PAYMENT STATUS  (by questionId)
+// ─────────────────────────────────────────────
 router.get('/status/:questionId', protect, async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.questionId)) {
+      return res.status(400).json({ error: 'Invalid question ID' });
+    }
+
     const payment = await Payment.findOne({
       questionId: req.params.questionId,
-      status: 'captured'
-    }).sort({ createdAt: -1 }); // Get the most recent payment
-    
+      status    : 'captured'
+    })
+      .select('mentorshipType amount createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+
     if (payment) {
-      res.json({
-        isPaid: true,
-        mentorshipType: payment.mentorshipType,
-        amount: payment.amount,
-        paidAt: payment.createdAt
-      });
+      res.json({ isPaid: true, mentorshipType: payment.mentorshipType, amount: payment.amount, paidAt: payment.createdAt });
     } else {
-      res.json({
-        isPaid: false
-      });
+      res.json({ isPaid: false });
     }
-    
   } catch (error) {
-    console.error('Payment status check error:', error);
+    console.error('payment status error:', error.message);
     res.status(500).json({ error: 'Failed to check payment status' });
   }
 });
 
-// Get all payments for a user
+// ─────────────────────────────────────────────
+//  7. MY PAYMENTS  (student)
+// ─────────────────────────────────────────────
 router.get('/my-payments', protect, async (req, res) => {
   try {
-    const payments = await Payment.find({
-      userId: req.user.userId,
-      status: 'captured'
-    })
-    .populate('questionId', 'questionText')
-    .populate('mentorId', 'name username')
-    .sort({ createdAt: -1 });
-    
+    const payments = await Payment.find({ userId: req.user.userId, status: 'captured' })
+      .populate('questionId', 'questionText')
+      .populate('mentorId',   'name username')
+      .select('-razorpayData')   // 🔴 FIX: don't leak raw Razorpay payload to client
+      .sort({ createdAt: -1 })
+      .lean();
+
     res.json(payments);
-    
   } catch (error) {
-    console.error('Error fetching payments:', error);
+    console.error('my-payments error:', error.message);
     res.status(500).json({ error: 'Failed to fetch payments' });
   }
 });
 
-// Get all payments received by a mentor
+// ─────────────────────────────────────────────
+//  8. MENTOR EARNINGS
+// ─────────────────────────────────────────────
 router.get('/mentor-earnings', protect, async (req, res) => {
   try {
-    const payments = await Payment.find({
-      mentorId: req.user.userId,
-      status: 'captured'
-    })
-    .populate('userId', 'name username email')
-    .populate('questionId', 'questionText')
-    .sort({ createdAt: -1 });
-    
-    const totalEarnings = payments.reduce((sum, payment) => sum + payment.amount, 0);
-    
+    if (req.user.role !== 'mentor') {
+      return res.status(403).json({ error: 'Only mentors can access this' });
+    }
+
+    const payments = await Payment.find({ mentorId: req.user.userId, status: 'captured' })
+      .populate('userId',     'name username email')
+      .populate('questionId', 'questionText')
+      .select('-razorpayData')   // 🔴 FIX: don't leak raw payload
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const totalEarnings = payments.reduce((sum, p) => sum + p.amount, 0);
+
     res.json({
       payments,
       totalEarnings,
       totalSessions: payments.length
     });
-    
   } catch (error) {
-    console.error('Error fetching mentor earnings:', error);
+    console.error('mentor-earnings error:', error.message);
     res.status(500).json({ error: 'Failed to fetch earnings' });
   }
 });

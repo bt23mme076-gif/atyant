@@ -1,160 +1,159 @@
 import express from 'express';
-const router = express.Router();
+import mongoose from 'mongoose';
+import { LRUCache } from 'lru-cache';
 import User from '../models/User.js';
 import Message from '../models/Message.js';
 import protect from '../middleware/authMiddleware.js';
-// ========== UPDATE MENTOR STRATEGY ========== 
+
+const router = express.Router();
+const isDev  = process.env.NODE_ENV === 'development';
+
+// ─────────────────────────────────────────────
+//  MENTOR LIST CACHE
+//  🔴 FIX: Use LRU (bounded memory) instead of module-level variable
+//  Note: for multi-instance (2+ PM2 workers) this still gives per-process
+//  caching which is fine — each process warms independently.
+// ─────────────────────────────────────────────
+const mentorListCache = new LRUCache({
+  max: 1,           // single entry
+  ttl: 5 * 60 * 1000  // 5 min
+});
+
+// ─────────────────────────────────────────────
+//  MENTOR STRATEGY UPDATE
+// ─────────────────────────────────────────────
 router.post('/update-strategy', protect, async (req, res) => {
   try {
     const { tone, language, hardTruth, timeWaste, roadmap, resumeTip, neverRecommend, permission } = req.body;
-    const mentorId = req.user.id || req.user.userId;
-    const update = {
-      strategy: { tone, language, hardTruth, timeWaste, roadmap, resumeTip, neverRecommend, permission },
-      isStrategyComplete: true
-    };
-    const mentor = await User.findByIdAndUpdate(mentorId, { $set: update }, { new: true });
-    if (!mentor) {
-      return res.status(404).json({ error: 'Mentor not found' });
-    }
-    res.status(200).json({ message: 'Strategy saved! Now we can handle your pending questions.' });
+    const mentorId = req.user.userId;
+
+    const mentor = await User.findByIdAndUpdate(
+      mentorId,
+      { $set: { strategy: { tone, language, hardTruth, timeWaste, roadmap, resumeTip, neverRecommend, permission }, isStrategyComplete: true } },
+      { new: true, select: 'username strategy' }
+    );
+
+    if (!mentor) return res.status(404).json({ error: 'Mentor not found' });
+    res.json({ message: 'Strategy saved! Now we can handle your pending questions.' });
   } catch (err) {
+    console.error('update-strategy error:', err);
     res.status(500).json({ error: 'Update failed' });
   }
 });
 
-const isDev = process.env.NODE_ENV === 'development';
-
-// ✅ PERFORMANCE: Cache mentor list
-let mentorCache = null;
-let cacheTime = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
-// ========== GET ALL MENTORS (WITH CACHING) ==========
+// ─────────────────────────────────────────────
+//  GET ALL MENTORS (cached)
+// ─────────────────────────────────────────────
 router.get('/mentors', async (req, res) => {
   try {
-    // ✅ Return cached data if fresh
-    if (mentorCache && cacheTime && (Date.now() - cacheTime < CACHE_DURATION)) {
-      if (isDev) console.log('✅ Returning cached mentors');
-      return res.json(mentorCache);
+    const cached = mentorListCache.get('all');
+    if (cached) {
+      if (isDev) console.log('✅ Mentor list cache hit');
+      return res.json(cached);
     }
 
-    // ✅ PERFORMANCE: Optimized query
     const mentors = await User.find({ role: 'mentor' })
-      .select('name username profilePicture profileImage bio city expertise skills isOnline lastActive yearsOfExperience price location')
-      .lean() // ✅ Returns plain JS objects (30% faster)
-      .sort({ _id: 1 }); // ✅ Oldest mentor first
+      .select('name username profilePicture profileImage bio city expertise skills isOnline lastActive yearsOfExperience price location rating responseRate')
+      .sort({ lastActive: -1 })  // 🔴 FIX: sort by recent activity, not insertion order
+      .lean();
 
-    // ✅ Update cache
-    mentorCache = mentors;
-    cacheTime = Date.now();
-
+    mentorListCache.set('all', mentors);
     if (isDev) console.log(`✅ Fetched ${mentors.length} mentors from DB`);
 
     res.json(mentors);
   } catch (error) {
-    console.error('Error fetching mentors:', error.message);
+    console.error('GET /mentors error:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// ========== GET MENTOR BY ID ==========
+// ─────────────────────────────────────────────
+//  GET MENTOR BY ID
+// ─────────────────────────────────────────────
 router.get('/mentors/:id', async (req, res) => {
   try {
     const mentor = await User.findById(req.params.id)
-      .select('-password') // ✅ Don't send password
-      .lean(); // ✅ Faster
+      .select('-password -passwordResetToken -passwordResetExpires -verificationToken')
+      .lean();
 
     if (!mentor || mentor.role !== 'mentor') {
       return res.status(404).json({ message: 'Mentor not found' });
     }
 
-    // ✅ Increment profile views asynchronously (don't wait)
-    User.findByIdAndUpdate(req.params.id, { $inc: { profileViews: 1 } }).catch(err => 
-      console.error('Error updating profile views:', err)
-    );
+    // Fire-and-forget profile view increment
+    User.findByIdAndUpdate(req.params.id, { $inc: { profileViews: 1 } })
+      .catch(err => console.error('profileViews increment failed:', err.message));
 
     res.json(mentor);
   } catch (error) {
-    console.error('Error fetching mentor:', error.message);
+    console.error('GET /mentors/:id error:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// ========== SEARCH MENTORS ==========
+// ─────────────────────────────────────────────
+//  SEARCH MENTORS
+// ─────────────────────────────────────────────
 router.get('/search', async (req, res) => {
   try {
     const { q, expertise, city } = req.query;
-    
-    let query = { role: 'mentor' };
-    
+    const query = { role: 'mentor' };
+
     if (q) {
-      query.$or = [
-        { username: { $regex: q, $options: 'i' } },
-        { bio: { $regex: q, $options: 'i' } }
-      ];
+      const re = { $regex: q, $options: 'i' };
+      query.$or = [{ username: re }, { bio: re }];
     }
-    
-    if (expertise) {
-      query.expertise = { $in: [expertise] };
-    }
-    
-    if (city) {
-      query.city = { $regex: city, $options: 'i' };
-    }
+    if (expertise) query.expertise = { $in: [expertise] };
+    if (city)      query.city      = { $regex: city, $options: 'i' };
 
     const mentors = await User.find(query)
-      .select('username profilePicture bio city expertise skills isOnline')
-      .lean()
-      .limit(50);
+      .select('username profilePicture bio city expertise skills isOnline rating')
+      .limit(50)
+      .lean();
 
     res.json(mentors);
   } catch (error) {
-    console.error('Error searching mentors:', error.message);
+    console.error('GET /search error:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// ========== CLEAR CACHE ENDPOINT (Admin) ==========
-router.post('/clear-cache', protect, async (req, res) => {
+// ─────────────────────────────────────────────
+//  CLEAR MENTOR CACHE (admin)
+// ─────────────────────────────────────────────
+router.post('/clear-cache', protect, (req, res) => {
   if (req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Unauthorized' });
+    return res.status(403).json({ message: 'Unauthorised' });
   }
-  
-  mentorCache = null;
-  cacheTime = null;
-  
-  res.json({ message: 'Cache cleared successfully' });
+  mentorListCache.clear();
+  res.json({ message: 'Mentor cache cleared' });
 });
 
-// ========== GET MENTOR STATISTICS (Dashboard) ==========
+// ─────────────────────────────────────────────
+//  MENTOR STATS
+// ─────────────────────────────────────────────
 router.get('/stats', protect, async (req, res) => {
   try {
     if (req.user.role !== 'mentor') {
       return res.status(403).json({ message: 'Only mentors can access this' });
     }
 
-    const mentorId = req.user.id || req.user.userId;
+    const mentorId = req.user.userId;
+
     const mentor = await User.findById(mentorId)
       .select('profileViews totalChats username')
       .lean();
 
-    if (!mentor) {
-      return res.status(404).json({ message: 'Mentor not found' });
-    }
+    if (!mentor) return res.status(404).json({ message: 'Mentor not found' });
 
-    // Get active chats (last 7 days) - count unique conversations
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const sevenDaysAgo  = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const mentorObjectId = new mongoose.Types.ObjectId(mentorId);
 
-    // Convert string ID to ObjectId for aggregation
-    const mongoose = await import('mongoose');
-    const mentorObjectId = new mongoose.default.Types.ObjectId(mentorId);
-
-    const activeConversations = await Message.aggregate([
+    const [activeConversations] = await Message.aggregate([
       {
         $match: {
           $or: [
-            { sender: mentorObjectId, createdAt: { $gte: sevenDaysAgo } },
+            { sender  : mentorObjectId, createdAt: { $gte: sevenDaysAgo } },
             { receiver: mentorObjectId, createdAt: { $gte: sevenDaysAgo } }
           ]
         }
@@ -162,34 +161,20 @@ router.get('/stats', protect, async (req, res) => {
       {
         $group: {
           _id: {
-            $cond: [
-              { $eq: ['$sender', mentorObjectId] },
-              '$receiver',
-              '$sender'
-            ]
+            $cond: [{ $eq: ['$sender', mentorObjectId] }, '$receiver', '$sender']
           }
         }
       },
       { $count: 'total' }
     ]);
 
-    const activeChats = activeConversations.length > 0 ? activeConversations[0].total : 0;
-
-    console.log(`📊 Stats for ${mentor.username}:`, {
-      mentorId: mentorId,
-      profileViews: mentor.profileViews || 0,
-      totalChats: mentor.totalChats || 0,
-      activeChats
-    });
-
     res.json({
       profileViews: mentor.profileViews || 0,
-      totalChats: mentor.totalChats || 0,
-      activeChats: activeChats || 0
+      totalChats  : mentor.totalChats   || 0,
+      activeChats : activeConversations?.total || 0
     });
-
   } catch (error) {
-    console.error('Error fetching mentor stats:', error.message);
+    console.error('GET /stats error:', error.message);
     res.status(500).json({ message: 'Server error' });
   }
 });

@@ -1,158 +1,115 @@
 import mongoose from 'mongoose';
 
+// ─────────────────────────────────────────────
+//  REUSABLE SUB-SCHEMA  (used in main + follow-ups)
+// ─────────────────────────────────────────────
+const answerContentSchema = new mongoose.Schema({
+  mainAnswer       : { type: String, default: '' },
+  situation        : { type: String, default: '' },
+  firstAttempt     : { type: String, default: '' },
+  // 🔴 FIX: [Object] → typed arrays so Mongoose can validate
+  keyMistakes      : [{ type: String }],
+  whatWorked       : { type: String, default: '' },
+  actionableSteps  : [{
+    step        : { type: String },
+    description : { type: String }
+  }],
+  timeline         : { type: String, default: '' },
+  differentApproach: { type: String, default: '' },
+  additionalNotes  : { type: String, default: '' }
+}, { _id: false });
+
+// ─────────────────────────────────────────────
+//  FOLLOW-UP SUB-SCHEMA
+// ─────────────────────────────────────────────
+const followUpSchema = new mongoose.Schema({
+  questionText      : { type: String, required: true },
+  questionId        : { type: mongoose.Schema.Types.ObjectId, ref: 'Question' },
+  answerContent     : { type: answerContentSchema, default: () => ({}) },
+  mentorExperienceId: { type: mongoose.Schema.Types.ObjectId, ref: 'MentorExperience' },
+  askedAt           : { type: Date, default: Date.now },
+  answeredAt        : { type: Date, default: null }
+}, { _id: false });
+
+// ─────────────────────────────────────────────
+//  MAIN SCHEMA
+// ─────────────────────────────────────────────
 const answerCardSchema = new mongoose.Schema({
-  // Related question
   questionId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Question',
-    required: true
+    type    : mongoose.Schema.Types.ObjectId,
+    ref     : 'Question',
+    required: true,
+    index   : true   // 🔴 FIX: index added
   },
-  
-  // Related mentor experience (internal only)
+
+  mentorId: {
+    type    : mongoose.Schema.Types.ObjectId,
+    ref     : 'User',
+    required: true,
+    index   : true   // 🔴 FIX: index added
+  },
+
   mentorExperienceId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'MentorExperience',
+    type    : mongoose.Schema.Types.ObjectId,
+    ref     : 'MentorExperience',
     required: false
   },
-  
-  // Mentor who provided the experience (hidden from user)
-  mentorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
 
-  /**
-   * 🚀 VECTOR SEARCH FIELD (ADDED)
-   * Isme Python API se aaya hua 384-dimension array save hoga.
-   * 'select: false' isliye taaki normal API calls mein ye data load na ho (performance).
-   */
+  // 🔥 Vector embedding — select: false keeps it out of default queries
   embedding: {
-    type: [Number],
-    required: false, // Initial data migration ke waqt false rakhna sahi hai
-    select: false    
+    type    : [Number],
+    required: false,
+    select  : false
   },
-  
-  // Transformed Answer Card content (in Atyant's voice)
+
   answerContent: {
-    type: new mongoose.Schema({
-      mainAnswer: String,
-      situation: String,
-      firstAttempt: String,
-      keyMistakes: [Object],
-      whatWorked: String,
-      actionableSteps: [Object],
-      timeline: String,
-      differentApproach: String,
-      additionalNotes: String
-    }, { _id: false })
+    type   : answerContentSchema,
+    default: () => ({})
   },
 
-  // Mentor audio answer (optional)
-  audioUrl: {
-    type: String,
-    default: null
-  },
-  transcript: {
-    type: String,
-    default: null
-  },
-  
-  // Trust message
+  audioUrl  : { type: String, default: null },
+  transcript: { type: String, default: null },
+
   trustMessage: {
-    type: String,
-    default: "This answer is built from real experience, not AI-generated advice."
+    type   : String,
+    default: 'This answer is built from real experience, not AI-generated advice.'
   },
-  
-  // Signature
+
   signature: {
-    type: String,
-    default: "— Atyant Expert Mentor"
+    type   : String,
+    default: '— Atyant Expert Mentor'
   },
-  
-  // Follow-up questions allowed (max 2)
+
   followUpCount: {
-    type: Number,
+    type   : Number,
     default: 0,
-    max: 2
+    max    : 2
   },
-  
-  // Follow-up Q&A pairs
-  followUpAnswers: [{
-    questionText: {
-      type: String,
-      required: true
-    },
-    questionId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Question'
-    },
-    answerContent: {
-      type: new mongoose.Schema({
-        mainAnswer: String,
-        situation: String,
-        firstAttempt: String,
-        keyMistakes: [Object],
-        whatWorked: String,
-        actionableSteps: [Object],
-        timeline: String,
-        differentApproach: String,
-        additionalNotes: String
-      }, { _id: false })
-    },
-    mentorExperienceId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'MentorExperience'
-    },
-    askedAt: {
-      type: Date,
-      default: Date.now
-    },
-    answeredAt: {
-      type: Date,
-      default: null
-    }
-  }],
-  
-  // User feedback
+
+  followUpAnswers: [followUpSchema],
+
   userFeedback: {
-    helpful: {
-      type: Boolean,
-      default: null
-    },
-    rating: {
-      type: Number,
-      min: 1,
-      max: 5,
-      default: null
-    },
-    comment: {
-      type: String,
-      maxlength: 500,
-      default: ''
-    }
+    helpful: { type: Boolean, default: null },
+    rating : { type: Number, min: 1, max: 5, default: null },
+    comment: { type: String, maxlength: 500, default: '' }
   },
-  
-  // Metadata
-  deliveredAt: {
-    type: Date,
-    default: null
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
+
+  deliveredAt: { type: Date, default: null }
+
+}, {
+  // 🔴 FIX: Use built-in timestamps instead of manual updatedAt/createdAt
+  timestamps: true
 });
 
-// Update timestamp on save
-answerCardSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  next();
-});
+// ─────────────────────────────────────────────
+//  COMPOUND INDEX: mentor's answer history page
+// ─────────────────────────────────────────────
+answerCardSchema.index({ mentorId: 1, createdAt: -1 });
+
+// ─────────────────────────────────────────────
+//  FEEDBACK INDEX: analytics queries
+// ─────────────────────────────────────────────
+answerCardSchema.index({ 'userFeedback.rating': 1 }, { sparse: true });
 
 const AnswerCard = mongoose.model('AnswerCard', answerCardSchema);
 export default AnswerCard;

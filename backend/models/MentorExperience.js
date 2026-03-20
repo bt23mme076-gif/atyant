@@ -1,106 +1,53 @@
 import mongoose from 'mongoose';
 
 const mentorExperienceSchema = new mongoose.Schema({
-  // Related question
+
   questionId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Question',
-    required: true
+    type    : mongoose.Schema.Types.ObjectId,
+    ref     : 'Question',
+    required: true,
+    index   : true
   },
-  
-  // Mentor who provided the experience
+
   mentorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    type    : mongoose.Schema.Types.ObjectId,
+    ref     : 'User',
+    required: true,
+    index   : true
   },
-  
-  // Raw experience input from mentor
+
   rawExperience: {
-    // When I was in this situation
-    situation: {
-      type: String,
-      required: true,
-      maxlength: 1000
-    },
-    
-    // What I tried first
-    firstAttempt: {
-      type: String,
-      required: true,
-      maxlength: 1000
-    },
-    
-    // What failed
-   keyMistakes: {
-      type: Array,
-      required: true,
-      maxlength: 1000
-    },
-    
-    // What worked
-    whatWorked: {
-      type: String,
-      required: true,
-      maxlength: 1000
-    },
-    
-    // Step-by-step actions taken
-    actionableSteps: {
-      type: Array,
-      required: true,
-      maxlength: 2000
-    },
-    
-    // Timeline / outcomes
-    timeline: {
-      type: String,
-      required: true,
-      maxlength: 500
-    },
-    
-    // What I would do differently today
-    differentApproach: {
-      type: String,
-      required: true,
-      maxlength: 1000
-    },
-    
-    // Additional context (optional)
-    additionalNotes: {
-      type: String,
-      maxlength: 500,
-      default: ''
-    }
+    situation    : { type: String, required: true, maxlength: 1000 },
+    firstAttempt : { type: String, required: true, maxlength: 1000 },
+    // 🔴 FIX: Typed arrays instead of bare Array
+    keyMistakes  : [{ type: String }],
+    whatWorked   : { type: String, required: true, maxlength: 1000 },
+    actionableSteps: [{
+      step       : { type: String },
+      description: { type: String }
+    }],
+    timeline         : { type: String, required: true, maxlength: 500 },
+    differentApproach: { type: String, required: true, maxlength: 1000 },
+    additionalNotes  : { type: String, maxlength: 500, default: '' }
   },
-  
-  // Status
+
   status: {
-    type: String,
-    enum: ['draft', 'submitted', 'processed'],
+    type   : String,
+    enum   : ['draft', 'submitted', 'processed'],
     default: 'draft'
   },
-  
-  // Metadata
-  submittedAt: {
-    type: Date,
-    default: null
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now
-  }
+
+  submittedAt: { type: Date, default: null }
+
+}, {
+  // 🔴 FIX: Use built-in timestamps
+  timestamps: true
 });
 
-// Update timestamp on save
-mentorExperienceSchema.pre('save', function(next) {
-  this.updatedAt = Date.now();
-  if (this.status === 'submitted' && !this.submittedAt) {
-    this.submittedAt = Date.now();
+// Auto-set submittedAt when status becomes 'submitted'
+mentorExperienceSchema.pre('save', function (next) {
+  if (this.isModified('status') && this.status === 'submitted' && !this.submittedAt) {
+    this.submittedAt = new Date();
   }
   next();
 });

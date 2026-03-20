@@ -7,253 +7,236 @@ import aiServiceInstance from './AIService.js';
 import crypto from 'crypto';
 import { LRUCache } from 'lru-cache';
 
-// Runtime flags and caches
+// ─────────────────────────────────────────────
+//  DEV LOGGER
+// ─────────────────────────────────────────────
 const isDev = process.env.NODE_ENV !== 'production';
 function dlog(...args) { if (isDev) console.log(...args); }
 
-let COMPANY_CACHE = null;
+// ─────────────────────────────────────────────
+//  COMPANY CACHE  (TTL-based, O(1) lookup)
+// ─────────────────────────────────────────────
+let COMPANY_CACHE      = null;
 let COMPANY_CACHE_TIME = 0;
-const CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
+const COMPANY_TTL      = 6 * 60 * 60 * 1000; // 6 h
+const COMPANY_LOOKUP   = new Map();            // alias → canonical key
 
-let COMPANY_LIST_READY = true; // ✅ BONUS: Cache is TTL-based, no need for flag
-let COMPANY_LOOKUP = new Map(); // ✅ FIX #1: O(1) company detection
+// ─────────────────────────────────────────────
+//  MENTOR LIST CACHE  (🔴 FIX #4: was missing)
+//  Saves a full DB scan on every Path-B request
+// ─────────────────────────────────────────────
+let MENTOR_CACHE      = null;
+let MENTOR_CACHE_TIME = 0;
+const MENTOR_TTL      = 5 * 60 * 1000; // 5 min
 
-// Vector search result cache (10min TTL for repeated questions)
-// ✅ FIX #2: LRU cache prevents memory spike on clear()
+// ─────────────────────────────────────────────
+//  VECTOR RESULT CACHE  (LRU, 10-min TTL)
+// ─────────────────────────────────────────────
 const VECTOR_CACHE = new LRUCache({
-  max: 1000,
-  ttl: 1000 * 60 * 10, // 10 minutes
-  updateAgeOnGet: false,
-  updateAgeOnHas: false
+  max              : 1000,
+  ttl              : 10 * 60 * 1000,
+  updateAgeOnGet   : false,
+  updateAgeOnHas   : false,
 });
 
-async function warmUpCompanyCache() {
-  if (!COMPANY_LIST_READY) {
-    await getAllTargetCompanies();
-    COMPANY_LIST_READY = true;
-    console.log("✅ Company cache warmed up");
-  }
-}
-
+// ─────────────────────────────────────────────
+//  CONFIG
+// ─────────────────────────────────────────────
 const CONFIG = {
-  // 🔥 VECTOR SEARCH TUNING
-  SEMANTIC_FLOOR: 0.85,           // Slightly stricter floor to reduce noise
-  INSTANT_THRESHOLD: 0.88,        // High bar for instant answers
-  VECTOR_CANDIDATES: 80,          // Reduced for cost-effectiveness
-  VECTOR_LIMIT: 25,               // Reduced for cost-effectiveness
-  
-  // 🔥 LIVE ROUTING
-  LIVE_MATCH_THRESHOLD: 350,      // Minimum points for assignment
-  LOAD_PENALTY: 60,               // Penalty per active question
-  MAX_LOAD: 5,                    // Max concurrent questions
-  
-  // 🔥 QUALITY GATES
-  MIN_SCORE_GAP: 0.04,            // 4% gap required between #1 and #2
-  AMBIGUITY_THRESHOLD: 0.03,      // 3% gap = ambiguous match
-  TOP_MATCH_CONFIDENCE: 0.92,     // 92%+ = auto-accept even if close
-  
-  // 🔥 HYBRID SCORING WEIGHTS
+  // Vector search
+  SEMANTIC_FLOOR       : 0.85,
+  INSTANT_THRESHOLD    : 0.88,
+  VECTOR_CANDIDATES    : 80,
+  VECTOR_LIMIT         : 25,
+
+  // Live routing
+  LIVE_MATCH_THRESHOLD : 350,
+  LOAD_PENALTY         : 60,
+  MAX_LOAD             : 5,
+
+  // Quality gates
+  MIN_SCORE_GAP        : 0.04,
+  AMBIGUITY_THRESHOLD  : 0.03,
+  TOP_MATCH_CONFIDENCE : 0.92,
+
+  // Retry
+  MAX_RETRIES          : 2,
+
+  // Hybrid scoring weights (vector path)
   WEIGHTS: {
-    // Semantic match bonuses (multiply with base vector score)
-    EXACT_COMPANY: 0.12,          // +12% if exact company match
-    RELATED_COMPANY: 0.06,        // +6% if related company
-    EXACT_DOMAIN: 0.08,           // +8% if exact intent match
-    PARTIAL_DOMAIN: 0.04,         // +4% if 'both' domain
-    SPECIAL_TAG: 0.05,            // +5% per matching tag
-    MILESTONE: 0.04,              // +4% per matching milestone
-    EXPERTISE: 0.06,              // +6% per matching tech skill
-    BIO_DENSITY: 0.03,            // +3% if bio has 5+ keywords
-    COLLEGE_TYPE: 0.05,           // +5% same college tier
-    SAME_BRANCH: 0.03,            // +3% same branch
-    HIGH_RATING: 0.05,            // +5% if rating ≥ 4.5
-    HIGH_RESPONSE: 0.04,          // +4% if response rate ≥ 85%
-    RECENT_ACTIVE: 0.03,          // +3% if active in 14 days
+    EXACT_COMPANY  : 0.12,
+    RELATED_COMPANY: 0.06,
+    EXACT_DOMAIN   : 0.08,
+    PARTIAL_DOMAIN : 0.04,
+    SPECIAL_TAG    : 0.05,
+    MILESTONE      : 0.04,
+    EXPERTISE      : 0.06,
+    BIO_DENSITY    : 0.03,
+    COLLEGE_TYPE   : 0.05,
+    SAME_BRANCH    : 0.03,
+    HIGH_RATING    : 0.05,
+    HIGH_RESPONSE  : 0.04,
+    RECENT_ACTIVE  : 0.03,
   },
-  
-  // 🔥 LIVE ROUTING POINTS
+
+  // Live routing points
   LIVE_WEIGHTS: {
-    EXACT_COMPANY: 700,
-    RELATED_COMPANY: 350,
-    SPECIAL_TAG: 500,
-    EXACT_DOMAIN: 300,
-    PARTIAL_DOMAIN: 150,
-    MILESTONE: 200,
-    EXPERTISE_EXACT: 250,
+    EXACT_COMPANY    : 700,
+    RELATED_COMPANY  : 350,
+    SPECIAL_TAG      : 500,
+    EXACT_DOMAIN     : 300,
+    PARTIAL_DOMAIN   : 150,
+    MILESTONE        : 200,
+    EXPERTISE_EXACT  : 250,
     EXPERTISE_PARTIAL: 125,
-    BIO_KEYWORD: 60,
-    COLLEGE_TYPE: 120,
-    SAME_BRANCH: 80,
-    HIGH_RATING: 120,
-    HIGH_RESPONSE: 100,
-    RECENT_ACTIVE: 70,
-    PROVEN_MENTOR: 150,  // Per 10 successful matches
-  }
+    BIO_KEYWORD      : 60,
+    COLLEGE_TYPE     : 120,
+    SAME_BRANCH      : 80,
+    HIGH_RATING      : 120,
+    HIGH_RESPONSE    : 100,
+    RECENT_ACTIVE    : 70,
+    PROVEN_MENTOR    : 150,
+  },
 };
 
-// 🔥 COMPANY ALIASES (Expanded - covers your specific needs)
+// ─────────────────────────────────────────────
+//  COMPANY ALIASES
+//  🔴 FIX #5: all keys are now lowercase
+// ─────────────────────────────────────────────
 const COMPANY_ALIASES = {
-  'google': ['google', 'alphabet', 'gcp', 'youtube'],
-  'microsoft': ['microsoft', 'msft', 'azure', 'linkedin'],
-  'amazon': ['amazon', 'aws', 'amzn', 'prime'],
-  'meta': ['meta', 'facebook', 'fb', 'instagram', 'whatsapp', 'ig'],
-  'apple': ['apple', 'aapl', 'iphone', 'mac'],
-  'netflix': ['netflix', 'nflx'],
-  'nvidia': ['nvidia', 'nvda'],
-  'tesla': ['tesla', 'tsla'],
-  'jpmorgan': ['jpmorgan', 'jp morgan', 'jpm', 'chase', 'jpmchase'],
-  'goldmansachs': ['goldman sachs', 'goldman', 'gs'],
-  'morganstanley': ['morgan stanley', 'ms'],
-  'citadel': ['citadel', 'citadel securities'],
-  'janestreet': ['jane street', 'janestreet'],
-  'tower': ['tower research', 'tower'],
-  'uber': ['uber', 'uber technologies'],
-  'airbnb': ['airbnb'],
-  'snowflake': ['snowflake'],
-  'databricks': ['databricks'],
-  'stripe': ['stripe'],
-  'coinbase': ['coinbase'],
-  'flipkart': ['flipkart', 'walmart india'],
-  'swiggy': ['swiggy'],
-  'zomato': ['zomato'],
-  'paytm': ['paytm', 'one97'],
-  'ola': ['ola', 'ola electric', 'ola cabs'],
-  'cred': ['cred'],
-  'razorpay': ['razorpay'],
-  'phonepe': ['phonepe'],
-  'atlassian': ['atlassian', 'jira', 'confluence', 'trello'],
-  'adobe': ['adobe', 'adbe'],
-  'salesforce': ['salesforce', 'crm'],
-  'oracle': ['oracle', 'orcl'],
-  'sap': ['sap'],
-  'intuit': ['intuit', 'quickbooks', 'turbotax'],
-  'servicenow': ['servicenow', 'now'],
-  'cisco': ['cisco', 'csco'],
-  'vmware': ['vmware', 'broadcom'],
-  'redhat': ['redhat', 'red hat', 'ibm'],
-  'qualcomm': ['qualcomm', 'qcom'],
-  'intel': ['intel', 'intc'],
-  'amd': ['amd', 'advanced micro devices'],
-  'deshaw': ['de shaw', 'deshaw', 'd.e. shaw'],
-  'McKinsey': ['mckinsey', 'mckinsey & company'],
-  'bcg': ['bcg', 'boston consulting'],
-  'bain': ['bain', 'bain & company'],
+  google       : ['google', 'alphabet', 'gcp', 'youtube'],
+  microsoft    : ['microsoft', 'msft', 'azure', 'linkedin'],
+  amazon       : ['amazon', 'aws', 'amzn', 'prime'],
+  meta         : ['meta', 'facebook', 'fb', 'instagram', 'whatsapp', 'ig'],
+  apple        : ['apple', 'aapl', 'iphone', 'mac'],
+  netflix      : ['netflix', 'nflx'],
+  nvidia       : ['nvidia', 'nvda'],
+  tesla        : ['tesla', 'tsla'],
+  jpmorgan     : ['jpmorgan', 'jp morgan', 'jpm', 'chase', 'jpmchase', 'j.p. morgan', 'jpmorgan chase'],
+  goldmansachs : ['goldman sachs', 'goldman', 'gs'],
+  morganstanley: ['morgan stanley', 'ms', 'morganstanley'],
+  citadel      : ['citadel', 'citadel securities'],
+  janestreet   : ['jane street', 'janestreet'],
+  tower        : ['tower research', 'tower'],
+  uber         : ['uber', 'uber technologies'],
+  airbnb       : ['airbnb'],
+  snowflake    : ['snowflake'],
+  databricks   : ['databricks'],
+  stripe       : ['stripe'],
+  coinbase     : ['coinbase'],
+  flipkart     : ['flipkart', 'walmart india'],
+  swiggy       : ['swiggy'],
+  zomato       : ['zomato'],
+  paytm        : ['paytm', 'one97'],
+  ola          : ['ola', 'ola electric', 'ola cabs'],
+  cred         : ['cred'],
+  razorpay     : ['razorpay'],
+  phonepe      : ['phonepe'],
+  atlassian    : ['atlassian', 'jira', 'confluence', 'trello'],
+  adobe        : ['adobe', 'adbe'],
+  salesforce   : ['salesforce', 'crm'],
+  oracle       : ['oracle', 'orcl'],
+  sap          : ['sap'],
+  intuit       : ['intuit', 'quickbooks', 'turbotax'],
+  servicenow   : ['servicenow', 'now'],
+  cisco        : ['cisco', 'csco'],
+  vmware       : ['vmware', 'broadcom'],
+  redhat       : ['redhat', 'red hat', 'ibm'],
+  qualcomm     : ['qualcomm', 'qcom'],
+  intel        : ['intel', 'intc'],
+  amd          : ['amd', 'advanced micro devices'],
+  deshaw       : ['de shaw', 'deshaw', 'd.e. shaw', 'de shaw'],
+  // 🔴 FIX #5: was 'McKinsey' (camelCase), never matched
+  mckinsey     : ['mckinsey', 'mckinsey & company'],
+  bcg          : ['bcg', 'boston consulting'],
+  bain         : ['bain', 'bain & company'],
 };
 
-// 🔥 TECH SKILLS DATABASE (For vector embedding context)
+// ─────────────────────────────────────────────
+//  TECH KEYWORDS
+// ─────────────────────────────────────────────
 const TECH_KEYWORDS = [
-  // Languages
-  'python', 'java', 'javascript', 'c++', 'cpp', 'golang', 'rust', 'kotlin', 
-  'swift', 'typescript', 'scala', 'ruby', 'php',
-  
-  // Frameworks
-  'react', 'angular', 'vue', 'nextjs', 'django', 'flask', 'fastapi', 
-  'spring', 'springboot', 'nodejs', 'express', 'nestjs',
-  
-  // Data & ML
-  'machine learning', 'ml', 'deep learning', 'dl', 'nlp', 'computer vision',
-  'tensorflow', 'pytorch', 'keras', 'scikit', 'pandas', 'numpy',
-  
-  // Cloud & DevOps
-  'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'k8s', 'terraform',
-  'jenkins', 'ci/cd', 'devops', 'ansible',
-  
-  // Databases
-  'sql', 'mysql', 'postgresql', 'mongodb', 'redis', 'cassandra', 
-  'dynamodb', 'elasticsearch',
-  
-  // Core CS
-  'dsa', 'data structures', 'algorithms', 'system design', 'hld', 'lld',
-  'oops', 'dbms', 'operating system', 'os', 'networks', 'computer networks',
-  
-  // Domains
-  'backend', 'frontend', 'fullstack', 'mobile', 'android', 'ios',
-  'data science', 'data engineering', 'sde', 'swe', 'devops engineer',
-  'quant', 'quantitative', 'trading', 'fintech'
+  'python','java','javascript','c++','cpp','golang','rust','kotlin',
+  'swift','typescript','scala','ruby','php',
+  'react','angular','vue','nextjs','django','flask','fastapi',
+  'spring','springboot','nodejs','express','nestjs',
+  'machine learning','ml','deep learning','dl','nlp','computer vision',
+  'tensorflow','pytorch','keras','scikit','pandas','numpy',
+  'aws','azure','gcp','docker','kubernetes','k8s','terraform',
+  'jenkins','ci/cd','devops','ansible',
+  'sql','mysql','postgresql','mongodb','redis','cassandra',
+  'dynamodb','elasticsearch',
+  'dsa','data structures','algorithms','system design','hld','lld',
+  'oops','dbms','operating system','os','networks','computer networks',
+  'backend','frontend','fullstack','mobile','android','ios',
+  'data science','data engineering','sde','swe','devops engineer',
+  'quant','quantitative','trading','fintech',
 ];
 
-// 🔥 SPECIAL TAGS (Career milestones & contexts)
+// ─────────────────────────────────────────────
+//  SPECIAL TAGS
+// ─────────────────────────────────────────────
 const SPECIAL_TAGS = [
-  // College types
-  'iit', 'nit', 'iiit', 'bits', 'iim', 'dtu', 'nsut', 'vit',
-  
-  // Career contexts
-  'faang', 'maang', 'foreign', 'abroad', 'usa', 'europe', 'canada', 'germany',
-  'startup', 'unicorn', 'series-a', 'early-stage',
-  
-  // Placement types
-  'on-campus', 'off-campus', 'ppo', 'pre-placement',
-  
-  // Education
-  'masters', 'ms', 'mtech', 'mba', 'phd', 'research',
-  
-  // Exams
-  'gate', 'gre', 'gmat', 'cat', 'upsc',
-  
-  // Domains
-  'consulting', 'product', 'quant', 'trading', 'fintech',
-  
-  // Activities
-  'competitive programming', 'cp', 'hackathon', 'open source', 
-  'gsoc', 'leetcode', 'codeforces', 'kaggle',
-  
-  // Switches
-  'career switch', 'domain switch', 'company switch'
+  'iit','nit','iiit','bits','iim','dtu','nsut','vit',
+  'faang','maang','foreign','abroad','usa','europe','canada','germany',
+  'startup','unicorn','series-a','early-stage',
+  'on-campus','off-campus','ppo','pre-placement',
+  'masters','ms','mtech','mba','phd','research',
+  'gate','gre','gmat','cat','upsc',
+  'consulting','product','quant','trading','fintech',
+  'competitive programming','cp','hackathon','open source',
+  'gsoc','leetcode','codeforces','kaggle',
+  'career switch','domain switch','company switch',
 ];
 
-// 🔥 UTILITY FUNCTIONS
+// ─────────────────────────────────────────────
+//  UTILITY FUNCTIONS
+// ─────────────────────────────────────────────
 
+/** Normalise a raw company string to its canonical alias key */
 function normalizeCompany(company) {
   if (!company || typeof company !== 'string') return '';
-  const normalized = company.toLowerCase().trim().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '');
-  
-  // ✅ FIX #6: Exact match to prevent false positives (amazonintern ≠ amazon)
+  const clean = company.toLowerCase().trim().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '');
   for (const [key, aliases] of Object.entries(COMPANY_ALIASES)) {
-    if (aliases.some(alias => {
-      const cleanAlias = alias.replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '');
-      return normalized === cleanAlias;
-    })) {
+    if (aliases.some(a => a.replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '') === clean)) {
       return key;
     }
   }
-  return normalized;
+  return clean;
 }
 
 function getCollegeType(collegeName) {
   if (!collegeName) return 'unknown';
-  const name = collegeName.toLowerCase();
-  
-  if (name.includes('iit')) return 'iit';
-  if (name.includes('nit')) return 'nit';
-  if (name.includes('iiit')) return 'iiit';
-  if (name.includes('bits')) return 'bits';
-  if (name.includes('iim')) return 'iim';
-  
-  const tier1 = ['dtu', 'nsut', 'vit', 'manipal', 'thapar', 'rvce', 'pec', 'coep', 'vnit'];
-  if (tier1.some(t => name.includes(t))) return 'tier1';
-  
+  const n = collegeName.toLowerCase();
+  if (n.includes('iit'))  return 'iit';
+  if (n.includes('nit'))  return 'nit';
+  if (n.includes('iiit')) return 'iiit';
+  if (n.includes('bits')) return 'bits';
+  if (n.includes('iim'))  return 'iim';
+  const tier1 = ['dtu','nsut','vit','manipal','thapar','rvce','pec','coep','vnit'];
+  if (tier1.some(t => n.includes(t))) return 'tier1';
   return 'tier2';
 }
 
 function extractSmartKeywords(text) {
   const stopwords = new Set([
-    'the', 'is', 'at', 'which', 'on', 'a', 'an', 'as', 'are', 'was', 'were',
-    'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would',
-    'should', 'could', 'may', 'might', 'must', 'can', 'to', 'of', 'in', 'for',
-    'with', 'from', 'by', 'about', 'into', 'through', 'during', 'before',
-    'after', 'above', 'below', 'between', 'under', 'again', 'further', 'then',
-    'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'both',
-    'each', 'few', 'more', 'most', 'other', 'some', 'such', 'only', 'own',
-    'same', 'than', 'too', 'very', 'just', 'but', 'what', 'get', 'got', 'help',
-    'want', 'need', 'know', 'like', 'kaise', 'kya', 'hai', 'hain', 'mujhe', 
-    'please', 'bhai', 'yaar', 'bro', 'plz', 'pls'
+    'the','is','at','which','on','a','an','as','are','was','were',
+    'been','be','have','has','had','do','does','did','will','would',
+    'should','could','may','might','must','can','to','of','in','for',
+    'with','from','by','about','into','through','during','before',
+    'after','above','below','between','under','again','further','then',
+    'once','here','there','when','where','why','how','all','both',
+    'each','few','more','most','other','some','such','only','own',
+    'same','than','too','very','just','but','what','get','got','help',
+    'want','need','know','like','kaise','kya','hai','hain','mujhe',
+    'bhai','yaar','bro','plz','pls',
   ]);
-  
-  const words = text.toLowerCase()
-    .replace(/[^\w\s]/g, ' ')
-    .split(/\s+/)
-    .filter(w => w.length > 2 && !stopwords.has(w));
-  
-  return [...new Set(words)].slice(0, 25);
+  return [...new Set(
+    text.toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 2 && !stopwords.has(w))
+  )].slice(0, 25);
 }
 
 function isRecentlyActive(lastActive, days = 14) {
@@ -263,10 +246,13 @@ function isRecentlyActive(lastActive, days = 14) {
   return new Date(lastActive) > cutoff;
 }
 
+// ─────────────────────────────────────────────
+//  COMPANY CACHE LOADER
+// ─────────────────────────────────────────────
 async function getAllTargetCompanies() {
   try {
     const now = Date.now();
-    if (COMPANY_CACHE && (now - COMPANY_CACHE_TIME) < CACHE_TTL) {
+    if (COMPANY_CACHE && (now - COMPANY_CACHE_TIME) < COMPANY_TTL) {
       return COMPANY_CACHE;
     }
 
@@ -275,10 +261,10 @@ async function getAllTargetCompanies() {
       Array.isArray(m.topCompanies) ? m.topCompanies.filter(c => typeof c === 'string') : []
     );
 
-    COMPANY_CACHE = [...new Set(allCompanies.map(c => normalizeCompany(c)))].filter(Boolean);
+    COMPANY_CACHE      = [...new Set(allCompanies.map(normalizeCompany))].filter(Boolean);
     COMPANY_CACHE_TIME = now;
-    
-    // ✅ FIX #1: Build lookup map for O(1) detection
+
+    // Rebuild O(1) lookup map
     COMPANY_LOOKUP.clear();
     for (const c of COMPANY_CACHE) {
       const aliases = COMPANY_ALIASES[c] || [c];
@@ -286,7 +272,8 @@ async function getAllTargetCompanies() {
         COMPANY_LOOKUP.set(a.toLowerCase().replace(/[^a-z0-9]/g, ''), c);
       });
     }
-    
+
+    dlog(`✅ Company cache rebuilt (${COMPANY_CACHE.length} companies)`);
     return COMPANY_CACHE;
   } catch (err) {
     console.error('getAllTargetCompanies error:', err);
@@ -294,97 +281,134 @@ async function getAllTargetCompanies() {
   }
 }
 
-// 🔥 MAIN ENGINE CLASS
+// ─────────────────────────────────────────────
+//  MENTOR LIST CACHE LOADER  (🔴 FIX #4)
+// ─────────────────────────────────────────────
+async function getActiveMentors() {
+  try {
+    const now = Date.now();
+    if (MENTOR_CACHE && (now - MENTOR_CACHE_TIME) < MENTOR_TTL) {
+      dlog(`💾 Mentor cache hit (${MENTOR_CACHE.length} mentors)`);
+      return MENTOR_CACHE;
+    }
 
+    const mentors = await User.find({
+      role: 'mentor',
+      $and: [
+        {
+          $or: [
+            { activeQuestions: { $exists: false } },
+            { activeQuestions: null },
+            { activeQuestions: { $lt: CONFIG.MAX_LOAD + 2 } },
+          ],
+        },
+        {
+          $or: [
+            { lastActive: { $exists: false } },
+            { lastActive: null },
+            { lastActive: { $gte: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000) } },
+          ],
+        },
+      ],
+    })
+      .select(
+        'username email education primaryDomain topCompanies milestones specialTags ' +
+        'expertise bio activeQuestions rating responseRate lastActive successfulMatches companyDomain'
+      )
+      .lean();
+
+    MENTOR_CACHE      = mentors;
+    MENTOR_CACHE_TIME = now;
+    dlog(`✅ Mentor cache rebuilt (${mentors.length} mentors)`);
+    return mentors;
+  } catch (err) {
+    console.error('getActiveMentors error:', err);
+    return [];
+  }
+}
+
+/** Invalidate mentor cache after any write that changes load/availability */
+function invalidateMentorCache() {
+  MENTOR_CACHE      = null;
+  MENTOR_CACHE_TIME = 0;
+}
+
+// ─────────────────────────────────────────────
+//  SLEEP HELPER  (for retry backoff)
+// ─────────────────────────────────────────────
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// ─────────────────────────────────────────────
+//  MAIN ENGINE CLASS
+// ─────────────────────────────────────────────
 class AtyantEngine {
 
   /* =============================================
-      🧠 DEEP QUERY ANALYSIS (Vector-Optimized)
+      🧠 DEEP QUERY ANALYSIS
      ============================================= */
   async detectQueryDetails(text) {
     const t = text.toLowerCase();
-    
-    // 1. Intent Detection with Confidence
-    let intent = null;
-    let confidence = 0;
-    
+
+    // 1. Intent detection
     const internshipPatterns = [
-      'internship', 'intern', 'summer internship', 'winter internship', 
-      'intern offer', 'internship offer', 'intern prep'
+      'internship','intern','summer internship','winter internship',
+      'intern offer','internship offer','intern prep',
     ];
     const placementPatterns = [
-      'placement', 'job', 'full time', 'full-time', 'ft role', 'ft offer',
-      'job offer', 'campus placement', 'recruitment'
+      'placement','job','full time','full-time','ft role','ft offer',
+      'job offer','campus placement','recruitment',
     ];
-    
+
     const internMatches = internshipPatterns.filter(p => t.includes(p)).length;
-    const placeMatches = placementPatterns.filter(p => t.includes(p)).length;
-    
+    const placeMatches  = placementPatterns.filter(p => t.includes(p)).length;
+
+    let intent, confidence;
     if (internMatches > placeMatches && internMatches > 0) {
-      intent = 'internship';
-      confidence = Math.min(internMatches / internshipPatterns.length, 1);
+      intent = 'internship'; confidence = Math.min(internMatches / internshipPatterns.length, 1);
     } else if (placeMatches > 0) {
-      intent = 'placement';
-      confidence = Math.min(placeMatches / placementPatterns.length, 1);
+      intent = 'placement'; confidence = Math.min(placeMatches / placementPatterns.length, 1);
     } else {
-      intent = 'general';
-      confidence = 0.3;
+      intent = 'general'; confidence = 0.3;
     }
 
-    // 2. Company Detection - ✅ FIX #1 (REAL O(1)): Tokenize & direct lookup
-    await getAllTargetCompanies(); // Warm cache + build lookup
+    // 2. Company detection — cache must already be warm
     const mentionedCompanies = [];
-    const relatedCompanies = [];
-    
-    const tClean = t.replace(/[^a-z0-9\s]/g, '');
-    const tokens = new Set(tClean.split(/\s+/));
-    
-    // True O(1): Direct map lookup for each token
-    for (const token of tokens) {
+    const relatedCompanies   = [];
+
+    const tClean  = t.replace(/[^a-z0-9\s]/g, '');
+    const tokens  = tClean.split(/\s+/);
+    const tokenSet = new Set(tokens);
+
+    // Unigram lookup  O(n)
+    for (const token of tokenSet) {
       const clean = token.replace(/[^a-z0-9]/g, '');
-      
       if (COMPANY_LOOKUP.has(clean)) {
         const key = COMPANY_LOOKUP.get(clean);
-        
-        if (!mentionedCompanies.includes(key)) {
-          mentionedCompanies.push(key);
+        if (!mentionedCompanies.includes(key)) mentionedCompanies.push(key);
+      }
+    }
+
+    // 🔴 FIX #6: bigram + trigram lookup for "jp morgan", "j.p. morgan", "morgan stanley" etc.
+    for (let i = 0; i < tokens.length - 1; i++) {
+      const bigram  = (tokens[i] + tokens[i + 1]).replace(/[^a-z0-9]/g, '');
+      const trigram = i < tokens.length - 2
+        ? (tokens[i] + tokens[i + 1] + tokens[i + 2]).replace(/[^a-z0-9]/g, '')
+        : null;
+
+      for (const gram of [bigram, trigram].filter(Boolean)) {
+        if (COMPANY_LOOKUP.has(gram)) {
+          const key = COMPANY_LOOKUP.get(gram);
+          if (!mentionedCompanies.includes(key) && !relatedCompanies.includes(key)) {
+            relatedCompanies.push(key);
+          }
         }
       }
     }
-    
-    // Multi-word partial match (e.g., "jp morgan")
-    const bigrams = [];
-    const tokenArr = [...tokens];
-    for (let i = 0; i < tokenArr.length - 1; i++) {
-      bigrams.push(tokenArr[i] + tokenArr[i+1]);
-    }
-    
-    for (const bigram of bigrams) {
-      if (COMPANY_LOOKUP.has(bigram)) {
-        const key = COMPANY_LOOKUP.get(bigram);
-        if (!mentionedCompanies.includes(key) && !relatedCompanies.includes(key)) {
-          relatedCompanies.push(key);
-        }
-      }
-    }
 
-    // 3. Special Tags Detection
-    const foundTags = SPECIAL_TAGS.filter(tag => t.includes(tag));
-
-    // 4. Tech Skills Detection
-    const mentionedTech = TECH_KEYWORDS.filter(tech => {
-      // Handle multi-word tech (e.g., "machine learning")
-      if (tech.includes(' ')) {
-        return t.includes(tech);
-      }
-      // Handle variations (e.g., "c++" vs "cpp")
-      return t.includes(tech);
-    });
-
-    // 5. Context Signals
-    const isUrgent = /urgent|asap|immediate|quickly|fast/.test(t);
-    const isDetailOriented = text.length > 200; // Longer questions = more serious
-    const hasSpecifics = mentionedCompanies.length > 0 || mentionedTech.length > 2;
+    const foundTags    = SPECIAL_TAGS.filter(tag => t.includes(tag));
+    const mentionedTech = TECH_KEYWORDS.filter(tech =>
+      tech.includes(' ') ? t.includes(tech) : t.includes(tech)
+    );
 
     return {
       intent,
@@ -393,508 +417,282 @@ class AtyantEngine {
       relatedCompanies,
       foundTags,
       mentionedTech,
-      isUrgent,
-      isDetailOriented,
-      hasSpecifics,
-      questionLength: text.length
+      isUrgent       : /urgent|asap|immediate|quickly|fast/.test(t),
+      isDetailOriented: text.length > 200,
+      hasSpecifics   : mentionedCompanies.length > 0 || mentionedTech.length > 2,
+      questionLength : text.length,
     };
   }
 
   /* =============================================
-      🔥 PATH A: VECTOR-BASED SEMANTIC MATCHING
+      🔥 PATH A: VECTOR SEMANTIC MATCHING
      ============================================= */
   async findBestSemanticMatch(studentId, vector, questionText) {
     try {
-      // 🔥 CHECK VECTOR CACHE (10min TTL for repeated questions)
-      // ✅ FIX #2: Hash-based cache key to prevent collisions
+      // Cache check
       const cacheKey = crypto.createHash('sha1').update(questionText).digest('hex');
-      
-      // ✅ LRU auto-handles TTL and eviction
       if (VECTOR_CACHE.has(cacheKey)) {
-        dlog(`💾 CACHE HIT: Returning cached result`);
+        dlog(`💾 VECTOR CACHE HIT`);
         return VECTOR_CACHE.get(cacheKey);
       }
 
-      const student = await User.findById(studentId).select('education').lean();
-      const sEdu = student?.education?.[0] || {};
+      const student           = await User.findById(studentId).select('education').lean();
+      const sEdu              = student?.education?.[0] || {};
       const studentCollegeType = getCollegeType(sEdu.institutionName);
 
       const queryDetails = await this.detectQueryDetails(questionText);
-      const { 
-        intent, confidence, mentionedCompanies, relatedCompanies, 
-        foundTags, mentionedTech, isUrgent, hasSpecifics 
-      } = queryDetails;
-      
-      dlog(`\n🔎 ===== VECTOR SEMANTIC SEARCH (Atlas) =====`);
-      dlog(`Intent: ${intent} | Confidence: ${(confidence*100).toFixed(0)}%`);
-      dlog(`Companies (Exact): [${mentionedCompanies.join(', ') || 'None'}]`);
-      dlog(`Companies (Related): [${relatedCompanies.join(', ') || 'None'}]`);
-      dlog(`Tags: [${foundTags.slice(0, 5).join(', ') || 'None'}]`);
-      dlog(`Tech: [${mentionedTech.slice(0, 5).join(', ') || 'None'}]`);
-      dlog(`Signals: ${isUrgent ? '⚡Urgent' : ''} ${hasSpecifics ? '🎯Specific' : '📝General'}`);
+      const { intent, confidence, mentionedCompanies, relatedCompanies,
+              foundTags, mentionedTech, isUrgent, hasSpecifics } = queryDetails;
 
-      // 🔥 ATLAS VECTOR SEARCH (✅ FIX #4: Dynamic candidates based on query type)
-      const dynamicCandidates = isUrgent ? 120 : (hasSpecifics ? 80 : 50);
-      
-      // First check if we have any AnswerCards with embeddings
-      const totalAnswerCards = await AnswerCard.countDocuments();
-      const answerCardsWithEmbeddings = await AnswerCard.countDocuments({ 
-        embedding: { $exists: true, $ne: null, $not: { $size: 0 } } 
+      dlog(`\n🔎 ===== VECTOR SEMANTIC SEARCH =====`);
+      dlog(`Intent: ${intent} (${(confidence*100).toFixed(0)}%) | Companies: [${mentionedCompanies}]`);
+      dlog(`Tags: [${foundTags.slice(0,5)}] | Tech: [${mentionedTech.slice(0,5)}]`);
+
+      // Check if any AnswerCards have embeddings
+      const answerCardsWithEmbeddings = await AnswerCard.countDocuments({
+        embedding: { $exists: true, $ne: null, $not: { $size: 0 } },
       });
-      
-      dlog(`📊 Database Stats:`);
-      dlog(`   Total AnswerCards: ${totalAnswerCards}`);
-      dlog(`   AnswerCards with embeddings: ${answerCardsWithEmbeddings}`);
-      
       if (answerCardsWithEmbeddings === 0) {
-        dlog(`❌ NO ANSWER CARDS WITH EMBEDDINGS - Vector search skipped`);
-        dlog(`   To enable instant answers: Mentors need to answer questions first`);
+        dlog(`❌ No AnswerCards with embeddings — vector search skipped`);
         return null;
       }
-      
+
+      const dynamicCandidates = isUrgent ? 120 : hasSpecifics ? 80 : 50;
+
       const candidates = await AnswerCard.aggregate([
         {
-          "$vectorSearch": {
-            "index": "vector_index",
-            "path": "embedding",
-            "queryVector": vector,
-            "numCandidates": dynamicCandidates,  // ✅ 30-40% cost savings
-            "limit": CONFIG.VECTOR_LIMIT,
-            "filter": {}
-          }
+          $vectorSearch: {
+            index       : 'vector_index',
+            path        : 'embedding',
+            queryVector : vector,
+            numCandidates: dynamicCandidates,
+            limit       : CONFIG.VECTOR_LIMIT,
+            filter      : {},
+          },
         },
         {
-          "$project": {
-            "answerContent": 1,
-            "mentorId": 1,
-            "questionId": 1,
-            "createdAt": 1,
-            "score": { "$meta": "vectorSearchScore" }
-          }
-        }
+          $project: {
+            answerContent: 1,
+            mentorId     : 1,
+            questionId   : 1,
+            createdAt    : 1,
+            score        : { $meta: 'vectorSearchScore' },
+          },
+        },
       ]);
 
-      dlog(`Atlas returned ${candidates.length} vector matches`);
+      dlog(`Atlas returned ${candidates.length} candidates`);
+      if (candidates.length === 0) return null;
 
-      if (candidates.length === 0) {
-        dlog(`⚠️ NO VECTOR MATCHES from Atlas`);
-        return null;
-      }
-
-      // 🔥 FETCH MENTOR DATA IN BULK (Performance optimization)
+      // Bulk-fetch mentor data
       const mentorIds = [...new Set(candidates.map(c => c.mentorId.toString()))];
-      const mentors = await User.find({ _id: { $in: mentorIds }, role: 'mentor' })
-        .select('username avatar bio education primaryDomain topCompanies milestones specialTags expertise rating responseRate lastActive successfulMatches companyDomain')
+      const mentors   = await User.find({ _id: { $in: mentorIds }, role: 'mentor' })
+        .select('username avatar bio education primaryDomain topCompanies milestones ' +
+                'specialTags expertise rating responseRate lastActive successfulMatches companyDomain')
         .lean();
-      
       const mentorMap = new Map(mentors.map(m => [m._id.toString(), m]));
 
-      // 🔥 HYBRID SCORING (Vector + Metadata)
+      // Hybrid scoring
+      const keywords = extractSmartKeywords(questionText);
       const scoredMatches = [];
+      const W = CONFIG.WEIGHTS;
 
-      for (let match of candidates) {
-        if (match.score < CONFIG.SEMANTIC_FLOOR) {
-          dlog(`⏭️ Skipping match (score ${(match.score*100).toFixed(1)}% < ${CONFIG.SEMANTIC_FLOOR*100}% floor)`);
-          continue;
-        }
-        
+      for (const match of candidates) {
+        if (match.score < CONFIG.SEMANTIC_FLOOR) continue;
         const mentor = mentorMap.get(match.mentorId.toString());
         if (!mentor) continue;
 
-        const baseScore = match.score; // vector score
         let totalBonus = 0;
         const bonusLogs = [];
-        const W = CONFIG.WEIGHTS;
 
-        // 🔥 1. COMPANY MATCHING (Strongest signal)
-        const mentorCompanies = (mentor.topCompanies || []).map(c => normalizeCompany(c));
-        const exactCompanyMatch = mentorCompanies.filter(mc => mentionedCompanies.includes(mc)).length;
-        const relatedCompanyMatch = mentorCompanies.filter(mc => relatedCompanies.includes(mc)).length;
+        const mentorCompanies  = (mentor.topCompanies || []).map(normalizeCompany);
+        const exactCo  = mentorCompanies.filter(mc => mentionedCompanies.includes(mc)).length;
+        const relatedCo = mentorCompanies.filter(mc => relatedCompanies.includes(mc)).length;
 
-        if (exactCompanyMatch > 0) {
-          const bonus = W.EXACT_COMPANY * Math.min(exactCompanyMatch, 3);
-          totalBonus += bonus;
-          bonusLogs.push(`ExactCo(+${(bonus*100).toFixed(1)}%,${exactCompanyMatch}x)`);
-        } else if (relatedCompanyMatch > 0) {
-          const bonus = W.RELATED_COMPANY * Math.min(relatedCompanyMatch, 2);
-          totalBonus += bonus;
-          bonusLogs.push(`RelatedCo(+${(bonus*100).toFixed(1)}%,${relatedCompanyMatch}x)`);
-        }
+        if (exactCo > 0)  { const b = W.EXACT_COMPANY * Math.min(exactCo, 3);   totalBonus += b; bonusLogs.push(`ExactCo(+${(b*100).toFixed(1)}%)`); }
+        else if (relatedCo > 0) { const b = W.RELATED_COMPANY * Math.min(relatedCo, 2); totalBonus += b; bonusLogs.push(`RelatedCo(+${(b*100).toFixed(1)}%)`); }
 
-        // 🔥 2. INTENT/DOMAIN MATCHING (Confidence-weighted)
         if (mentor.primaryDomain === intent) {
-          const bonus = W.EXACT_DOMAIN * confidence;
-          totalBonus += bonus;
-          bonusLogs.push(`Domain(+${(bonus*100).toFixed(1)}%)`);
+          const b = W.EXACT_DOMAIN * confidence; totalBonus += b; bonusLogs.push(`Domain(+${(b*100).toFixed(1)}%)`);
         } else if (mentor.primaryDomain === 'both') {
-          const bonus = W.PARTIAL_DOMAIN * confidence;
-          totalBonus += bonus;
-          bonusLogs.push(`BothDomain(+${(bonus*100).toFixed(1)}%)`);
+          const b = W.PARTIAL_DOMAIN * confidence; totalBonus += b; bonusLogs.push(`BothDomain(+${(b*100).toFixed(1)}%)`);
         }
 
-        // 🔥 3. SPECIAL TAGS (Career context)
-        const tagMatches = (mentor.specialTags || []).filter(tag => foundTags.some(ft => tag.toLowerCase().includes(ft))).length;
-        if (tagMatches > 0) {
-          const bonus = W.SPECIAL_TAG * Math.min(tagMatches, 4);
-          totalBonus += bonus;
-          bonusLogs.push(`Tags(+${(bonus*100).toFixed(1)}%,${tagMatches}x)`);
-        }
+        const tagCount = (mentor.specialTags || []).filter(tag => foundTags.some(ft => tag.toLowerCase().includes(ft))).length;
+        if (tagCount > 0) { const b = W.SPECIAL_TAG * Math.min(tagCount, 4); totalBonus += b; bonusLogs.push(`Tags(+${(b*100).toFixed(1)}%,${tagCount}x)`); }
 
-        // 🔥 4. MILESTONES
-        const milestoneMatches = (mentor.milestones || []).filter(m => foundTags.some(ft => m.toLowerCase().includes(ft))).length;
-        if (milestoneMatches > 0) {
-          const bonus = W.MILESTONE * Math.min(milestoneMatches, 3);
-          totalBonus += bonus;
-          bonusLogs.push(`Milestones(+${(bonus*100).toFixed(1)}%,${milestoneMatches}x)`);
-        }
+        const milestoneCount = (mentor.milestones || []).filter(m => foundTags.some(ft => m.toLowerCase().includes(ft))).length;
+        if (milestoneCount > 0) { const b = W.MILESTONE * Math.min(milestoneCount, 3); totalBonus += b; bonusLogs.push(`Milestones(+${(b*100).toFixed(1)}%)`); }
 
-        // 🔥 5. EXPERTISE (Tech skills)
-        const expertiseMatches = (mentor.expertise || []).filter(exp => mentionedTech.some(tech => exp.toLowerCase().includes(tech))).length;
-        if (expertiseMatches > 0) {
-          const bonus = W.EXPERTISE * Math.min(expertiseMatches, 5);
-          totalBonus += bonus;
-          bonusLogs.push(`Tech(+${(bonus*100).toFixed(1)}%,${expertiseMatches}x)`);
-        }
+        const expertiseMatches = (mentor.expertise || []).filter(exp => mentionedTech.some(t => exp.toLowerCase().includes(t))).length;
+        if (expertiseMatches > 0) { const b = W.EXPERTISE * Math.min(expertiseMatches, 5); totalBonus += b; bonusLogs.push(`Tech(+${(b*100).toFixed(1)}%,${expertiseMatches}x)`); }
 
-        // 🔥 6. BIO KEYWORD DENSITY
-        const keywords = extractSmartKeywords(questionText);
         const bioMatches = keywords.filter(kw => mentor.bio?.toLowerCase().includes(kw)).length;
-        if (bioMatches >= 5) {
-          const bonus = W.BIO_DENSITY;
-          totalBonus += bonus;
-          bonusLogs.push(`Bio(+${(bonus*100).toFixed(1)}%,${bioMatches}kw)`);
-        }
+        if (bioMatches >= 5) { totalBonus += W.BIO_DENSITY; bonusLogs.push(`Bio(+${(W.BIO_DENSITY*100).toFixed(1)}%)`); }
 
-        // 🔥 7. COLLEGE TYPE AFFINITY
         const mEdu = mentor.education?.[0] || {};
         const mentorCollegeType = getCollegeType(mEdu.institutionName);
         if (studentCollegeType === mentorCollegeType && studentCollegeType !== 'unknown') {
-          totalBonus += W.COLLEGE_TYPE;
-          bonusLogs.push(`${studentCollegeType.toUpperCase()}(+${(W.COLLEGE_TYPE*100).toFixed(1)}%)`);
+          totalBonus += W.COLLEGE_TYPE; bonusLogs.push(`${studentCollegeType.toUpperCase()}(+${(W.COLLEGE_TYPE*100).toFixed(1)}%)`);
         }
-
-        // 🔥 8. SAME BRANCH
-        if (sEdu.field && mEdu.field && 
-            sEdu.field.toLowerCase() === mEdu.field.toLowerCase()) {
-          totalBonus += W.SAME_BRANCH;
-          bonusLogs.push(`Branch(+${(W.SAME_BRANCH*100).toFixed(1)}%)`);
+        if (sEdu.field && mEdu.field && sEdu.field.toLowerCase() === mEdu.field.toLowerCase()) {
+          totalBonus += W.SAME_BRANCH; bonusLogs.push(`Branch(+${(W.SAME_BRANCH*100).toFixed(1)}%)`);
         }
+        if (mentor.rating >= 4.5)       { totalBonus += W.HIGH_RATING;    bonusLogs.push(`★${mentor.rating}(+${(W.HIGH_RATING*100).toFixed(1)}%)`); }
+        if (mentor.responseRate >= 85)   { totalBonus += W.HIGH_RESPONSE;  bonusLogs.push(`Response(+${(W.HIGH_RESPONSE*100).toFixed(1)}%)`); }
+        if (isRecentlyActive(mentor.lastActive)) { totalBonus += W.RECENT_ACTIVE; bonusLogs.push(`Active(+${(W.RECENT_ACTIVE*100).toFixed(1)}%)`); }
+        if ((mentor.successfulMatches || 0) < 5) { totalBonus += 0.03; bonusLogs.push(`ColdStart(+3%)`); }
 
-        // 🔥 9. MENTOR QUALITY SIGNALS
-        if (mentor.rating >= 4.5) {
-          totalBonus += W.HIGH_RATING;
-          bonusLogs.push(`★${mentor.rating.toFixed(1)}(+${(W.HIGH_RATING*100).toFixed(1)}%)`);
-        }
+        const cappedBonus  = Math.min(totalBonus, 0.35);
+        const finalScore   = Math.min(match.score * (1 + cappedBonus), 1.0);
 
-        if (mentor.responseRate >= 85) {
-          totalBonus += W.HIGH_RESPONSE;
-          bonusLogs.push(`Response${mentor.responseRate}%(+${(W.HIGH_RESPONSE*100).toFixed(1)}%)`);
-        }
-
-        if (isRecentlyActive(mentor.lastActive)) {
-          totalBonus += W.RECENT_ACTIVE;
-          bonusLogs.push(`Active(+${(W.RECENT_ACTIVE*100).toFixed(1)}%)`);
-        }
-
-        // Cold-start boost for newer mentors
-        if ((mentor.successfulMatches || 0) < 5) {
-          const cold = 0.03; // +3%
-          totalBonus += cold;
-          bonusLogs.push(`ColdStart(+${(cold*100).toFixed(1)}%)`);
-        }
-
-        // FINAL: Cap bonus at 35% to prevent weak mentor inflation, then multiply and clamp
-        const cappedBonus = Math.min(totalBonus, 0.35); // max 35%
-        let finalScore = Math.min(baseScore * (1 + cappedBonus), 1.0);
-        
-        if (cappedBonus < totalBonus) {
-          dlog(`⚠️ Bonus capped: ${(totalBonus*100).toFixed(1)}% → ${(cappedBonus*100).toFixed(1)}%`);
-        }
-
-        // 🔥 Store scored match
         scoredMatches.push({
           ...match,
           finalScore,
-          baseScore: match.score,
-          bonusScore: totalBonus,
+          baseScore  : match.score,
+          bonusScore : totalBonus,
           mentorProfile: {
-            _id: mentor._id,
-            username: mentor.username,
-            avatar: mentor.avatar,
-            bio: mentor.bio,
-            education: mEdu,
-            rating: mentor.rating,
-            responseRate: mentor.responseRate,
-            topCompanies: mentor.topCompanies
+            _id          : mentor._id,
+            username     : mentor.username,
+            avatar       : mentor.avatar,
+            bio          : mentor.bio,
+            education    : mEdu,
+            rating       : mentor.rating,
+            responseRate : mentor.responseRate,
+            topCompanies : mentor.topCompanies,
           },
-          breakdown: bonusLogs.join(' | ')
+          breakdown: bonusLogs.join(' | '),
         });
       }
 
-      // 🔥 SORT BY HYBRID SCORE
       scoredMatches.sort((a, b) => b.finalScore - a.finalScore);
 
-      // 🔥 TOP 10 DETAILED LOGGING (dev only)
-      dlog(`\n--- TOP 10 VECTOR MATCHES (Hybrid Scored) ---`);
-      scoredMatches.slice(0, 10).forEach((m, i) => {
-        dlog(
-          `#${i + 1}: ${m.mentorProfile.username}\n` +
-          `   Final: ${(m.finalScore * 100).toFixed(2)}% | ` +
-          `Vector: ${(m.baseScore * 100).toFixed(1)}% | ` +
-          `Bonus: +${(m.bonusScore * 100).toFixed(1)}%\n` +
-          `   └─ ${m.breakdown || 'Pure semantic match'}`
-        );
+      dlog(`\n--- TOP 5 VECTOR MATCHES ---`);
+      scoredMatches.slice(0, 5).forEach((m, i) => {
+        dlog(`#${i+1}: ${m.mentorProfile.username} | ${(m.finalScore*100).toFixed(2)}% (base ${(m.baseScore*100).toFixed(1)}% +${(m.bonusScore*100).toFixed(1)}%)\n   └─ ${m.breakdown || 'pure semantic'}`);
       });
-      dlog(`---------------------------------------------\n`);
 
-      // 🔥 QUALITY GATES
-      const best = scoredMatches[0];
+      const best   = scoredMatches[0];
       const second = scoredMatches[1];
 
-      if (!best) {
-        dlog(`❌ NO QUALIFYING MATCHES after scoring`);
+      if (!best || best.finalScore < CONFIG.INSTANT_THRESHOLD) {
+        dlog(`⚠️ Below threshold (${((best?.finalScore||0)*100).toFixed(2)}% < ${CONFIG.INSTANT_THRESHOLD*100}%)`);
         return null;
       }
 
-      // Gate 1: Minimum threshold
-      if (best.finalScore < CONFIG.INSTANT_THRESHOLD) {
-        dlog(
-          `⚠️ BELOW THRESHOLD: Best ${(best.finalScore*100).toFixed(2)}% < ` +
-          `${(CONFIG.INSTANT_THRESHOLD*100)}% required`
-        );
-        return null;
-      }
-
-      // Gate 2: Clear winner check (avoid ambiguity)
       if (second) {
         const gap = best.finalScore - second.finalScore;
-        
-        // If top score is excellent (>92%), accept even if close
         if (best.finalScore >= CONFIG.TOP_MATCH_CONFIDENCE) {
-          dlog(
-            `✅ EXCELLENT MATCH: ${best.mentorProfile.username} ` +
-            `(${(best.finalScore*100).toFixed(2)}% ≥ ${CONFIG.TOP_MATCH_CONFIDENCE*100}%)`
-          );
-          return best;
-        }
-        
-        // Otherwise require minimum gap
-        if (gap < CONFIG.AMBIGUITY_THRESHOLD) {
-          dlog(
-            `⚠️ AMBIGUOUS: #1 vs #2 gap only ${(gap*100).toFixed(2)}%\n` +
-            `   #1: ${best.mentorProfile.username} (${(best.finalScore*100).toFixed(2)}%)\n` +
-            `   #2: ${second.mentorProfile.username} (${(second.finalScore*100).toFixed(2)}%)\n` +
-            `   → Routing to live mentor for safety`
-          );
+          dlog(`✅ EXCELLENT MATCH: ${best.mentorProfile.username} (${(best.finalScore*100).toFixed(2)}%)`);
+        } else if (gap < CONFIG.AMBIGUITY_THRESHOLD) {
+          dlog(`⚠️ AMBIGUOUS — gap ${(gap*100).toFixed(2)}% < ${CONFIG.AMBIGUITY_THRESHOLD*100}% — routing live`);
           return null;
         }
       }
-      // ✅ CLEAR WINNER
-      dlog(
-        `✅ INSTANT MATCH CONFIRMED: ${best.mentorProfile.username}\n` +
-        `   Score: ${(best.finalScore*100).toFixed(2)}% ` +
-        `(Gap: ${second ? ((best.finalScore - second.finalScore) * 100).toFixed(2) + '%' : 'Unique'})`
-      );
-      
-      // 🔥 CACHE THE RESULT (✅ LRU auto-manages TTL and size)
+
+      dlog(`✅ INSTANT MATCH: ${best.mentorProfile.username} ${(best.finalScore*100).toFixed(2)}%`);
       VECTOR_CACHE.set(cacheKey, best);
-      
       return best;
 
     } catch (error) {
-      console.error("🔥 Vector Search Error:", error);
+      console.error('🔥 Vector Search Error:', error);
       return null;
     }
   }
 
   /* =============================================
-      🔥 PATH B: LIVE MENTOR ROUTING (Fallback)
+      🔥 PATH B: LIVE MENTOR ROUTING
      ============================================= */
   async findBestMentor(studentId, keywords, questionCategory = null) {
     try {
       const questionText = keywords.join(' ');
-      const student = await User.findById(studentId).select('education').lean();
-      const sEdu = student?.education?.[0] || {};
+      const student      = await User.findById(studentId).select('education').lean();
+      const sEdu         = student?.education?.[0] || {};
       const studentCollegeType = getCollegeType(sEdu.institutionName);
 
       const queryDetails = await this.detectQueryDetails(questionText);
-      const { 
-intent, confidence, mentionedCompanies, relatedCompanies, 
-        foundTags, mentionedTech 
-      } = queryDetails;
-
-      dlog(`Question Category/Domain: ${questionCategory || 'Not specified'}`);
+      const { intent, confidence, mentionedCompanies, relatedCompanies, foundTags, mentionedTech } = queryDetails;
 
       dlog(`\n🤝 ===== LIVE MENTOR ROUTING =====`);
-      dlog(`Analyzing all available mentors...`);
 
-      // 🔥 FETCH MENTORS (✅ FIXED: Handle missing activeQuestions & lastActive fields)
-      const mentors = await User.find({
-        role: 'mentor',
-        $and: [
-          {
-            $or: [
-              { activeQuestions: { $exists: false } },
-              { activeQuestions: null },
-              { activeQuestions: { $lt: CONFIG.MAX_LOAD + 2 } }
-            ]
-          },
-          {
-            $or: [
-              { lastActive: { $exists: false } },
-              { lastActive: null },
-              { lastActive: { $gte: new Date(Date.now() - 90*24*60*60*1000) } }
-            ]
-          }
-        ]
-      })
-        .select(
-          'username education primaryDomain topCompanies milestones specialTags ' +
-          'expertise bio activeQuestions rating responseRate lastActive successfulMatches companyDomain'
-        )
-        .lean();
-      
-      dlog(`Found ${mentors.length} total mentors`);
+      // 🔴 FIX #4: Use cached mentor list instead of fresh DB scan
+      const mentors = await getActiveMentors();
+      dlog(`Scoring ${mentors.length} mentors...`);
 
-      // 🔥 SCORE EACH MENTOR
+      const LW = CONFIG.LIVE_WEIGHTS;
+
       const scored = mentors.map(mentor => {
         let points = 0;
-        let breakdown = [];
-        const LW = CONFIG.LIVE_WEIGHTS;
+        const breakdown = [];
 
-        // 1. COMPANY DOMAIN MATCHING (Tech, Data Analytics, etc.)
-        if (questionCategory && mentor.companyDomain) {
-          if (mentor.companyDomain === questionCategory) {
-            const pts = 800; // High priority for exact domain match
-            points += pts;
-            breakdown.push(`ExactDomain(+${pts})`);
-          }
+        // Company domain match
+        if (questionCategory && mentor.companyDomain === questionCategory) {
+          points += 800; breakdown.push(`ExactDomain(+800)`);
         }
 
-        // 2. COMPANY MATCHING
-        const mentorCompanies = (mentor.topCompanies || []).map(c => normalizeCompany(c));
-        const exactCount = mentorCompanies.filter(mc => 
-          mentionedCompanies.includes(mc)
-        ).length;
-        const relatedCount = mentorCompanies.filter(mc => 
-          relatedCompanies.includes(mc)
-        ).length;
-        
-        if (exactCount > 0) {
-          const pts = LW.EXACT_COMPANY * exactCount;
-          points += pts;
-          breakdown.push(`ExactCo(+${pts},${exactCount}x)`);
-        } else if (relatedCount > 0) {
-          const pts = LW.RELATED_COMPANY * relatedCount;
-          points += pts;
-          breakdown.push(`RelatedCo(+${pts},${relatedCount}x)`);
-        }
+        // Company matching
+        const mentorCompanies = (mentor.topCompanies || []).map(normalizeCompany);
+        const exactCount      = mentorCompanies.filter(mc => mentionedCompanies.includes(mc)).length;
+        const relatedCount    = mentorCompanies.filter(mc => relatedCompanies.includes(mc)).length;
 
-        // 3. SPECIAL TAGS
-        const tagCount = (mentor.specialTags || []).filter(tag => 
-          foundTags.some(ft => tag.toLowerCase().includes(ft))
-        ).length;
-        if (tagCount > 0) {
-          const pts = LW.SPECIAL_TAG * tagCount;
-          points += pts;
-          breakdown.push(`Tags(+${pts},${tagCount}x)`);
-        }
+        if (exactCount > 0)       { const p = LW.EXACT_COMPANY * exactCount;   points += p; breakdown.push(`ExactCo(+${p})`); }
+        else if (relatedCount > 0){ const p = LW.RELATED_COMPANY * relatedCount; points += p; breakdown.push(`RelatedCo(+${p})`); }
 
-        // 4. DOMAIN INTENT (placement/internship)
+        // Special tags
+        const tagCount = (mentor.specialTags || []).filter(tag => foundTags.some(ft => tag.toLowerCase().includes(ft))).length;
+        if (tagCount > 0) { const p = LW.SPECIAL_TAG * tagCount; points += p; breakdown.push(`Tags(+${p},${tagCount}x)`); }
+
+        // Domain intent
         if (intent && intent !== 'general') {
           if (mentor.primaryDomain === intent) {
-            const pts = Math.round(LW.EXACT_DOMAIN * confidence);
-            points += pts;
-            breakdown.push(`Domain(+${pts})`);
+            const p = Math.round(LW.EXACT_DOMAIN * confidence); points += p; breakdown.push(`Domain(+${p})`);
           } else if (mentor.primaryDomain === 'both') {
-            const pts = Math.round(LW.PARTIAL_DOMAIN * confidence);
-            points += pts;
-            breakdown.push(`BothDomain(+${pts})`);
+            const p = Math.round(LW.PARTIAL_DOMAIN * confidence); points += p; breakdown.push(`BothDomain(+${p})`);
           }
         }
 
-        // 5. MILESTONES
-        const milestoneCount = (mentor.milestones || []).filter(m => 
-          foundTags.some(ft => m.toLowerCase().includes(ft))
-        ).length;
-        if (milestoneCount > 0) {
-          const pts = LW.MILESTONE * milestoneCount;
-          points += pts;
-          breakdown.push(`Milestones(+${pts},${milestoneCount}x)`);
-        }
+        // Milestones
+        const milestoneCount = (mentor.milestones || []).filter(m => foundTags.some(ft => m.toLowerCase().includes(ft))).length;
+        if (milestoneCount > 0) { const p = LW.MILESTONE * milestoneCount; points += p; breakdown.push(`Milestones(+${p})`); }
 
-        // 6. EXPERTISE (Tech)
-        const expertiseExact = (mentor.expertise || []).filter(exp => 
-          mentionedTech.some(tech => exp.toLowerCase() === tech.toLowerCase())
-        ).length;
-        const expertisePartial = (mentor.expertise || []).filter(exp => 
-          mentionedTech.some(tech => exp.toLowerCase().includes(tech))
-        ).length - expertiseExact;
+        // Expertise
+        const expExact   = (mentor.expertise || []).filter(exp => mentionedTech.some(t => exp.toLowerCase() === t.toLowerCase())).length;
+        const expPartial = (mentor.expertise || []).filter(exp => mentionedTech.some(t => exp.toLowerCase().includes(t))).length - expExact;
+        if (expExact   > 0) { const p = LW.EXPERTISE_EXACT * expExact;     points += p; breakdown.push(`ExactTech(+${p})`); }
+        if (expPartial > 0) { const p = LW.EXPERTISE_PARTIAL * expPartial; points += p; breakdown.push(`PartialTech(+${p})`); }
 
-        if (expertiseExact > 0) {
-          const pts = LW.EXPERTISE_EXACT * expertiseExact;
-          points += pts;
-          breakdown.push(`ExactTech(+${pts},${expertiseExact}x)`);
-        }
-        if (expertisePartial > 0) {
-          const pts = LW.EXPERTISE_PARTIAL * expertisePartial;
-          points += pts;
-          breakdown.push(`PartialTech(+${pts},${expertisePartial}x)`);
-        }
+        // Bio keywords
+        const bioCount = keywords.filter(kw => mentor.bio?.toLowerCase().includes(kw)).length;
+        if (bioCount >= 3) { const p = LW.BIO_KEYWORD * bioCount; points += p; breakdown.push(`Bio(+${p})`); }
 
-        // 7. BIO KEYWORDS
-        const bioCount = keywords.filter(kw => 
-          mentor.bio?.toLowerCase().includes(kw)
-        ).length;
-        if (bioCount >= 3) {
-          const pts = LW.BIO_KEYWORD * bioCount;
-          points += pts;
-          breakdown.push(`Bio(+${pts},${bioCount}kw)`);
-        }
-
-        // 8. COLLEGE TYPE
+        // College type
         const mEdu = mentor.education?.[0] || {};
         const mentorCollegeType = getCollegeType(mEdu.institutionName);
         if (studentCollegeType === mentorCollegeType && studentCollegeType !== 'unknown') {
-          points += LW.COLLEGE_TYPE;
-          breakdown.push(`${studentCollegeType.toUpperCase()}(+${LW.COLLEGE_TYPE})`);
+          points += LW.COLLEGE_TYPE; breakdown.push(`${studentCollegeType.toUpperCase()}(+${LW.COLLEGE_TYPE})`);
         }
 
-        // 9. SAME BRANCH
-        if (sEdu.field && mEdu.field && 
-            sEdu.field.toLowerCase() === mEdu.field.toLowerCase()) {
-          points += LW.SAME_BRANCH;
-          breakdown.push(`Branch(+${LW.SAME_BRANCH})`);
+        // Same branch
+        if (sEdu.field && mEdu.field && sEdu.field.toLowerCase() === mEdu.field.toLowerCase()) {
+          points += LW.SAME_BRANCH; breakdown.push(`Branch(+${LW.SAME_BRANCH})`);
         }
 
-        // 10. QUALITY SIGNALS
-        if (mentor.rating >= 4.5) {
-          points += LW.HIGH_RATING;
-          breakdown.push(`★${mentor.rating.toFixed(1)}(+${LW.HIGH_RATING})`);
-        }
+        // Quality signals
+        if (mentor.rating >= 4.5)                  { points += LW.HIGH_RATING;   breakdown.push(`★${mentor.rating}(+${LW.HIGH_RATING})`); }
+        if (mentor.responseRate >= 85)              { points += LW.HIGH_RESPONSE; breakdown.push(`Response(+${LW.HIGH_RESPONSE})`); }
+        if (isRecentlyActive(mentor.lastActive))    { points += LW.RECENT_ACTIVE; breakdown.push(`Active(+${LW.RECENT_ACTIVE})`); }
 
-        if (mentor.responseRate >= 85) {
-          points += LW.HIGH_RESPONSE;
-          breakdown.push(`Response${mentor.responseRate}%(+${LW.HIGH_RESPONSE})`);
-        }
-
-        if (isRecentlyActive(mentor.lastActive)) {
-          points += LW.RECENT_ACTIVE;
-          breakdown.push(`Active(+${LW.RECENT_ACTIVE})`);
-        }
-
-        // 11. PROVEN TRACK RECORD
-        if (mentor.successfulMatches >= 10) {
+        // Proven track record
+        if ((mentor.successfulMatches || 0) >= 10) {
           const bonus = Math.min(Math.floor(mentor.successfulMatches / 10), 5) * LW.PROVEN_MENTOR;
-          points += bonus;
-          breakdown.push(`Proven(+${bonus},${mentor.successfulMatches}m)`);
+          points += bonus; breakdown.push(`Proven(+${bonus})`);
         }
 
-        // 12. LOAD PENALTY
+        // Load penalty
         const load = mentor.activeQuestions || 0;
         if (load >= CONFIG.MAX_LOAD) {
           const oldPoints = points;
-          points = Math.floor(points * 0.25); // 75% penalty
+          points = Math.floor(points * 0.25);
           breakdown.push(`OVERLOADED(-${oldPoints - points},${load}Q)`);
         } else if (load > 0) {
           const penalty = load * CONFIG.LOAD_PENALTY;
@@ -902,99 +700,47 @@ intent, confidence, mentionedCompanies, relatedCompanies,
           breakdown.push(`Load(-${penalty},${load}Q)`);
         }
 
-        return {
-          mentor,
-          points,
-          logs: breakdown.join(' | '),
-          load: load
-        };
+        return { mentor, points, logs: breakdown.join(' | '), load };
       });
 
-      // 🔥 SORT BY POINTS
       scored.sort((a, b) => b.points - a.points);
 
-      // 🔥 TOP 10 LOGGING (dev only)
-      dlog(`\n--- TOP 10 LIVE ROUTING CANDIDATES ---`);
-      scored.slice(0, 10).forEach((item, i) => {
-        dlog(
-          `#${i+1}: ${item.mentor.username} | ${item.points} pts (${item.load} active)\n` +
-          `   └─ ${item.logs || 'Generic match'}`
-        );
+      dlog(`\n--- TOP 5 LIVE CANDIDATES ---`);
+      scored.slice(0, 5).forEach((item, i) => {
+        dlog(`#${i+1}: ${item.mentor.username} | ${item.points}pts (${item.load}Q)\n   └─ ${item.logs || 'generic'}`);
       });
-      dlog(`---------------------------------------\n`);
 
-      const best = scored[0];
+      const best   = scored[0];
       const second = scored[1];
 
-      // 🔥 QUALITY GATES
-      
-      // Gate 1: Minimum threshold
       if (!best || best.points < CONFIG.LIVE_MATCH_THRESHOLD) {
-        console.log(
-          `❌ NO QUALIFYING MENTOR: Best ${best?.points || 0} pts < ` +
-          `${CONFIG.LIVE_MATCH_THRESHOLD} threshold`
-        );
+        console.log(`❌ NO QUALIFYING MENTOR: best=${best?.points || 0} < ${CONFIG.LIVE_MATCH_THRESHOLD}`);
         return null;
       }
 
-      // Gate 2: Avoid overloaded mentors if alternatives exist
+      // Avoid overloaded if alternatives exist
       if (best.load >= CONFIG.MAX_LOAD) {
-        const alternative = scored.find(s => s.load < CONFIG.MAX_LOAD && s.points >= CONFIG.LIVE_MATCH_THRESHOLD);
-        if (alternative) {
-          console.log(
-            `⚠️ Best mentor overloaded (${best.load}Q), switching to:\n` +
-            `   ${alternative.mentor.username} (${alternative.points} pts, ${alternative.load}Q)`
-          );
-          return alternative.mentor;
+        const alt = scored.find(s => s.load < CONFIG.MAX_LOAD && s.points >= CONFIG.LIVE_MATCH_THRESHOLD);
+        if (alt) {
+          dlog(`⚠️ Best overloaded → switching to ${alt.mentor.username} (${alt.points}pts)`);
+          return alt.mentor;
         }
       }
 
-      // Gate 3: Check for ambiguity (20% gap required)
-      if (second && best.points >= CONFIG.LIVE_MATCH_THRESHOLD) {
-        const gap = best.points - second.points;
-        const gapPercent = (gap / best.points) * 100;
-        
-        // If gap too small and neither has >1000 pts, use tiebreaker
-        if (gapPercent < 20 && best.points < 1000) {
-          dlog(
-            `⚠️ CLOSE MATCH: #1 vs #2 gap only ${gapPercent.toFixed(1)}%\n` +
-            `   #1: ${best.mentor.username} (${best.points} pts)\n` +
-            `   #2: ${second.mentor.username} (${second.points} pts)`
-          );
-          
-          // Tiebreaker 1: Higher rating
-          if (second.mentor.rating > best.mentor.rating) {
-            dlog(`   → Selected #2 (higher rating: ${second.mentor.rating} > ${best.mentor.rating})`);
-            return second.mentor;
-          }
-          
-          // Tiebreaker 2: Lower load
-          if (second.load < best.load) {
-            dlog(`   → Selected #2 (less busy: ${second.load}Q < ${best.load}Q)`);
-            return second.mentor;
-          }
-          
-          // Tiebreaker 3: More experience
-          if ((second.mentor.successfulMatches || 0) > (best.mentor.successfulMatches || 0)) {
-            dlog(`   → Selected #2 (more experienced)`);
-            return second.mentor;
-          }
-          
-          dlog(`   → Keeping #1 (no clear tiebreaker)`);
-        }
+      // Tiebreaker (< 20% gap and both < 1000pts)
+      if (second && (best.points - second.points) / best.points < 0.20 && best.points < 1000) {
+        const gap = ((best.points - second.points) / best.points * 100).toFixed(1);
+        dlog(`⚠️ CLOSE MATCH (${gap}% gap) — running tiebreakers`);
+        if (second.mentor.rating > best.mentor.rating)                                           return second.mentor;
+        if (second.load < best.load)                                                              return second.mentor;
+        if ((second.mentor.successfulMatches || 0) > (best.mentor.successfulMatches || 0))       return second.mentor;
       }
 
-      // ✅ CLEAR WINNER
-      dlog(
-        `✅ MENTOR ASSIGNED: ${best.mentor.username}\n` +
-        `   Points: ${best.points} | Load: ${best.load}Q | ` +
-        `Gap: ${second ? (best.points - second.points) : 'Unique'}`
-      );
-      
+      dlog(`✅ MENTOR ASSIGNED: ${best.mentor.username} | ${best.points}pts`);
       return best.mentor;
 
     } catch (error) {
-      console.error("🔥 Live Routing Error:", error);
+      console.error('🔥 Live Routing Error:', error);
       return null;
     }
   }
@@ -1003,191 +749,170 @@ intent, confidence, mentionedCompanies, relatedCompanies,
       🚀 MAIN ORCHESTRATOR
      ============================================= */
   async processQuestion(userId, questionText, options = {}) {
+    const retryCount = options._retryCount || 0;
+
     try {
-      // 🔥 WARM UP COMPANY CACHE (Once at startup)
-      await warmUpCompanyCache();
+      // Warm caches once (both company + mentor)
+      await Promise.all([
+        getAllTargetCompanies(),
+        getActiveMentors(),
+      ]);
 
-      dlog('\n🚀 ========== ATYANT VECTOR ENGINE START ==========');
-      dlog(`User: ${userId}`);
-      dlog(`Question (${questionText.length} chars):\n"${questionText.substring(0, 150)}${questionText.length > 150 ? '...' : ''}"`);
-      dlog(`Options: ${JSON.stringify(options)}`);
+      dlog(`\n🚀 ========== ATYANT ENGINE START ==========`);
+      dlog(`User: ${userId} | Q(${questionText.length}ch): "${questionText.substring(0, 100)}..."`);
 
-      // 🔥 GENERATE EMBEDDING
+      // Generate embedding
       let vector = null;
       try {
         vector = await getQuestionEmbedding(questionText);
-        dlog(`✅ Vector embedding generated (${vector?.length || 0} dimensions)`);
+        dlog(`✅ Embedding (${vector?.length || 0} dims)`);
       } catch (err) {
-        dlog(`❌ Vector generation failed: ${err.message}`);
+        dlog(`❌ Embedding failed: ${err.message}`);
       }
-      
-      const keywords = extractSmartKeywords(questionText);
-      dlog(`Keywords: [${keywords.slice(0, 10).join(', ')}${keywords.length > 10 ? '...' : ''}]`);
 
-      // 🔥 PATH A: VECTOR SEMANTIC SEARCH
+      const keywords = extractSmartKeywords(questionText);
+
+      // ──────────────────────────────────────────
+      //  PATH A: Vector semantic search
+      // ──────────────────────────────────────────
       if (vector && !options.isFollowUp) {
-        dlog(`\n🎯 Attempting Vector Semantic Match...`);
+        dlog(`\n🎯 Path A: Vector search...`);
         const match = await this.findBestSemanticMatch(userId, vector, questionText);
-        
+
         if (match) {
-          // Save question with instant answer
           const q = new Question({
             userId,
             questionText,
             keywords,
-            status: 'answered_instantly',
-            answerCardId: match._id,
+            status          : 'answered_instantly',
+            answerCardId    : match._id,
             selectedMentorId: match.mentorProfile._id,
-            isInstant: true,
-            matchScore: Math.round(match.finalScore * 100),
-            matchMethod: 'vector_semantic'
+            isInstant       : true,
+            matchScore      : Math.round(match.finalScore * 100),
+            matchMethod     : 'vector_semantic',
           });
           await q.save();
-          
-          dlog(`\n🎉 ========== INSTANT ANSWER DELIVERED ==========`);
-          dlog(`AnswerCard ID: ${match._id}`);
-          dlog(`Mentor: ${match.mentorProfile.username}`);
-          dlog(`Match Score: ${(match.finalScore*100).toFixed(2)}%`);
-          dlog(`================================================\n`);
-          
+
+          dlog(`🎉 INSTANT ANSWER | Card: ${match._id} | Mentor: ${match.mentorProfile.username} | ${(match.finalScore*100).toFixed(2)}%`);
+
           return {
-            success: true,
+            success      : true,
             instantAnswer: true,
-            questionId: q._id,
-            answerCardId: match._id,
+            questionId   : q._id,
+            answerCardId : match._id,
             answerContent: match.answerContent,
-            mentor: match.mentorProfile,
-            matchScore: match.finalScore,
-            matchMethod: 'vector_semantic'
+            mentor       : match.mentorProfile,
+            matchScore   : match.finalScore,
+            matchMethod  : 'vector_semantic',
           };
         }
-        
-        dlog(`No instant match found, proceeding to live routing...`);
-      } else if (!vector) {
-        dlog(`⚠️ Skipping vector search (embedding unavailable)`);
-      } else if (options.isFollowUp) {
-        dlog(`⚠️ Skipping vector search (follow-up question)`);
+        dlog(`Path A: no match — proceeding to Path B`);
       }
 
-      // 🔥 PATH B: LIVE MENTOR ROUTING
-      dlog(`\n🎯 Attempting Live Mentor Routing...`);
-      const questionCategory = options.category || null;
-      const bestMentor = await this.findBestMentor(userId, keywords, questionCategory);
-      
+      // ──────────────────────────────────────────
+      //  PATH B: Live mentor routing
+      // ──────────────────────────────────────────
+      dlog(`\n🎯 Path B: Live routing...`);
+      const bestMentor = await this.findBestMentor(userId, keywords, options.category || null);
+
       const question = new Question({
         userId,
         questionText,
         keywords,
-        status: bestMentor ? 'mentor_assigned' : 'pending',
+        status     : bestMentor ? 'mentor_assigned' : 'pending',
         matchMethod: 'live_routing',
-        isFollowUp: options.isFollowUp || false
+        isFollowUp : options.isFollowUp || false,
       });
 
       if (bestMentor) {
         question.selectedMentorId = bestMentor._id;
         await question.save();
-        
-        // 🔥 ATOMIC UPDATE: Prevent race condition (2 users → same mentor → overload)
+
+        // Atomic load increment — prevents race condition
         const updated = await User.findOneAndUpdate(
-          {
-            _id: bestMentor._id,
-            activeQuestions: { $lt: CONFIG.MAX_LOAD }
-          },
+          { _id: bestMentor._id, activeQuestions: { $lt: CONFIG.MAX_LOAD } },
           { $inc: { activeQuestions: 1 } },
           { new: true }
         );
-        
+
         if (!updated) {
-          // ✅ FIX #4: Prevent infinite retry loop
-          if ((options._retryCount || 0) > 2) {
-            console.error('❌ Max retry reached (mentor overload). Moving to global pool.');
-            return { success: false, message: 'System is busy. Your question will be answered soon.' };
+          // 🔴 FIX #3: bounded retry with exponential backoff
+          if (retryCount >= CONFIG.MAX_RETRIES) {
+            console.error(`❌ Max retries (${CONFIG.MAX_RETRIES}) hit — moving to global pool`);
+            // Invalidate mentor cache so next request gets fresh data
+            invalidateMentorCache();
+            question.status           = 'pending';
+            question.selectedMentorId = undefined;
+            await question.save();
+            return {
+              success    : true,
+              message    : 'System is busy. Your question will be answered shortly.',
+              questionId : question._id,
+              pool       : 'global',
+              matchMethod: 'retry_exhausted',
+            };
           }
-          console.error(`⚠️ Mentor ${bestMentor.username} became overloaded during assignment, retrying...`);
-          // Retry with fresh mentor pool
-          return this.processQuestion(userId, questionText, { ...options, _retryCount: (options._retryCount || 0) + 1 });
+          console.warn(`⚠️ Mentor ${bestMentor.username} overloaded — retry ${retryCount + 1}/${CONFIG.MAX_RETRIES}`);
+          invalidateMentorCache();
+          await sleep(200 * Math.pow(2, retryCount)); // 200ms, 400ms backoff
+          return this.processQuestion(userId, questionText, { ...options, _retryCount: retryCount + 1 });
         }
 
-        // Send notification
-        try {
-          await sendMentorNewQuestionNotification(
-            bestMentor.email,
-            bestMentor.username,
-            questionText
-          );
-          dlog(`📧 Email sent to ${bestMentor.username}`);
-        } catch (emailErr) {
-          console.error(`⚠️ Email notification failed: ${emailErr.message}`);
-        }
+        // Invalidate mentor cache (load changed)
+        invalidateMentorCache();
 
-        dlog(`\n✅ ========== ROUTED TO MENTOR ==========`);
-        dlog(`Question ID: ${question._id}`);
-        dlog(`Mentor: ${bestMentor.username}`);
-        dlog(`Current Load: ${updated.activeQuestions}`);
-        dlog(`=========================================\n`);
-        
+        // 🔴 FIX: Email failure is non-blocking but logged with context
+        sendMentorNewQuestionNotification(bestMentor.email, bestMentor.username, questionText)
+          .then(() => dlog(`📧 Email sent → ${bestMentor.username}`))
+          .catch(err => console.error(`⚠️ Email failed for ${bestMentor.username}:`, err.message));
+
+        dlog(`✅ ROUTED → ${bestMentor.username} | Load: ${updated.activeQuestions}`);
+
         return {
-          success: true,
-          questionId: question._id,
-          message: `Matching with ${bestMentor.username}...`,
-          mentorId: bestMentor._id,
-          mentorUsername: bestMentor.username,
-          matchMethod: 'live_routing'
+          success        : true,
+          questionId     : question._id,
+          message        : `Matching with ${bestMentor.username}...`,
+          mentorId       : bestMentor._id,
+          mentorUsername : bestMentor.username,
+          matchMethod    : 'live_routing',
         };
       }
 
-      // 🔥 FALLBACK: GLOBAL POOL or ATYANT ENGINE
-      // Try to assign to Atyant Engine fallback user if no mentor found
-      const atyantEngineUser = await User.findOne({ username: 'Atyant Engine', email: 'atyant.in@gmail.com' });
-      if (atyantEngineUser) {
-        question.selectedMentorId = atyantEngineUser._id;
-        question.status = 'mentor_assigned';
+      // ──────────────────────────────────────────
+      //  FALLBACK: Atyant Engine user
+      // ──────────────────────────────────────────
+      const engineUser = await User.findOne({ username: 'Atyant Engine', email: 'atyant.in@gmail.com' }).lean();
+      if (engineUser) {
+        question.selectedMentorId = engineUser._id;
+        question.status           = 'mentor_assigned';
         await question.save();
-        dlog(`\n⚠️ ========== ASSIGNED TO ATYANT ENGINE USER ==========`);
+        dlog(`⚠️ Assigned to Atyant Engine user`);
         return {
-          success: true,
-          questionId: question._id,
-          message: 'No mentor found. Assigned to Atyant Engine.',
-          mentorId: atyantEngineUser._id,
-          mentorUsername: atyantEngineUser.username,
-          matchMethod: 'atyant_engine_fallback'
+          success        : true,
+          questionId     : question._id,
+          message        : 'Connecting to Atyant Engine...',
+          mentorId       : engineUser._id,
+          mentorUsername : engineUser.username,
+          matchMethod    : 'atyant_engine_fallback',
         };
       }
-      // If fallback user not found, keep in global pool
+
+      // ──────────────────────────────────────────
+      //  GLOBAL POOL
+      // ──────────────────────────────────────────
       await question.save();
-      
-      dlog(`\n⚠️ ========== MOVED TO GLOBAL POOL ==========`);
-      dlog(`Question ID: ${question._id}`);
-      dlog(`Reason: No mentor met minimum threshold`);
-      dlog(`============================================\n`);
-      
+      dlog(`⚠️ GLOBAL POOL — no mentor met threshold`);
       return {
-        success: true,
-        message: 'Looking for a senior mentor...',
-        questionId: question._id,
-        pool: 'global',
-        matchMethod: 'pending_assignment'
+        success    : true,
+        message    : 'Looking for a senior mentor...',
+        questionId : question._id,
+        pool       : 'global',
+        matchMethod: 'pending_assignment',
       };
 
     } catch (error) {
-      console.error('\n🔥 ========== ENGINE CRITICAL ERROR ==========');
-      console.error(error);
-      console.error('=============================================\n');
-      
-      return { 
-        success: false, 
-        message: 'Failed to submit question. Please try again.' 
-      };
-    }
-  }
-
-  // Helper exposed to routes for keyword extraction
-  extractBetterKeywords(text) {
-    try {
-      return extractSmartKeywords(text || '');
-    } catch (e) {
-      console.error('Keyword extraction error:', e);
-      return [];
+      console.error('\n🔥 ENGINE CRITICAL ERROR\n', error);
+      return { success: false, message: 'Failed to submit question. Please try again.' };
     }
   }
 
@@ -1196,102 +921,97 @@ intent, confidence, mentionedCompanies, relatedCompanies,
      ============================================= */
   async transformToAnswerCard(mentorExperience, question) {
     try {
-      const mentorId = mentorExperience.mentorId;
+      const { mentorId, _id: mentorExperienceId, rawExperience: rawData } = mentorExperience;
       const questionId = question._id;
-      const mentorExperienceId = mentorExperience._id;
-      const rawData = mentorExperience.rawExperience;
 
-      console.log(`\n✨ Transforming to Answer Card...`);
-      console.log(`Question: ${question.questionText.substring(0, 50)}...`);
+      console.log(`\n✨ Transforming → AnswerCard for: "${question.questionText.substring(0, 60)}..."`);
 
-      // 🔥 AI REFINEMENT
+      // AI refinement
       let polishedContent;
       try {
-        console.log(`📤 Sending to AI for refinement...`);
         polishedContent = await aiServiceInstance.refineExperience(rawData);
         console.log(`✅ AI refinement complete`);
       } catch (err) {
-        console.log(`⚠️ AI unavailable (${err.message}), using raw data`);
+        console.warn(`⚠️ AI unavailable (${err.message}) — using raw data`);
         polishedContent = rawData;
       }
 
-      // 🔥 DATA VALIDATION & NORMALIZATION
+      // Data normalisation
       if (polishedContent) {
-        // Ensure keyMistakes is array
         if (typeof polishedContent.keyMistakes === 'string') {
-          polishedContent.keyMistakes = polishedContent.keyMistakes
-            .split(/[\n,;]/)
-            .map(s => s.trim())
-            .filter(Boolean);
+          polishedContent.keyMistakes = polishedContent.keyMistakes.split(/[\n,;]/).map(s => s.trim()).filter(Boolean);
         }
-        if (!Array.isArray(polishedContent.keyMistakes)) {
-          polishedContent.keyMistakes = [];
-        }
+        if (!Array.isArray(polishedContent.keyMistakes)) polishedContent.keyMistakes = [];
 
-        // Ensure actionableSteps is array of objects
         if (polishedContent.actionableSteps && typeof polishedContent.actionableSteps === 'string') {
           polishedContent.actionableSteps = polishedContent.actionableSteps
-            .split(/[\n]/)
-            .map((line, idx) => ({
-              step: `Step ${idx + 1}`,
-              description: line.trim()
-            }))
+            .split(/\n/)
+            .map((line, idx) => ({ step: `Step ${idx + 1}`, description: line.trim() }))
             .filter(s => s.description);
         }
-        if (!Array.isArray(polishedContent.actionableSteps)) {
-          polishedContent.actionableSteps = [];
-        }
+        if (!Array.isArray(polishedContent.actionableSteps)) polishedContent.actionableSteps = [];
 
-        // Fallback for differentApproach
-        if (!polishedContent.differentApproach && rawData.differentApproach) {
+        if (!polishedContent.differentApproach && rawData?.differentApproach) {
           polishedContent.differentApproach = rawData.differentApproach;
         }
       }
 
-      // 🔥 GENERATE EMBEDDING FOR ANSWER CARD
-      dlog(`🔢 Generating vector embedding for answer...`);
-      const embeddingText = [
-        polishedContent.situation,
-        polishedContent.context,
-        polishedContent.outcome,
-        polishedContent.keyMistakes?.join(' '),
-        polishedContent.actionableSteps?.map(s => s.description).join(' ')
-      ].filter(Boolean).join(' ');
+      // 🔴 FIX #8: embedding failure is caught — card still saves, just not searchable
+      let embedding = null;
+      try {
+        const embeddingText = [
+          polishedContent?.situation,
+          polishedContent?.context,
+          polishedContent?.outcome,
+          Array.isArray(polishedContent?.keyMistakes) ? polishedContent.keyMistakes.join(' ') : '',
+          Array.isArray(polishedContent?.actionableSteps) ? polishedContent.actionableSteps.map(s => s.description).join(' ') : '',
+        ].filter(Boolean).join(' ');
 
-      const embedding = await getQuestionEmbedding(embeddingText);
-      dlog(`✅ Embedding generated (${embedding?.length || 0} dims)`);
+        embedding = await getQuestionEmbedding(embeddingText);
+        dlog(`✅ Embedding generated (${embedding?.length || 0} dims)`);
+      } catch (embErr) {
+        console.error(`⚠️ Embedding failed — card will save but won't appear in vector search:`, embErr.message);
+        // embedding stays null; card is still useful for live routing
+      }
 
-      // 🔥 CREATE ANSWER CARD
       const newCard = new AnswerCard({
         mentorId,
         questionId,
         mentorExperienceId,
         answerContent: polishedContent,
-        embedding
+        ...(embedding ? { embedding } : {}),  // only set if we got one
       });
-
       await newCard.save();
-      dlog(`✅ Answer Card created: ${newCard._id}`);
+      dlog(`✅ AnswerCard saved: ${newCard._id}${!embedding ? ' (no embedding)' : ''}`);
 
-      // 🔥 UPDATE MENTOR STATS
+      // Update mentor stats + invalidate mentor cache
       await User.findByIdAndUpdate(mentorId, {
-        $inc: { 
-          activeQuestions: -1,
-          successfulMatches: 1
-        }
+        $inc: { activeQuestions: -1, successfulMatches: 1 },
       });
-      dlog(`✅ Mentor stats updated (load -1, matches +1)`);
+      invalidateMentorCache();
+      dlog(`✅ Mentor stats updated`);
 
-      dlog(`\n🎉 Answer Card transformation complete!`);
       return newCard;
-
     } catch (error) {
       console.error('🔥 Transform Error:', error);
       throw error;
     }
   }
-  
 
+  /** Expose keyword extractor to routes */
+  extractBetterKeywords(text) {
+    try   { return extractSmartKeywords(text || ''); }
+    catch { return []; }
+  }
+
+  /** Manually bust all runtime caches (admin use) */
+  flushAllCaches() {
+    COMPANY_CACHE      = null;
+    COMPANY_CACHE_TIME = 0;
+    invalidateMentorCache();
+    VECTOR_CACHE.clear();
+    console.log('🗑️  All AtyantEngine caches flushed');
+  }
 }
 
 export default new AtyantEngine();

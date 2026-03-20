@@ -1,5 +1,6 @@
 import express from 'express';
 import multer from 'multer';
+import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import cloudinary from '../config/cloudinary.js';
 import protect from '../middleware/authMiddleware.js';
@@ -7,77 +8,90 @@ import protect from '../middleware/authMiddleware.js';
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-// ========== GET CURRENT USER PROFILE (PROTECTED) ==========
+// ─────────────────────────────────────────────
+//  GET /me  — current user profile
+//  🔴 FIX: includes credits so frontend stays in sync
+// ─────────────────────────────────────────────
 router.get('/me', protect, async (req, res) => {
   try {
-    console.log('🔍 Fetching profile for user ID:', req.user.id || req.user.userId);
-    
-    const userId = req.user.id || req.user.userId;
-    
-    const user = await User.findById(userId).select('-password -verificationToken -passwordResetToken');
-    
-    if (!user) {
-      console.log('❌ User not found');
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
-    // ✅ Add location status to response
-    const hasLocation = !!(user.location?.coordinates && user.location.coordinates.length === 2);
-    
-    console.log('✅ User found:', user.username);
-    console.log(hasLocation ? '✅ Location set' : '⚠️ Location not set');
-    
-    res.json({
-      ...user.toObject(),
-      hasLocation // ✅ Frontend can use this
-    });
-    
+    const userId = req.user.userId;
+
+    const user = await User.findById(userId)
+      .select('-password -verificationToken -passwordResetToken -passwordResetExpires')
+      .lean();
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const hasLocation = !!(user.location?.coordinates?.length === 2);
+
+    res.json({ ...user, hasLocation });
   } catch (error) {
-    console.error('❌ Error fetching profile:', error);
-    res.status(500).json({ message: 'Server Error', error: error.message });
+    console.error('GET /profile/me error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
-// ========== UPDATE USER PROFILE (PROTECTED) - FIXED ==========
-// ========== UPDATE USER PROFILE (PROTECTED) - FIXED FOR ATYANT ENGINE ==========
+// ─────────────────────────────────────────────
+//  🔴 NEW: GET /me/credits — lightweight credit check
+//  Frontend calls this after payment to refresh credits
+//  without fetching entire profile
+// ─────────────────────────────────────────────
+router.get('/me/credits', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId)
+      .select('messageCredits credits')
+      .lean();
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    res.json({
+      success       : true,
+      messageCredits: user.messageCredits ?? 0,
+      credits       : user.credits ?? 0
+    });
+  } catch (error) {
+    console.error('GET /profile/me/credits error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// ─────────────────────────────────────────────
+//  PUT /me  — update profile
+// ─────────────────────────────────────────────
 router.put('/me', protect, async (req, res) => {
   try {
-    const userId = req.user.id || req.user.userId;
+    const userId    = req.user.userId;
     const updateData = req.body;
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // 1. Basic Fields update
-    const basicFields = ['username', 'bio', 'city', 'linkedinProfile', 'companyDomain', 'primaryDomain', 'strategy'];
+    // Basic scalar fields
+    const basicFields = ['username', 'bio', 'city', 'linkedinProfile'];
     basicFields.forEach(field => {
-      if (req.body[field] !== undefined) {
-        if (field === 'strategy' && typeof req.body[field] === 'object') {
-          user.strategy = { ...(user.strategy?.toObject?.() || user.strategy || {}), ...req.body[field] };
-          user.markModified('strategy'); // 🔥 Ensure Mongoose saves nested changes
-        } else {
-          user[field] = req.body[field];
-        }
-      }
+      if (updateData[field] !== undefined) user[field] = updateData[field];
     });
 
-    // 🔥 Handle Enums separately to prevent "" (empty string) errors
-if (req.body.companyDomain === "" || req.body.companyDomain === null) {
-  user.companyDomain = undefined; // This allows the 'default: null' to work
-} else if (req.body.companyDomain) {
-  user.companyDomain = req.body.companyDomain;
-}
-      // 🔥 Handle primaryDomain enum to prevent "" (empty string) errors
-      if (req.body.primaryDomain === "" || req.body.primaryDomain === null) {
-        user.primaryDomain = undefined; // This allows the 'default: null' to work
-      } else if (req.body.primaryDomain) {
-        const allowedDomains = ['placement', 'internship', 'both'];
-        if (allowedDomains.includes(req.body.primaryDomain)) {
-          user.primaryDomain = req.body.primaryDomain;
-        }
-      }
+    // Strategy (deep merge)
+    if (updateData.strategy && typeof updateData.strategy === 'object') {
+      user.strategy = { ...(user.strategy?.toObject?.() || user.strategy || {}), ...updateData.strategy };
+      user.markModified('strategy');
+    }
 
-    // 2. Array Fields update
+    // Enums — 🔴 FIX: empty string → null (prevents Mongoose enum validation error)
+    const enumFields = {
+      companyDomain : ['Tech', 'Data Analytics', 'Consulting', 'Product', 'Core Engineering'],
+      primaryDomain : ['placement', 'internship', 'both']
+    };
+    for (const [field, allowed] of Object.entries(enumFields)) {
+      if (updateData[field] === '' || updateData[field] === null) {
+        user[field] = null;
+      } else if (updateData[field] && allowed.includes(updateData[field])) {
+        user[field] = updateData[field];
+      }
+    }
+
+    // Array fields
     const arrayFields = ['interests', 'expertise', 'domainExperience', 'skills', 'topCompanies', 'milestones', 'specialTags'];
     arrayFields.forEach(field => {
       if (updateData[field] !== undefined) {
@@ -85,127 +99,101 @@ if (req.body.companyDomain === "" || req.body.companyDomain === null) {
       }
     });
 
-    // 3. Education Logic (Processed once)
+    // Education — 🔴 FIX: sync both institution & institutionName for AtyantEngine
     if (updateData.education !== undefined) {
       user.education = Array.isArray(updateData.education)
-        ? updateData.education.map(edu => ({
-            institution: edu.institution,
-            degree: edu.degree,
-            field: edu.field,
-            year: edu.year,
-            cgpa: edu.cgpa ? Number(edu.cgpa) : undefined
-          }))
-          .filter(edu => edu.institution && edu.degree)
+        ? updateData.education
+            .filter(e => e.institution || e.institutionName)
+            .map(e => ({
+              institution    : e.institution || e.institutionName || '',
+              institutionName: e.institutionName || e.institution || '',
+              degree         : e.degree || '',
+              field          : e.field  || '',
+              year           : e.year   || '',
+              cgpa           : e.cgpa ? Number(e.cgpa) : undefined
+            }))
         : [];
     }
 
     await user.save();
+
     const userResponse = user.toObject();
     delete userResponse.password;
+    delete userResponse.verificationToken;
+    delete userResponse.passwordResetToken;
+    delete userResponse.passwordResetExpires;
 
     res.json({ message: 'Profile updated', user: userResponse });
-
   } catch (error) {
-    console.error('❌ Error updating profile:', error);
-    res.status(500).json({ message: 'Server Error', error: error.message });
+    console.error('PUT /profile/me error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
-    
 
-// ========== UPLOAD PROFILE PICTURE (PROTECTED) ==========
+// ─────────────────────────────────────────────
+//  POST /upload-picture
+// ─────────────────────────────────────────────
 router.post('/upload-picture', protect, upload.single('profilePicture'), async (req, res) => {
   try {
-    const userId = req.user.id || req.user.userId;
+    const userId = req.user.userId;
+
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
     const user = await User.findById(userId);
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
-    }
-
-    // ✅ Upload to Cloudinary using Promise
-    const uploadPromise = new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
         { folder: 'atyant_profiles' },
-        (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }
+        (error, result) => error ? reject(error) : resolve(result)
       );
-      uploadStream.end(req.file.buffer);
+      stream.end(req.file.buffer);
     });
 
-    const result = await uploadPromise;
-    
     user.profilePicture = result.secure_url;
     await user.save();
-    
-    console.log('✅ Profile picture updated:', result.secure_url);
-    
-    res.json({ 
-      message: 'Profile picture updated successfully', 
-      profilePicture: user.profilePicture 
-    });
-    
+
+    res.json({ message: 'Profile picture updated', profilePicture: user.profilePicture });
   } catch (error) {
-    console.error('❌ Error uploading picture:', error);
-    res.status(500).json({ 
-      message: 'Server error during upload',
-      error: error.message 
-    });
+    console.error('POST /upload-picture error:', error);
+    res.status(500).json({ message: 'Upload failed', error: error.message });
   }
 });
 
-// ========== GET PUBLIC PROFILE BY USERNAME ==========
+// ─────────────────────────────────────────────
+//  GET /:username  — public profile
+// ─────────────────────────────────────────────
 router.get('/:username', async (req, res) => {
   try {
-    console.log('🔍 Fetching public profile for:', req.params.username);
-    
-    const user = await User.findOne({ 
+    const user = await User.findOne({
       username: new RegExp(`^${req.params.username}$`, 'i')
-    }).select('-password -verificationToken -passwordResetToken -passwordResetExpires');
-    
-    if (!user) {
-      console.log('❌ User not found:', req.params.username);
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
-    // ✅ Increment profile views for mentors ONLY if viewer is different user
-    // Get viewer's ID from Authorization header if present
-    const authHeader = req.headers.authorization;
-    let viewerId = null;
-    
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-      try {
-        const token = authHeader.split(' ')[1];
-        const jwt = await import('jsonwebtoken');
-        const decoded = jwt.default.verify(token, process.env.JWT_SECRET);
-        viewerId = decoded.id || decoded.userId;
-      } catch (err) {
-        // Token invalid or expired, continue without viewer ID
+    })
+      .select('-password -verificationToken -passwordResetToken -passwordResetExpires -messageCredits -credits')
+      .lean();
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Count profile view — only if viewer ≠ mentor, non-blocking
+    if (user.role === 'mentor') {
+      const authHeader = req.headers.authorization;
+      let viewerId = null;
+      if (authHeader?.startsWith('Bearer ')) {
+        try {
+          const decoded = jwt.verify(authHeader.split(' ')[1], process.env.JWT_SECRET);
+          viewerId = decoded._id || decoded.id || decoded.userId;
+        } catch { /* invalid token — ignore */ }
+      }
+      if (viewerId && viewerId !== user._id.toString()) {
+        User.findByIdAndUpdate(user._id, { $inc: { profileViews: 1 } })
+          .catch(err => console.error('profileViews increment error:', err.message));
       }
     }
-    
-    // Only count if: 1) user is mentor, 2) viewer is not the mentor themselves
-    if (user.role === 'mentor' && viewerId && viewerId !== user._id.toString()) {
-      User.findByIdAndUpdate(user._id, { $inc: { profileViews: 1 } }).catch(err => 
-        console.error('Error updating profile views:', err)
-      );
-      console.log(`📊 Profile view counted for mentor: ${user.username} (viewer: ${viewerId})`);
-    }
-    
-    console.log('✅ Public profile sent for:', user.username);
+
     res.json(user);
-    
   } catch (error) {
-    console.error('❌ Error fetching public profile:', error);
-    res.status(500).json({ 
-      message: 'Server Error',
-      error: error.message 
-    });
+    console.error('GET /profile/:username error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
 export default router;
