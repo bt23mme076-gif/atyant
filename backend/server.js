@@ -63,9 +63,14 @@ const allowedOrigins = [
 app.use(cors({
   origin        : allowedOrigins,
   credentials   : true,
-  methods        : ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders : ['Content-Type', 'Authorization']
+  methods        : ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders : ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders : ['Content-Range', 'X-Content-Range'],
+  maxAge        : 600 // Cache preflight for 10 minutes
 }));
+
+// Handle preflight requests explicitly
+app.options('*', cors());
 
 app.use(express.json({ limit: '10mb' }));
 
