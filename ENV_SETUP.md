@@ -43,6 +43,9 @@ RAZORPAY_KEY_SECRET=...
 # AI
 GEMINI_API_KEY=...
 
+# Python Embedding Service (for vector search)
+PYTHON_ENGINE_URL=http://127.0.0.1:8000
+
 # Email (Nodemailer - optional)
 EMAIL_USER=...
 EMAIL_PASS=...
@@ -91,3 +94,15 @@ npm run build
 ```
 
 Frontend build will use `VITE_API_URL` from `.env.production`
+
+## Python Embedding Service
+
+The backend uses a separate Python service for generating embeddings (vector search). Configure it with:
+
+```env
+PYTHON_ENGINE_URL=http://127.0.0.1:8000  # Local development
+PYTHON_ENGINE_URL=https://embeddings.atyant.in  # Production
+```
+
+If the Python service is unavailable, the backend will still work but vector search features (instant answer matching) will be disabled.
+
