@@ -18,8 +18,7 @@ import { API_URL } from './services/api.js';
 
 
 // Lazy-loaded pages
-const OldHome           = lazy(() => import('./components/Home'));
-const Home              = lazy(() => import('./components/NewHome'));
+const Home              = lazy(() => import('./components/Home'));
 const Dashboard         = lazy(() => import('./components/Dashboard'));
 const Login             = lazy(() => import('./components/Login'));
 const Signup            = lazy(() => import('./components/signup'));
@@ -65,7 +64,6 @@ function App() {
 
   const isChatPage = location.pathname === '/chat';
   const isHomePage = location.pathname === '/';
-  const isNewHomePage = location.pathname === '/' || location.pathname === '/new-home';
 
   // Show Google modal once per session if not logged in
   useEffect(() => {
@@ -157,7 +155,7 @@ function App() {
 
   return (
     <div className={isChatPage && user ? 'App chat-active' : 'App'}>
-      {!isNewHomePage && <Navbar />}
+      <Navbar />
       <main>
         <ScrollToTop />
         <Suspense fallback={<LoadingSpinner />}>
@@ -165,7 +163,6 @@ function App() {
             <Routes>
               {/* Public */}
               <Route path="/"                      element={<Home />} />
-              <Route path="/old-home"              element={<OldHome />} />
               <Route path="/signup"                element={<Signup />} />
               <Route path="/login"                 element={<Login />} />
               <Route path="/forgot-password"       element={<ForgotPassword />} />
@@ -194,11 +191,11 @@ function App() {
         </Suspense>
       </main>
 
-      {!isChatPage && !isNewHomePage && <Footer />}
+      {!isChatPage && <Footer />}
       <Analytics />
 
-      {/* Community Chat FAB — home page only (but not on new homepage) */}
-      {!showCommunityChat && isHomePage && !isNewHomePage && (
+      {/* Community Chat FAB — home page only */}
+      {!showCommunityChat && isHomePage && (
         <button
           className={`community-chat-fab ${newMessageCount > 0 ? 'has-new-messages' : ''}`}
           onClick={handleToggleCommunityChat}
