@@ -44,7 +44,7 @@ RAZORPAY_KEY_SECRET=...
 GEMINI_API_KEY=...
 
 # Python Embedding Service (for vector search)
-PYTHON_ENGINE_URL=http://127.0.0.1:8000
+PYTHON_ENGINE_URL=https://embed.atyant.in
 
 # Email (Nodemailer - optional)
 EMAIL_USER=...
@@ -101,8 +101,22 @@ The backend uses a separate Python service for generating embeddings (vector sea
 
 ```env
 PYTHON_ENGINE_URL=http://127.0.0.1:8000  # Local development
-PYTHON_ENGINE_URL=https://embeddings.atyant.in  # Production
+PYTHON_ENGINE_URL=https://embed.atyant.in  # Production
 ```
 
 If the Python service is unavailable, the backend will still work but vector search features (instant answer matching) will be disabled.
+
+## Architecture
+
+```
+Frontend (Vercel)          Backend (VPS)           Python Service (VPS)
+atyant.in              →   api.atyant.in       →   embed.atyant.in
+www.atyant.in                                      (embeddings only)
+```
+
+CORS is configured to allow:
+- `https://atyant.in`
+- `https://www.atyant.in`
+- `http://localhost:5173` (dev)
+
 
