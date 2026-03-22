@@ -65,6 +65,7 @@ function App() {
 
   const isChatPage = location.pathname === '/chat';
   const isHomePage = location.pathname === '/';
+  const isNewHomePage = location.pathname === '/' || location.pathname === '/new-home';
 
   // Show Google modal once per session if not logged in
   useEffect(() => {
@@ -156,7 +157,7 @@ function App() {
 
   return (
     <div className={isChatPage && user ? 'App chat-active' : 'App'}>
-      <Navbar />
+      {!isNewHomePage && <Navbar />}
       <main>
         <ScrollToTop />
         <Suspense fallback={<LoadingSpinner />}>
@@ -193,11 +194,11 @@ function App() {
         </Suspense>
       </main>
 
-      {!isChatPage && <Footer />}
+      {!isChatPage && !isNewHomePage && <Footer />}
       <Analytics />
 
-      {/* Community Chat FAB — home page only */}
-      {!showCommunityChat && isHomePage && (
+      {/* Community Chat FAB — home page only (but not on new homepage) */}
+      {!showCommunityChat && isHomePage && !isNewHomePage && (
         <button
           className={`community-chat-fab ${newMessageCount > 0 ? 'has-new-messages' : ''}`}
           onClick={handleToggleCommunityChat}
