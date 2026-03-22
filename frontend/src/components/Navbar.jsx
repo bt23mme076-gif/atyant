@@ -6,7 +6,6 @@ import UserAvatar from './UserAvatar';
 import { Menu, User as UserIcon, GraduationCap, LogOut, ShoppingBag } from 'lucide-react';
 import './Navbar.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Navbar = () => {
   const navigate    = useNavigate();

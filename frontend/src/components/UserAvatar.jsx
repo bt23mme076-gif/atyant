@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { API_URL } from '../services/api.js';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 function optimizeCloudinary(url, size) {
   try {

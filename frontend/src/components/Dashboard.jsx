@@ -6,7 +6,6 @@ import { MessageSquare, Users, TrendingUp, MapPin, Calendar, BookOpen } from 'lu
 import './Dashboard.css';
 import LoadingSpinner from './LoadingSpinner';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);

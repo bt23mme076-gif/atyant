@@ -4,7 +4,6 @@ import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './MentorDashboard.css';
 
-const API_URL        = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const REFRESH_MS     = 10_000;
 const MAX_AUDIO_SIZE = 10 * 1024 * 1024; // 10 MB
 

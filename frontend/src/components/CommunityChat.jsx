@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useContext, memo } from 'react';
+import { API_URL } from '../services/api.js';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
 import { Send, Users, Smile, X, UserX, Trash2, LogIn } from 'lucide-react';
 import './CommunityChat.css';
 import UserAvatar from './UserAvatar';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const CommunityChat = ({ onClose }) => {
   const { user } = useContext(AuthContext);

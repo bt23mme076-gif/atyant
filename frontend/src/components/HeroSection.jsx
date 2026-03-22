@@ -102,7 +102,6 @@ const fallbackQuestions = [
         return;
       }
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
         const res = await fetch(`${API_URL}/api/ask/generate-suggestions`, {
           method: 'POST',
           headers: {
@@ -125,7 +124,6 @@ const fallbackQuestions = [
     setSubmitting(true);
     setLoading(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       
       // Check profile completion before redirecting
       const profileRes = await fetch(`${API_URL}/api/profile/me`, {

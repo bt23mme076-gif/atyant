@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../services/api.js';
 import './MentorRating.css';
 
 const MentorRating = ({ mentorId, showDetails = false }) => {
@@ -7,7 +8,6 @@ const MentorRating = ({ mentorId, showDetails = false }) => {
   const [error, setError] = useState(null);
 
   // ✅ GET API URL from environment
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     if (mentorId) {

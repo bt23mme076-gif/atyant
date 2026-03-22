@@ -46,7 +46,6 @@ const SearchBar = () => {
 
     const fetchSuggestions = async () => {
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
         const params = new URLSearchParams();
 
         if (query.trim()) {

@@ -18,7 +18,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   // Same base URL for normal and Google login
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

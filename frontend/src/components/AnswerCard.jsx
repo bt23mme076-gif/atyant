@@ -92,7 +92,6 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
       const mentorId = answerCard.mentorId || answerCard.selectedMentorId;
       if (!mentorId) return setLoadingMentor(false);
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
         const response = await fetch(`${API_URL}/api/users/${mentorId}`, {
           headers: { 'Authorization': `Bearer ${user.token}` }
         });
@@ -109,7 +108,6 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
     if (!followUpText.trim() || followUpText.length < 5) return;
     setFollowUpLoading(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const response = await fetch(`${API_URL}/api/engine/submit-follow-up`, {
         method: 'POST',
         headers: {
@@ -313,7 +311,6 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
                     onClick={async () => {
                       if (!window.confirm('Are you sure you want to delete this voice answer?')) return;
                       try {
-                        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
                         const response = await fetch(`${API_URL}/api/engine/delete-voice-answer`, {
                           method: 'POST',
                           headers: {
@@ -336,7 +333,7 @@ const AnswerCard = ({ answerCard, questionId, onRefresh }) => {
                   src={
                     answerCard.audioUrl.startsWith('http')
                       ? answerCard.audioUrl
-                      : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${answerCard.audioUrl}`
+                      : `${API_URL}${answerCard.audioUrl}`
                   }
                   className="mentor-audio-bar"
                 />

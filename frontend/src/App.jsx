@@ -38,7 +38,6 @@ const InternshipJourney = lazy(() => import('./components/InternshipJourney'));
 const AdminDashboard    = lazy(() => import('./components/AdminDashboard'));
 const CareerGuidesPage  = lazy(() => import('./components/CareerGuidesPage'));
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // Community notifications — static, no need inside component
 const COMMUNITY_NOTIFICATIONS = [

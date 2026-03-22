@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { API_URL } from '../services/api.js';
 import { useAuth, AuthContext } from '../AuthContext';
 // ========== NEW: ADD THESE IMPORTS ==========
 import { MapPin, RefreshCw } from 'lucide-react';
@@ -8,7 +9,6 @@ import { toast } from 'react-toastify';
 // ✅ ADD THIS IMPORT AT TOP
 import LoadingSpinner from './LoadingSpinner';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const Profile = () => {
   const { user, updateUser, login } = useContext(AuthContext); // ✅ Get updateUser and login functions
@@ -136,7 +136,7 @@ const Profile = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'http://localhost:5000/api/users/upload-profile-picture',
+        `${API_URL}/api/users/upload-profile-picture`,
         formData,
         {
           headers: {

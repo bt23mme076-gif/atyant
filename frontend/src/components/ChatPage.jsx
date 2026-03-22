@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useContext, useMemo } from 'react';
+import { API_URL } from '../services/api.js';
 import { useLocation, useNavigate, Link, useParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { jwtDecode } from 'jwt-decode';
@@ -10,7 +11,6 @@ import { AuthContext } from '../AuthContext';
 import RatingModal from './RatingModal'; // ✅ MAKE SURE THIS LINE EXISTS
 import LoadingSpinner from './LoadingSpinner';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 // ✅ Utility function to convert URLs to clickable links
 const linkifyText = (text) => {
@@ -301,9 +301,7 @@ const ChatPage = ({ recipientId, recipientName }) => {
         (async () => {
           const { io } = await import('socket.io-client');
           
-          const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 
-                            import.meta.env.VITE_API_URL || 
-                            (import.meta.env.PROD ? 'https://atyant-backend.onrender.com' : 'http://localhost:5000');
+          const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_URL;
           
           socket = io(SOCKET_URL, {
             auth: { token },

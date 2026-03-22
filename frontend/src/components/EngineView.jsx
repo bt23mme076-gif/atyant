@@ -40,7 +40,6 @@ const EngineView = ({ isAnswerView }) => {
 
   const fetchAnswerCard = async () => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const response = await fetch(`${API_URL}/api/engine/answer-card/${answerCardId}`, {
         headers: {
           'Authorization': `Bearer ${user.token}`
@@ -70,7 +69,6 @@ const EngineView = ({ isAnswerView }) => {
 
   const fetchQuestionStatus = async () => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const response = await fetch(`${API_URL}/api/engine/question-status/${questionId}`, {
         headers: {
           'Authorization': `Bearer ${user.token}`

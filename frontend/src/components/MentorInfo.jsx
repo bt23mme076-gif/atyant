@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import MentorDNAForm from './MentorDNAForm';
 import './MentorInfo.css';
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export default function MentorInfo({ mentor, onDnaUpdate }) {
   const [editing, setEditing] = useState(false);

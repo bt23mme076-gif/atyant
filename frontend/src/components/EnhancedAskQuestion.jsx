@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { API_URL } from '../services/api.js';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './EnhancedAskQuestion.css';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const COMPANY_DOMAINS = [
   { label: 'Tech', value: 'Tech', icon: '💻' },

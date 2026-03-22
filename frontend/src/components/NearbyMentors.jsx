@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { API_URL } from '../services/api.js';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { MapPin, Navigation, Users, MessageCircle, Search, X, ChevronRight, RefreshCw, AlertCircle } from 'lucide-react';
@@ -7,7 +8,6 @@ import './shared.css';
 import LoadingSpinner from './LoadingSpinner';
 import SEO from './SEO'; // ✅ NEW IMPORT
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // ========== EXPERTISE CATEGORIES ==========
 const expertiseCategories = {

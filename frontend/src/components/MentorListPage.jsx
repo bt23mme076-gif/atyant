@@ -173,7 +173,6 @@ const MentorListPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
       const url = `${API_URL}/api/search/mentors?limit=100`;
 
       const headers = {};

@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { API_URL } from '../services/api.js';
 import { useEffect as useEffectReact, useState as useStateReact } from 'react';
 import { Download, Mail, ExternalLink, Search, Filter, Building2, GraduationCap, ChevronLeft, ChevronRight, Quote, Lock, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -383,7 +384,6 @@ Resume Link: [Resume Link]
     }
     setLoadingEmails(true);
     // IIT: fetch from Google Sheet, IIM: fetch from backend
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const fetchProfessors = async () => {
       try {
         let data = [];

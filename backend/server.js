@@ -56,10 +56,8 @@ app.use(compression({
 // ─── CORS ──────────────────────────────────────────────────────────────────
 const allowedOrigins = [
   process.env.FRONTEND_URL,
-  'https://atyant.in',
-  'https://www.atyant.in',
-  'http://localhost:5173',
-  'http://localhost:5000'
+  process.env.FRONTEND_URL_WWW,
+  process.env.DEV_URL || 'http://localhost:5173',
 ].filter(Boolean);
 
 app.use(cors({

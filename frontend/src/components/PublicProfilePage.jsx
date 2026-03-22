@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { API_URL } from '../services/api.js';
 import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
 import './PublicProfilePage.css'; // Import CSS file
@@ -16,7 +17,6 @@ const PublicProfilePage = () => {
       setLoading(true);
       setError('');
       try {
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
         
         // ✅ Send Authorization header to track profile views
         const headers = {};

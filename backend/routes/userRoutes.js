@@ -49,7 +49,7 @@ router.post('/upload-profile-picture', auth, upload.single('profilePicture'), as
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    const profilePictureUrl = `http://localhost:5000/uploads/profiles/${req.file.filename}`;
+    const profilePictureUrl = `${process.env.BACKEND_URL || 'http://localhost:5000'}/uploads/profiles/${req.file.filename}`;
 
     // Update user in database
     await User.findByIdAndUpdate(req.user.userId, {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
+import { API_URL } from '../services/api.js';
 import { AuthContext } from '../AuthContext';
 import { MapPin, RefreshCw, AlertCircle, CheckCircle, Plus } from 'lucide-react';
 import './ProfilePage.css';
@@ -7,7 +8,6 @@ import MentorInfo from './MentorInfo';
 import LoadingSpinner from './LoadingSpinner';
 
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const ProfilePage = () => {
   const { user, setUser, updateUser } = useContext(AuthContext);

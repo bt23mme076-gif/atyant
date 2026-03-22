@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_URL } from '../services/api.js';
 import './FeedbackForm.css';
 
 const FeedbackForm = () => {
@@ -10,8 +11,6 @@ const FeedbackForm = () => {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_URL } from '../services/api.js';
 import './RatingModal.css';
 
 const RatingModal = ({ isOpen, onClose, mentor, chatSessionId, onSubmitSuccess }) => {
@@ -10,7 +11,6 @@ const RatingModal = ({ isOpen, onClose, mentor, chatSessionId, onSubmitSuccess }
   const [localSessionId, setLocalSessionId] = useState(null);
 
   // ✅ GET API URL from environment
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     if (isOpen && mentor) {

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { API_URL } from '../services/api.js';
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import "./AuthForm.css";
@@ -79,8 +80,6 @@ const Signup = () => {
 
     try {
       // Purane waale pattern ke hisaab se default 3000 rakha tha. Aap VITE_API_URL ko 5000 set kar lo.
-      const API_URL =
-        import.meta.env.VITE_API_URL || "http://localhost:3000";
 
       // Payload ko purane jaisa hi bhejo (confirmPassword hatao, role as-is)
       const { confirmPassword, ...submitData } = formData;

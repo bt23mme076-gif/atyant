@@ -11,19 +11,9 @@ export const mentorApi = {
 // ========================================
 // API BASE URL CONFIGURATION
 // ========================================
-const getApiUrl = () => {
-  // Check if we're in production
-  if (import.meta.env.PROD) {
-    // Production API URL
-    return import.meta.env.VITE_API_URL || 'https://your-backend-api.onrender.com';
-  }
-  
-  // Development API URL
-  return import.meta.env.VITE_API_URL || 'http://localhost:3000';
-};
-
-const API_BASE = getApiUrl();
-export const API_BASE_URL = API_BASE; // ✅ Export for compatibility
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+export const API_BASE_URL = API_BASE;
+export const API_URL = API_BASE; // alias used across components
 
 // ========================================
 // API ENDPOINTS

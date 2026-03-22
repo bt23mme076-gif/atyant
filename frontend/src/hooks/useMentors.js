@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
+import { API_URL } from '../services/api.js';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export function useMentors(filters) {
   const { searchTerm, selectedCategory, mentorBackground, availability, price, sort } = filters;
