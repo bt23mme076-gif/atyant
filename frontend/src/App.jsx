@@ -38,9 +38,6 @@ const EnhancedAskQuestion = lazy(() => import('./components/EnhancedAskQuestion'
 const InternshipJourney = lazy(() => import('./components/InternshipJourney'));
 const AdminDashboard    = lazy(() => import('./components/AdminDashboard'));
 const CareerGuidesPage  = lazy(() => import('./components/CareerGuidesPage'));
-import { API_URL } from '../services/api.js';
-
-
 // Community notifications — static, no need inside component
 const COMMUNITY_NOTIFICATIONS = [
   '💬 Join the Community Chat!',
