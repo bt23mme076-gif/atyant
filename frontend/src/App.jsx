@@ -186,8 +186,6 @@ function App() {
               <Route path="/ask"              element={<ProtectedRoute><EnhancedAskQuestion /></ProtectedRoute>} />
               <Route path="/mentor-dashboard" element={<ProtectedRoute><MentorDashboard /></ProtectedRoute>} />
               <Route path="/admin-dashboard"  element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-             /
-
             </Routes>
           </ErrorBoundary>
         </Suspense>

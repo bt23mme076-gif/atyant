@@ -5,7 +5,6 @@ import { API_URL } from '../services/api.js';
 
 import MentorInfo from './MentorInfo';
 import './AdminDashboard.css';
-import { API_URL } from '../services/api.js';
 
 
 const AdminDashboard = () => {
