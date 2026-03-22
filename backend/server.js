@@ -1,9 +1,3 @@
-import { Headers, Request, Response, fetch } from 'undici';
-global.Headers = Headers;
-global.Request = Request;
-global.Response = Response;
-global.fetch = fetch;
-
 import dotenv from 'dotenv';
 dotenv.config();
 
