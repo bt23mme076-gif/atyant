@@ -156,3 +156,69 @@ main {
 footer {
   margin-top: auto;
 }
+
+/* ============================================
+   PREMIUM HOMEPAGE ANIMATIONS
+   ============================================ */
+
+/* Infinite Scroll Animation for Testimonials */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 40s linear infinite;
+}
+
+.pause-animation:hover {
+  animation-play-state: paused;
+}
+
+/* Smooth transitions for all interactive elements */
+button,
+a {
+  transition: all 200ms ease;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0A0F;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E1E2E;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6C63FF;
+}
+
+/* Ensure smooth font rendering */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fix for backdrop blur support */
+@supports (backdrop-filter: blur(10px)) {
+  .backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+  }
+}
+
+/* Gradient text support */
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
