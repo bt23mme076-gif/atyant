@@ -16,8 +16,8 @@
   right: 0;
   bottom: 0;
   background-image: 
-    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    radial-gradient(circle at 20% 50%, rgba(241, 241, 241, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(241, 241, 241, 0.1) 0%, transparent 50%);
   animation: particleFloat 15s ease-in-out infinite;
   pointer-events: none;
 }
@@ -83,7 +83,7 @@
 }
 
 .journey-subtitle {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(241, 241, 241, 0.9);
   font-size: 1.1rem;
   font-weight: 300;
   margin: 0;
@@ -98,7 +98,7 @@
   overflow: hidden;
   box-shadow: 
     0 20px 60px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 0 0 1px rgba(241, 241, 241, 0.1);
   background: rgba(0, 0, 0, 0.2);
   perspective: 1000px;
   transform-style: preserve-3d;
@@ -201,7 +201,7 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(241, 241, 241, 0.9);
   border: none;
   width: 50px;
   height: 50px;
@@ -257,7 +257,7 @@
 }
 
 .dot:hover {
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(241, 241, 241, 0.5);
   transform: scale(1.2);
 }
 
@@ -272,7 +272,7 @@
   position: absolute;
   top: 20px;
   right: 20px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(241, 241, 241, 0.9);
   border: none;
   width: 45px;
   height: 45px;

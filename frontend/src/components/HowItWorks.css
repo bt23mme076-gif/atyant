@@ -2,7 +2,7 @@
 :root {
   --how-gradient-start: #667eea;
   --how-gradient-end: #764ba2;
-  --how-card-bg: #f9fafb;
+  --how-card-bg: #111118;
   --how-text-primary: #111827;
   --how-text-secondary: #6b7280;
   --how-shadow-sm: 0 4px 12px rgba(102, 126, 234, 0.08);
@@ -11,7 +11,7 @@
 
 .how-it-works-section {
   padding: 80px 20px;
-  background: #0D1117;
+  background: #0A0A0F;
   position: relative;
   overflow: hidden;
 }
@@ -70,7 +70,7 @@
 }
 
 .section-header h2 .highlight {
-  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  background: linear-gradient(90deg, #6C63FF, #A78BFA);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -78,7 +78,7 @@
 
 .section-header p {
   font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(241, 241, 241, 0.6);
   max-width: 600px;
   margin: 0 auto;
   font-weight: 500;
@@ -93,7 +93,7 @@
 }
 
 .step-card {
-  background: linear-gradient(145deg, #ffffff 0%, #fafbff 100%);
+  background: linear-gradient(145deg, #F1F1F1 0%, #fafbff 100%);
   padding: 40px 30px;
   border-radius: 20px;
   border: 2px solid transparent;
@@ -233,7 +233,7 @@
   transform: translateX(-50%);
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #38bdf8, #818cf8);
+  background: linear-gradient(135deg, #6C63FF, #A78BFA);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -255,14 +255,14 @@
 .flow-step h3 {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #F1F1F1;
   margin-bottom: 12px;
 }
 
 /* Step Description */
 .flow-step > p {
   font-size: 0.88rem;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(241, 241, 241, 0.65);
   line-height: 1.6;
   margin: 0;
 }
@@ -270,7 +270,7 @@
 /* Flow Arrow */
 .flow-arrow {
   font-size: 1.8rem;
-  color: #38bdf8;
+  color: #6C63FF;
   align-self: center;
   margin-top: 50px;
   opacity: 0.6;
@@ -321,7 +321,7 @@
 .path-label {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #38bdf8;
+  color: #6C63FF;
   text-transform: uppercase;
   letter-spacing: 0.8px;
 }
@@ -333,7 +333,7 @@
 /* Path Description */
 .path p {
   font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(241, 241, 241, 0.75);
   margin: 6px 0 0 0;
   line-height: 1.45;
 }
@@ -341,7 +341,7 @@
 /* Path Divider */
 .path-divider {
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(241, 241, 241, 0.35);
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -353,7 +353,7 @@
   justify-content: center;
   gap: 50px;
   padding-top: 40px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(241, 241, 241, 0.08);
 }
 
 .benefit {
@@ -361,8 +361,8 @@
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(241, 241, 241, 0.02);
+  border: 1px solid rgba(241, 241, 241, 0.06);
   border-radius: 30px;
   transition: all 0.3s ease;
 }
@@ -379,7 +379,7 @@
 
 .benefit p {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(241, 241, 241, 0.7);
   margin: 0;
   white-space: nowrap;
 }
@@ -560,7 +560,7 @@
   border-radius: 30px;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #6366f1;
+  color: #6C63FF;
   margin-bottom: 16px;
   animation: badgeFloat 3s ease-in-out infinite;
 }
@@ -578,7 +578,7 @@
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+  background: linear-gradient(135deg, #6C63FF, #A78BFA, #a855f7);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -622,7 +622,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(180deg, transparent, #6366f1, #8b5cf6, transparent);
+  background: linear-gradient(180deg, transparent, #6C63FF, #A78BFA, transparent);
   animation: lineFlow 2s ease-in-out infinite;
 }
 
@@ -642,7 +642,7 @@
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 10px solid #8b5cf6;
+  border-top: 10px solid #A78BFA;
   animation: arrowPulse 2s ease-in-out infinite;
 }
 
@@ -656,7 +656,7 @@
   display: flex;
   align-items: center;
   gap: 24px;
-  background: #ffffff;
+  background: #F1F1F1;
   border-radius: 24px;
   padding: 28px 36px;
   width: 100%;
@@ -680,8 +680,8 @@
   left: 24px;
   font-size: 0.75rem;
   font-weight: 800;
-  color: #ffffff;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #F1F1F1;
+  background: linear-gradient(135deg, #6C63FF, #A78BFA);
   padding: 4px 12px;
   border-radius: 20px;
   letter-spacing: 1px;
@@ -709,7 +709,7 @@
   bottom: -4px;
   border: 2px solid transparent;
   border-radius: 24px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6) border-box;
+  background: linear-gradient(135deg, #6C63FF, #A78BFA) border-box;
   -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: destination-out;
@@ -755,7 +755,7 @@
 .ai-dots span {
   width: 8px;
   height: 8px;
-  background: #6366f1;
+  background: #6C63FF;
   border-radius: 50%;
   animation: dotBounce 1.4s ease-in-out infinite;
 }
@@ -771,7 +771,7 @@
 /* ========== SUCCESS NODE ========== */
 .node-end {
   border: 2px solid rgba(34, 197, 94, 0.25);
-  background: linear-gradient(135deg, #ffffff, rgba(34, 197, 94, 0.03));
+  background: linear-gradient(135deg, #F1F1F1, rgba(34, 197, 94, 0.03));
 }
 
 .node-end:hover {
@@ -819,7 +819,7 @@
   width: 100%;
   max-width: 720px;
   /* Force neutral white background to remove purple appearance */
-  background: #ffffff !important;
+  background: #F1F1F1 !important;
   border-radius: 28px;
   padding: 32px;
   box-shadow: 0 10px 50px rgba(0, 0, 0, 0.08);
@@ -994,7 +994,7 @@
   content: '→';
   position: absolute;
   left: 0;
-  color: #6366f1;
+  color: #6C63FF;
   font-weight: 600;
   transition: transform 0.3s ease;
 }
@@ -1037,7 +1037,7 @@
 .tag-animate {
   padding: 6px 14px;
   background: rgba(99, 102, 241, 0.08);
-  color: #6366f1;
+  color: #6C63FF;
   font-size: 0.78rem;
   font-weight: 600;
   border-radius: 20px;

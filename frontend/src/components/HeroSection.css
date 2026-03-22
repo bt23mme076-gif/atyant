@@ -1,8 +1,8 @@
 /* ========== HERO SECTION ========== */
 .hero-section {
-  background: #0D1117;
+  background: #0A0A0F;
   background-image:
-    linear-gradient(rgba(13, 17, 23, 0.95), rgba(13, 17, 23, 0.8)),
+    linear-gradient(rgba(10, 10, 15, 0.95), rgba(10, 10, 15, 0.8)),
     url('https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto,w_800/v1762949592/hero_dooexp.jpg');
   background-size: cover;
   background-position: center;
@@ -11,7 +11,7 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  color: #c9d1d9;
+  color: #F1F1F1;
   padding: 40px 20px;
 }
 
@@ -29,7 +29,7 @@
 }
 
 .hero-title .highlight {
-  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  background: linear-gradient(90deg, #6C63FF, #A78BFA);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -69,11 +69,11 @@
 .problem-pill:hover {
   background: rgba(56, 189, 248, 0.12);
   border-color: rgba(56, 189, 248, 0.3);
-  color: #38bdf8;
+  color: #6C63FF;
 }
 
 .problem-pill.active {
-  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  background: linear-gradient(90deg, #6C63FF, #A78BFA);
   border-color: transparent;
   color: white;
 }
@@ -130,7 +130,7 @@
   transform: translateY(-50%);
   width: 28px;
   height: 28px;
-  background: linear-gradient(135deg, #6366f1, #38bdf8);
+  background: linear-gradient(135deg, #6C63FF, #6C63FF);
   border-radius: 8px;
   cursor: pointer;
   display: flex;
@@ -153,7 +153,7 @@
 .ask-button {
   padding: 14px 24px;
   border-radius: 12px;
-  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  background: linear-gradient(90deg, #6C63FF, #A78BFA);
   color: white;
   font-size: 15px;
   font-weight: 700;
@@ -182,7 +182,7 @@
   padding: 14px;
   background: rgba(255, 255, 255, 0.98);
   border-radius: 14px;
-  border: 1.5px solid #38bdf8;
+  border: 1.5px solid #6C63FF;
   box-shadow: 0 8px 32px rgba(56, 189, 248, 0.15);
   z-index: 100;
   animation: fadeInUp 0.3s ease;
@@ -190,7 +190,7 @@
 
 .ai-suggestions-title {
   font-size: 0.85rem;
-  color: #6366f1;
+  color: #6C63FF;
   margin-bottom: 10px;
   font-weight: 600;
 }
@@ -207,7 +207,7 @@
 }
 
 .ai-suggestion-item:hover {
-  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  background: linear-gradient(90deg, #6C63FF, #A78BFA);
   color: #fff;
   transform: translateX(4px);
 }
@@ -285,7 +285,7 @@
 }
 
 .hero-confirm-send {
-  background: linear-gradient(120deg, #38bdf8, #818cf8);
+  background: linear-gradient(120deg, #6C63FF, #A78BFA);
   color: #fff;
   box-shadow: 0 10px 30px rgba(56, 189, 248, 0.35);
 }
@@ -300,7 +300,7 @@
   height: 20px;
   margin: 0 auto;
   border: 2px solid #f3f3f3;
-  border-top: 2px solid #6366f1;
+  border-top: 2px solid #6C63FF;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -375,7 +375,7 @@
   font-size: 2.2rem;
   font-weight: 800;
   letter-spacing: 0.03em;
-  background: linear-gradient(135deg, #ffffff, #c7d2fe, #8b5cf6);
+  background: linear-gradient(135deg, #ffffff, #c7d2fe, #A78BFA);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -468,7 +468,7 @@
   font-size: 3rem;
   font-weight: 700;
   color: #fff;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #6C63FF, #A78BFA);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -525,7 +525,7 @@
 .rotating-text {
   font-size: 1.15rem;
   font-weight: 600;
-  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  background: linear-gradient(90deg, #6C63FF, #A78BFA);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -535,7 +535,7 @@
 .cursor {
   display: inline-block;
   margin-left: 2px;
-  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  background: linear-gradient(90deg, #6C63FF, #A78BFA);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -726,7 +726,7 @@
 @media (min-width: 768px) {
   .hero-section {
     background-image:
-      linear-gradient(rgba(13, 17, 23, 0.95), rgba(13, 17, 23, 0.8)),
+      linear-gradient(rgba(10, 10, 15, 0.95), rgba(10, 10, 15, 0.8)),
       url('https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto,w_1200/v1762949592/hero_dooexp.jpg');
   }
 }
@@ -734,7 +734,7 @@
 @media (min-width: 1920px) {
   .hero-section {
     background-image:
-      linear-gradient(rgba(13, 17, 23, 0.95), rgba(13, 17, 23, 0.8)),
+      linear-gradient(rgba(10, 10, 15, 0.95), rgba(10, 10, 15, 0.8)),
       url('https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto,w_2070/v1762949592/hero_dooexp.jpg');
   }
 }
@@ -743,7 +743,7 @@
 .hero-search-input.highlight-input {
   animation: highlightPulse 0.5s ease-out;
   box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.3), 0 0 30px rgba(99, 102, 241, 0.2);
-  border-color: #6366f1 !important;
+  border-color: #6C63FF !important;
 }
 
 @keyframes highlightPulse {

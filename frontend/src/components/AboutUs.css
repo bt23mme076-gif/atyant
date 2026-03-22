@@ -2,7 +2,7 @@
 
 .about-section {
   padding: 80px 20px;
-  background: #0D1117;
+  background: #0A0A0F;
 }
 
 .about-container {
@@ -44,13 +44,13 @@
 
 .about-tagline {
   font-size: 1.15rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(241, 241, 241, 0.7);
   margin-bottom: 32px;
   line-height: 1.6;
 }
 
 .about-tagline .highlight {
-  color: #38bdf8;
+  color: #6C63FF;
   font-weight: 600;
 }
 
@@ -66,8 +66,8 @@
   align-items: flex-start;
   gap: 16px;
   padding: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(241, 241, 241, 0.03);
+  border: 1px solid rgba(241, 241, 241, 0.08);
   border-radius: 12px;
   transition: all 0.3s ease;
 }
@@ -92,7 +92,7 @@
 
 .about-point p {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(241, 241, 241, 0.6);
   margin: 0;
   line-height: 1.5;
 }

@@ -56,8 +56,8 @@
   right: 0;
   bottom: 0;
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(rgba(241, 241, 241, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(241, 241, 241, 0.02) 1px, transparent 1px);
   background-size: 60px 60px;
   animation: gridMove 30s linear infinite;
 }
@@ -138,13 +138,13 @@
   font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 900;
   margin: 0 0 16px;
-  color: #ffffff;
+  color: #F1F1F1;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
 
 .reviews-head .gradient-text {
-  background: linear-gradient(135deg, #818cf8, #a78bfa, #c084fc);
+  background: linear-gradient(135deg, #A78BFA, #a78bfa, #c084fc);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -170,8 +170,8 @@
   justify-content: center;
   align-items: center;
   gap: 0;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(241, 241, 241, 0.03);
+  border: 1px solid rgba(241, 241, 241, 0.08);
   border-radius: 20px;
   padding: 28px 40px;
   backdrop-filter: blur(20px);
@@ -195,7 +195,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #818cf8;
+  color: #A78BFA;
 }
 
 .stat-content {
@@ -207,7 +207,7 @@
 .stat-number {
   font-size: 1.8rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #ffffff, #c7d2fe);
+  background: linear-gradient(135deg, #F1F1F1, #c7d2fe);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -226,7 +226,7 @@
 .stat-divider {
   width: 1px;
   height: 50px;
-  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.15), transparent);
+  background: linear-gradient(to bottom, transparent, rgba(241, 241, 241, 0.15), transparent);
 }
 
 /* ========== SWIPER ========== */
@@ -261,7 +261,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7);
+  background: linear-gradient(90deg, #6C63FF, #A78BFA, #a855f7);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.5s ease;
@@ -301,7 +301,7 @@
   left: -100%;
   width: 50%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  background: linear-gradient(90deg, transparent, rgba(241, 241, 241, 0.05), transparent);
   transform: skewX(-20deg);
   transition: left 0.8s ease;
   pointer-events: none;
@@ -359,7 +359,7 @@
   width: 60px;
   height: 60px;
   border-radius: 18px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #6C63FF, #A78BFA);
   color: #fff;
   display: flex;
   align-items: center;
@@ -473,7 +473,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(241, 241, 241, 0.06);
 }
 
 .review-platform {
@@ -532,7 +532,7 @@
 }
 
 .swiper-pagination-bullet-active {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #6C63FF, #A78BFA);
   opacity: 1;
   width: 36px;
   border-radius: 6px;
@@ -569,13 +569,13 @@
 .cta-content h3 {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #ffffff;
+  color: #F1F1F1;
   margin-bottom: 8px;
 }
 
 .cta-content p {
   font-size: 1rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(241, 241, 241, 0.6);
 }
 
 .cta-button {
@@ -583,12 +583,12 @@
   align-items: center;
   gap: 12px;
   padding: 18px 36px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #6C63FF, #A78BFA);
   border: none;
   border-radius: 16px;
   font-size: 1rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #F1F1F1;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -601,7 +601,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(241, 241, 241, 0.2), transparent);
   animation: btnShine 3s ease-in-out infinite;
 }
 
