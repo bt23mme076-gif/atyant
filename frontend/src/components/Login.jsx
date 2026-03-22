@@ -2,6 +2,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
+import { API_URL } from '../services/api.js';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { GoogleLogin } from '@react-oauth/google';
