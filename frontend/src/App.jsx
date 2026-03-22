@@ -14,6 +14,7 @@ import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 import ResumeMarketplace from './components/ResumeMarketplace';
+import { API_URL } from '../services/api.js';
 
 
 // Lazy-loaded pages
@@ -37,6 +38,7 @@ const EnhancedAskQuestion = lazy(() => import('./components/EnhancedAskQuestion'
 const InternshipJourney = lazy(() => import('./components/InternshipJourney'));
 const AdminDashboard    = lazy(() => import('./components/AdminDashboard'));
 const CareerGuidesPage  = lazy(() => import('./components/CareerGuidesPage'));
+import { API_URL } from '../services/api.js';
 
 
 // Community notifications — static, no need inside component

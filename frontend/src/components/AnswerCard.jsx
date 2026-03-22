@@ -34,6 +34,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './AnswerCard.css';
+import { API_URL } from '../services/api.js';
 
 
 

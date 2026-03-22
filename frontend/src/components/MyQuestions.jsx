@@ -4,6 +4,7 @@ import { useAuth } from '../AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import LoadingSpinner from './LoadingSpinner';
 import './MyQuestions.css';
+import { API_URL } from '../services/api.js';
 
 const REFRESH_INTERVAL = 10_000;
 

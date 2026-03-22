@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './AuthForm.css';
+import { API_URL } from '../services/api.js';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');

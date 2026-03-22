@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import './SearchBar.css';
+import { API_URL } from '../services/api.js';
 
 const SearchBar = () => {
   const [query, setQuery] = useState('');

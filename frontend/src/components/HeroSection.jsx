@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import './HeroSection.css';
 import LoadingSpinner from './LoadingSpinner';
+import { API_URL } from '../services/api.js';
 
 const HeroSection = () => {
   const [problem, setProblem] = useState('');

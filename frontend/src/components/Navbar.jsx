@@ -5,6 +5,7 @@ import { AuthContext } from '../AuthContext';
 import UserAvatar from './UserAvatar';
 import { Menu, User as UserIcon, GraduationCap, LogOut, ShoppingBag } from 'lucide-react';
 import './Navbar.css';
+import { API_URL } from '../services/api.js';
 
 
 const Navbar = () => {

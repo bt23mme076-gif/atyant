@@ -1,6 +1,7 @@
 // src/components/ForgotPassword.jsx
 import React, { useState } from 'react';
 import './AuthForm.css';
+import { API_URL } from '../services/api.js';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');

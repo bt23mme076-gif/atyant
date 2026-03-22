@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import './MentorGallery.css';
 import defaultAvatar from '../assets/default-avatar.svg';
+import { API_URL } from '../services/api.js';
 
 // ✅ CACHE CONSTANTS
 const CACHE_TIME = 40 * 60 * 1000; // 40 minutes

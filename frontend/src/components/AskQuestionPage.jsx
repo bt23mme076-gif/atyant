@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import './AskQuestionPage.css';
 import './MentorListPage.css';
+import { API_URL } from '../services/api.js';
 
 const AskQuestionPage = () => {
   const [question, setQuestion] = useState('');

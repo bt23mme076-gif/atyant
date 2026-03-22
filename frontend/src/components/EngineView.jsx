@@ -5,6 +5,7 @@ import { useAuth } from '../AuthContext';
 import AnswerCard from './AnswerCard';
 import LoadingSpinner from './LoadingSpinner';
 import './EngineView.css';
+import { API_URL } from '../services/api.js';
 
 const EngineView = ({ isAnswerView }) => {
   const { questionId, answerCardId } = useParams();

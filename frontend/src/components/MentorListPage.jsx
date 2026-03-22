@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import MentorRating from './MentorRating';
 import './MentorListPage.css';
+import { API_URL } from '../services/api.js';
 
 // ✅ CACHE CONSTANTS
 const CACHE_TIME = 5 * 60 * 1000; // 5 minutes

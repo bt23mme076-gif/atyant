@@ -1,6 +1,7 @@
 // frontend/src/components/ResetPasswordPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { API_URL } from '../services/api.js';
 
 const ResetPasswordPage = () => {
   const [password, setPassword] = useState('');

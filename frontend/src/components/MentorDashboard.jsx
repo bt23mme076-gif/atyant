@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './MentorDashboard.css';
+import { API_URL } from '../services/api.js';
 
 const REFRESH_MS     = 10_000;
 const MAX_AUDIO_SIZE = 10 * 1024 * 1024; // 10 MB
