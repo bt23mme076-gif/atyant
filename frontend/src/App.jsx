@@ -18,8 +18,8 @@ import { API_URL } from './services/api.js';
 
 
 // Lazy-loaded pages
-const Home              = lazy(() => import('./components/NewHome')); // Premium homepage
-const OldHome           = lazy(() => import('./components/Home')); // Old homepage (backup)
+const OldHome           = lazy(() => import('./components/Home'));
+const Home              = lazy(() => import('./components/NewHome'));
 const Dashboard         = lazy(() => import('./components/Dashboard'));
 const Login             = lazy(() => import('./components/Login'));
 const Signup            = lazy(() => import('./components/signup'));
