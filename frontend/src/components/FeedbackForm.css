@@ -2,7 +2,7 @@
 
 .feedback-section {
   padding: 60px 20px;
-  background-color: #f9fafb; /* Light grey background */
+  background: #ffffff; /* Light grey background */
   font-family: 'Poppins', sans-serif;
 }
 
@@ -46,7 +46,7 @@
   border-radius: 8px;
   font-size: 1rem;
   font-family: 'Poppins', sans-serif;
-  background-color: #f9fafb;
+  background: #ffffff;
   transition: all 0.3s ease;
 }
 

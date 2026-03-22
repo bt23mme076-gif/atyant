@@ -133,7 +133,7 @@
 
 .why-header p {
   font-size: 1.15rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: #475569;
   max-width: 450px;
   margin: 0 auto;
 }
@@ -159,7 +159,7 @@
 
 .why-card:hover {
   transform: translateY(-10px);
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: #475569;
 }
 
 /* Card Glow Effect */
@@ -197,13 +197,13 @@
   right: 24px;
   font-size: 4rem;
   font-weight: 900;
-  color: rgba(255, 255, 255, 0.03);
+  color: #475569;
   line-height: 1;
   transition: all 0.4s ease;
 }
 
 .why-card:hover .card-number {
-  color: rgba(255, 255, 255, 0.08);
+  color: #475569;
   transform: scale(1.1);
 }
 
@@ -292,7 +292,7 @@
 /* Card Description */
 .why-card p {
   font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: #475569;
   line-height: 1.7;
   margin-bottom: 20px;
 }
@@ -315,7 +315,7 @@
 
 .card-blue .card-highlight {
   background: rgba(56, 189, 248, 0.1);
-  color: #38bdf8;
+  color: #667eea;
   border: 1px solid rgba(56, 189, 248, 0.2);
 }
 
@@ -341,7 +341,7 @@
   align-items: center;
   justify-content: center;
   background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.3);
+  color: #475569;
   opacity: 0;
   transform: translate(-10px, 10px);
   transition: all 0.4s ease;
@@ -359,7 +359,7 @@
 
 .card-blue:hover .card-arrow {
   background: rgba(56, 189, 248, 0.15);
-  color: #38bdf8;
+  color: #667eea;
 }
 
 .card-purple:hover .card-arrow {
@@ -376,7 +376,7 @@
 
 .why-cta p {
   font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: #475569;
   margin-bottom: 20px;
 }
 

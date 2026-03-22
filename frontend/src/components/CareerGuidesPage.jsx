@@ -491,7 +491,7 @@ export default function CareerGuidesPage() {
   };
 
   return (
-    <div className="career-page">
+    <div className="career-guides-page career-page">
       <section className="career-hero">
         <div className="container">
           <div className="hero-badge">ATYANT • Career Playbook</div>

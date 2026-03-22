@@ -83,7 +83,7 @@
 }
 
 .journey-subtitle {
-  color: rgba(255, 255, 255, 0.9);
+  color: #475569;
   font-size: 1.1rem;
   font-weight: 300;
   margin: 0;
@@ -177,7 +177,7 @@
 }
 
 .slide-caption {
-  color: #fff;
+  color: #1e293b;
   font-size: 1.5rem;
   font-weight: 600;
   margin: 0;
@@ -294,7 +294,7 @@
   text-align: center;
   margin-top: 30px;
   font-size: 1.2rem;
-  color: #fff;
+  color: #1e293b;
   font-weight: 600;
   letter-spacing: 2px;
 }
