@@ -2,7 +2,7 @@
 
 .feedback-section {
   padding: 60px 20px;
-  background-color: #111118; /* Light grey background */
+  background-color: #f9fafb; /* Light grey background */
   font-family: 'Poppins', sans-serif;
 }
 
@@ -30,7 +30,7 @@
   flex-direction: column;
   gap: 20px;
   text-align: left;
-  background-color: #F1F1F1;
+  background-color: #ffffff;
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -46,7 +46,7 @@
   border-radius: 8px;
   font-size: 1rem;
   font-family: 'Poppins', sans-serif;
-  background-color: #111118;
+  background-color: #f9fafb;
   transition: all 0.3s ease;
 }
 
@@ -60,7 +60,7 @@
 .feedback-form textarea:focus {
   outline: none;
   border-color: #4f46e5; /* Atyant's primary blue */
-  background-color: #F1F1F1;
+  background-color: #ffffff;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
