@@ -14,7 +14,7 @@ import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 import ResumeMarketplace from './components/ResumeMarketplace';
-import { API_URL } from '../services/api.js';
+import { API_URL } from './services/api.js';
 
 
 // Lazy-loaded pages
