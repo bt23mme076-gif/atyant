@@ -13,6 +13,8 @@ import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
+import ResumeMarketplace from './components/ResumeMarketplace';
+
 
 // Lazy-loaded pages
 const Home              = lazy(() => import('./components/Home'));
@@ -171,6 +173,7 @@ function App() {
               <Route path="/internship-journey"    element={<InternshipJourney />} />
               <Route path="/career-guides"         element={<CareerGuidesPage />} />
               <Route path="/profile/:username"     element={<PublicProfilePage />} />
+              <Route path="/resume-store" element={<ResumeMarketplace />} />
 
               {/* Protected */}
               <Route path="/dashboard"        element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -185,6 +188,8 @@ function App() {
               <Route path="/ask"              element={<ProtectedRoute><EnhancedAskQuestion /></ProtectedRoute>} />
               <Route path="/mentor-dashboard" element={<ProtectedRoute><MentorDashboard /></ProtectedRoute>} />
               <Route path="/admin-dashboard"  element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+             /
+
             </Routes>
           </ErrorBoundary>
         </Suspense>

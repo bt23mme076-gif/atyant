@@ -1,3 +1,9 @@
+import { Headers, Request, Response, fetch } from 'undici';
+global.Headers = Headers;
+global.Request = Request;
+global.Response = Response;
+global.fetch = fetch;
+
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -26,6 +32,7 @@ import iimRoutes           from './routes/iimRoutes.js';
 import adminRoutes         from './routes/adminRoutes.js';
 import questionRoutes      from './routes/questionRoutes.js';
 import paymentRoutes       from './routes/paymentRoutes.js';
+import resumeRoutes        from './routes/resumeRoutes.js';
 
 // ─── Models / utils ────────────────────────────────────────────────────────
 import Message      from './models/Message.js';
@@ -116,6 +123,7 @@ app.use('/api/profile',         profileRoutes);
 app.use('/api/search',          searchRoutes);
 app.use('/api/payment',         paymentRoutes);
 app.use('/api/payments',        paymentRoutes);
+// app.use('/api/resume',          resumeRoutes); // Removed duplicate
 app.use('/api/ask',             askRoutes);
 app.use('/api/mentor',          mentorRoutes);
 app.use('/api/users',           mentorRoutes);   // backward compat
@@ -126,6 +134,7 @@ app.use('/api/engine',          engineRoutes);
 app.use('/api/iim',             iimRoutes);
 app.use('/api/admin',           adminRoutes);
 app.use('/api/questions',       questionRoutes);
+app.use('/api/resume',          resumeRoutes);
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

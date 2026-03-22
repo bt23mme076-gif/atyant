@@ -5,15 +5,19 @@
 User-agent: *
 
 # ===== ALLOW PUBLIC PAGES =====
-Allow: /
-Allow: /internships
-Allow: /career-guides
-Allow: /nearby-mentors
+Allow: /$
+Allow: /internships$
+Allow: /career-guides$
+Allow: /faq$
+Allow: /blog$
+Allow: /forum$
+Allow: /ask$
+Allow: /profile/
+Allow: /internship-journey$
 
 # ===== BLOCK AUTH PAGES =====
 Disallow: /login
 Disallow: /signup
-Disallow: /Signup
 Disallow: /forgot-password
 Disallow: /reset-password
 
@@ -24,17 +28,18 @@ Disallow: /mentors
 Disallow: /engine
 Disallow: /my-questions
 Disallow: /mentor-dashboard
-Disallow: /profile
+Disallow: /admin-dashboard
+Disallow: /nearby-mentors
+Disallow: /answer
+Disallow: /profile$
 
 # ===== BLOCK SYSTEM FILES =====
 Disallow: /api/
 Disallow: /sw.js
+Disallow: /manifest.json
 
 # ===== BLOCK DUPLICATE CONTENT =====
 Disallow: /*?*
 
 # ===== SITEMAP =====
 Sitemap: https://atyant.in/sitemap.xml
-
-# Crawl Delay
-Crawl-delay: 1

@@ -148,6 +148,15 @@ const userSchema = new mongoose.Schema({
   messageCredits: { type: Number, default: 5 },
   credits       : { type: Number, default: 3, min: 0 },
 
+    // ─── PURCHASED TEMPLATES (Resume marketplace)
+    purchasedTemplates: [{
+      templateId: { type: Number, required: true },
+      paymentId:  { type: String },
+      canvaLink:  { type: String },
+      expiresAt:  { type: Date, required: true },
+      createdAt:  { type: Date, default: Date.now }
+    }],
+
   // ─── PROFILE STRENGTH ──────────────────────
   profileStrength: { type: Number, min: 0, max: 100, default: 0 }
 

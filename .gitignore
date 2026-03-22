@@ -1,20 +1,15 @@
-# Node modules
-node_modules/
-
-# Environment files
-.env
-.env.*
-
-# VSCode settings
-.vscode/
-
-# Build output
-dist/
-build/
-
-# OS files
+# ─── OS ───────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 
-# Ignore Google Cloud credentials
-backend/google-key.json
+# ─── Editor ───────────────────────────────────────────
+.vscode/
+.idea/
+
+# ─── Secrets / credentials (repo-wide safety net) ─────
+*.pem
+*.key
+google-key.json
+
+# ─── Misc ─────────────────────────────────────────────
+*.log

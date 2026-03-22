@@ -3,7 +3,7 @@ import React, { useContext, useState, useEffect, useRef, useCallback } from 'rea
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
 import UserAvatar from './UserAvatar';
-import { Menu, User as UserIcon, GraduationCap, LogOut } from 'lucide-react';
+import { Menu, User as UserIcon, GraduationCap, LogOut, ShoppingBag } from 'lucide-react';
 import './Navbar.css';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -17,7 +17,6 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
   const panelRef    = useRef(null);
 
-  // 🔴 FIX: Removed console.logs from render — only fetch photo when needed
   useEffect(() => {
     if (!user) { setUserPhoto(null); return; }
     if (user.profilePicture) { setUserPhoto(user.profilePicture); return; }
@@ -32,9 +31,8 @@ const Navbar = () => {
       .catch(() => {});
 
     return () => { cancelled = true; };
-  }, [user?.id || user?._id]);   // Only re-fetch when user ID changes
+  }, [user?.id || user?._id]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     if (!showDropdown) return;
     const handler = (e) => {
@@ -46,7 +44,6 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, [showDropdown]);
 
-  // Listen for community chat event
   useEffect(() => {
     const handler = () => {};
     window.addEventListener('openCommunityChat', handler);
@@ -68,27 +65,30 @@ const Navbar = () => {
 
     if (!user) return (
       <>
-        <Link to="/internships"   className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
-        <Link to="/career-guides" className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
-        <Link to="/login"         className="nav-button"                  onClick={close}>Login</Link>
-        <Link to="/signup"        className="nav-button primary"          onClick={close}>Sign Up</Link>
+        <Link to="/internships"    className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/career-guides"  className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
+        <Link to="/resume-store"   className="nav-link resume-store-link"  onClick={close}><ShoppingBag size={18} /> Resume Store</Link>
+        <Link to="/login"          className="nav-button"                  onClick={close}>Login</Link>
+        <Link to="/signup"         className="nav-button primary"          onClick={close}>Sign Up</Link>
       </>
     );
 
     if (user.role === 'mentor') return (
       <>
-        <Link to="/dashboard"      className="nav-link dashboard-link"    onClick={close}>Dashboard</Link>
-        <Link to="/chat"           className="nav-link mentor-chat-link"  onClick={close}>Student Chats</Link>
-        <Link to="/internships"    className="nav-link internship-link"   onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/dashboard"      className="nav-link dashboard-link"     onClick={close}>Dashboard</Link>
+        <Link to="/chat"           className="nav-link mentor-chat-link"   onClick={close}>Student Chats</Link>
+        <Link to="/internships"    className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
         <Link to="/career-guides"  className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
+        <Link to="/resume-store"   className="nav-link resume-store-link"  onClick={close}><ShoppingBag size={18} /> Resume Store</Link>
       </>
     );
 
     return (
       <>
-        <Link to="/my-questions"   className="nav-link"                   onClick={close}>My Questions</Link>
-        <Link to="/internships"    className="nav-link internship-link"   onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/my-questions"   className="nav-link"                    onClick={close}>My Questions</Link>
+        <Link to="/internships"    className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
         <Link to="/career-guides"  className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
+        <Link to="/resume-store"   className="nav-link resume-store-link"  onClick={close}><ShoppingBag size={18} /> Resume Store</Link>
       </>
     );
   };
