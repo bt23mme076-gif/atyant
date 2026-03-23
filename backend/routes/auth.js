@@ -88,9 +88,16 @@ router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    // Check if user has a password (not OAuth user)
+    if (!user.password) {
+      return res.status(400).json({ 
+        message: 'This account was created with Google. Please use "Continue with Google" to login.' 
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);

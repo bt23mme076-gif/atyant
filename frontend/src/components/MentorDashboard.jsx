@@ -256,6 +256,23 @@ const MentorDashboard = () => {
 
   return (
     <div className="mentor-dashboard-container">
+      {/* Big Beautiful Monetization Banner */}
+      <div className="monetization-banner">
+        <div className="banner-content">
+          <div className="banner-icon">💰</div>
+          <div className="banner-text">
+            <h2>Start Earning with Monetization</h2>
+            <p>Create paid services, manage bookings, and track your earnings</p>
+          </div>
+          <button 
+            className="banner-cta"
+            onClick={() => navigate('/mentor-monetization')}
+          >
+            Open Monetization Dashboard →
+          </button>
+        </div>
+      </div>
+
       <div className="mentor-dashboard-header">
         <div className="header-content">
           <h1>🎯 Mentor Dashboard</h1>

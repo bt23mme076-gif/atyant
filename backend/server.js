@@ -27,6 +27,7 @@ import adminRoutes         from './routes/adminRoutes.js';
 import questionRoutes      from './routes/questionRoutes.js';
 import paymentRoutes       from './routes/paymentRoutes.js';
 import resumeRoutes        from './routes/resumeRoutes.js';
+import monetizationRoutes  from './routes/monetizationRoutes.js';
 
 // ─── Models / utils ────────────────────────────────────────────────────────
 import Message      from './models/Message.js';
@@ -34,6 +35,7 @@ import User         from './models/User.js';
 import { moderator } from './utils/ContentModerator.js';
 import { globalRateLimit } from './middleware/globalRateLimiter.js';
 import { sendAutoReply }   from './controllers/messageController.js';
+import ReminderCron from './services/ReminderCron.js';
 
 // ─────────────────────────────────────────────
 //  APP SETUP
@@ -98,7 +100,11 @@ mongoose.connect(MONGO_URI, {
   socketTimeoutMS        : 45000,
   connectTimeoutMS       : 30000,
 })
-  .then(() => console.log('✅ MongoDB connected'))
+  .then(() => {
+    console.log('✅ MongoDB connected');
+    // Start reminder cron job
+    ReminderCron.start();
+  })
   .catch(err => {
     console.error('❌ MongoDB connection error:', err.message);
     process.exit(1);
@@ -132,6 +138,7 @@ app.use('/api/iim',             iimRoutes);
 app.use('/api/admin',           adminRoutes);
 app.use('/api/questions',       questionRoutes);
 app.use('/api/resume',          resumeRoutes);
+app.use('/api/monetization',    monetizationRoutes);
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

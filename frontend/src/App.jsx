@@ -33,6 +33,10 @@ const InternshipPage    = lazy(() => import('./components/InternshipPage'));
 const CommunityChat     = lazy(() => import('./components/CommunityChat'));
 const EngineView        = lazy(() => import('./components/EngineView'));
 const MentorDashboard   = lazy(() => import('./components/MentorDashboard'));
+const MentorMonetization = lazy(() => import('./components/MentorMonetization'));
+const MentorProfilePage = lazy(() => import('./components/MentorProfilePage'));
+const MyBookings = lazy(() => import('./components/MyBookings'));
+const RoleBasedDashboard = lazy(() => import('./components/RoleBasedDashboard'));
 const MyQuestions       = lazy(() => import('./components/MyQuestions'));
 const EnhancedAskQuestion = lazy(() => import('./components/EnhancedAskQuestion'));
 const AdminDashboard    = lazy(() => import('./components/AdminDashboard'));
@@ -172,7 +176,7 @@ function App() {
               <Route path="/resume-store" element={<ResumeMarketplace />} />
 
               {/* Protected */}
-              <Route path="/dashboard"        element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/dashboard"        element={<ProtectedRoute><RoleBasedDashboard /></ProtectedRoute>} />
               <Route path="/mentors"          element={<ProtectedRoute><MentorListPage /></ProtectedRoute>} />
               <Route path="/chat"             element={<ProtectedRoute><ErrorBoundary><ChatPage /></ErrorBoundary></ProtectedRoute>} />
               <Route path="/chat/:mentorId"   element={<ProtectedRoute><ErrorBoundary><ChatPage /></ErrorBoundary></ProtectedRoute>} />
@@ -183,6 +187,9 @@ function App() {
               <Route path="/my-questions"     element={<ProtectedRoute><MyQuestions /></ProtectedRoute>} />
               <Route path="/ask"              element={<ProtectedRoute><EnhancedAskQuestion /></ProtectedRoute>} />
               <Route path="/mentor-dashboard" element={<ProtectedRoute><MentorDashboard /></ProtectedRoute>} />
+              <Route path="/mentor-monetization" element={<ProtectedRoute><MentorMonetization /></ProtectedRoute>} />
+              <Route path="/mentor/:mentorId" element={<MentorProfilePage />} />
+              <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
               <Route path="/admin-dashboard"  element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             </Routes>
           </ErrorBoundary>

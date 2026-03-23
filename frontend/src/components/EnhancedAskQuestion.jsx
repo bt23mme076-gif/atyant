@@ -6,6 +6,300 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './EnhancedAskQuestion.css';
 
+// Mentor Services Preview Component
+const MentorServicesPreview = ({ mentorId }) => {
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedService, setSelectedService] = useState(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchServices();
+  }, [mentorId]);
+
+  const fetchServices = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/monetization/services/mentor/${mentorId}`);
+      const data = await res.json();
+      if (data.success) {
+        setServices(data.services.filter(s => s.isActive).slice(0, 3)); // Show max 3 services
+      }
+    } catch (error) {
+      console.error('Fetch services error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBookService = (service) => {
+    setSelectedService(service);
+    setShowBookingModal(true);
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  if (loading || services.length === 0) return null;
+
+  return (
+    <div className="mentor-services-preview">
+      <h4 className="services-title">💼 Available Services</h4>
+      <div className="services-grid-preview">
+        {services.map(service => (
+          <div key={service._id} className="service-card-mini">
+            <div className="service-header-mini">
+              <span className="service-icon">
+                {service.type === 'video-call' && '📹'}
+                {service.type === 'audio-call' && '🎤'}
+                {service.type === 'chat' && '💬'}
+                {service.type === 'answer-card' && '🎯'}
+              </span>
+              {service.isRecommended && (
+                <span className="recommended-mini">⭐</span>
+              )}
+            </div>
+            <h5>{service.title}</h5>
+            <p className="service-desc-mini">{service.description.substring(0, 60)}...</p>
+            <div className="service-footer-mini">
+              <span className="price-mini">{formatCurrency(service.price)}</span>
+              <button 
+                className="book-mini-btn"
+                onClick={() => handleBookService(service)}
+              >
+                Book
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      <button 
+        className="view-all-services-btn"
+        onClick={() => navigate(`/mentor/${mentorId}`)}
+      >
+        View All Services →
+      </button>
+
+      {showBookingModal && selectedService && (
+        <ServiceBookingModal
+          service={selectedService}
+          mentorId={mentorId}
+          onClose={() => {
+            setShowBookingModal(false);
+            setSelectedService(null);
+          }}
+          user={user}
+        />
+      )}
+    </div>
+  );
+};
+
+// Service Booking Modal Component
+const ServiceBookingModal = ({ service, mentorId, onClose, user }) => {
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [notes, setNotes] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleBooking = async () => {
+    if ((service.type === 'video-call' || service.type === 'audio-call') && (!selectedDate || !selectedTime)) {
+      alert('Please select date and time');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Create Razorpay order
+      const orderRes = await fetch(`${API_URL}/api/payment/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${user.token}`
+        },
+        body: JSON.stringify({
+          amount: service.price,
+          serviceId: service._id,
+          mentorId,
+          scheduledAt: (service.type === 'video-call' || service.type === 'audio-call') ? `${selectedDate}T${selectedTime}` : null,
+          notes
+        })
+      });
+
+      const orderData = await orderRes.json();
+      
+      if (orderData.success) {
+        // Initialize Razorpay
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: orderData.order.amount,
+          currency: 'INR',
+          name: 'Atyant',
+          description: service.title,
+          order_id: orderData.order.id,
+          handler: async function (response) {
+            // Verify payment
+            const verifyRes = await fetch(`${API_URL}/api/payment/verify`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${user.token}`
+              },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                serviceId: service._id,
+                mentorId,
+                scheduledAt: (service.type === 'video-call' || service.type === 'audio-call') ? `${selectedDate}T${selectedTime}` : null,
+                notes
+              })
+            });
+
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              alert('✅ Booking confirmed! Check your email for details.');
+              onClose();
+            }
+          },
+          prefill: {
+            name: user.name,
+            email: user.email
+          },
+          theme: {
+            color: '#667eea'
+          }
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      alert('Failed to create booking. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Generate next 30 days
+  const getAvailableDates = () => {
+    const dates = [];
+    for (let i = 1; i <= 30; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() + i);
+      dates.push(date.toISOString().split('T')[0]);
+    }
+    return dates;
+  };
+
+  // Generate time slots
+  const getTimeSlots = () => {
+    const slots = [];
+    for (let hour = 9; hour <= 20; hour++) {
+      slots.push(`${hour.toString().padStart(2, '0')}:00`);
+      slots.push(`${hour.toString().padStart(2, '0')}:30`);
+    }
+    return slots;
+  };
+
+  return (
+    <div className="booking-modal-overlay" onClick={onClose}>
+      <div className="booking-modal-content" onClick={e => e.stopPropagation()}>
+        <div className="booking-modal-header">
+          <h3>Book: {service.title}</h3>
+          <button className="close-modal-btn" onClick={onClose}>×</button>
+        </div>
+
+        <div className="booking-modal-body">
+          <div className="booking-summary-box">
+            <div className="summary-row">
+              <span>Service:</span>
+              <strong>{service.title}</strong>
+            </div>
+            <div className="summary-row">
+              <span>Price:</span>
+              <strong>₹{service.price}</strong>
+            </div>
+            {(service.type === 'video-call' || service.type === 'audio-call') && (
+              <div className="summary-row">
+                <span>Duration:</span>
+                <strong>{service.duration} minutes</strong>
+              </div>
+            )}
+          </div>
+
+          {(service.type === 'video-call' || service.type === 'audio-call') && (
+            <>
+              <div className="form-group-booking">
+                <label>Select Date</label>
+                <select 
+                  value={selectedDate} 
+                  onChange={e => setSelectedDate(e.target.value)}
+                  required
+                >
+                  <option value="">Choose a date</option>
+                  {getAvailableDates().map(date => (
+                    <option key={date} value={date}>
+                      {new Date(date).toLocaleDateString('en-IN', { 
+                        weekday: 'short', 
+                        day: 'numeric', 
+                        month: 'short' 
+                      })}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group-booking">
+                <label>Select Time</label>
+                <select 
+                  value={selectedTime} 
+                  onChange={e => setSelectedTime(e.target.value)}
+                  required
+                >
+                  <option value="">Choose a time</option>
+                  {getTimeSlots().map(time => (
+                    <option key={time} value={time}>{time}</option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
+
+          <div className="form-group-booking">
+            <label>Notes (Optional)</label>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="Any specific requirements..."
+              rows={3}
+            />
+          </div>
+
+          <div className="booking-modal-actions">
+            <button className="cancel-booking-btn" onClick={onClose}>Cancel</button>
+            <button 
+              className="confirm-booking-btn" 
+              onClick={handleBooking}
+              disabled={loading}
+            >
+              {loading ? 'Processing...' : `Pay ₹${service.price}`}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const COMPANY_DOMAINS = [
   { label: 'Tech', value: 'Tech', icon: '💻' },
@@ -873,28 +1167,33 @@ const EnhancedAskQuestion = () => {
                   )}
 
                   {mentorPreview?.mentor && (
-                    <div className="mentor-card-preview">
-                      <div className="mentor-avatar">
-                        {mentorPreview.mentor?.profileImage ? (
-                          <img src={mentorPreview.mentor.profileImage} alt="Mentor" />
-                        ) : (
-                          <div className="avatar-placeholder">👤</div>
-                        )}
-                      </div>
-                      <div className="mentor-info">
-                        <h3>{mentorPreview.mentor?.name || 'Matched Mentor'}</h3>
-                        <p className="mentor-bio">{mentorPreview.mentor?.bio || 'A mentor match has been found for your question.'}</p>
-                        <div className="mentor-expertise">
-                          {mentorPreview.mentor?.expertise?.slice(0, 3).map((exp, i) => (
-                            <span key={i} className="expertise-tag">{exp}</span>
-                          ))}
+                    <>
+                      <div className="mentor-card-preview">
+                        <div className="mentor-avatar">
+                          {mentorPreview.mentor?.profileImage ? (
+                            <img src={mentorPreview.mentor.profileImage} alt="Mentor" />
+                          ) : (
+                            <div className="avatar-placeholder">👤</div>
+                          )}
                         </div>
-                        <div className="match-percentage">
-                          <div className="match-circle">{mentorPreview.mentor?.matchPercentage || 0}%</div>
-                          <span>Match Score</span>
+                        <div className="mentor-info">
+                          <h3>{mentorPreview.mentor?.name || 'Matched Mentor'}</h3>
+                          <p className="mentor-bio">{mentorPreview.mentor?.bio || 'A mentor match has been found for your question.'}</p>
+                          <div className="mentor-expertise">
+                            {mentorPreview.mentor?.expertise?.slice(0, 3).map((exp, i) => (
+                              <span key={i} className="expertise-tag">{exp}</span>
+                            ))}
+                          </div>
+                          <div className="match-percentage">
+                            <div className="match-circle">{mentorPreview.mentor?.matchPercentage || 0}%</div>
+                            <span>Match Score</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
+
+                      {/* Mentor Services Section */}
+                      <MentorServicesPreview mentorId={mentorPreview.mentor.id} />
+                    </>
                   )}
 
                   <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', flexDirection: 'row' }}>
