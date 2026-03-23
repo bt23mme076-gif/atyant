@@ -94,9 +94,13 @@ router.get('/mentors', optionalAuth, async (req, res) => {
         sortOptions = { lastActive: -1 };
     }
 
+    // Respect client-provided `limit` with a safe upper bound to avoid huge responses
+    const requestedLimit = parseInt(req.query.limit, 10);
+    const limit = Number.isFinite(requestedLimit) && requestedLimit > 0 ? Math.min(requestedLimit, 1000) : 100;
+
     const mentors = await User.find(filter)
       .sort(sortOptions)
-      .limit(100)
+      .limit(limit)
       .select('username name profilePicture bio rating expertise skills education location isOnline lastActive price yearsOfExperience topCompanies specialTags primaryDomain')
       .lean();
 

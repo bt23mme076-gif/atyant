@@ -174,7 +174,8 @@ const MentorListPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const url = `${API_URL}/api/search/mentors?limit=100`;
+      // Request up to 200 mentors (DB currently has ~153). Backend caps at 1000.
+      const url = `${API_URL}/api/search/mentors?limit=200`;
 
       const headers = {};
       const token = localStorage.getItem('token');

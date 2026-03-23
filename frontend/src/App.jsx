@@ -35,7 +35,6 @@ const EngineView        = lazy(() => import('./components/EngineView'));
 const MentorDashboard   = lazy(() => import('./components/MentorDashboard'));
 const MyQuestions       = lazy(() => import('./components/MyQuestions'));
 const EnhancedAskQuestion = lazy(() => import('./components/EnhancedAskQuestion'));
-const InternshipJourney = lazy(() => import('./components/InternshipJourney'));
 const AdminDashboard    = lazy(() => import('./components/AdminDashboard'));
 const CareerGuidesPage  = lazy(() => import('./components/CareerGuidesPage'));
 // Community notifications — static, no need inside component
@@ -168,7 +167,6 @@ function App() {
               <Route path="/forgot-password"       element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
               <Route path="/internships"           element={<InternshipPage />} />
-              <Route path="/internship-journey"    element={<InternshipJourney />} />
               <Route path="/career-guides"         element={<CareerGuidesPage />} />
               <Route path="/profile/:username"     element={<PublicProfilePage />} />
               <Route path="/resume-store" element={<ResumeMarketplace />} />
