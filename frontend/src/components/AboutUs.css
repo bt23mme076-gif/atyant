@@ -2,7 +2,7 @@
 
 .about-section {
   padding: 80px 20px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: #0D1117;
 }
 
 .about-container {
@@ -38,19 +38,19 @@
 .about-title {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #1e293b;
+  color: #fff;
   margin-bottom: 16px;
 }
 
 .about-tagline {
   font-size: 1.15rem;
-  color: #475569;
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 32px;
   line-height: 1.6;
 }
 
 .about-tagline .highlight {
-  color: #667eea;
+  color: #38bdf8;
   font-weight: 600;
 }
 
@@ -86,13 +86,13 @@
 .about-point strong {
   display: block;
   font-size: 1rem;
-  color: #1e293b;
+  color: #fff;
   margin-bottom: 4px;
 }
 
 .about-point p {
   font-size: 0.9rem;
-  color: #475569;
+  color: rgba(255, 255, 255, 0.6);
   margin: 0;
   line-height: 1.5;
 }
