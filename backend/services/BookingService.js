@@ -89,6 +89,10 @@ class BookingService {
   // Send booking confirmation email
   async sendConfirmationEmail(booking, mentor, user, service) {
     try {
+      // Get proper names with fallbacks
+      const userName = user.name || user.username || 'User';
+      const mentorName = mentor.name || mentor.username || 'Mentor';
+      
       const emailHtml = `
         <!DOCTYPE html>
         <html>
@@ -112,8 +116,8 @@ class BookingService {
               <p>Your session has been successfully booked</p>
             </div>
             <div class="content">
-              <h2>Hi ${user.name},</h2>
-              <p>Your booking with <strong>${mentor.name}</strong> has been confirmed!</p>
+              <h2>Hi ${userName},</h2>
+              <p>Your booking with <strong>${mentorName}</strong> has been confirmed!</p>
               
               <div class="booking-details">
                 <h3>Booking Details</h3>
@@ -178,11 +182,13 @@ class BookingService {
         });
 
         // Send to mentor too
+        const mentorEmailHtml = emailHtml.replace(`Hi ${userName}`, `Hi ${mentorName}`).replace('Your booking with', `New booking from ${userName} for`);
+        
         await this.emailTransporter.sendMail({
           from: `"Atyant" <${process.env.SMTP_USER}>`,
           to: mentor.email,
           subject: `🔔 New Booking - ${service.title}`,
-          html: emailHtml.replace(`Hi ${user.name}`, `Hi ${mentor.name}`)
+          html: mentorEmailHtml
         });
 
         console.log('✅ Confirmation emails sent');
@@ -191,6 +197,66 @@ class BookingService {
       }
     } catch (error) {
       console.error('Send confirmation email error:', error);
+    }
+  }
+
+  // Create booking
+  async createBooking({ userId, mentorId, serviceId, scheduledAt, notes, amount, razorpayPaymentId, razorpayOrderId }) {
+    try {
+      // Fetch service details
+      const service = await Service.findById(serviceId);
+      if (!service) {
+        throw new Error('Service not found');
+      }
+
+      // Fetch mentor and user details
+      const [mentor, user] = await Promise.all([
+        User.findById(mentorId),
+        User.findById(userId)
+      ]);
+
+      if (!mentor || !user) {
+        throw new Error('Mentor or user not found');
+      }
+
+      // Create booking
+      const booking = new Booking({
+        serviceId,
+        mentorId,
+        userId,
+        razorpayPaymentId,
+        razorpayOrderId,
+        scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
+        serviceType: service.type,
+        status: 'confirmed',
+        amount,
+        notes: notes || '',
+        rescheduleCount: 0
+      });
+
+      await booking.save();
+
+      // Generate meeting link for video/audio calls
+      if (service.type === 'video-call' || service.type === 'audio-call') {
+        if (scheduledAt) {
+          await this.generateMeetingLink(booking, mentor, user);
+        }
+      }
+
+      // Send confirmation emails
+      await this.sendConfirmationEmail(booking, mentor, user, service);
+
+      // Update service stats
+      await Service.findByIdAndUpdate(serviceId, {
+        $inc: { totalSales: 1, totalRevenue: amount }
+      });
+
+      console.log(`✅ Booking created: ${booking._id} | ${service.type} | ₹${amount}`);
+
+      return booking;
+    } catch (error) {
+      console.error('Create booking error:', error);
+      throw error;
     }
   }
 
@@ -203,6 +269,10 @@ class BookingService {
         Service.findById(booking.serviceId)
       ]);
 
+      // Get proper names with fallbacks
+      const userName = user.name || user.username || 'User';
+      const mentorName = mentor.name || mentor.username || 'Mentor';
+      
       const timeUntil = type === '24h' ? '24 hours' : '1 hour';
       
       const emailHtml = `
@@ -224,8 +294,8 @@ class BookingService {
               <p>Your session starts in ${timeUntil}</p>
             </div>
             <div class="content">
-              <h2>Hi ${user.name},</h2>
-              <p>This is a reminder that your session with <strong>${mentor.name}</strong> is coming up!</p>
+              <h2>Hi ${userName},</h2>
+              <p>This is a reminder that your session with <strong>${mentorName}</strong> is coming up!</p>
               
               <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
                 <p><strong>Service:</strong> ${service.title}</p>

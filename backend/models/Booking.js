@@ -21,9 +21,22 @@ const bookingSchema = new mongoose.Schema({
     index: true
   },
   
-  paymentId: {
+  // Optional: Link to question if booking was made from a question
+  questionId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Payment',
+    ref: 'Question',
+    index: true
+  },
+  
+  // Payment information
+  razorpayPaymentId: {
+    type: String,
+    required: true,
+    index: true
+  },
+  
+  razorpayOrderId: {
+    type: String,
     required: true
   },
   

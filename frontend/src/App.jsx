@@ -37,7 +37,7 @@ const MentorMonetization = lazy(() => import('./components/MentorMonetization'))
 const MentorProfilePage = lazy(() => import('./components/MentorProfilePage'));
 const MyBookings = lazy(() => import('./components/MyBookings'));
 const RoleBasedDashboard = lazy(() => import('./components/RoleBasedDashboard'));
-const MyQuestions       = lazy(() => import('./components/MyQuestions'));
+const MyQuestions       = lazy(() => import('./components/MyQuestionsEnhanced'));
 const EnhancedAskQuestion = lazy(() => import('./components/EnhancedAskQuestion'));
 const AdminDashboard    = lazy(() => import('./components/AdminDashboard'));
 const CareerGuidesPage  = lazy(() => import('./components/CareerGuidesPage'));

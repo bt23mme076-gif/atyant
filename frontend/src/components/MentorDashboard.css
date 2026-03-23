@@ -685,3 +685,264 @@
 .monetization-link-btn {
   display: none;
 }
+
+
+/* ============================================
+   ENHANCED MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Dashboard Container */
+  .mentor-dashboard {
+    padding: 1rem;
+  }
+
+  /* Header */
+  .mentor-dashboard-header {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .mentor-dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .mentor-dashboard-header p {
+    font-size: 0.95rem;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-card {
+    padding: 1.25rem;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+  }
+
+  /* Monetization Banner */
+  .monetization-banner {
+    flex-direction: column;
+    padding: 1.5rem;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .banner-icon {
+    font-size: 3rem;
+  }
+
+  .banner-text h2 {
+    font-size: 1.5rem;
+  }
+
+  .banner-text p {
+    font-size: 1rem;
+  }
+
+  .banner-cta {
+    width: 100%;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+
+  /* Questions Grid */
+  .questions-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Question Card */
+  .question-card {
+    padding: 1.25rem;
+  }
+
+  .question-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .question-status {
+    align-self: flex-start;
+  }
+
+  .question-title {
+    font-size: 1.1rem;
+  }
+
+  .question-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .question-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .question-actions button {
+    width: 100%;
+  }
+
+  /* Audio Section */
+  .mentor-audio-section {
+    padding: 1.25rem;
+  }
+
+  .mentor-audio-label {
+    font-size: 1.1rem;
+  }
+
+  .mentor-audio-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .mentor-audio-controls {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .mentor-audio-controls audio {
+    width: 100%;
+  }
+
+  /* Experience Form */
+  .experience-form {
+    padding: 1.5rem;
+  }
+
+  .form-group label {
+    font-size: 0.95rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .cancel-btn,
+  .submit-experience-btn {
+    width: 100%;
+    padding: 0.875rem;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    padding: 0.5rem;
+  }
+
+  .modal-content {
+    max-height: 95vh;
+    padding: 1.5rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.25rem;
+  }
+
+  /* Empty State */
+  .empty-state {
+    padding: 3rem 1.5rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+  }
+
+  .empty-state p {
+    font-size: 0.95rem;
+  }
+}
+
+/* Small Mobile (< 480px) */
+@media (max-width: 480px) {
+  .mentor-dashboard {
+    padding: 0.75rem;
+  }
+
+  .mentor-dashboard-header {
+    padding: 1.25rem;
+  }
+
+  .mentor-dashboard-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .stat-number {
+    font-size: 1.75rem;
+  }
+
+  .banner-text h2 {
+    font-size: 1.25rem;
+  }
+
+  .banner-text p {
+    font-size: 0.95rem;
+  }
+
+  .question-title {
+    font-size: 1rem;
+  }
+
+  .question-card {
+    padding: 1rem;
+  }
+}
+
+/* Landscape Mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .mentor-dashboard {
+    padding: 0.75rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .questions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .modal-content {
+    max-height: 85vh;
+  }
+}
+
+/* Tablet (768px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .questions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .monetization-banner {
+    padding: 2rem;
+  }
+}

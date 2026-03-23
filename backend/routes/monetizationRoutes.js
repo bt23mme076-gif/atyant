@@ -179,6 +179,28 @@ router.get('/availability', protect, async (req, res) => {
   }
 });
 
+// Get availability by mentor ID (public)
+router.get('/availability/mentor/:mentorId', async (req, res) => {
+  try {
+    let availability = await Availability.findOne({ mentorId: req.params.mentorId });
+    
+    if (!availability) {
+      // Return default availability if not set
+      availability = {
+        timezone: 'Asia/Kolkata',
+        weeklySchedule: {},
+        blockedDates: [],
+        bufferTime: 15
+      };
+    }
+    
+    res.json({ success: true, availability });
+  } catch (error) {
+    console.error('Get mentor availability error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch availability' });
+  }
+});
+
 // Update availability
 router.put('/availability', protect, async (req, res) => {
   try {

@@ -406,4 +406,130 @@ router.get('/mentor-earnings', protect, async (req, res) => {
   }
 });
 
+// ─────────────────────────────────────────────
+//  9. CREATE SERVICE BOOKING ORDER
+// ─────────────────────────────────────────────
+router.post('/create-booking-order', protect, async (req, res) => {
+  if (!razorpayReady(res)) return;
+  try {
+    const { amount, serviceId, mentorId, scheduledAt, notes } = req.body;
+
+    if (!amount || !serviceId || !mentorId) {
+      return res.status(400).json({ success: false, error: 'amount, serviceId, and mentorId required' });
+    }
+
+    const order = await razorpay.orders.create({
+      amount  : Math.round(amount * 100),  // paise
+      currency: 'INR',
+      receipt : `booking_${Date.now().toString().slice(-10)}`,
+      notes   : {
+        serviceId: serviceId.toString(),
+        mentorId: mentorId.toString(),
+        userId: req.user.userId.toString(),
+        scheduledAt: scheduledAt || '',
+        notes: notes || ''
+      }
+    });
+
+    res.json({ success: true, order, razorpayKeyId: RAZORPAY_KEY_ID });
+  } catch (error) {
+    console.error('create-booking-order error:', error.message);
+    res.status(500).json({ success: false, error: 'Failed to create booking order' });
+  }
+});
+
+// ─────────────────────────────────────────────
+//  10. VERIFY SERVICE BOOKING PAYMENT
+// ─────────────────────────────────────────────
+router.post('/verify-booking', protect, async (req, res) => {
+  if (!razorpayReady(res)) return;
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      serviceId,
+      mentorId,
+      scheduledAt,
+      notes
+    } = req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ success: false, error: 'Missing payment fields' });
+    }
+
+    if (!isValidObjectId(serviceId) || !isValidObjectId(mentorId)) {
+      return res.status(400).json({ success: false, error: 'Invalid serviceId or mentorId' });
+    }
+
+    // Verify signature
+    let valid = false;
+    try { valid = verifySignature(razorpay_order_id, razorpay_payment_id, razorpay_signature); }
+    catch (err) { 
+      console.error('Signature verification error:', err);
+      valid = false; 
+    }
+
+    if (!valid) {
+      return res.status(400).json({ success: false, error: 'Payment verification failed' });
+    }
+
+    // Fetch payment details from Razorpay
+    const payment = await razorpay.payments.fetch(razorpay_payment_id);
+    if (payment.status !== 'captured') {
+      return res.status(400).json({ success: false, error: `Payment not captured (status: ${payment.status})` });
+    }
+
+    // Import models
+    const Booking = (await import('../models/Booking.js')).default;
+    const Service = (await import('../models/Service.js')).default;
+    
+    // Check if booking already exists for this payment
+    const existingBooking = await Booking.findOne({ 
+      'razorpayPaymentId': razorpay_payment_id 
+    });
+    
+    if (existingBooking) {
+      console.log('⏭️ Booking already exists for payment:', razorpay_payment_id);
+      return res.json({ 
+        success: true, 
+        message: 'Booking already confirmed', 
+        booking: existingBooking 
+      });
+    }
+
+    // Fetch service details
+    const service = await Service.findById(serviceId);
+    if (!service) {
+      return res.status(404).json({ success: false, error: 'Service not found' });
+    }
+
+    // Import BookingService dynamically
+    const BookingService = (await import('../services/BookingService.js')).default;
+    
+    // Create booking with razorpay payment ID
+    const booking = await BookingService.createBooking({
+      userId: req.user.userId,
+      mentorId,
+      serviceId,
+      scheduledAt,
+      notes,
+      amount: payment.amount / 100,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpayOrderId: razorpay_order_id
+    });
+
+    console.log(`✅ Service booking payment: ₹${payment.amount / 100} | Service:${serviceId}`);
+
+    res.json({
+      success: true,
+      message: 'Booking confirmed successfully',
+      booking
+    });
+  } catch (error) {
+    console.error('verify-booking error:', error);
+    res.status(500).json({ success: false, error: error.message || 'Booking verification failed' });
+  }
+});
+
 export default router;

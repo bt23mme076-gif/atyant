@@ -509,4 +509,118 @@ router.get('/my-questions', protect, async (req, res) => {
   }
 });
 
+/**
+ * Get User's Dashboard (Questions + Bookings Combined)
+ * GET /api/questions/my-dashboard
+ */
+router.get('/my-dashboard', protect, async (req, res) => {
+  try {
+    // Import Booking model
+    const Booking = (await import('../models/Booking.js')).default;
+    const Service = (await import('../models/Service.js')).default;
+    
+    // Fetch questions
+    const questions = await Question.find({ userId: req.user.userId })
+      .populate('selectedMentorId', 'name username profilePicture expertise')
+      .populate('answerCardId')
+      .sort({ createdAt: -1 });
+    
+    // Fetch bookings
+    const bookings = await Booking.find({ userId: req.user.userId })
+      .populate('mentorId', 'name username profilePicture')
+      .populate('serviceId', 'title type duration price')
+      .sort({ createdAt: -1 });
+    
+    // Transform questions into dashboard items
+    const questionItems = questions.map(q => ({
+      type: 'question',
+      _id: q._id,
+      title: q.title || q.questionText || q.text,
+      description: q.questionText || q.text,
+      status: q.status,
+      category: q.category,
+      mentor: q.selectedMentorId ? {
+        _id: q.selectedMentorId._id,
+        name: q.selectedMentorId.name || q.selectedMentorId.username,
+        username: q.selectedMentorId.username,
+        profilePicture: q.selectedMentorId.profilePicture
+      } : null,
+      matchPercentage: q.matchPercentage,
+      followUpCount: q.followUpCount || 0,
+      hasAnswer: !!q.answerCardId,
+      createdAt: q.createdAt,
+      isEditable: q.checkEditable ? q.checkEditable() : false,
+      // Check if this question has an associated booking
+      booking: null // Will be populated below
+    }));
+    
+    // Transform bookings into dashboard items
+    const bookingItems = bookings.map(b => ({
+      type: 'booking',
+      _id: b._id,
+      title: b.serviceId?.title || 'Service Booking',
+      service: {
+        _id: b.serviceId?._id,
+        title: b.serviceId?.title,
+        type: b.serviceType,
+        duration: b.serviceId?.duration,
+        price: b.serviceId?.price
+      },
+      mentor: b.mentorId ? {
+        _id: b.mentorId._id,
+        name: b.mentorId.name || b.mentorId.username,
+        username: b.mentorId.username,
+        profilePicture: b.mentorId.profilePicture
+      } : null,
+      scheduledAt: b.scheduledAt,
+      status: b.status,
+      meetingLink: b.meetingLink,
+      amount: b.amount,
+      notes: b.notes,
+      createdAt: b.createdAt,
+      questionId: b.questionId // Link to question if exists
+    }));
+    
+    // Link bookings to questions
+    bookingItems.forEach(booking => {
+      if (booking.questionId) {
+        const question = questionItems.find(q => q._id.toString() === booking.questionId.toString());
+        if (question) {
+          question.booking = {
+            _id: booking._id,
+            serviceType: booking.service.type,
+            scheduledAt: booking.scheduledAt,
+            meetingLink: booking.meetingLink,
+            status: booking.status,
+            amount: booking.amount
+          };
+        }
+      }
+    });
+    
+    // Combine and sort by date
+    const allItems = [...questionItems, ...bookingItems].sort((a, b) => 
+      new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    
+    res.json({
+      success: true,
+      items: allItems,
+      stats: {
+        totalQuestions: questionItems.length,
+        totalBookings: bookingItems.length,
+        upcomingCalls: bookingItems.filter(b => 
+          b.scheduledAt && new Date(b.scheduledAt) > new Date() && b.status === 'confirmed'
+        ).length
+      }
+    });
+  } catch (error) {
+    console.error('❌ Dashboard fetch error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to fetch dashboard data' 
+    });
+  }
+});
+
 export default router;
