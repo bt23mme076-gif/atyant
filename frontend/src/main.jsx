@@ -29,6 +29,14 @@ initCarouselFix();
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
+// Debug: Check if client ID is loaded
+if (!GOOGLE_CLIENT_ID) {
+  console.error('❌ VITE_GOOGLE_CLIENT_ID is not defined!');
+  console.log('Available env vars:', import.meta.env);
+} else {
+  console.log('✅ Google Client ID loaded successfully');
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <HelmetProvider> {/* ✅ ADD THIS */}
