@@ -1,61 +1,62 @@
 import { useState, useEffect } from "react";
 import { API_URL, apiCall } from "../services/api.js";
+import { motion } from "framer-motion";
 
-// ─── Template Data ──────────────────────────────────────────────────────────
-// canvaLink: apna actual Canva remix link daal yahan
+// ─── Template Data ────────────────────────────────────────────────────────────
 const TEMPLATES = [
-  { id: 1, name: "Clean Fresher",   cat: "Fresher",     price: 49, desc: "Minimal 1-page layout for freshers",           color: "#E6F1FB", accent: "#378ADD", canvaLink: "https://www.canva.com/design/YOUR_ID_1/remix" },
-  { id: 2, name: "Modern Tech",     cat: "Experienced", price: 79, desc: "2-column layout for developers",               color: "#EAF3DE", accent: "#639922", canvaLink: "https://www.canva.com/design/YOUR_ID_2/remix" },
-  { id: 3, name: "Executive Pro",   cat: "Executive",   price: 99, desc: "Premium serif layout for leadership roles",    color: "#FAEEDA", accent: "#BA7517", canvaLink: "https://www.canva.com/design/YOUR_ID_3/remix" },
-  { id: 4, name: "Creative Bold",   cat: "Fresher",     price: 59, desc: "Stand-out design for creative fields",         color: "#EEEDFE", accent: "#7F77DD", canvaLink: "https://www.canva.com/design/YOUR_ID_4/remix" },
-  { id: 5, name: "Corporate Edge",  cat: "Experienced", price: 79, desc: "Clean structured layout for corporate roles",  color: "#EAF3DE", accent: "#3B6D11", canvaLink: "https://www.canva.com/design/YOUR_ID_5/remix" },
-  { id: 6, name: "Minimal Elite",   cat: "Executive",   price: 99, desc: "Elegant minimal design for senior roles",      color: "#FAEEDA", accent: "#854F0B", canvaLink: "https://www.canva.com/design/YOUR_ID_6/remix" },
+  { id: 1, name: "Industrial focus", cat: "Fresher",     price: 69, desc: "Clean 1-page layout for core engineering freshers", image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774380593/image_6_hg2ma1.jpg",                                  canvaLink: "https://docs.google.com/presentation/d/11T7fhWnJeA9OdM97OsvIF8cJIFdPP_h6qlcGh8uVogw/copy", proof: "3 students got Reliance Industries internship",   proofIcon: "🏭" },
+  { id: 2, name: "Tech Developer",  cat: "Experienced", price: 69, desc: "Modern 2-column layout for software developers",     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774380116/Screenshot_2026-03-25_004919_jtemge.jpg",         canvaLink: "https://docs.google.com/presentation/d/1y7yxncBrlXJpf9k9q7q82LjbzzxDl4xoW54YDl_sh3I/copy", proof: "4 students got software internships from this",   proofIcon: "💻" },
+  { id: 3, name: "Executive Pro",   cat: "Executive",   price: 69, desc: "Premium layout for leadership & senior roles",       image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774379922/image_5_iwtsl7.jpg",                                  canvaLink: "https://docs.google.com/presentation/d/1LLkgH59RSz4WdZQNOHaJqd4NAZaEnBSby96OyjLK99A/copy", proof: "2 students selected at top MNCs",                proofIcon: "🏆" },
+  { id: 4, name: "Creative Bold",   cat: "Fresher",     price: 69, desc: "Stand-out design for creative & design fields",      image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774379826/image_4_nik3ol.jpg",                                  canvaLink: "https://docs.google.com/presentation/d/1e6_JNRCLxX4QVQhx-Lmb1cBGpE4URGjcCpAqULhB-o4/copy", proof: "5 students got IIT Kanpur research internship",  proofIcon: "🎓" },
+  { id: 5, name: "Corporate Edge",  cat: "Experienced", price: 69, desc: "Clean structured layout for corporate roles",        image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774379716/image_3_jad3zp.jpg",                                  canvaLink: "https://docs.google.com/presentation/d/1e6_JNRCLxX4QVQhx-Lmb1cBGpE4URGjcCpAqULhB-o4/copy", proof: "3 students placed in Fortune 500 companies",    proofIcon: "📈" },
+  { id: 6, name: "IIM Ahmedabad",   cat: "MBA",         price: 69, desc: "Crafted for MBA & management aspirants",             image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774381400/cf814da1-04d0-4db5-961f-1e141e4b0bb4.png",           canvaLink: "https://docs.google.com/presentation/d/1rDfuWeIQLZ__7-G7GHaiHpuf3ewzSiIJusSpoaQ-V9E/copy",  proof: "Selected at IIM Ahmedabad from this resume",    proofIcon: "🌟" },
 ];
 
-const CAT_STYLES = {
-  Fresher:     { bg: "#E6F1FB", color: "#0C447C" },
-  Experienced: { bg: "#EAF3DE", color: "#27500A" },
-  Executive:   { bg: "#FAEEDA", color: "#633806" },
+const CAT_COLORS = {
+  Fresher:     { bg: "#E8F4FD", color: "#1565C0", border: "#BBDEFB" },
+  Experienced: { bg: "#E8F5E9", color: "#2E7D32", border: "#C8E6C9" },
+  Executive:   { bg: "#FFF8E1", color: "#F57F17", border: "#FFE082" },
+  MBA:         { bg: "#FCE4EC", color: "#880E4F", border: "#F48FB1" },
 };
 
-// ─── Mini Resume Preview SVG ─────────────────────────────────────────────────
-function MiniResume({ color, accent }) {
+const STEPS = [
+  { num: 1, emoji: "👀", title: "Preview Resume",       desc: "See the top half — get a feel of the design" },
+  { num: 2, emoji: "💳", title: "Pay ₹69",              desc: "One-time via Razorpay — UPI, card, netbanking" },
+  { num: 3, emoji: "🔗", title: "Get Slides Link",      desc: "Your unique editing link unlocks instantly" },
+  { num: 4, emoji: "✏️", title: "Edit Your Name",       desc: "Change name, skills, experience — Google Slides free" },
+  { num: 5, emoji: "📥", title: "Download PDF",         desc: "Export & apply to jobs right away!" },
+];
+
+// ─── Resume Preview with blur ────────────────────────────────────────────────
+function ResumePreview({ image, name }) {
   return (
-    <svg width="100" height="130" viewBox="0 0 100 130" fill="none">
-      <rect width="100" height="130" rx="4" fill={color} />
-      <rect x="10" y="12" width="40" height="5"  rx="2"   fill={accent} opacity="0.9" />
-      <rect x="10" y="20" width="28" height="3"  rx="1.5" fill={accent} opacity="0.4" />
-      <rect x="10" y="32" width="80" height="1"  rx="0.5" fill={accent} opacity="0.2" />
-      <rect x="10" y="38" width="22" height="3"  rx="1.5" fill={accent} opacity="0.7" />
-      <rect x="10" y="45" width="78" height="2"  rx="1"   fill={accent} opacity="0.2" />
-      <rect x="10" y="50" width="65" height="2"  rx="1"   fill={accent} opacity="0.2" />
-      <rect x="10" y="55" width="72" height="2"  rx="1"   fill={accent} opacity="0.2" />
-      <rect x="10" y="65" width="22" height="3"  rx="1.5" fill={accent} opacity="0.7" />
-      <rect x="10" y="72" width="78" height="2"  rx="1"   fill={accent} opacity="0.2" />
-      <rect x="10" y="77" width="60" height="2"  rx="1"   fill={accent} opacity="0.2" />
-      <rect x="10" y="82" width="70" height="2"  rx="1"   fill={accent} opacity="0.2" />
-      <rect x="10" y="92" width="22" height="3"  rx="1.5" fill={accent} opacity="0.7" />
-      <rect x="10" y="99" width="55" height="2"  rx="1"   fill={accent} opacity="0.2" />
-      <rect x="10" y="104" width="65" height="2" rx="1"   fill={accent} opacity="0.2" />
-    </svg>
+    <div style={{ position: "relative", width: "100%", height: 220, overflow: "hidden", borderRadius: "10px 10px 0 0", background: "#f5f5f5" }}>
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", overflow: "hidden" }}>
+        <img src={image} alt={name} style={{ width: "100%", objectFit: "cover", objectPosition: "top" }} />
+      </div>
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "50%", overflow: "hidden" }}>
+        <img src={image} alt={name} style={{ width: "100%", objectFit: "cover", objectPosition: "bottom", filter: "blur(6px)", transform: "scale(1.05)" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.75))" }} />
+      </div>
+      <div style={{ position: "absolute", bottom: 14, left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.78)", backdropFilter: "blur(8px)", color: "#fff", borderRadius: 20, padding: "5px 14px", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}>
+        🔒 Buy to unlock full resume
+      </div>
+    </div>
   );
 }
 
-// ─── Main Component ──────────────────────────────────────────────────────────
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function ResumeMarketplace() {
-  const [selected, setSelected]   = useState(null); // template selected for purchase
+  const [selected, setSelected]   = useState(null);
   const [loading, setLoading]     = useState(false);
-  const [canvaLink, setCanvaLink] = useState(null);  // unlocked link after payment
+  const [canvaLink, setCanvaLink] = useState(null);
   const [error, setError]         = useState("");
-  const [ownedTemplates, setOwnedTemplates] = useState({}); // { templateId: { canvaLink, expiresAt } }
+  const [ownedTemplates, setOwnedTemplates] = useState({});
 
-  // Called after Razorpay payment modal closes successfully
   async function handlePayment(template) {
     setLoading(true);
     setError("");
-
     try {
-      // Step 1: Create Razorpay order on backend
       const orderRes = await fetch(`${API_URL}/api/resume/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,16 +65,14 @@ export default function ResumeMarketplace() {
       const order = await orderRes.json();
       if (!order.id) throw new Error("Order creation failed");
 
-      // Step 2: Open Razorpay checkout
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID, // set in .env
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
         currency: "INR",
         name: "Atyant Career Hub",
         description: template.name,
         order_id: order.id,
         handler: async function (response) {
-          // Step 3: Verify payment + get Canva link
           const verifyRes = await fetch(`${API_URL}/api/resume/verify-payment`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -87,8 +86,7 @@ export default function ResumeMarketplace() {
           const data = await verifyRes.json();
           if (data.canvaLink) {
             setCanvaLink(data.canvaLink);
-            // mark as owned locally
-            setOwnedTemplates(prev => ({ ...prev, [template.id]: { canvaLink: data.canvaLink, expiresAt: data.expiresAt || null } }));
+            setOwnedTemplates(prev => ({ ...prev, [template.id]: { canvaLink: data.canvaLink } }));
           } else {
             setError("Payment verified but link fetch failed. Contact support.");
           }
@@ -96,12 +94,11 @@ export default function ResumeMarketplace() {
         },
         modal: { ondismiss: () => setLoading(false) },
         prefill: {},
-        theme: { color: "#1a1a1a" },
+        theme: { color: "#6366f1" },
       };
 
       const rzp = new window.Razorpay(options);
       rzp.open();
-
     } catch (err) {
       setError("Something went wrong. Please try again.");
       setLoading(false);
@@ -109,164 +106,240 @@ export default function ResumeMarketplace() {
   }
 
   useEffect(() => {
-    // Check ownership for logged-in user
     (async () => {
-      try {
-        for (const t of TEMPLATES) {
-          try {
-            const res = await apiCall(`/api/resume/purchase-status?templateId=${t.id}`);
-            if (res?.owned) {
-              setOwnedTemplates(prev => ({ ...prev, [t.id]: { canvaLink: res.canvaLink, expiresAt: res.expiresAt } }));
-            }
-          } catch (err) {
-            // ignore individual failures
-          }
-        }
-      } catch (err) {
-        // no-op
+      for (const t of TEMPLATES) {
+        try {
+          const res = await apiCall(`/api/resume/purchase-status?templateId=${t.id}`);
+          if (res?.owned) setOwnedTemplates(prev => ({ ...prev, [t.id]: { canvaLink: res.canvaLink } }));
+        } catch {}
       }
     })();
   }, []);
 
-  function openModal(template) {
-    setSelected(template);
-    setCanvaLink(null);
-    setError("");
-  }
-
-  function closeModal() {
-    setSelected(null);
-    setCanvaLink(null);
-    setLoading(false);
-    setError("");
-  }
+  function openModal(template) { setSelected(template); setCanvaLink(null); setError(""); }
+  function closeModal()        { setSelected(null); setCanvaLink(null); setLoading(false); setError(""); }
 
   return (
     <>
-      {/* Razorpay SDK — load once */}
       <script src="https://checkout.razorpay.com/v1/checkout.js" />
 
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "2rem 1rem", fontFamily: "DM Sans, sans-serif" }}>
+      <div style={{ maxWidth: 980, margin: "0 auto", padding: "2rem 1rem", fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
 
-        {/* Hero */}
-        <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-          <span style={{ display: "inline-block", background: "#f4f4f4", borderRadius: 20, fontSize: 12, color: "#666", padding: "4px 14px", marginBottom: 12, letterSpacing: "0.04em" }}>
-            Atyant Career Hub
-          </span>
-          <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(1.6rem,4vw,2.2rem)", fontWeight: 600, marginBottom: 8 }}>
-            Resume templates that get you shortlisted
-          </h1>
-          <p style={{ fontSize: 14, color: "#666", maxWidth: 400, margin: "0 auto" }}>
-            ATS-friendly, professionally designed. Buy once, edit in Canva, download instantly.
-          </p>
+        {/* ══ HERO ══════════════════════════════════════════════════════════ */}
+        <div style={{
+          textAlign: "center",
+          marginBottom: "1.8rem",
+          borderRadius: 20,
+          padding: "3rem 2rem 2.5rem",
+          background: "linear-gradient(145deg, #eef0ff 0%, #e8eeff 40%, #ede8ff 100%)",
+          position: "relative",
+          overflow: "hidden",
+          boxShadow: "0 4px 32px rgba(99,102,241,0.1)",
+        }}>
+          {/* Blobs */}
+          <div style={{ position: "absolute", width: 320, height: 320, borderRadius: "50%", background: "rgba(99,102,241,0.13)", filter: "blur(70px)", top: -80, left: -60, zIndex: 0 }} />
+          <div style={{ position: "absolute", width: 280, height: 280, borderRadius: "50%", background: "rgba(139,92,246,0.11)", filter: "blur(70px)", bottom: -60, right: -40, zIndex: 0 }} />
+
+          <div style={{ position: "relative", zIndex: 1 }}>
+            {/* Badge */}
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              background: "#fffbeb", border: "1.5px solid #f59e0b",
+              borderRadius: 20, fontSize: 11, color: "#92400e",
+              padding: "5px 16px", marginBottom: 22,
+              fontWeight: 700, letterSpacing: "0.05em",
+              boxShadow: "0 2px 8px rgba(245,158,11,0.15)",
+            }}>
+              ⚡ INDIA'S FIRST RESUME MARKETPLACE WITH INSTANT EDITING
+            </div>
+
+            {/* Headline */}
+            <h1 style={{
+              fontSize: "clamp(1.9rem, 4.5vw, 2.9rem)",
+              fontWeight: 800, color: "#111827",
+              lineHeight: 1.2, marginBottom: 14,
+              fontFamily: "Georgia, 'Times New Roman', serif",
+            }}>
+              Resume templates that get you
+              <br />
+              <span style={{ color: "#4f46e5" }}>shortlisted & selected</span>
+            </h1>
+
+            {/* Subtext */}
+            <p style={{ fontSize: 15, color: "#6b7280", maxWidth: 520, margin: "0 auto 28px", lineHeight: 1.7 }}>
+              ATS-friendly designs used by real students at IITs, IIMs & top companies.
+              Buy → Edit → Download. Done in 10 minutes.
+            </p>
+
+            {/* Stats */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "3rem", flexWrap: "wrap" }}>
+              {[["500+", "Students helped"], ["IIT/IIM", "Proven results"], ["10 min", "Edit & download"], ["₹69", "One-time only"]].map(([val, lbl]) => (
+                <div key={lbl} style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: "#111827", fontFamily: "Georgia, serif" }}>{val}</div>
+                  <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2 }}>{lbl}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
-          {TEMPLATES.map((t) => (
-            <div key={t.id} style={{ background: "#fff", border: "0.5px solid #e0e0e0", borderRadius: 12, overflow: "hidden" }}>
-              {/* Thumbnail */}
-              <div style={{ height: 160, background: "#f8f8f8", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
-                <MiniResume color={t.color} accent={t.accent} />
-                {/* Lock overlay */}
-                <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ width: 32, height: 32, background: "#fff", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>🔒</div>
+        {/* ══ HOW IT WORKS ═════════════════════════════════════════════════ */}
+        <div style={{
+          background: "#ffffff",
+          borderRadius: 20,
+          padding: "1.8rem 1.5rem",
+          marginBottom: "2.5rem",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.05)",
+          border: "1px solid #f3f4f6",
+        }}>
+          <p style={{ textAlign: "center", fontSize: 30, fontWeight: 1500, color: "#374151", letterSpacing: "0.14em", marginBottom: 5 }}>
+            <strong>HOW IT WORKS</strong>
+          </p>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            {STEPS.map((s) => (
+              <motion.div
+                key={s.num}
+                whileHover={{ y: -5, scale: 1.03 }}
+                transition={{ type: "spring", stiffness: 220, damping: 16 }}
+                style={{
+                  flex: 1, minWidth: 140,
+                  display: "flex", flexDirection: "column", alignItems: "center",
+                  textAlign: "center", padding: "20px 14px", borderRadius: 16,
+                  background: "linear-gradient(145deg, #f8f9ff, #f0f1ff)",
+                  border: "1px solid #e5e7ff",
+                  cursor: "default",
+                }}
+              >
+                <div style={{
+                  width: 62, height: 62, borderRadius: "50%",
+                  background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 24, marginBottom: 12,
+                  boxShadow: "0 6px 20px rgba(99,102,241,0.3)",
+                }}>
+                  {s.emoji}
                 </div>
-                {/* Category badge */}
-                <span style={{ position: "absolute", top: 8, left: 8, fontSize: 10, fontWeight: 500, padding: "3px 8px", borderRadius: 20, background: CAT_STYLES[t.cat].bg, color: CAT_STYLES[t.cat].color }}>
-                  {t.cat}
-                </span>
-              </div>
+                <div style={{ fontSize: 10, fontWeight: 800, color: "#6366f1", letterSpacing: "0.12em", marginBottom: 5 }}>STEP {s.num}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 6 }}>{s.title}</div>
+                <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.55 }}>{s.desc}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
 
-              {/* Body */}
-              <div style={{ padding: "14px 16px" }}>
-                <h3 style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>{t.name}</h3>
-                <p style={{ fontSize: 12, color: "#888", marginBottom: 12 }}>{t.desc}</p>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontFamily: "Georgia, serif", fontSize: 18, fontWeight: 600 }}>
-                    ₹{t.price} <span style={{ fontSize: 11, fontWeight: 400, fontFamily: "sans-serif", color: "#999" }}>one-time</span>
+        {/* ══ CARDS GRID ═══════════════════════════════════════════════════ */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: 20 }}>
+          {TEMPLATES.map((t) => {
+            const owned    = ownedTemplates[t.id];
+            const catStyle = CAT_COLORS[t.cat] || CAT_COLORS["Fresher"];
+            return (
+              <div key={t.id}
+                style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", transition: "transform 0.2s, box-shadow 0.2s" }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 10px 32px rgba(0,0,0,0.11)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)"; }}
+              >
+                <div style={{ padding: "8px 12px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: catStyle.bg, color: catStyle.color, border: `1px solid ${catStyle.border}`, letterSpacing: "0.04em" }}>
+                    {t.cat.toUpperCase()}
                   </span>
-                  {ownedTemplates[t.id] ? (
-                    <a
-                      href={ownedTemplates[t.id].canvaLink || t.canvaLink}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{ background: "#7B61FF", color: "#fff", border: "none", borderRadius: 8, padding: "6px 14px", fontSize: 12, fontWeight: 500, cursor: "pointer", textDecoration: 'none' }}
-                    >
-                      Open in Canva
-                    </a>
-                  ) : (
-                    <button
-                      onClick={() => openModal(t)}
-                      style={{ background: "#1a1a1a", color: "#fff", border: "none", borderRadius: 8, padding: "6px 14px", fontSize: 12, fontWeight: 500, cursor: "pointer" }}
-                    >
-                      Buy & unlock
-                    </button>
-                  )}
+                  {owned && <span style={{ fontSize: 10, color: "#2E7D32", fontWeight: 700 }}>✅ Owned</span>}
+                </div>
+
+                <ResumePreview image={t.image} name={t.name} />
+
+                <div style={{ margin: "10px 12px 0", background: "#f0f7ff", border: "1px solid #bbdefb", borderRadius: 8, padding: "7px 10px", display: "flex", alignItems: "flex-start", gap: 7 }}>
+                  <span style={{ fontSize: 14 }}>{t.proofIcon}</span>
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#1565C0", letterSpacing: "0.04em", marginBottom: 1 }}>PROVEN RESULTS</div>
+                    <div style={{ fontSize: 11, color: "#37474f", lineHeight: 1.4 }}>{t.proof}</div>
+                  </div>
+                </div>
+
+                <div style={{ padding: "10px 12px 14px" }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 3, color: "#1a1a1a" }}>{t.name}</h3>
+                  <p style={{ fontSize: 11, color: "#888", marginBottom: 12, lineHeight: 1.4 }}>{t.desc}</p>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div>
+                      <span style={{ fontSize: 20, fontWeight: 800, color: "#1a1a1a", fontFamily: "Georgia, serif" }}>₹{t.price}</span>
+                      <span style={{ fontSize: 10, color: "#999", marginLeft: 4 }}>one-time</span>
+                    </div>
+                    {owned ? (
+                      <a href={owned.canvaLink || t.canvaLink} target="_blank" rel="noreferrer"
+                        style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", textDecoration: "none", boxShadow: "0 2px 8px rgba(99,102,241,0.3)" }}>
+                        Open & Edit ↗
+                      </a>
+                    ) : (
+                      <button onClick={() => openModal(t)}
+                        style={{ background: "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", boxShadow: "0 2px 8px rgba(79,70,229,0.3)" }}>
+                        Buy & Unlock 🔓
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
-      {/* Modal */}
+      {/* ══ MODAL ════════════════════════════════════════════════════════════ */}
       {selected && (
         <div
-          onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}
+          onClick={e => { if (e.target === e.currentTarget) closeModal(); }}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}
         >
-          <div style={{ background: "#fff", borderRadius: 12, padding: "1.5rem", maxWidth: 340, width: "100%" }}>
-
+          <div style={{ background: "#fff", borderRadius: 18, padding: "1.5rem", maxWidth: 400, width: "100%", boxShadow: "0 24px 64px rgba(0,0,0,0.18)" }}>
             {!canvaLink ? (
               <>
-                <h2 style={{ fontFamily: "Georgia, serif", fontSize: "1.2rem", marginBottom: 4 }}>{selected.name}</h2>
-                <p style={{ fontSize: 12, color: "#888", marginBottom: "1rem" }}>{selected.desc} · {selected.cat}</p>
+                <div style={{ borderRadius: 10, overflow: "hidden", marginBottom: "1rem", height: 150, position: "relative" }}>
+                  <img src={selected.image} alt={selected.name} style={{ width: "100%", objectFit: "cover", objectPosition: "top", height: "100%" }} />
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55))" }} />
+                  <div style={{ position: "absolute", bottom: 10, left: 12 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{selected.name}</div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)" }}>{selected.cat}</div>
+                  </div>
+                </div>
 
-                <div style={{ borderTop: "0.5px solid #eee", paddingTop: "1rem", marginBottom: "1rem" }}>
+                <div style={{ borderTop: "1px solid #f3f4f6", paddingTop: "0.8rem", marginBottom: "0.8rem" }}>
                   {[
-                    ["Template price", `₹${selected.price}`],
-                    ["After payment",  "Unique Canva link"],
-                    ["Editable in",    "Canva (free)"],
-                    ["Downloads",      "Unlimited (your copy)"],
-                  ].map(([label, val]) => (
-                    <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 8 }}>
-                      <span style={{ color: "#888" }}>{label}</span>
-                      <span style={{ fontWeight: 500 }}>{val}</span>
+                    ["Price",         `₹${selected.price} (one-time)`],
+                    ["After payment", "Unique Google Slides link"],
+                    ["Edit in",       "Google Slides (free)"],
+                    ["Downloads",     "Unlimited PDF exports"],
+                  ].map(([lbl, val]) => (
+                    <div key={lbl} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 7 }}>
+                      <span style={{ color: "#9ca3af" }}>{lbl}</span>
+                      <span style={{ fontWeight: 600, color: "#111827" }}>{val}</span>
                     </div>
                   ))}
                 </div>
 
-                {error && <p style={{ fontSize: 12, color: "red", marginBottom: 8 }}>{error}</p>}
+                {error && <div style={{ fontSize: 12, color: "#dc2626", background: "#fef2f2", padding: "8px 10px", borderRadius: 6, marginBottom: 10 }}>{error}</div>}
 
                 <button
                   onClick={() => handlePayment(selected)}
                   disabled={loading}
-                  style={{ width: "100%", padding: 10, background: "#1a1a1a", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 500, cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1 }}
+                  style={{ width: "100%", padding: "12px", background: loading ? "#c7d2fe" : "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "#fff", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", boxShadow: "0 4px 16px rgba(79,70,229,0.3)", marginBottom: 8 }}
                 >
-                  {loading ? "Processing..." : `Pay ₹${selected.price} via Razorpay`}
+                  {loading ? "⏳ Processing..." : `💳 Pay ₹${selected.price} via Razorpay`}
                 </button>
-                <button onClick={closeModal} style={{ width: "100%", padding: "6px 12px", background: "none", border: "0.5px solid #ddd", borderRadius: 8, fontSize: 12, color: "#888", cursor: "pointer", marginTop: 8 }}>
+                <button onClick={closeModal} style={{ width: "100%", padding: "8px", background: "none", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 12, color: "#6b7280", cursor: "pointer" }}>
                   Cancel
                 </button>
               </>
             ) : (
-              /* Success state */
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "2rem", marginBottom: 8 }}>✅</div>
-                <h3 style={{ fontFamily: "Georgia, serif", fontSize: "1.1rem", marginBottom: 6 }}>Payment successful!</h3>
-                <p style={{ fontSize: 12, color: "#888", marginBottom: "1rem" }}>
-                  Your unique Canva template link is ready. Edit and download your resume anytime.
+                <div style={{ fontSize: "3rem", marginBottom: 10 }}>🎉</div>
+                <h3 style={{ fontFamily: "Georgia, serif", fontSize: "1.2rem", marginBottom: 6, color: "#111827" }}>Payment Successful!</h3>
+                <p style={{ fontSize: 13, color: "#6b7280", marginBottom: "1.2rem", lineHeight: 1.6 }}>
+                  Your Google Slides link is ready! Click below, make your copy, edit your details, then download as PDF.
                 </p>
-                <a
-                  href={canvaLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{ display: "block", width: "100%", padding: 10, background: "#7B61FF", color: "#fff", borderRadius: 8, fontSize: 13, fontWeight: 500, textDecoration: "none", textAlign: "center" }}
+                <a href={canvaLink} target="_blank" rel="noreferrer"
+                  style={{ display: "block", width: "100%", padding: "12px", background: "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "#fff", borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: "none", textAlign: "center", boxShadow: "0 4px 16px rgba(79,70,229,0.3)", marginBottom: 8 }}
                 >
-                  Open in Canva →
+                  ✏️ Open & Edit Resume →
                 </a>
-                <button onClick={closeModal} style={{ width: "100%", padding: "6px 12px", background: "none", border: "0.5px solid #ddd", borderRadius: 8, fontSize: 12, color: "#888", cursor: "pointer", marginTop: 8 }}>
+                <button onClick={closeModal} style={{ width: "100%", padding: "8px", background: "none", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 12, color: "#6b7280", cursor: "pointer" }}>
                   Close
                 </button>
               </div>

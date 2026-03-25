@@ -11,5 +11,9 @@ Thumbs.db
 *.key
 google-key.json
 
+# Backend secrets
+backend/.env
+backend/google-key.json
+
 # ─── Misc ─────────────────────────────────────────────
 *.log

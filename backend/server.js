@@ -6,6 +6,9 @@ import http from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import compression from 'compression';
+import jwt from 'jsonwebtoken';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
 import { Resend } from 'resend';
 import path from 'path';
@@ -45,6 +48,7 @@ const PORT = process.env.PORT || 3000;
 
 app.set('trust proxy', 1);
 
+
 // Static uploads
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
@@ -73,6 +77,35 @@ app.use(cors({
 
 // Handle preflight requests explicitly
 app.options('*', cors());
+
+// Build a strict Content Security Policy (CSP)
+let dynamicOrigins = [];
+try {
+  dynamicOrigins = allowedOrigins.map(o => {
+    try { return new URL(o).origin; } catch { return o; }
+  });
+} catch (e) {
+  dynamicOrigins = [];
+}
+
+const cspDirectives = {
+  defaultSrc: ["'self'"],
+  scriptSrc: ["'self'", 'https://checkout.razorpay.com'],
+  connectSrc: ["'self'", 'wss:', 'https:', ...dynamicOrigins],
+  styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+  fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+  imgSrc: ["'self'", 'data:', 'https://res.cloudinary.com'],
+  objectSrc: ["'none'"],
+};
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: cspDirectives
+  }
+}));
+
+// Parse cookies so we can read HttpOnly tokens
+app.use(cookieParser());
 
 app.use(express.json({ limit: '10mb' }));
 
@@ -242,6 +275,32 @@ const io = new Server(server, {
   perMessageDeflate: { threshold: 1024 }
 });
 
+// Authenticate socket connections using JWT from handshake
+io.use((socket, next) => {
+  try {
+    // Try JWT from socket auth, Authorization header, or cookie
+    let authToken = socket.handshake.auth?.token ||
+      (socket.handshake.headers?.authorization && socket.handshake.headers.authorization.split(' ')[1]);
+
+    // If still no token, try to parse cookie header (token cookie)
+    if (!authToken && socket.handshake.headers?.cookie) {
+      const cookieHeader = socket.handshake.headers.cookie;
+      const match = cookieHeader.match(/(?:^|; )token=([^;]+)/);
+      if (match) authToken = decodeURIComponent(match[1]);
+    }
+
+    if (!authToken) return next(new Error('Authentication error'));
+    const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
+    socket.user = {
+      ...decoded,
+      userId: decoded.userId || decoded.id || decoded._id
+    };
+    return next();
+  } catch (err) {
+    return next(new Error('Authentication error'));
+  }
+});
+
 // In-memory maps (per process)
 const activeUsers          = new Map();
 const userSockets          = new Map();
@@ -251,10 +310,13 @@ io.on('connection', socket => {
   let currentUserId = null;
 
   socket.on('join_user_room', userId => {
-    currentUserId = userId;
-    socket.join(userId);
-    userSockets.set(userId, socket.id);
-    if (!activeUsers.has(userId)) activeUsers.set(userId, new Set());
+    // Ignore client-supplied userId and use verified JWT identity
+    const socketUserId = socket.user?.userId;
+    if (!socketUserId) return socket.emit('auth_error', { error: 'Not authenticated' });
+    currentUserId = socketUserId;
+    socket.join(currentUserId);
+    userSockets.set(currentUserId, socket.id);
+    if (!activeUsers.has(currentUserId)) activeUsers.set(currentUserId, new Set());
   });
 
   socket.on('enter_chat', ({ partnerId }) => {

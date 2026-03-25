@@ -5,15 +5,15 @@ import User from '../models/User.js';
 const auth = async (req, res, next) => {
   try {
     const authHeader = req.header('Authorization');
+    const cookieToken = req.cookies?.token;
     
-    if (!authHeader) {
+    if (!authHeader && !cookieToken) {
       return res.status(401).json({
         success: false,
         message: 'No token provided'
       });
     }
-
-    const token = authHeader.replace('Bearer ', '');
+    const token = authHeader ? authHeader.replace('Bearer ', '') : cookieToken;
 
     if (!token) {
       return res.status(401).json({
@@ -72,7 +72,8 @@ export const optionalAuth = async (req, res, next) => {
     // ✅ No token? Continue as guest
     if (!authHeader) {
       req.user = null;
-      console.log('👤 Guest user');
+      // avoid noisy per-request logs in production
+      if (process.env.NODE_ENV === 'development') console.debug('👤 Guest user');
       return next();
     }
 
@@ -80,7 +81,7 @@ export const optionalAuth = async (req, res, next) => {
 
     if (!token) {
       req.user = null;
-      console.log('👤 No valid token - guest user');
+      if (process.env.NODE_ENV === 'development') console.debug('👤 No valid token - guest user');
       return next();
     }
 
@@ -94,18 +95,20 @@ export const optionalAuth = async (req, res, next) => {
 
     if (user) {
       req.user = user;
-      console.log('🔐 Authenticated user:', user.username);
-      console.log('🎓 User college:', user.education?.[0]?.institution);
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('🔐 Authenticated user:', user.username);
+        console.debug('🎓 User college:', user.education?.[0]?.institution);
+      }
     } else {
       req.user = null;
-      console.log('⚠️ User not found - continuing as guest');
+      if (process.env.NODE_ENV === 'development') console.debug('⚠️ User not found - continuing as guest');
     }
 
     next();
 
   } catch (error) {
     // ✅ On any auth error, just continue as guest (don't block request)
-    console.log('⚠️ Auth error, continuing as guest:', error.message);
+    if (process.env.NODE_ENV === 'development') console.debug('⚠️ Auth error, continuing as guest:', error.message);
     req.user = null;
     next();
   }

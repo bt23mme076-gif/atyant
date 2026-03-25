@@ -161,8 +161,9 @@ const EnhancedAskQuestion = () => {
   const checkEligibility = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/api/questions/check-eligibility`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include'
+        });
       const data = await response.json();
       if (data.success) {
         setEligibility(data);
@@ -310,6 +311,7 @@ const EnhancedAskQuestion = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
+        credentials: 'include',
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,
@@ -346,6 +348,7 @@ const EnhancedAskQuestion = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
+        credentials: 'include',
         body: JSON.stringify({
           title: formData.title,
           description: formData.description
@@ -408,8 +411,9 @@ const EnhancedAskQuestion = () => {
   const refreshCredits = useCallback(async () => {
     try {
       const res  = await fetch(`${API_URL}/api/profile/me/credits`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include'
+        });
       const data = await res.json();
       if (data.success) {
         setEligibility(prev => prev ? { ...prev, credits: data.credits } : prev);
@@ -427,6 +431,7 @@ const EnhancedAskQuestion = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
+        credentials: 'include',
         body: JSON.stringify({ amount: 1, credits: 5 })
       });
 
@@ -452,6 +457,7 @@ const EnhancedAskQuestion = () => {
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`
               },
+              credentials: 'include',
               body: JSON.stringify(paymentResponse)
             });
 
@@ -526,6 +532,7 @@ const EnhancedAskQuestion = () => {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
+        credentials: 'include',
         body: JSON.stringify({
           ...formData,
           qualityScore: qualityCheck?.qualityScore || 0,

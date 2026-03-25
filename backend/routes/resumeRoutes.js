@@ -22,12 +22,12 @@ const razorpay = new Razorpay({
 
 // ─── Template Data (server side — Canva links NEVER sent to frontend directly)
 const TEMPLATES = {
-  1: { name: "Clean Fresher",   price: 4900,  canvaLink: "https://www.canva.com/design/YOUR_ID_1/remix" },
-  2: { name: "Modern Tech",     price: 7900,  canvaLink: "https://www.canva.com/design/YOUR_ID_2/remix" },
-  3: { name: "Executive Pro",   price: 9900,  canvaLink: "https://www.canva.com/design/YOUR_ID_3/remix" },
-  4: { name: "Creative Bold",   price: 5900,  canvaLink: "https://www.canva.com/design/YOUR_ID_4/remix" },
-  5: { name: "Corporate Edge",  price: 7900,  canvaLink: "https://www.canva.com/design/YOUR_ID_5/remix" },
-  6: { name: "Minimal Elite",   price: 9900,  canvaLink: "https://www.canva.com/design/YOUR_ID_6/remix" },
+  1: { name: "Industrial focus", price: 6900, canvaLink: "https://docs.google.com/presentation/d/11T7fhWnJeA9OdM97OsvIF8cJIFdPP_h6qlcGh8uVogw/copy" },
+  2: { name: "Tech Developer",  price: 6900, canvaLink: "https://docs.google.com/presentation/d/1y7yxncBrlXJpf9k9q7q82LjbzzxDl4xoW54YDl_sh3I/copy" },
+  3: { name: "Executive Pro",   price: 6900, canvaLink: "https://docs.google.com/presentation/d/1LLkgH59RSz4WdZQNOHaJqd4NAZaEnBSby96OyjLK99A/copy" },
+  4: { name: "Creative Bold",   price: 6900, canvaLink: "https://docs.google.com/presentation/d/1e6_JNRCLxX4QVQhx-Lmb1cBGpE4URGjcCpAqULhB-o4/copy" },
+  5: { name: "Corporate Edge",  price: 6900, canvaLink: "https://docs.google.com/presentation/d/1e6_JNRCLxX4QVQhx-Lmb1cBGpE4URGjcCpAqULhB-o4/copy" },
+  6: { name: "IIM Ahmedabad",   price: 6900, canvaLink: "https://docs.google.com/presentation/d/1rDfuWeIQLZ__7-G7GHaiHpuf3ewzSiIJusSpoaQ-V9E/copy" },
 };
 
 // ─── POST /api/resume/create-order ───────────────────────────────────────────
