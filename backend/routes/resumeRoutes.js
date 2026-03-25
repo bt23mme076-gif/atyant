@@ -42,7 +42,7 @@ router.post("/create-order", async (req, res) => {
     }
 
     const order = await razorpay.orders.create({
-      amount:   template.price,   // in paise (49 * 100 = 4900)
+      amount:   template.price,   // in paise (69 * 100 = 6900)
       currency: "INR",
       receipt:  `receipt_${templateId}_${Date.now()}`,
       notes: { templateId: String(templateId) },
