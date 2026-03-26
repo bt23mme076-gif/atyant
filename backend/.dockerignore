@@ -5,7 +5,6 @@ backend/google-key.json
 uploads
 .git
 npm-debug.log
-package-lock.json
 .env.local
 .env.development
 node_modules/
