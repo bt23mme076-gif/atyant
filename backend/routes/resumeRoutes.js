@@ -24,8 +24,8 @@ const razorpay = new Razorpay({
 const TEMPLATES = {
   1: { name: "Industrial focus", price: 6900, canvaLink: "https://docs.google.com/presentation/d/11T7fhWnJeA9OdM97OsvIF8cJIFdPP_h6qlcGh8uVogw/copy" },
   2: { name: "Tech Developer",  price: 6900, canvaLink: "https://docs.google.com/presentation/d/1y7yxncBrlXJpf9k9q7q82LjbzzxDl4xoW54YDl_sh3I/copy" },
-  3: { name: "Executive Pro",   price: 6900, canvaLink: "https://docs.google.com/presentation/d/1LLkgH59RSz4WdZQNOHaJqd4NAZaEnBSby96OyjLK99A/copy" },
-  4: { name: "Creative Bold",   price: 6900, canvaLink: "https://docs.google.com/presentation/d/1e6_JNRCLxX4QVQhx-Lmb1cBGpE4URGjcCpAqULhB-o4/copy" },
+  3: { name: "Executive Pro",   price: 6900, canvaLink: "https://docs.google.com/presentation/d/1e6_JNRCLxX4QVQhx-Lmb1cBGpE4URGjcCpAqULhB-o4/copy" },
+  4: { name: "Creative Bold",   price: 6900, canvaLink: "https://docs.google.com/presentation/d/1LLkgH59RSz4WdZQNOHaJqd4NAZaEnBSby96OyjLK99A/copy" },
   5: { name: "Corporate Edge",  price: 6900, canvaLink: "https://docs.google.com/presentation/d/1e6_JNRCLxX4QVQhx-Lmb1cBGpE4URGjcCpAqULhB-o4/copy" },
   6: { name: "IIM Ahmedabad",   price: 6900, canvaLink: "https://docs.google.com/presentation/d/1rDfuWeIQLZ__7-G7GHaiHpuf3ewzSiIJusSpoaQ-V9E/copy" },
 };

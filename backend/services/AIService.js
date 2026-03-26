@@ -90,7 +90,64 @@ async refineExperience(rawData) {
     const data = await response.json();
     const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text;
     const jsonMatch = aiText.match(/\{[\s\S]*\}/);
-    return jsonMatch ? JSON.parse(jsonMatch[0]) : rawData;
+    const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : rawData;
+    
+    // 🔴 FIX: Validate and normalize actionableSteps format
+    if (parsed.actionableSteps) {
+      // If it's a string, convert to array of objects
+      if (typeof parsed.actionableSteps === 'string') {
+        const steps = parsed.actionableSteps.split('\n').filter(s => s.trim());
+        parsed.actionableSteps = steps.map((stepText, index) => ({
+          step: `Step ${index + 1}`,
+          description: stepText.trim()
+        }));
+      }
+      // If it's an array of strings, convert to array of objects
+      else if (Array.isArray(parsed.actionableSteps) && 
+               parsed.actionableSteps.length > 0 && 
+               typeof parsed.actionableSteps[0] === 'string') {
+        parsed.actionableSteps = parsed.actionableSteps.map((stepText, index) => ({
+          step: `Step ${index + 1}`,
+          description: stepText.trim()
+        }));
+      }
+      // If it's array of objects, validate structure
+      else if (Array.isArray(parsed.actionableSteps)) {
+        parsed.actionableSteps = parsed.actionableSteps.map((item, index) => {
+          if (typeof item === 'object' && item !== null) {
+            return {
+              step: item.step || `Step ${index + 1}`,
+              description: item.description || item.step || ''
+            };
+          }
+          return {
+            step: `Step ${index + 1}`,
+            description: String(item)
+          };
+        });
+      }
+    }
+    
+    // 🔴 FIX: Validate and normalize keyMistakes format
+    if (parsed.keyMistakes) {
+      if (typeof parsed.keyMistakes === 'string') {
+        parsed.keyMistakes = [parsed.keyMistakes];
+      } else if (Array.isArray(parsed.keyMistakes) && 
+                 parsed.keyMistakes.length > 0 && 
+                 typeof parsed.keyMistakes[0] === 'string') {
+        // Already array of strings - this is valid per schema
+      } else if (Array.isArray(parsed.keyMistakes)) {
+        // Convert objects to strings if needed
+        parsed.keyMistakes = parsed.keyMistakes.map(item => {
+          if (typeof item === 'object' && item !== null) {
+            return item.description || item.mistake || String(item);
+          }
+          return String(item);
+        });
+      }
+    }
+    
+    return parsed;
   } catch (error) {
     return rawData; 
   }

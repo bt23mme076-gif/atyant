@@ -21,11 +21,10 @@ const Home = () => {
       />
 
       <div id="home"><HeroSection /></div>
-      <AtyantJourneySlider />
       <div id="about"><AboutUs /></div>
+      <AtyantJourneySlider />
       <div id="how-it-works"><HowItWorks /></div>
       <div id="why-choose-us"><WhyChooseUs /></div>
-      <div id="FeedbackForm"><FeedbackForm /></div>
       <ReviewsSlider />
     </>
   );

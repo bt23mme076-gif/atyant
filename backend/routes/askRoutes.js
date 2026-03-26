@@ -105,9 +105,40 @@ router.post('/mentor/submit-audio-answer', protect, upload.single('audio'), asyn
     if (typeof answerContent === 'string') {
       try { parsedContent = JSON.parse(answerContent); } catch {}
     }
+    
+    // 🔴 FIX: Ensure actionableSteps is properly formatted as array of objects
     if (parsedContent && typeof parsedContent === 'object' && parsedContent.actionableSteps) {
-      if (Array.isArray(parsedContent.actionableSteps) && parsedContent.actionableSteps.length === 1 && typeof parsedContent.actionableSteps[0] === 'string') {
-        parsedContent.actionableSteps = parsedContent.actionableSteps[0];
+      // If it's a string, try to parse it into proper format
+      if (typeof parsedContent.actionableSteps === 'string') {
+        const steps = parsedContent.actionableSteps.split('\n').filter(s => s.trim());
+        parsedContent.actionableSteps = steps.map((stepText, index) => ({
+          step: `Step ${index + 1}`,
+          description: stepText.trim()
+        }));
+      }
+      // If it's an array of strings, convert to array of objects
+      else if (Array.isArray(parsedContent.actionableSteps) && 
+               parsedContent.actionableSteps.length > 0 && 
+               typeof parsedContent.actionableSteps[0] === 'string') {
+        parsedContent.actionableSteps = parsedContent.actionableSteps.map((stepText, index) => ({
+          step: `Step ${index + 1}`,
+          description: stepText.trim()
+        }));
+      }
+      // If it's already array of objects, validate structure
+      else if (Array.isArray(parsedContent.actionableSteps)) {
+        parsedContent.actionableSteps = parsedContent.actionableSteps.map((item, index) => {
+          if (typeof item === 'object' && item !== null) {
+            return {
+              step: item.step || `Step ${index + 1}`,
+              description: item.description || item.step || ''
+            };
+          }
+          return {
+            step: `Step ${index + 1}`,
+            description: String(item)
+          };
+        });
       }
     }
     

@@ -26,3 +26,28 @@
 /* Shared layout utilities */
 .flex-center { display: flex; justify-content: center; align-items: center; }
 .grid-auto { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+
+/* Global reduced spacing for sections — make site more compact */
+:root {
+  --section-vertical-padding: 28px;
+  --section-horizontal-padding: 16px;
+}
+
+section,
+[class$="-section"],
+[class*=" section"],
+.container,
+.journey-container,
+.flow-wrapper {
+  padding-top: var(--section-vertical-padding) !important;
+  padding-bottom: var(--section-vertical-padding) !important;
+  padding-left: var(--section-horizontal-padding) !important;
+  padding-right: var(--section-horizontal-padding) !important;
+}
+
+/* Slightly tighter headers */
+.journey-header,
+.flow-header,
+.heading-wrapper {
+  margin-bottom: 18px !important;
+}

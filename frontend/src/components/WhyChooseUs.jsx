@@ -53,21 +53,21 @@ const WhyChooseUs = () => {
     {
       icon: "🏆",
       title: "Real Experience → Reusable Guidance",
-      description: "Atyant doesn't give opinions. We convert real senior journeys into structured AnswerCards that guide thousands of similar students.",
+      description: "We convert real senior journeys into structured AnswerCards.",
       highlight: "AnswerCards",
       color: "gold"
     },
     {
       icon: "⚡",
       title: "Instant Answers, Not Endless Chats",
-      description: "If a relevant AnswerCard already exists, you get it instantly. No waiting. No repeated questions. No noise.",
+      description: "If a relevant AnswerCard already exists, you get it instantly.",
       highlight: "instantly",
       color: "blue"
     },
     {
       icon: "🧠",
       title: "AI Routing, Human Truth",
-      description: "Our AI decides who should answer — not what to answer. Guidance always comes from people who've actually solved the same problem.",
+      description: "Our AI decides who should answer — not what to answer.",
       highlight: "who should answer",
       color: "purple"
     }
@@ -88,7 +88,6 @@ const WhyChooseUs = () => {
         <div className="why-header why-animate">
           <span className="why-badge">💡 The Difference</span>
           <h2>Why Choose <span className="gradient-text">Atyant</span>?</h2>
-          <p>Not just another platform. A smarter way to get real guidance.</p>
         </div>
 
         {/* Cards Grid */}
