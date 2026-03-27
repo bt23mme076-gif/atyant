@@ -154,9 +154,7 @@ const AtyantJourneySlider = () => {
             <span className="heading-icon" aria-hidden="true">✨</span>
           </div>
           <p className="journey-subtitle" itemProp="description">
-            Discover Atyant journey across top engineering colleges - MANIT, VNIT, GHRC, PCE. 
-            Witness how AI-powered mentorship transforms student careers through workshops, 
-            mentor connections, and placement guidance 📸
+           
           </p>
           
           {/* SEO Content - Hidden but crawlable */}

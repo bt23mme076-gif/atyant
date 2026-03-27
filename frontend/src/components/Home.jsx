@@ -8,6 +8,8 @@ import WhyChooseUs from './WhyChooseUs';
 import FeedbackForm from './FeedbackForm';
 import ReviewsSlider from './ReviewsSlider';
 import AtyantJourneySlider from './AtyantJourneySlider';
+import ResumeheroSection from './ResumeHeroSection';
+
 
 const Home = () => {
   return (
@@ -23,8 +25,10 @@ const Home = () => {
       <div id="home"><HeroSection /></div>
       <div id="about"><AboutUs /></div>
       <AtyantJourneySlider />
-      <div id="how-it-works"><HowItWorks /></div>
+      <ResumeheroSection />
       <div id="why-choose-us"><WhyChooseUs /></div>
+            <div id="how-it-works"><HowItWorks /></div>
+
       <ReviewsSlider />
     </>
   );

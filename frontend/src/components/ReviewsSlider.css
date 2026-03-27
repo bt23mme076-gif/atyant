@@ -1,6 +1,7 @@
 .reviews-wrap {
-  padding: 100px 20px 120px;
-  background: #0a0a0f;
+  padding: 40px 20px; /* align with homepage spacing */
+  background: #0D1117; /* match hero dark background */
+  background-image: linear-gradient(rgba(13,17,23,0.95), rgba(13,17,23,0.85));
   position: relative;
   overflow: hidden;
 }
@@ -96,8 +97,8 @@
 
 /* ========== HEADER ========== */
 .reviews-head {
-  max-width: 1200px;
-  margin: 0 auto 60px;
+  max-width: 1100px;
+  margin: 0 auto 36px; /* tighter gap like homepage */
   text-align: center;
   position: relative;
   z-index: 1;
@@ -231,9 +232,9 @@
 
 /* ========== SWIPER ========== */
 .reviews-swiper {
-  max-width: 1250px;
+  max-width: 1150px;
   margin: 0 auto;
-  padding: 50px 20px 80px;
+  padding: 30px 12px 40px; /* reduced vertical padding to sync with homepage */
   position: relative;
   z-index: 1;
 }
@@ -241,16 +242,16 @@
 /* ========== REVIEW CARD ========== */
 .review-card {
   position: relative;
-  background: linear-gradient(145deg, rgba(30, 30, 50, 0.7), rgba(15, 15, 30, 0.9));
-  border: 1px solid rgba(139, 92, 246, 0.15);
-  border-radius: 28px;
-  padding: 36px 30px;
-  backdrop-filter: blur(20px);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(145deg, rgba(20, 22, 30, 0.75), rgba(10, 10, 16, 0.95));
+  border: 1px solid rgba(99, 102, 241, 0.06);
+  border-radius: 20px;
+  padding: 28px 24px;
+  backdrop-filter: blur(12px);
+  transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
   overflow: hidden;
 }
 

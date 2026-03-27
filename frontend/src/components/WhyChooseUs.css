@@ -1,6 +1,6 @@
 /* src/components/WhyChooseUs.css */
 .why-section {
-  padding: 100px 20px;
+  padding: 20px 10px; /* reduced vertical padding */
   background: #0a0a0f;
   position: relative;
   overflow: hidden;
@@ -124,6 +124,32 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: gradientMove 4s ease infinite;
+}
+
+/* Dynamic word styling (Placement / Internship) */
+.dynamic-word {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 800;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: wordIn 600ms ease;
+}
+
+.dynamic-word[data-word="Placement"] {
+  background-image: linear-gradient(90deg,#06b6d4,#3b82f6);
+}
+
+.dynamic-word[data-word="Internship"] {
+  background-image: linear-gradient(90deg,#f97316,#f43f5e);
+}
+
+@keyframes wordIn {
+  0% { opacity: 0; transform: translateY(8px) scale(0.98); }
+  60% { opacity: 1; transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes gradientMove {
