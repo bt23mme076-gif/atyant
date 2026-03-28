@@ -1,13 +1,21 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import compression from 'vite-plugin-compression';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   base: '/',
   plugins: [
     react(),
     compression({ algorithm: 'gzip', ext: '.gz' }),
-    compression({ algorithm: 'brotliCompress', ext: '.br' })
+    compression({ algorithm: 'brotliCompress', ext: '.br' }),
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: require('./public/manifest.json'),
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,png,svg,ico,json}'],
+      },
+    }),
   ],
   build: {
     target: 'esnext', // Modern browsers ke liye faster build

@@ -11,6 +11,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import { HelmetProvider } from 'react-helmet-async'; // ✅ NEW IMPORT
 import { initCarouselFix } from './utils/carouselFix';
 import QueryProvider from './providers/QueryProvider';
+import './registerSW';
 
 initCarouselFix();
 

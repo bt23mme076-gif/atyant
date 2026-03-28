@@ -3,7 +3,7 @@ import { API_URL } from '../services/api.js';
 import { useNavigate } from "react-router-dom";
 import MentorRecommendationBlock from "./MentorRecommendationBlock";
 import "./career-guides.css";
-
+import EnvelopeSection from "./EnvelopeSection";
 
 const trackMentorKeywords = {
   analytics: [
@@ -601,57 +601,114 @@ export default function CareerGuidesPage() {
             </div>
 
             <div className="content-grid">
-              <div className="content-card">
-                <h3>Skills recruiters expect</h3>
+              <EnvelopeSection
+                title="Skills recruiters expect"
+                preview={
+                  <ul>
+                    {track.skills.slice(0, 2).map((skill) => (
+                      <li key={skill}>{skill}</li>
+                    ))}
+                  </ul>
+                }
+              >
                 <ul>
                   {track.skills.map((skill) => (
                     <li key={skill}>{skill}</li>
                   ))}
                 </ul>
-              </div>
+              </EnvelopeSection>
 
-              <div className="content-card">
-                <h3>Simple roadmap</h3>
+              <EnvelopeSection
+                title="Simple roadmap"
+                preview={
+                  <ol>
+                    {track.roadmap.slice(0, 2).map((step) => (
+                      <li key={step}>{step}</li>
+                    ))}
+                  </ol>
+                }
+              >
                 <ol>
                   {track.roadmap.map((step) => (
                     <li key={step}>{step}</li>
                   ))}
                 </ol>
-              </div>
+              </EnvelopeSection>
             </div>
 
             <div className="content-grid">
-              <div className="content-card">
-                <h3>Where to apply</h3>
+              <EnvelopeSection
+                title="Where to apply"
+                preview={
+                  <div className="chip-grid">
+                    {track.applyWhere.slice(0, 3).map((item) => (
+                      <span key={item} className="chip">{item}</span>
+                    ))}
+                  </div>
+                }
+              >
                 <div className="chip-grid">
                   {track.applyWhere.map((item) => (
                     <span key={item} className="chip">{item}</span>
                   ))}
                 </div>
-              </div>
+              </EnvelopeSection>
 
-              <div className="content-card">
-                <h3>Project ideas</h3>
+              <EnvelopeSection
+                title="Project ideas"
+                preview={
+                  <div className="chip-grid">
+                    {track.projects.slice(0, 2).map((project) => (
+                      <span key={project} className="chip subtle">{project}</span>
+                    ))}
+                  </div>
+                }
+              >
                 <div className="chip-grid">
                   {track.projects.map((project) => (
                     <span key={project} className="chip subtle">{project}</span>
                   ))}
                 </div>
-              </div>
+              </EnvelopeSection>
             </div>
 
             <div className="content-grid">
-              <div className="content-card">
-                <h3>Target companies</h3>
+              <EnvelopeSection
+                title="Target companies"
+                preview={
+                  <div className="chip-grid">
+                    {track.companies.slice(0, 3).map((company) => (
+                      <span key={company} className="chip company">{company}</span>
+                    ))}
+                  </div>
+                }
+              >
                 <div className="chip-grid">
                   {track.companies.map((company) => (
                     <span key={company} className="chip company">{company}</span>
                   ))}
                 </div>
-              </div>
+              </EnvelopeSection>
 
-              <div className="content-card">
-                <h3>Best resources</h3>
+              <EnvelopeSection
+                title="Best resources"
+                preview={
+                  <div className="resource-list">
+                    {track.resources.slice(0, 1).map((resource) => (
+                      <a
+                        key={resource.name}
+                        href={resource.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="resource-item"
+                      >
+                        <span>{resource.name}</span>
+                        <span>↗</span>
+                      </a>
+                    ))}
+                  </div>
+                }
+              >
                 <div className="resource-list">
                   {track.resources.map((resource) => (
                     <a
@@ -666,7 +723,7 @@ export default function CareerGuidesPage() {
                     </a>
                   ))}
                 </div>
-              </div>
+              </EnvelopeSection>
             </div>
 
             <div className="mentor-recommend-wrap">

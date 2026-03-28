@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import './ResumeHeroSection.css';
+import InstallPWAButton from './InstallPWAButton';
 
 export default function PremiumSectionHero({ 
   badgeText = ' NEW ON ATYANT🔥',
@@ -37,11 +38,12 @@ export default function PremiumSectionHero({
           {subText}
         </motion.p>
 
-        
-
-        <motion.button onClick={() => navigate('/career-guides')} className="resume-hero-cta" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.4 }}>
-          <span className="resume-hero-cta-text">Explore Career Guide</span>
-        </motion.button>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 32 }}>
+          <motion.button onClick={() => navigate('/career-guides')} className="resume-hero-cta" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 0.4 }}>
+            <span className="resume-hero-cta-text">Explore Career Guide</span>
+          </motion.button>
+          <InstallPWAButton />
+        </div>
       </div>
     </section>
   );

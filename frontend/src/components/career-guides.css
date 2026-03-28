@@ -34,6 +34,48 @@
   --radius-xl: 20px;
 }
 
+/* Accordion Envelope Styles */
+.envelope-section {
+  background: var(--card);
+  border: 1.5px solid var(--card-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 24px;
+  transition: box-shadow 0.2s;
+  overflow: hidden;
+}
+
+.envelope-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 20px 24px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  background: var(--card-soft);
+  user-select: none;
+}
+
+.chevron {
+  transition: transform 0.3s;
+  font-size: 1.2em;
+}
+
+.chevron.rotated {
+  transform: rotate(180deg);
+}
+
+.envelope-content {
+  padding: 22px 24px;
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
 * {
   box-sizing: border-box;
 }
@@ -867,6 +909,28 @@ a {
   margin: 0;
   color: rgba(255, 255, 255, 0.92);
   line-height: 1.7;
+}
+
+/* PWA Download Button Custom Style */
+.pwa-download-btn {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.08rem;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.18);
+  padding: 14px 36px;
+  margin: 18px auto 24px auto;
+  display: block;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+}
+.pwa-download-btn:hover {
+  background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.22);
+  transform: translateY(-2px) scale(1.04);
 }
 
 /* Responsive */

@@ -9,6 +9,7 @@ import FeedbackForm from './FeedbackForm';
 import ReviewsSlider from './ReviewsSlider';
 import AtyantJourneySlider from './AtyantJourneySlider';
 import ResumeheroSection from './ResumeHeroSection';
+import InstallPWAButton from './InstallPWAButton';
 
 
 const Home = () => {
@@ -27,8 +28,7 @@ const Home = () => {
       <AtyantJourneySlider />
       <ResumeheroSection />
       <div id="why-choose-us"><WhyChooseUs /></div>
-            <div id="how-it-works"><HowItWorks /></div>
-
+      <div id="how-it-works"><HowItWorks /></div>
       <ReviewsSlider />
     </>
   );
