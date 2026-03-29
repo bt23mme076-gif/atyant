@@ -31,6 +31,8 @@ import questionRoutes      from './routes/questionRoutes.js';
 import paymentRoutes       from './routes/paymentRoutes.js';
 import resumeRoutes        from './routes/resumeRoutes.js';
 import monetizationRoutes  from './routes/monetizationRoutes.js';
+import pushRoutes          from './routes/pushRoutes.js';
+import notificationRoutes  from './routes/notificationRoutes.js';
 
 // ─── Models / utils ────────────────────────────────────────────────────────
 import Message      from './models/Message.js';
@@ -172,6 +174,8 @@ app.use('/api/admin',           adminRoutes);
 app.use('/api/questions',       questionRoutes);
 app.use('/api/resume',          resumeRoutes);
 app.use('/api/monetization',    monetizationRoutes);
+app.use('/api/push',            pushRoutes);
+app.use('/api/notifications',   notificationRoutes);
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

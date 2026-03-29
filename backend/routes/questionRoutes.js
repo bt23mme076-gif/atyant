@@ -4,6 +4,7 @@ import { questionLimiter } from '../middleware/rateLimiters.js';
 import Question from '../models/Question.js';
 import User from '../models/User.js';
 import { sendMentorNewQuestionNotification } from '../utils/emailNotifications.js';
+import notificationService from '../utils/notificationService.js';
 import atyantEngine from '../services/AtyantEngine.js';
 import Mentor from '../models/Mentor.js';
 import { getQuestionEmbedding } from '../services/AIService.js';
@@ -398,11 +399,19 @@ router.post('/submit', questionLimiter, protect, async (req, res) => {
       try {
         const mentor = await User.findById(question.selectedMentorId).select('email username name');
         if (mentor && mentor.email) {
+          // Send email
           await sendMentorNewQuestionNotification(
             mentor.email,
             mentor.username || mentor.name || 'Mentor',
             question.questionText,
             question.keywords || []
+          );
+          
+          // Create in-app notification
+          await notificationService.notifyQuestionAssigned(
+            question.selectedMentorId,
+            question.questionText,
+            question._id
           );
         }
       } catch (notifyErr) {

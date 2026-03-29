@@ -6,6 +6,7 @@ import { extractKeywords } from '../utils/keywordExtractor.js';
 import protect from '../middleware/authMiddleware.js';
 import AnswerCard from '../models/AnswerCard.js';
 import { sendUserAnswerReadyNotification } from '../utils/emailNotifications.js';
+import notificationService from '../utils/notificationService.js';
 import { getQuestionEmbedding } from '../services/AIService.js';
 
 import path from 'path';
@@ -87,7 +88,11 @@ router.post('/mentor/submit-audio-answer', protect, upload.single('audio'), asyn
       try {
         const asker = await User.findById(question.userId).select('email username name');
         if (asker && asker.email) {
+          // Send email
           await sendUserAnswerReadyNotification(asker.email, asker.username || asker.name || 'Student', question.questionText, true);
+          
+          // Create in-app notification
+          await notificationService.notifyAnswerReady(question.userId, question.questionText, question._id);
         }
       } catch (notifyErr) {
         console.error('Error sending follow-up answer notification:', notifyErr);
@@ -187,8 +192,11 @@ router.post('/mentor/submit-audio-answer', protect, upload.single('audio'), asyn
     try {
       const asker = await User.findById(question.userId).select('email username name');
       if (asker && asker.email) {
-        // Non-follow-up answer
+        // Send email
         await sendUserAnswerReadyNotification(asker.email, asker.username || asker.name || 'Student', question.questionText, false);
+        
+        // Create in-app notification
+        await notificationService.notifyAnswerReady(question.userId, question.questionText, question._id);
       }
     } catch (notifyErr) {
       console.error('Error sending user answer notification:', notifyErr);

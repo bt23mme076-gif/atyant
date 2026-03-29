@@ -3,6 +3,7 @@ import React, { useContext, useState, useEffect, useRef, useCallback } from 'rea
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
 import UserAvatar from './UserAvatar';
+import NotificationBell from './NotificationBell';
 import { Menu, User as UserIcon, GraduationCap, LogOut, ShoppingBag } from 'lucide-react';
 import './Navbar.css';
 import { API_URL } from '../services/api.js';
@@ -103,28 +104,31 @@ const Navbar = () => {
       <nav className="navbar-links desktop-only">
         {renderLinks()}
         {user && (
-          <div className="profile-menu-container" ref={dropdownRef}>
-            <button onClick={() => setShowDropdown(v => !v)} className="profile-avatar-btn">
-              <UserAvatar user={avatarUser} size={40} />
-            </button>
-            {showDropdown && (
-              <div className="profile-dropdown">
-                <div className="dropdown-header">
-                  <UserAvatar user={avatarUser} size={48} />
-                  <div className="dropdown-user-info">
-                    <span>Signed in as</span>
-                    <strong>{user.name || user.username || user.email || 'User'}</strong>
+          <>
+            <NotificationBell />
+            <div className="profile-menu-container" ref={dropdownRef}>
+              <button onClick={() => setShowDropdown(v => !v)} className="profile-avatar-btn">
+                <UserAvatar user={avatarUser} size={40} />
+              </button>
+              {showDropdown && (
+                <div className="profile-dropdown">
+                  <div className="dropdown-header">
+                    <UserAvatar user={avatarUser} size={48} />
+                    <div className="dropdown-user-info">
+                      <span>Signed in as</span>
+                      <strong>{user.name || user.username || user.email || 'User'}</strong>
+                    </div>
                   </div>
+                  <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+                    <UserIcon size={18} /> My Profile
+                  </Link>
+                  <button onClick={handleLogout} className="dropdown-item logout-btn">
+                    <LogOut size={18} /> Logout
+                  </button>
                 </div>
-                <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
-                  <UserIcon size={18} /> My Profile
-                </Link>
-                <button onClick={handleLogout} className="dropdown-item logout-btn">
-                  <LogOut size={18} /> Logout
-                </button>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          </>
         )}
       </nav>
 
