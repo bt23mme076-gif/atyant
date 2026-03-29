@@ -109,8 +109,46 @@ const NotificationBell = () => {
   // Fetch unread count on mount and every 30 seconds
   useEffect(() => {
     if (!token) return;
+    
+    // Initial fetch (silent, no toast)
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 30000); // 30 seconds
+    
+    // Store initial count
+    const initialCountRef = { current: null };
+    
+    const interval = setInterval(async () => {
+      if (!token) return;
+      
+      try {
+        const res = await fetch(`${API_URL}/api/notifications/unread-count`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          const newCount = data.count;
+          
+          // If this is first check, just store the count
+          if (initialCountRef.current === null) {
+            initialCountRef.current = newCount;
+            setUnreadCount(newCount);
+            return;
+          }
+          
+          // If count increased, show toast (NEW notification)
+          if (newCount > initialCountRef.current) {
+            // Optional: Show toast notification here
+            // toast.info('You have new notifications!', { position: 'top-right', autoClose: 3000 });
+          }
+          
+          initialCountRef.current = newCount;
+          setUnreadCount(newCount);
+        }
+      } catch (error) {
+        console.error('Fetch unread count error:', error);
+      }
+    }, 30000); // 30 seconds
+    
     return () => clearInterval(interval);
   }, [token]);
 
