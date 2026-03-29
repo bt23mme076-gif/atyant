@@ -20,11 +20,19 @@ const Home = () => {
       if (Notification.permission === 'default') {
         Notification.requestPermission().then(permission => {
           if (permission === 'granted') {
+            // Show notification only when permission is FIRST granted
             showTestNotification();
+            // Mark that we've shown the welcome notification
+            localStorage.setItem('welcomeNotificationShown', 'true');
           }
         });
       } else if (Notification.permission === 'granted') {
-        showTestNotification();
+        // Check if we've already shown the welcome notification
+        const hasShownWelcome = localStorage.getItem('welcomeNotificationShown');
+        if (!hasShownWelcome) {
+          showTestNotification();
+          localStorage.setItem('welcomeNotificationShown', 'true');
+        }
       }
     }
 
