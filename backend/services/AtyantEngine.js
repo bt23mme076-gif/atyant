@@ -758,6 +758,139 @@ class AtyantEngine {
       return best.mentor;
 
     } catch (error) {
+      console.error('❌ findBestMentor error:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Find top N mentors for a question (for carousel display)
+   */
+  async findTopMentors(studentId, keywords, questionCategory = null, limit = 3) {
+    try {
+      const questionText = keywords.join(' ');
+      const student      = await User.findById(studentId).select('education').lean();
+      const sEdu         = student?.education?.[0] || {};
+      const studentCollegeType = getCollegeType(sEdu.institutionName);
+
+      const queryDetails = await this.detectQueryDetails(questionText);
+      const { intent, confidence, mentionedCompanies, relatedCompanies, foundTags, mentionedTech } = queryDetails;
+
+      dlog(`\n🤝 ===== FINDING TOP ${limit} MENTORS =====`);
+
+      const mentors = await getActiveMentors();
+      dlog(`Scoring ${mentors.length} mentors...`);
+
+      const LW = CONFIG.LIVE_WEIGHTS;
+
+      const scored = mentors.map(mentor => {
+        let points = 0;
+        const breakdown = [];
+
+        // Company domain match
+        if (questionCategory && mentor.companyDomain === questionCategory) {
+          points += 800; breakdown.push(`ExactDomain(+800)`);
+        }
+
+        // Company matching
+        const mentorCompanies = (mentor.topCompanies || []).map(normalizeCompany);
+        const exactCount      = mentorCompanies.filter(mc => mentionedCompanies.includes(mc)).length;
+        const relatedCount    = mentorCompanies.filter(mc => relatedCompanies.includes(mc)).length;
+
+        if (exactCount > 0)       { const p = LW.EXACT_COMPANY * exactCount;   points += p; breakdown.push(`ExactCo(+${p})`); }
+        else if (relatedCount > 0){ const p = LW.RELATED_COMPANY * relatedCount; points += p; breakdown.push(`RelatedCo(+${p})`); }
+
+        // Special tags
+        const tagCount = (mentor.specialTags || []).filter(tag => foundTags.some(ft => tag.toLowerCase().includes(ft))).length;
+        if (tagCount > 0) { const p = LW.SPECIAL_TAG * tagCount; points += p; breakdown.push(`Tags(+${p},${tagCount}x)`); }
+
+        // Domain intent
+        if (intent && intent !== 'general') {
+          if (mentor.primaryDomain === intent) {
+            const p = Math.round(LW.EXACT_DOMAIN * confidence); points += p; breakdown.push(`Domain(+${p})`);
+          } else if (mentor.primaryDomain === 'both') {
+            const p = Math.round(LW.PARTIAL_DOMAIN * confidence); points += p; breakdown.push(`BothDomain(+${p})`);
+          }
+        }
+
+        // Milestones
+        const milestoneCount = (mentor.milestones || []).filter(m => foundTags.some(ft => m.toLowerCase().includes(ft))).length;
+        if (milestoneCount > 0) { const p = LW.MILESTONE * milestoneCount; points += p; breakdown.push(`Milestones(+${p})`); }
+
+        // Expertise
+        const expExact   = (mentor.expertise || []).filter(exp => mentionedTech.some(t => exp.toLowerCase() === t.toLowerCase())).length;
+        const expPartial = (mentor.expertise || []).filter(exp => mentionedTech.some(t => exp.toLowerCase().includes(t))).length - expExact;
+        if (expExact   > 0) { const p = LW.EXPERTISE_EXACT * expExact;     points += p; breakdown.push(`ExactTech(+${p})`); }
+        if (expPartial > 0) { const p = LW.EXPERTISE_PARTIAL * expPartial; points += p; breakdown.push(`PartialTech(+${p})`); }
+
+        // Bio keywords
+        const bioCount = keywords.filter(kw => mentor.bio?.toLowerCase().includes(kw)).length;
+        if (bioCount >= 3) { const p = LW.BIO_KEYWORD * bioCount; points += p; breakdown.push(`Bio(+${p})`); }
+
+        // College type
+        const mEdu = mentor.education?.[0] || {};
+        const mentorCollegeType = getCollegeType(mEdu.institutionName);
+        if (studentCollegeType === mentorCollegeType && studentCollegeType !== 'unknown') {
+          points += LW.COLLEGE_TYPE; breakdown.push(`${studentCollegeType.toUpperCase()}(+${LW.COLLEGE_TYPE})`);
+        }
+
+        // Same branch
+        if (sEdu.field && mEdu.field && sEdu.field.toLowerCase() === mEdu.field.toLowerCase()) {
+          points += LW.SAME_BRANCH; breakdown.push(`Branch(+${LW.SAME_BRANCH})`);
+        }
+
+        // Quality signals
+        if (mentor.rating >= 4.5)                  { points += LW.HIGH_RATING;   breakdown.push(`★${mentor.rating}(+${LW.HIGH_RATING})`); }
+        if (mentor.responseRate >= 85)              { points += LW.HIGH_RESPONSE; breakdown.push(`Response(+${LW.HIGH_RESPONSE})`); }
+        if (isRecentlyActive(mentor.lastActive))    { points += LW.RECENT_ACTIVE; breakdown.push(`Active(+${LW.RECENT_ACTIVE})`); }
+
+        // Proven track record
+        if ((mentor.successfulMatches || 0) >= 10) {
+          const bonus = Math.min(Math.floor(mentor.successfulMatches / 10), 5) * LW.PROVEN_MENTOR;
+          points += bonus; breakdown.push(`Proven(+${bonus})`);
+        }
+
+        // Load penalty
+        const load = mentor.activeQuestions || 0;
+        if (load >= CONFIG.MAX_LOAD) {
+          const oldPoints = points;
+          points = Math.floor(points * 0.25);
+          breakdown.push(`OVERLOADED(-${oldPoints - points},${load}Q)`);
+        } else if (load > 0) {
+          const penalty = load * CONFIG.LOAD_PENALTY;
+          points -= penalty;
+          breakdown.push(`Load(-${penalty},${load}Q)`);
+        }
+
+        return { mentor, points, logs: breakdown.join(' | '), load };
+      });
+
+      scored.sort((a, b) => b.points - a.points);
+
+      console.log(`\n--- TOP ${limit} MENTORS ---`);
+      scored.slice(0, limit).forEach((item, i) => {
+        console.log(`#${i+1}: ${item.mentor.username} | ${item.points}pts (${item.load}Q) ${i === 0 ? '⭐ RECOMMENDED' : ''}`);
+        dlog('   └─', item.logs || 'generic');
+      });
+
+      // Filter mentors that meet threshold
+      const qualifiedMentors = scored
+        .filter(s => s.points >= CONFIG.LIVE_MATCH_THRESHOLD)
+        .slice(0, limit)
+        .map(s => {
+          s.mentor.matchScore = Math.min(Math.round((s.points / 2000) * 100), 99);
+          return s.mentor;
+        });
+
+      if (qualifiedMentors.length === 0) {
+        console.log(`❌ NO QUALIFYING MENTORS: all below ${CONFIG.LIVE_MATCH_THRESHOLD}`);
+        return null;
+      }
+
+      dlog(`✅ RETURNING ${qualifiedMentors.length} MENTORS`);
+      return qualifiedMentors;
+
+    } catch (error) {
       console.error('🔥 Live Routing Error:', error);
       return null;
     }

@@ -136,11 +136,11 @@ const userSchema = new mongoose.Schema({
   strategy: {
     tone          : String,
     language      : String,
-    hardTruth     : String,
-    timeWaste     : String,
-    roadmap       : String,
-    resumeTip     : String,
-    neverRecommend: String,
+    hardTruth     : [String],
+    timeWaste     : [String],
+    roadmap       : [String],
+    resumeTip     : [String],
+    neverRecommend: [String],
     permission    : Boolean
   },
 

@@ -204,6 +204,19 @@ const RedditThreads = ({ posts }) => {
 
 const MentorPreviewContent = ({ mentorPreview, checkingQuality, onContinue, onAsk }) => {
   const navigate = useNavigate();
+  const [currentMentorIndex, setCurrentMentorIndex] = useState(0);
+
+  // Get mentors array (support both old and new API format)
+  const mentors = mentorPreview.mentors || (mentorPreview.mentor ? [mentorPreview.mentor] : []);
+  const currentMentor = mentors[currentMentorIndex] || mentors[0];
+
+  const handlePrevMentor = () => {
+    setCurrentMentorIndex((prev) => (prev === 0 ? mentors.length - 1 : prev - 1));
+  };
+
+  const handleNextMentor = () => {
+    setCurrentMentorIndex((prev) => (prev === mentors.length - 1 ? 0 : prev + 1));
+  };
 
   return (
     <>
@@ -212,32 +225,76 @@ const MentorPreviewContent = ({ mentorPreview, checkingQuality, onContinue, onAs
         {mentorPreview.instantAnswer ? '⚡ Instant answer available!' : '✨ Best mentor found for your question'}
       </h2>
 
-      {/* 2. Mentor Card */}
-      {mentorPreview.mentor && (
-        <div className="aq-mentor-card">
-          <div className="aq-mentor-avatar">
-            {mentorPreview.mentor.profileImage
-              ? <img src={mentorPreview.mentor.profileImage} alt={mentorPreview.mentor.name} />
-              : <div className="aq-avatar-fallback"><svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div>}
-          </div>
-          <div className="aq-mentor-details">
-            <h3>{mentorPreview.mentor.name || 'Matched Mentor'}</h3>
-            <p className="aq-mentor-bio">{mentorPreview.mentor.bio || 'A mentor match has been found for your question.'}</p>
-            <div className="aq-expertise-tags">
-              {mentorPreview.mentor.expertise?.slice(0, 4).map((exp, i) => (
-                <span key={i} className="aq-tag">{exp}</span>
-              ))}
+      {/* 2. Mentor Carousel */}
+      {currentMentor && (
+        <div className="aq-mentor-carousel">
+          {/* Recommended Badge */}
+          {currentMentor.isRecommended && (
+            <div className="aq-recommended-by-atyant">
+              ⭐ Recommended by Atyant
+            </div>
+          )}
+
+          {/* Navigation Arrows (only show if multiple mentors) */}
+          {mentors.length > 1 && (
+            <>
+              <button 
+                className="aq-carousel-arrow aq-carousel-prev" 
+                onClick={handlePrevMentor}
+                aria-label="Previous mentor"
+              >
+                ‹
+              </button>
+              <button 
+                className="aq-carousel-arrow aq-carousel-next" 
+                onClick={handleNextMentor}
+                aria-label="Next mentor"
+              >
+                ›
+              </button>
+            </>
+          )}
+
+          {/* Mentor Card */}
+          <div className="aq-mentor-card">
+            <div className="aq-mentor-avatar">
+              {currentMentor.profileImage
+                ? <img src={currentMentor.profileImage} alt={currentMentor.name} />
+                : <div className="aq-avatar-fallback"><svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div>}
+            </div>
+            <div className="aq-mentor-details">
+              <h3>{currentMentor.name || 'Matched Mentor'}</h3>
+              <p className="aq-mentor-bio">{currentMentor.bio || 'A mentor match has been found for your question.'}</p>
+              <div className="aq-expertise-tags">
+                {currentMentor.expertise?.slice(0, 4).map((exp, i) => (
+                  <span key={i} className="aq-tag">{exp}</span>
+                ))}
+              </div>
+            </div>
+            <div className="aq-match-score">
+              <ProgressRing value={currentMentor.matchPercentage || 0} />
+              <span className="aq-match-label">Match</span>
             </div>
           </div>
-          <div className="aq-match-score">
-            <ProgressRing value={mentorPreview.mentor.matchPercentage || 0} />
-            <span className="aq-match-label">Match</span>
-          </div>
+
+          {/* Carousel Dots (only show if multiple mentors) */}
+          {mentors.length > 1 && (
+            <div className="aq-carousel-dots">
+              {mentors.map((_, index) => (
+                <button
+                  key={index}
+                  className={`aq-carousel-dot ${index === currentMentorIndex ? 'active' : ''}`}
+                  onClick={() => setCurrentMentorIndex(index)}
+                  aria-label={`View mentor ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* 3. Services */}
-      {mentorPreview.mentor && <MentorServicesPreview mentorId={mentorPreview.mentor.id} />}
+      {currentMentor && <MentorServicesPreview mentorId={currentMentor.id} />}
 
       {/* 4. Reddit Stats Banner */}
       {mentorPreview.redditStats && (

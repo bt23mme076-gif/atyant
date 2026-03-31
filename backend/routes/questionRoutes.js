@@ -133,23 +133,24 @@ router.post('/preview-match', questionLimiter, protect, async (req, res) => {
     }
     
     // 🔥 FALLBACK TO LIVE MENTOR ROUTING
-    const bestMentor = await atyantEngine.findBestMentor(req.user.userId, keywords, questionCategory);
+    const topMentors = await atyantEngine.findTopMentors(req.user.userId, keywords, questionCategory, 3);
     
-    if (!bestMentor) {
+    if (!topMentors || topMentors.length === 0) {
       // Fallback: Return real Atyant Engine mentor from DB
       const atyantMentor = await Mentor.findOne({ username: 'Atyant Engine' });
       if (atyantMentor) {
         return res.json({
           success: true,
           mentorFound: false,
-          mentor: {
+          mentors: [{
             id: atyantMentor._id,
             name: atyantMentor.username,
             bio: atyantMentor.bio,
             profileImage: atyantMentor.profilePicture,
             expertise: atyantMentor.expertise,
-            matchPercentage: 100
-          },
+            matchPercentage: 100,
+            isRecommended: true
+          }],
           message: 'No mentor match found. Your question will be answered by Atyant Engine.',
           redditStats: redditStats
         });
@@ -157,22 +158,33 @@ router.post('/preview-match', questionLimiter, protect, async (req, res) => {
         return res.json({
           success: true,
           mentorFound: false,
+          mentors: [],
           message: 'No mentor match found. We will find one after submission.',
           redditStats: redditStats
         });
       }
     }
+    
     res.json({
       success: true,
       mentorFound: true,
       instantAnswer: false,
-      mentor: {
-        id: bestMentor._id,
-        name: bestMentor.name || bestMentor.username,
-        bio: bestMentor.bio,
-        expertise: bestMentor.expertise,
-        profileImage: bestMentor.profilePicture,
-        matchPercentage: bestMentor.matchScore || 85
+      mentors: topMentors.map((m, index) => ({
+        id: m._id,
+        name: m.name || m.username,
+        bio: m.bio,
+        expertise: m.expertise,
+        profileImage: m.profilePicture,
+        matchPercentage: m.matchScore || 85,
+        isRecommended: index === 0 // First mentor is recommended
+      })),
+      mentor: { // Keep backward compatibility
+        id: topMentors[0]._id,
+        name: topMentors[0].name || topMentors[0].username,
+        bio: topMentors[0].bio,
+        expertise: topMentors[0].expertise,
+        profileImage: topMentors[0].profilePicture,
+        matchPercentage: topMentors[0].matchScore || 85
       },
       redditStats: redditStats
     });

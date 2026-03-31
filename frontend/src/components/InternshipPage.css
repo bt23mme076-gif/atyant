@@ -2472,35 +2472,36 @@
 /* ========== HERO SECTION - TOPMATE STYLE ========== */
 .internship-hero-topmate {
   position: relative;
-  min-height: 650px;
+  min-height: 700px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 80px 60px;
-  background: linear-gradient(135deg, #fef3e2 0%, #7168C7 100%);
+  padding: 100px 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   overflow: hidden;
 }
 
 .hero-left-content {
-  max-width: 550px;
+  max-width: 580px;
   z-index: 2;
   position: relative;
 }
 
 .hero-left-content h1 {
-  font-size: 3.5rem;
+  font-size: 3.75rem;
   font-weight: 800;
-  line-height: 1.1;
-  color: #1a1a1a;
+  line-height: 1.05;
+  color: #ffffff;
   margin-bottom: 24px;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .hero-left-content p {
-  font-size: 1.15rem;
-  line-height: 1.7;
-  color: #4a4a4a;
-  margin-bottom: 32px;
+  font-size: 1.2rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 36px;
   font-weight: 400;
 }
 
@@ -2508,27 +2509,29 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  background: #1a1a1a;
-  color: white;
-  padding: 16px 32px;
-  border-radius: 12px;
-  font-size: 1.05rem;
-  font-weight: 600;
+  background: #ffffff;
+  color: #1a1a1a;
+  padding: 18px 36px;
+  border-radius: 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   margin-bottom: 40px;
+  letter-spacing: 0.01em;
 }
 
 .hero-cta-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  background: #2a2a2a;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+  background: #f8f9fa;
 }
 
 .hero-cta-btn.locked {
-  background: #64748b;
+  background: rgba(255, 255, 255, 0.85);
+  color: #374151;
 }
 
 .hero-cta-btn .arrow {
@@ -2542,27 +2545,30 @@
 
 .hero-stats {
   display: flex;
-  gap: 48px;
-  margin-top: 32px;
+  gap: 56px;
+  margin-top: 40px;
 }
 
 .stat-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .stat-number {
-  font-size: 2rem;
+  font-size: 2.75rem;
   font-weight: 800;
-  color: #1a1a1a;
+  color: #ffffff;
   line-height: 1;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .stat-label {
-  font-size: 0.9rem;
-  color: #6b7280;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 /* ========== VERTICAL SLIDERS WITH GRADIENT BACKGROUNDS (Topmate Style) ========== */
@@ -2721,7 +2727,7 @@
   color: #1a1a1a;
 }
 
-/* ========== RESPONSIVE ========== */
+/* ========== RESPONSIVE - MOBILE OPTIMIZED ========== */
 @media (max-width: 1200px) {
   .vertical-sliders-container {
     width: 350px;
@@ -2765,9 +2771,11 @@
 @media (max-width: 768px) {
   .internship-hero-topmate {
     min-height: auto;
-    padding: 40px 24px;
+    padding: 48px 24px;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   }
   
   .vertical-sliders-container {
@@ -2779,7 +2787,73 @@
   }
   
   .hero-left-content h1 {
+    font-size: 2.25rem;
+    color: white;
+    margin-bottom: 20px;
+  }
+  
+  .hero-left-content p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: 28px;
+  }
+  
+  .welcome-badge {
+    margin-bottom: 20px;
+  }
+  
+  .hero-cta-btn {
+    width: 100%;
+    max-width: 400px;
+    justify-content: center;
+    padding: 16px 28px;
+    font-size: 1rem;
+    background: white;
+    color: #1a1a1a;
+    margin-bottom: 36px;
+  }
+  
+  .hero-cta-btn:hover {
+    background: #f3f4f6;
+  }
+  
+  .hero-cta-btn.locked {
+    background: rgba(255, 255, 255, 0.9);
+    color: #1a1a1a;
+  }
+  
+  .hero-stats {
+    gap: 40px;
+    width: 100%;
+    max-width: 400px;
+    justify-content: center;
+  }
+  
+  .stat-item {
+    align-items: center;
+  }
+  
+  .stat-number {
     font-size: 2rem;
+    color: white;
+  }
+  
+  .stat-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.85rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .internship-hero-topmate {
+    padding: 40px 20px;
+  }
+  
+  .hero-left-content h1 {
+    font-size: 1.85rem;
+    line-height: 1.2;
   }
   
   .hero-left-content p {
@@ -2787,29 +2861,21 @@
   }
   
   .hero-cta-btn {
-    width: 100%;
-    justify-content: center;
     padding: 14px 24px;
+    font-size: 0.95rem;
   }
   
   .hero-stats {
+    flex-direction: row;
     gap: 32px;
-    width: 100%;
   }
   
   .stat-number {
     font-size: 1.75rem;
   }
-}
-
-@media (max-width: 480px) {
-  .hero-left-content h1 {
-    font-size: 1.75rem;
-  }
   
-  .hero-stats {
-    flex-direction: column;
-    gap: 20px;
+  .stat-label {
+    font-size: 0.8rem;
   }
 }
 
