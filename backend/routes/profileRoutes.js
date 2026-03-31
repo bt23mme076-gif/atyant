@@ -63,6 +63,13 @@ router.put('/me', protect, async (req, res) => {
     const userId    = req.user.userId;
     const updateData = req.body;
 
+    // Security: prevent clients from directly setting credit balances.
+    // Credits are managed server-side (payments, admin actions).
+    if (updateData && typeof updateData === 'object') {
+      delete updateData.credits;
+      delete updateData.messageCredits;
+    }
+
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: 'User not found' });
 

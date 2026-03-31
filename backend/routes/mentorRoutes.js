@@ -72,7 +72,12 @@ router.get('/mentors', async (req, res) => {
 // ─────────────────────────────────────────────
 router.get('/mentors/:id', async (req, res) => {
   try {
-    const mentor = await User.findById(req.params.id)
+    const id = req.params.id;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Invalid mentor id' });
+    }
+
+    const mentor = await User.findById(id)
       .select('-password -passwordResetToken -passwordResetExpires -verificationToken')
       .lean();
 

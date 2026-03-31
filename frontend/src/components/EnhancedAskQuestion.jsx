@@ -145,7 +145,7 @@ const EnhancedAskQuestion = () => {
   const [errors, setErrors] = useState({});
 
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 2; // Reduced from 4 to 2 (Ask Question → Mentor Match → Submit)
+  const totalSteps = 4;
 
   const [editTimeLeft, setEditTimeLeft] = useState(300);
   const [editTimerActive, setEditTimerActive] = useState(false);
@@ -374,45 +374,13 @@ const EnhancedAskQuestion = () => {
     }
   };
 
-  const handleContinueFromMentor = async () => {
-    // Directly submit the question without quality check or preview
-    setSubmitting(true);
-    try {
-      const response = await fetch(`${API_URL}/api/questions/submit`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          ...formData,
-          qualityScore: 100, // Skip quality check
-          mentorId: mentorPreview?.mentor?.id || null,
-          forceLive: forceLive || !!mentorPreview?.instantAnswer
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        if (data.instantAnswer) {
-          alert('⚡ Great news! We found an instant answer from a mentor who solved the same problem!');
-        } else {
-          alert('✅ Question submitted successfully! You will receive an answer within 24 hours.');
-        }
-        navigate('/my-questions');
-      } else {
-        alert('❌ ' + data.error);
-      }
-    } catch (error) {
-      console.error('❌ Submission failed:', error);
-      alert('Failed to submit question. Please try again.');
-    } finally {
-      setSubmitting(false);
-      setShowMentorPreview(false);
-      setForceLive(false);
-    }
+  const handleContinueFromMentor = () => {
+    setShowMentorPreview(false);
+    // If the mentor preview contained an instant answer and the user
+    // chose to continue, we should force live routing to mentors.
+    if (mentorPreview?.instantAnswer) setForceLive(true);
+    setCurrentStep(3);
+    checkQuestionQuality();
   };
 
   const handleImproveQuestion = () => {
@@ -833,192 +801,233 @@ const EnhancedAskQuestion = () => {
                 <p className="next-step-hint">
                   {mentorPreview.instantAnswer
                     ? 'This mentor has already answered a similar question! 🎯'
-                    : 'Click continue to get your free answer card 🎁'}
+                    : 'Next: Quality Check & Review 📝'}
                 </p>
               </div>
 
               {mentorPreview.mentorFound || mentorPreview.mentorUsername === 'Atyant Engine' || mentorPreview.message?.includes('Atyant Engine') ? (
                 <>
-                  {/* TOPMATE-INSPIRED MENTOR SECTION */}
-                  <div className="topmate-mentor-section">
-                    <div className="mentor-header-badge">
-                      {mentorPreview.instantAnswer ? '⚡ Instant Answer Available!' : '✨ Perfect Match Found'}
-                    </div>
-
-                    {mentorPreview?.mentor && (
-                      <>
-                        <div className="topmate-mentor-card-enhanced">
-                          {/* Avatar Section - Larger & Centered */}
-                          <div className="mentor-avatar-section">
-                            <div className="mentor-avatar-wrapper-large">
-                              {mentorPreview.mentor?.profileImage ? (
-                                <img 
-                                  src={mentorPreview.mentor.profileImage} 
-                                  alt={mentorPreview.mentor.name} 
-                                  className="mentor-avatar-img-large" 
-                                />
-                              ) : (
-                                <div className="mentor-avatar-placeholder-large">
-                                  {(mentorPreview.mentor?.name || 'M').charAt(0).toUpperCase()}
-                                </div>
-                              )}
-                              <div className="verified-badge-large">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                  <path d="M12 0L14.6942 3.50532L19.0535 3.70535L18.7053 8.06458L22.2106 10.7587L18.7053 13.4529L19.0535 17.8122L14.6942 18.0122L12 21.5174L9.30583 18.0122L4.94649 17.8122L5.29466 13.4529L1.78934 10.7587L5.29466 8.06458L4.94649 3.70535L9.30583 3.50532L12 0Z" fill="#10B981"/>
-                                  <path d="M8.25 12L10.5 14.25L15.75 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Mentor Info - Centered */}
-                          <div className="mentor-info-section">
-                            <h2 className="mentor-name-large">{mentorPreview.mentor?.name || 'Matched Mentor'}</h2>
-                            <p className="mentor-tagline-large">{mentorPreview.mentor?.bio || 'Expert mentor ready to help you'}</p>
-                            
-                            {/* Match Score - Inline */}
-                            <div className="match-score-inline">
-                              <div className="match-score-circle-small">
-                                <svg className="match-score-ring-small" viewBox="0 0 100 100">
-                                  <defs>
-                                    <linearGradient id="matchGradientSmall" x1="0%" y1="0%" x2="100%" y2="100%">
-                                      <stop offset="0%" stopColor="#10b981" />
-                                      <stop offset="100%" stopColor="#059669" />
-                                    </linearGradient>
-                                  </defs>
-                                  <circle className="match-score-bg-small" cx="50" cy="50" r="45" />
-                                  <circle 
-                                    className="match-score-fill-small" 
-                                    cx="50" 
-                                    cy="50" 
-                                    r="45"
-                                    style={{
-                                      strokeDasharray: `${2 * Math.PI * 45}`,
-                                      strokeDashoffset: `${2 * Math.PI * 45 * (1 - (mentorPreview.mentor?.matchPercentage || 0) / 100)}`
-                                    }}
-                                  />
-                                </svg>
-                                <div className="match-score-text-small">
-                                  <span className="match-score-number-small">{mentorPreview.mentor?.matchPercentage || 0}</span>
-                                  <span className="match-score-percent-small">%</span>
-                                </div>
-                              </div>
-                              <div className="match-score-label-inline">
-                                <strong>Match Score</strong>
-                                <span>Based on your profile</span>
-                              </div>
-                            </div>
-
-                            {/* Expertise Pills */}
-                            <div className="mentor-expertise-pills-centered">
-                              {mentorPreview.mentor?.expertise?.slice(0, 4).map((exp, i) => (
-                                <span key={i} className="expertise-pill-enhanced">{exp}</span>
-                              ))}
-                            </div>
-                          </div>
+                  {mentorPreview?.redditStats && (
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-around',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '20px',
+                        color: 'white'
+                      }}
+                    >
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '28px', fontWeight: 'bold' }}>
+                          {mentorPreview.redditStats.totalSolved}+
                         </div>
-
-                        {/* Mentor Services Section */}
-                        <MentorServicesPreview mentorId={mentorPreview.mentor.id} />
-                      </>
-                    )}
-
-                    {/* INSTANT ANSWER PREVIEW (if available) */}
-                    {mentorPreview.instantAnswer && mentorPreview.answerPreview && (
-                      <div className="instant-answer-preview-enhanced">
-                        <h4>📝 Answer Preview:</h4>
-                        <p>{mentorPreview.answerPreview}</p>
-                        <span className="instant-badge">✨ Based on similar question</span>
-                        {mentorPreview.answerCardId && (
-                          <button
-                            className="view-answer-btn"
-                            onClick={e => {
-                              e.preventDefault();
-                              window.open(`/answer/${mentorPreview.answerCardId}`, '_blank');
-                            }}
-                          >
-                            See Full Answer Card ↗
-                          </button>
-                        )}
+                        <div style={{ fontSize: '12px', opacity: 0.9 }}>students solved this</div>
                       </div>
-                    )}
-
-                    {/* ACTION BUTTON - MOVED ABOVE COMMUNITY INSIGHTS */}
-                    <div className="mentor-actions-top">
-                      <button
-                        className="continue-btn-enhanced-top"
-                        onClick={handleContinueFromMentor}
-                        disabled={submitting}
-                      >
-                        {submitting ? 'Submitting...' : '🎁 Get Free Answer Card'}
-                      </button>
-                    </div>
-
-                    {/* REDDIT STATS SECTION (AFTER MENTOR) */}
-                    {mentorPreview?.redditStats && (
-                      <div className="reddit-section">
-                        <h3 className="section-divider">📊 Community Insights</h3>
-                        <div className="reddit-stats-card">
-                          <div className="stat-item">
-                            <div className="stat-value">{mentorPreview.redditStats.totalSolved}+</div>
-                            <div className="stat-label">students solved this</div>
-                          </div>
-                          <div className="stat-item">
-                            <div className="stat-value">{mentorPreview.mentor?.matchPercentage || 0}%</div>
-                            <div className="stat-label">profile match</div>
-                          </div>
-                          <div className="stat-item">
-                            <div className="stat-value">{mentorPreview.redditStats.totalThreads || 0}</div>
-                            <div className="stat-label">Reddit threads found</div>
-                          </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '28px', fontWeight: 'bold' }}>
+                          {mentorPreview.mentor?.matchPercentage || 0}%
                         </div>
+                        <div style={{ fontSize: '12px', opacity: 0.9 }}>profile match</div>
                       </div>
-                    )}
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '28px', fontWeight: 'bold' }}>
+                          {mentorPreview.redditStats.totalThreads || 0}
+                        </div>
+                        <div style={{ fontSize: '12px', opacity: 0.9 }}>Reddit threads found</div>
+                      </div>
+                    </div>
+                  )}
 
-                    {mentorPreview?.redditStats?.aiSummary && (
-                      <div className="ai-summary-card">
-                        <div className="summary-header">💡 What others did in your situation:</div>
-                        <p>{mentorPreview.redditStats.aiSummary}</p>
+                  {mentorPreview?.redditStats?.aiSummary && (
+                    <div
+                      style={{
+                        background: '#f8f9ff',
+                        border: '1px solid #e0e3ff',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '20px',
+                        fontSize: '14px',
+                        lineHeight: '1.6',
+                        color: '#333'
+                      }}
+                    >
+                      <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
+                        💡 What others did in your situation:
                       </div>
-                    )}
+                      <p style={{ margin: 0 }}>{mentorPreview.redditStats.aiSummary}</p>
+                    </div>
+                  )}
+
+                    <h2>
+                      {mentorPreview.instantAnswer
+                        ? '⚡ Instant Answer Available!'
+                        : '✨ We found the best mentor for your question!'}
+                    </h2>
 
                     {mentorPreview?.redditStats?.top10Posts?.length > 0 && (
-                      <div className="reddit-threads-card">
-                        <div className="threads-header">
-                          <svg width="18" height="18" viewBox="0 0 20 20" fill="#ff4500" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="10" cy="10" r="10" fill="#ff4500" />
-                            <text x="5" y="15" fontSize="12" fill="white" fontWeight="bold">r/</text>
-                          </svg>
-                          Top Reddit Threads matching your question
-                        </div>
-                        <div className="threads-list">
-                          {mentorPreview.redditStats.top10Posts.map((post, idx) => (
-                            <a
-                              key={idx}
-                              href={post.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="thread-item"
-                            >
-                              <span className="thread-number">{idx + 1}.</span>
-                              <div className="thread-content">
-                                <div className="thread-title">{post.title}</div>
-                                <div className="thread-meta">
-                                  <span>⬆ {post.ups.toLocaleString()}</span>
-                                  <span>💬 {post.numComments.toLocaleString()}</span>
-                                  <span>{post.subreddit}</span>
-                                </div>
+                    <div
+                      style={{
+                        background: '#fff',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '12px',
+                        padding: '16px',
+                        marginBottom: '20px'
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontWeight: 'bold',
+                          marginBottom: '12px',
+                          fontSize: '14px',
+                          color: '#333',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 20 20" fill="#ff4500" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="10" cy="10" r="10" fill="#ff4500" />
+                          <text x="5" y="15" fontSize="12" fill="white" fontWeight="bold">r/</text>
+                        </svg>
+                        Top Reddit Threads matching your question
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {mentorPreview.redditStats.top10Posts.map((post, idx) => (
+                          <a
+                            key={idx}
+                            href={post.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: 'flex',
+                              alignItems: 'flex-start',
+                              gap: '10px',
+                              padding: '10px 12px',
+                              background: '#f9fafb',
+                              borderRadius: '8px',
+                              textDecoration: 'none',
+                              color: '#111',
+                              border: '1px solid #f0f0f0',
+                              transition: 'background 0.15s'
+                            }}
+                            onMouseEnter={e => (e.currentTarget.style.background = '#f0f4ff')}
+                            onMouseLeave={e => (e.currentTarget.style.background = '#f9fafb')}
+                          >
+                            <span style={{ minWidth: '22px', fontWeight: 'bold', color: '#6b7280', fontSize: '13px', paddingTop: '1px' }}>
+                              {idx + 1}.
+                            </span>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: '13px', fontWeight: '500', lineHeight: '1.4', marginBottom: '4px' }}>
+                                {post.title}
                               </div>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" strokeWidth="2" className="thread-arrow">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                              </svg>
-                            </a>
-                          ))}
+                              <div style={{ display: 'flex', gap: '10px', fontSize: '11px', color: '#9ca3af' }}>
+                                <span>⬆ {post.ups.toLocaleString()}</span>
+                                <span>💬 {post.numComments.toLocaleString()}</span>
+                                <span>{post.subreddit}</span>
+                              </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" strokeWidth="2" style={{ marginTop: '3px', flexShrink: 0 }}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  
+
+                  {mentorPreview.instantAnswer && mentorPreview.answerPreview && (
+                    <div className="instant-answer-preview">
+                      <h4>📝 Answer Preview:</h4>
+                      <p>{mentorPreview.answerPreview}</p>
+                      <span className="instant-badge">✨ Based on similar question</span>
+                      {mentorPreview.answerCardId && (
+                        <button
+                          className="view-answer-btn"
+                          style={{
+                            marginTop: '12px',
+                            padding: '8px 16px',
+                            background: '#4f46e5',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '13px',
+                            fontWeight: '600',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            width: '100%',
+                            transition: 'background 0.2s'
+                          }}
+                          onClick={e => {
+                            e.preventDefault();
+                            window.open(`/answer/${mentorPreview.answerCardId}`, '_blank');
+                          }}
+                          onMouseEnter={e => (e.currentTarget.style.background = '#4338ca')}
+                          onMouseLeave={e => (e.currentTarget.style.background = '#4f46e5')}
+                        >
+                          See Full Answer Card ↗
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {mentorPreview?.mentor && (
+                    <>
+                      <div className="mentor-card-preview">
+                        <div className="mentor-avatar">
+                          {mentorPreview.mentor?.profileImage ? (
+                            <img src={mentorPreview.mentor.profileImage} alt="Mentor" />
+                          ) : (
+                            <div className="avatar-placeholder">👤</div>
+                          )}
+                        </div>
+                        <div className="mentor-info">
+                          <h3>{mentorPreview.mentor?.name || 'Matched Mentor'}</h3>
+                          <p className="mentor-bio">{mentorPreview.mentor?.bio || 'A mentor match has been found for your question.'}</p>
+                          <div className="mentor-expertise">
+                            {mentorPreview.mentor?.expertise?.slice(0, 3).map((exp, i) => (
+                              <span key={i} className="expertise-tag">{exp}</span>
+                            ))}
+                          </div>
+                          <div className="match-percentage">
+                            <div className="match-circle">{mentorPreview.mentor?.matchPercentage || 0}%</div>
+                            <span>Match Score</span>
+                          </div>
                         </div>
                       </div>
+
+                      {/* Mentor Services Section */}
+                      <MentorServicesPreview mentorId={mentorPreview.mentor.id} />
+                    </>
+                  )}
+
+                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', flexDirection: 'row' }}>
+                    {mentorPreview.mentor && mentorPreview.mentor.id && (
+                      <button
+                        className="continue-btn"
+                        style={{ background: '#10b981', flex: 1, opacity: 0.7, cursor: 'not-allowed' }}
+                        disabled
+                        onClick={() => {
+                          toast.info('Chat feature coming soon!', { position: 'top-center', autoClose: 2500 });
+                        }}
+                      >
+                        💬 Chat Now
+                      </button>
                     )}
-
-
+                    <button
+                      className="continue-btn"
+                      onClick={handleContinueFromMentor}
+                      disabled={checkingQuality}
+                      style={{ flex: 1 }}
+                    >
+                      {checkingQuality ? 'Analyzing...' : 'Continue'}
+                    </button>
                   </div>
                 </>
               ) : (
@@ -1042,8 +1051,8 @@ const EnhancedAskQuestion = () => {
                   </div>
                   <h2>📋 Question Received</h2>
                   <p>No mentor match found. Your question will be answered by <strong>Atyant Engine</strong> after submission.</p>
-                  <button className="continue-btn-enhanced" onClick={handleContinueFromMentor} disabled={submitting}>
-                    {submitting ? 'Submitting...' : '🎁 Get Free Answer Card'}
+                  <button className="continue-btn" onClick={handleContinueFromMentor}>
+                    Continue
                   </button>
                 </>
               )}

@@ -473,46 +473,65 @@ router.post('/suggest-mentors', protect, async (req, res) => {
     
     console.log(`Found ${mentors.length} mentors for keywords:`, keywords); // Debug
     
-    // ✅ Score mentors by relevance
+    // ✅ Score mentors by relevance and collect match details for terminal debug
     const scoredMentors = mentors.map(mentor => {
       let score = 0;
-      
+      const matches = { expertise: [], bio: [], name: [] };
+
       // Higher score if expertise matches
       if (mentor.expertise) {
         mentor.expertise.forEach(exp => {
           keywords.forEach(kw => {
             if (exp.toLowerCase().includes(kw.toLowerCase())) {
               score += 5;
+              if (!matches.expertise.includes(kw)) matches.expertise.push(kw);
             }
           });
         });
       }
-      
+
       // Medium score for bio match
       if (mentor.bio) {
         keywords.forEach(kw => {
           if (mentor.bio.toLowerCase().includes(kw.toLowerCase())) {
             score += 2;
+            if (!matches.bio.includes(kw)) matches.bio.push(kw);
           }
         });
       }
-      
+
       // Small score for name match
       if (mentor.name || mentor.username) {
         const name = (mentor.name || mentor.username).toLowerCase();
         keywords.forEach(kw => {
           if (name.includes(kw.toLowerCase())) {
             score += 1;
+            if (!matches.name.includes(kw)) matches.name.push(kw);
           }
         });
       }
-      
-      return { ...mentor.toObject(), relevanceScore: score };
+
+      return { ...mentor.toObject(), relevanceScore: score, _matchDetails: matches };
     });
-    
+
     // Sort by relevance score
     scoredMentors.sort((a, b) => b.relevanceScore - a.relevanceScore);
-    
+
+    // Log detailed matching info to server terminal (useful for debugging/matching visibility)
+    try {
+      console.log('\n=== Mentor Matching Debug ===');
+      console.log('Question:', question);
+      console.log('Keywords:', keywords.join(', '));
+      console.log(`Found ${scoredMentors.length} mentors; top results:`);
+      scoredMentors.slice(0, 12).forEach((m, idx) => {
+        console.log(`#${idx + 1}: ${m.username || m.name} (id=${m._id}) — score=${m.relevanceScore}`);
+        console.log('   matches:', JSON.stringify(m._matchDetails));
+      });
+      console.log('=== End Matching Debug ===\n');
+    } catch (logErr) {
+      console.error('Error logging matching debug:', logErr.message);
+    }
+
     res.json(scoredMentors.slice(0, 12));
   } catch (error) {
     console.error('Error finding mentors:', error);

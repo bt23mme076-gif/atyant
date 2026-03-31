@@ -8,10 +8,13 @@ import crypto from 'crypto';
 import { LRUCache } from 'lru-cache';
 
 // ─────────────────────────────────────────────
-//  DEV LOGGER
+//  DEV / DEBUG LOGGER
 // ─────────────────────────────────────────────
+// By default logs are shown in development. To enable detailed matching
+// diagnostics in any environment, set DEBUG_MATCHING=1 (or 'true').
 const isDev = process.env.NODE_ENV !== 'production';
-function dlog(...args) { if (isDev) console.log(...args); }
+const alwaysDebug = process.env.DEBUG_MATCHING === '1' || process.env.DEBUG_MATCHING === 'true';
+function dlog(...args) { if (isDev || alwaysDebug) console.log(...args); }
 
 // ─────────────────────────────────────────────
 //  COMPANY CACHE  (TTL-based, O(1) lookup)
@@ -494,6 +497,11 @@ class AtyantEngine {
 
       // Hybrid scoring
       const keywords = extractSmartKeywords(questionText);
+
+      // Detect intent/categories early so live routing uses inferred intent
+      // (prevents incorrect external category from giving huge ExactDomain bonuses)
+      const queryDetailsForRouting = await this.detectQueryDetails(questionText);
+      const inferredCategory = queryDetailsForRouting?.intent || null;
       const scoredMatches = [];
       const W = CONFIG.WEIGHTS;
 
@@ -705,13 +713,23 @@ class AtyantEngine {
 
       scored.sort((a, b) => b.points - a.points);
 
-      dlog(`\n--- TOP 5 LIVE CANDIDATES ---`);
+      // Always print a concise TOP-5 summary so it's visible in terminals
+      console.log('\n--- TOP 5 LIVE CANDIDATES ---');
       scored.slice(0, 5).forEach((item, i) => {
-        dlog(`#${i+1}: ${item.mentor.username} | ${item.points}pts (${item.load}Q)\n   └─ ${item.logs || 'generic'}`);
+        console.log(`#${i+1}: ${item.mentor.username} | ${item.points}pts (${item.load}Q)`);
+        dlog('   └─', item.logs || 'generic');
       });
 
       const best   = scored[0];
       const second = scored[1];
+
+      // Always print detailed breakdown for the top candidate so it's
+      // visible in terminal even when DEBUG_MATCHING is not enabled.
+      if (best) {
+        console.log('\n--- TOP CANDIDATE DETAILS ---');
+        console.log(`${best.mentor.username} | ${best.points}pts (${best.load}Q)`);
+        console.log('Breakdown:', best.logs || 'none');
+      }
 
       if (!best || best.points < CONFIG.LIVE_MATCH_THRESHOLD) {
         console.log(`❌ NO QUALIFYING MENTOR: best=${best?.points || 0} < ${CONFIG.LIVE_MATCH_THRESHOLD}`);
@@ -812,8 +830,8 @@ class AtyantEngine {
       // ──────────────────────────────────────────
       //  PATH B: Live mentor routing
       // ──────────────────────────────────────────
-      dlog(`\n🎯 Path B: Live routing...`);
-      const bestMentor = await this.findBestMentor(userId, keywords, options.category || null);
+      dlog(`\n🎯 Path B: Live routing (inferred category: ${inferredCategory})...`);
+      const bestMentor = await this.findBestMentor(userId, keywords, options.category || inferredCategory || null);
 
       const question = new Question({
         userId,

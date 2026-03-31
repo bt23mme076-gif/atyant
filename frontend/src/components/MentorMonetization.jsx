@@ -3,6 +3,7 @@ import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { API_URL } from '../services/api.js';
 import './MentorMonetization.css';
+import MentorAvailabilityCalendar from './MentorAvailabilityCalendar.jsx';
 
 const MentorMonetization = () => {
   const { user } = useAuth();
@@ -645,57 +646,7 @@ const AvailabilityTab = ({ token }) => {
 
       <div className="weekly-schedule">
         <h3>Weekly Schedule</h3>
-        {days.map(day => (
-          <div key={day} className="day-schedule">
-            <div className="day-header">
-              <label className="day-toggle">
-                <input
-                  type="checkbox"
-                  checked={availability.weeklySchedule[day]?.enabled || false}
-                  onChange={() => handleDayToggle(day)}
-                />
-                <span className="day-name">{dayLabels[day]}</span>
-              </label>
-              {availability.weeklySchedule[day]?.enabled && (
-                <button 
-                  className="add-slot-btn"
-                  onClick={() => handleAddSlot(day)}
-                >
-                  + Add Time Slot
-                </button>
-              )}
-            </div>
-
-            {availability.weeklySchedule[day]?.enabled && (
-              <div className="time-slots">
-                {(availability.weeklySchedule[day]?.slots || []).map((slot, index) => (
-                  <div key={index} className="time-slot">
-                    <input
-                      type="time"
-                      value={slot.start}
-                      onChange={e => handleSlotChange(day, index, 'start', e.target.value)}
-                    />
-                    <span>to</span>
-                    <input
-                      type="time"
-                      value={slot.end}
-                      onChange={e => handleSlotChange(day, index, 'end', e.target.value)}
-                    />
-                    <button 
-                      className="remove-slot-btn"
-                      onClick={() => handleRemoveSlot(day, index)}
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-                {(!availability.weeklySchedule[day]?.slots || availability.weeklySchedule[day].slots.length === 0) && (
-                  <p className="no-slots">No time slots added. Click "Add Time Slot" to add one.</p>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
+        <MentorAvailabilityCalendar availability={availability} setAvailability={setAvailability} token={token} />
       </div>
 
       <div className="save-footer">

@@ -75,16 +75,20 @@ const AdminDashboard = () => {
       additionalNotes: ''
     });
     try {
-    const handleDnaUpdate = (updatedMentor) => {
-      setMentor(updatedMentor);
-    };
-      const res = await fetch(`${API_URL}/api/mentor/mentors/${q.matchedMentorId}`, {
-        headers: {
-          Authorization: `Bearer ${user?.token}`
+        const handleDnaUpdate = (updatedMentor) => {
+          setMentor(updatedMentor);
+        };
+        if (q?.matchedMentorId) {
+          const res = await fetch(`${API_URL}/api/mentor/mentors/${q.matchedMentorId}`, {
+            headers: {
+              Authorization: `Bearer ${user?.token}`
+            }
+          });
+          const data = await res.json();
+          setMentor(data);
+        } else {
+          setMentor(null);
         }
-      });
-      const data = await res.json();
-      setMentor(data);
     } catch (err) {
       console.error('Failed to load mentor');
     }

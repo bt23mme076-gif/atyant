@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import protect from '../middleware/authMiddleware.js';
 import Service from '../models/Service.js';
 import Booking from '../models/Booking.js';
@@ -29,8 +30,13 @@ router.get('/services', protect, async (req, res) => {
 // Get services by mentor ID (public)
 router.get('/services/mentor/:mentorId', async (req, res) => {
   try {
+    const mentorId = req.params.mentorId;
+    if (!mentorId || !mongoose.Types.ObjectId.isValid(mentorId)) {
+      return res.status(400).json({ success: false, error: 'Invalid mentorId' });
+    }
+
     const services = await Service.find({ 
-      mentorId: req.params.mentorId,
+      mentorId,
       isActive: true
     }).sort({ createdAt: -1 });
     
