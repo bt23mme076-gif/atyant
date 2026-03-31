@@ -7,7 +7,20 @@ import 'react-toastify/dist/ReactToastify.css';
 import './EnhancedAskQuestion.css';
 import ServiceBookingModal from './ServiceBookingModal.jsx';
 
-// Mentor Services Preview Component
+const SERVICE_ICONS = {
+  'video-call': '📹',
+  'audio-call': '🎤',
+  'chat': '💬',
+  'answer-card': '🎯',
+};
+
+const formatINR = (amount) =>
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(amount);
+
 const MentorServicesPreview = ({ mentorId }) => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,62 +30,38 @@ const MentorServicesPreview = ({ mentorId }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchServices();
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/monetization/services/mentor/${mentorId}`);
+        const data = await res.json();
+        if (data.success) setServices(data.services.filter((s) => s.isActive).slice(0, 3));
+      } catch (err) {
+        console.error('Fetch services error:', err);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [mentorId]);
 
-  const fetchServices = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/monetization/services/mentor/${mentorId}`);
-      const data = await res.json();
-      if (data.success) {
-        setServices(data.services.filter(s => s.isActive).slice(0, 3)); // Show max 3 services
-      }
-    } catch (error) {
-      console.error('Fetch services error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBookService = (service) => {
-    setSelectedService(service);
-    setShowBookingModal(true);
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
-
-  if (loading || services.length === 0) return null;
+  if (loading || !services.length) return null;
 
   return (
-    <div className="mentor-services-preview">
-      <h4 className="services-title">💼 Available Services</h4>
-      <div className="services-grid-preview">
-        {services.map(service => (
-          <div key={service._id} className="service-card-mini">
-            <div className="service-header-mini">
-              <span className="service-icon">
-                {service.type === 'video-call' && '📹'}
-                {service.type === 'audio-call' && '🎤'}
-                {service.type === 'chat' && '💬'}
-                {service.type === 'answer-card' && '🎯'}
-              </span>
-              {service.isRecommended && (
-                <span className="recommended-mini">⭐</span>
-              )}
+    <div className="aq-services-preview">
+      <h4 className="aq-services-title">Available Services</h4>
+      <div className="aq-services-grid">
+        {services.map((s) => (
+          <div key={s._id} className="aq-service-card">
+            <div className="aq-service-top">
+              <span className="aq-service-icon">{SERVICE_ICONS[s.type] || '📋'}</span>
+              {s.isRecommended && <span className="aq-recommended-badge">Recommended</span>}
             </div>
-            <h5>{service.title}</h5>
-            <p className="service-desc-mini">{service.description.substring(0, 60)}...</p>
-            <div className="service-footer-mini">
-              <span className="price-mini">{formatCurrency(service.price)}</span>
-              <button 
-                className="book-mini-btn"
-                onClick={() => handleBookService(service)}
+            <h5 className="aq-service-name">{s.title}</h5>
+            <p className="aq-service-desc">{s.description.substring(0, 60)}…</p>
+            <div className="aq-service-footer">
+              <span className="aq-service-price">{formatINR(s.price)}</span>
+              <button
+                className="aq-btn aq-btn-sm aq-btn-primary"
+                onClick={() => { setSelectedService(s); setShowBookingModal(true); }}
               >
                 Book
               </button>
@@ -80,21 +69,14 @@ const MentorServicesPreview = ({ mentorId }) => {
           </div>
         ))}
       </div>
-      <button 
-        className="view-all-services-btn"
-        onClick={() => navigate(`/mentor/${mentorId}`)}
-      >
-        View All Services →
+      <button className="aq-btn aq-btn-ghost aq-view-all" onClick={() => navigate(`/mentor/${mentorId}`)}>
+        View all services →
       </button>
-
       {showBookingModal && selectedService && (
         <ServiceBookingModal
           service={selectedService}
           mentorId={mentorId}
-          onClose={() => {
-            setShowBookingModal(false);
-            setSelectedSlot(null);
-          }}
+          onClose={() => { setShowBookingModal(false); setSelectedService(null); }}
           user={user}
         />
       )}
@@ -102,1083 +84,771 @@ const MentorServicesPreview = ({ mentorId }) => {
   );
 };
 
-
 const COMPANY_DOMAINS = [
   { label: 'Tech', value: 'Tech', icon: '💻' },
   { label: 'Data Analytics', value: 'Data Analytics', icon: '📊' },
   { label: 'Consulting', value: 'Consulting', icon: '🧑‍💼' },
   { label: 'Product', value: 'Product', icon: '📦' },
-  { label: 'Core Engineering', value: 'Core Engineering', icon: '⚙️' }
+  { label: 'Core Engineering', value: 'Core Engineering', icon: '⚙️' },
 ];
+
+const LOADING_MESSAGES = [
+  'Understanding your question…',
+  'Scanning mentor expertise…',
+  'Matching domain and profile…',
+  'Searching similar solved cases…',
+  'Ranking the best mentor for you…',
+  'Preparing your personalized preview…',
+];
+
+const STEPS = ['Ask', 'Mentor'];
+
+const StepBar = ({ current, total }) => (
+  <div className="aq-step-bar">
+    {STEPS.slice(0, total).map((label, i) => {
+      const idx = i + 1;
+      const status = idx < current ? 'done' : idx === current ? 'active' : 'pending';
+      return (
+        <React.Fragment key={idx}>
+          <div className={`aq-step-node aq-step-${status}`}>
+            <div className="aq-step-circle">
+              {status === 'done' ? '✓' : idx}
+            </div>
+            <span className="aq-step-label">{label}</span>
+          </div>
+          {idx < total && <div className={`aq-step-connector ${idx < current ? 'done' : ''}`} />}
+        </React.Fragment>
+      );
+    })}
+  </div>
+);
+
+const ModalShell = ({ onClose, children, size = 'md' }) => (
+  <div className="aq-overlay" onClick={onClose}>
+    <div
+      className={`aq-modal aq-modal-${size}`}
+      onClick={(e) => e.stopPropagation()}
+      role="dialog"
+      aria-modal="true"
+    >
+      <button className="aq-close-btn" onClick={onClose} aria-label="Close">✕</button>
+      {children}
+    </div>
+  </div>
+);
+
+const ProgressRing = ({ value }) => {
+  const r = 36;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (value / 100) * circ;
+  return (
+    <svg className="aq-progress-ring" viewBox="0 0 88 88" width="88" height="88">
+      <circle cx="44" cy="44" r={r} className="aq-ring-track" />
+      <circle cx="44" cy="44" r={r} className="aq-ring-fill" strokeDasharray={circ} strokeDashoffset={offset} />
+      <text x="44" y="50" textAnchor="middle" className="aq-ring-text">{value}%</text>
+    </svg>
+  );
+};
+
+// ─── Reddit Threads (collapsible, 3 visible) ───────────────────────────────────
+
+const RedditThreads = ({ posts }) => {
+  const [expanded, setExpanded] = useState(false);
+  const visible = expanded ? posts : posts.slice(0, 3);
+  const extra = posts.length - 3;
+
+  return (
+    <div className="aq-reddit-posts">
+      <p className="aq-reddit-posts-title">
+        <svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true">
+          <circle cx="10" cy="10" r="10" fill="#ff4500"/>
+          <text x="4.5" y="14.5" fontSize="10" fill="white" fontWeight="bold">r/</text>
+        </svg>
+        Top Reddit threads matching your question
+      </p>
+      {visible.map((post, i) => (
+        <a
+          key={i}
+          href={post.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="aq-reddit-post"
+        >
+          <span className="aq-post-num">{i + 1}.</span>
+          <div className="aq-post-info">
+            <span className="aq-post-title">{post.title}</span>
+            <span className="aq-post-meta">
+              ⬆ {post.ups.toLocaleString()} · 💬 {post.numComments.toLocaleString()} · {post.subreddit}
+            </span>
+          </div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <path d="M14 5l7 7-7 7M3 12h18"/>
+          </svg>
+        </a>
+      ))}
+      {posts.length > 3 && (
+        <button
+          className="aq-reddit-toggle"
+          onClick={() => setExpanded((p) => !p)}
+        >
+          {expanded
+            ? '▲ Show less'
+            : `▼ Show ${extra} more thread${extra > 1 ? 's' : ''}`}
+        </button>
+      )}
+    </div>
+  );
+};
+
+// ─── Mentor Preview Content ─────────────────────────────────────────────────────
+
+const MentorPreviewContent = ({ mentorPreview, checkingQuality, onContinue, onAsk }) => {
+  const navigate = useNavigate();
+
+  return (
+    <>
+      {/* 1. Heading */}
+      <h2 className="aq-modal-heading">
+        {mentorPreview.instantAnswer ? '⚡ Instant answer available!' : '✨ Best mentor found for your question'}
+      </h2>
+
+      {/* 2. Mentor Card */}
+      {mentorPreview.mentor && (
+        <div className="aq-mentor-card">
+          <div className="aq-mentor-avatar">
+            {mentorPreview.mentor.profileImage
+              ? <img src={mentorPreview.mentor.profileImage} alt={mentorPreview.mentor.name} />
+              : <div className="aq-avatar-fallback"><svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg></div>}
+          </div>
+          <div className="aq-mentor-details">
+            <h3>{mentorPreview.mentor.name || 'Matched Mentor'}</h3>
+            <p className="aq-mentor-bio">{mentorPreview.mentor.bio || 'A mentor match has been found for your question.'}</p>
+            <div className="aq-expertise-tags">
+              {mentorPreview.mentor.expertise?.slice(0, 4).map((exp, i) => (
+                <span key={i} className="aq-tag">{exp}</span>
+              ))}
+            </div>
+          </div>
+          <div className="aq-match-score">
+            <ProgressRing value={mentorPreview.mentor.matchPercentage || 0} />
+            <span className="aq-match-label">Match</span>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Services */}
+      {mentorPreview.mentor && <MentorServicesPreview mentorId={mentorPreview.mentor.id} />}
+
+      {/* 4. Reddit Stats Banner */}
+      {mentorPreview.redditStats && (
+        <div className="aq-reddit-stats">
+          {[
+            { value: `${mentorPreview.redditStats.totalSolved}+`, label: 'students solved this' },
+            { value: `${mentorPreview.mentor?.matchPercentage || 0}%`, label: 'profile match' },
+            { value: mentorPreview.redditStats.totalThreads || 0, label: 'Reddit threads found' },
+          ].map(({ value, label }) => (
+            <div key={label} className="aq-stat-item">
+              <span className="aq-stat-value">{value}</span>
+              <span className="aq-stat-label">{label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 5. AI Summary */}
+      {mentorPreview.redditStats?.aiSummary && (
+        <div className="aq-ai-summary">
+          <p className="aq-ai-summary-title">💡 What others did in your situation:</p>
+          <p>{mentorPreview.redditStats.aiSummary}</p>
+        </div>
+      )}
+
+      {/* 6. Reddit Threads (collapsible) */}
+      {mentorPreview.redditStats?.top10Posts?.length > 0 && (
+        <RedditThreads posts={mentorPreview.redditStats.top10Posts} />
+      )}
+
+      {/* 7. Instant Answer Preview */}
+      {mentorPreview.instantAnswer && mentorPreview.answerPreview && (
+        <div className="aq-instant-answer">
+          <h4>📝 Answer Preview</h4>
+          <p>{mentorPreview.answerPreview}</p>
+          <span className="aq-instant-badge">✨ Based on similar question</span>
+          {mentorPreview.answerCardId && (
+            <button
+              className="aq-btn aq-btn-primary aq-btn-full"
+              onClick={() => window.open(`/answer/${mentorPreview.answerCardId}`, '_blank')}
+            >
+              See full answer card ↗
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* 8. Actions */}
+      <div className="aq-modal-actions">
+        {mentorPreview.mentor?.id && (
+          <button className="aq-btn aq-btn-chat" disabled title="Coming soon">
+            💬 Chat Now
+          </button>
+        )}
+        <button
+          className="aq-btn aq-btn-primary"
+          onClick={onAsk}
+          disabled={checkingQuality}
+        >
+          {checkingQuality ? 'Analysing…' : 'Ask for Answer Card'}
+        </button>
+      </div>
+    </>
+  );
+};
+
+// ─── Main Component ────────────────────────────────────────────────────────────
 
 const EnhancedAskQuestion = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: '',
-    reason: ''
-  });
-
-  const [eligibility, setEligibility] = useState(null);
-  const [loadingEligibility, setLoadingEligibility] = useState(true);
-
-  const [mentorPreview, setMentorPreview] = useState(null);
-  const [showMentorPreview, setShowMentorPreview] = useState(false);
-
-  const [qualityCheck, setQualityCheck] = useState(null);
-  const [showQualityWarning, setShowQualityWarning] = useState(false);
-
-  const [showPreview, setShowPreview] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [forceLive, setForceLive] = useState(false);
-
-  const [submitting, setSubmitting] = useState(false);
-  const [findingMentor, setFindingMentor] = useState(false);
-  const [checkingQuality, setCheckingQuality] = useState(false);
-
-  const [mentorLoadingProgress, setMentorLoadingProgress] = useState(0);
-  const [mentorLoadingMessage, setMentorLoadingMessage] = useState('Initializing mentor search...');
-
-  const [errors, setErrors] = useState({});
-
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 4;
-
-  const [editTimeLeft, setEditTimeLeft] = useState(300);
-  const [editTimerActive, setEditTimerActive] = useState(false);
-
-  // ─────────────────────────────────────────────
-  //  🔴 FIX: token nikalo ek jagah se
-  // ─────────────────────────────────────────────
   const token = user?.token || localStorage.getItem('token');
 
-  // ─────────────────────────────────────────────
-  //  CHECK ELIGIBILITY — fresh DB se credits lao
-  // ─────────────────────────────────────────────
+  const [formData, setFormData] = useState({ title: '', description: '', category: '', reason: '' });
+  const [eligibility, setEligibility] = useState(null);
+  const [loadingEligibility, setLoadingEligibility] = useState(true);
+  const [mentorPreview, setMentorPreview] = useState(null);
+  const [qualityCheck, setQualityCheck] = useState(null);
+  const [forceLive, setForceLive] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [currentStep, setCurrentStep] = useState(1);
+
+  const [ui, setUi] = useState({
+    findingMentor: false,
+    checkingQuality: false,
+    submitting: false,
+    showMentorPreview: false,
+    showQualityWarning: false,
+  });
+
+  const [loaderProgress, setLoaderProgress] = useState(0);
+  const [loaderMessage, setLoaderMessage] = useState(LOADING_MESSAGES[0]);
+
+  // ─── Eligibility ──────────────────────────────────────────────────────────
+
   const checkEligibility = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/api/questions/check-eligibility`, {
-          headers: { Authorization: `Bearer ${token}` },
-          credentials: 'include'
-        });
-      const data = await response.json();
+      const res = await fetch(`${API_URL}/api/questions/check-eligibility`, {
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
+      });
+      const data = await res.json();
       if (data.success) {
         setEligibility(data);
         if (!data.isProfileComplete) {
           alert(`Please complete your profile first. Missing: ${data.missingFields.join(', ')}`);
           navigate('/profile');
-          return;
         }
       }
-    } catch (error) {
-      console.error('❌ Eligibility check failed:', error);
+    } catch (err) {
+      console.error('Eligibility check failed:', err);
     } finally {
       setLoadingEligibility(false);
     }
   }, [token, navigate]);
 
-  useEffect(() => {
-    if (!token) {
-      navigate('/login');
-      return;
-    }
-
-    const draftQuestion = localStorage.getItem('draftQuestion');
-    if (draftQuestion) {
-      const autoTitle =
-        draftQuestion.length > 50
-          ? draftQuestion.substring(0, 50).trim() + '...'
-          : draftQuestion.trim();
-
-      setFormData(prev => ({
-        ...prev,
-        title: autoTitle,
-        description: draftQuestion
-      }));
-
-      localStorage.removeItem('draftQuestion');
-    }
-
-    checkEligibility();
-  }, [token, navigate, checkEligibility]);
-
-  useEffect(() => {
-    if (!showPreview) {
-      setEditTimerActive(false);
-      return;
-    }
-    setEditTimeLeft(300);
-    setEditTimerActive(true);
-  }, [showPreview]);
-
-  useEffect(() => {
-    if (!editTimerActive) return;
-    if (editTimeLeft <= 0) {
-      setEditTimerActive(false);
-      return;
-    }
-    const interval = setInterval(() => {
-      setEditTimeLeft(prev => prev - 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [editTimerActive, editTimeLeft]);
-
-  useEffect(() => {
-    if (!findingMentor) {
-      setMentorLoadingProgress(0);
-      setMentorLoadingMessage('Initializing mentor search...');
-      return;
-    }
-
-    const loadingMessages = [
-      'Understanding your question...',
-      'Scanning mentor expertise...',
-      'Matching domain and profile...',
-      'Searching similar solved cases...',
-      'Ranking the best mentor for you...',
-      'Preparing your personalized preview...'
-    ];
-
-    let progress = 6;
-    let messageIndex = 0;
-
-    setMentorLoadingProgress(progress);
-    setMentorLoadingMessage(loadingMessages[0]);
-
-    const progressInterval = setInterval(() => {
-      progress += Math.floor(Math.random() * 8) + 3;
-      if (progress > 94) progress = 94;
-      setMentorLoadingProgress(progress);
-    }, 450);
-
-    const messageInterval = setInterval(() => {
-      messageIndex = (messageIndex + 1) % loadingMessages.length;
-      setMentorLoadingMessage(loadingMessages[messageIndex]);
-    }, 1400);
-
-    return () => {
-      clearInterval(progressInterval);
-      clearInterval(messageInterval);
-    };
-  }, [findingMentor]);
-
-  const handleChange = e => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: null }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
-    } else if (formData.title.length < 10) {
-      newErrors.title = 'Title must be at least 10 characters';
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
-    } else if (formData.description.length < 10) {
-      newErrors.description = 'Description must be at least 10 characters';
-    }
-    if (!formData.category) {
-      newErrors.category = 'Please select a company domain';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleGetAnswer = async e => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    if ((eligibility?.credits || 0) === 0) {
-      alert('You have 0 credits remaining. Please upgrade to continue.');
-      return;
-    }
-
-    setFindingMentor(true);
-    setMentorLoadingProgress(6);
-    setMentorLoadingMessage('Understanding your question...');
-
-    try {
-      const response = await fetch(`${API_URL}/api/questions/preview-match`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          category: formData.category
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setMentorLoadingProgress(100);
-        setMentorLoadingMessage('Best mentor found! Preparing your preview...');
-        await new Promise(resolve => setTimeout(resolve, 500));
-        setMentorPreview(data);
-        setShowMentorPreview(true);
-        setCurrentStep(2);
-      } else {
-        alert(data.error || 'Failed to find mentor match. Please try again.');
-      }
-    } catch (error) {
-      console.error('❌ Mentor match failed:', error);
-      alert('Failed to find mentor match. Please try again.');
-    } finally {
-      setFindingMentor(false);
-    }
-  };
-
-  const checkQuestionQuality = async () => {
-    setCheckingQuality(true);
-    try {
-      const response = await fetch(`${API_URL}/api/questions/quality-check`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description
-        })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setQualityCheck(data);
-        if (data.needsImprovement) {
-          setShowQualityWarning(true);
-          setShowMentorPreview(false);
-        } else {
-          setShowPreview(true);
-          setShowMentorPreview(false);
-        }
-      }
-    } catch (error) {
-      console.error('❌ Quality check failed:', error);
-    } finally {
-      setCheckingQuality(false);
-    }
-  };
-
-  const handleContinueFromMentor = () => {
-    setShowMentorPreview(false);
-    // If the mentor preview contained an instant answer and the user
-    // chose to continue, we should force live routing to mentors.
-    if (mentorPreview?.instantAnswer) setForceLive(true);
-    setCurrentStep(3);
-    checkQuestionQuality();
-  };
-
-  const handleImproveQuestion = () => {
-    setShowQualityWarning(false);
-    document.getElementById('description')?.focus();
-  };
-
-  const handleContinueAnyway = () => {
-    setShowQualityWarning(false);
-    setShowPreview(true);
-  };
-
-  const handleEditFromPreview = () => {
-    setShowPreview(false);
-    setCurrentStep(1);
-  };
-
-  const handleConfirmFromPreview = () => {
-    setShowPreview(false);
-    setShowConfirmation(true);
-    setCurrentStep(4);
-  };
-
-  // ─────────────────────────────────────────────
-  //  🔴 CREDIT FIX: payment ke baad DB se fresh
-  //  credits lo aur state update karo
-  // ─────────────────────────────────────────────
   const refreshCredits = useCallback(async () => {
     try {
-      const res  = await fetch(`${API_URL}/api/profile/me/credits`, {
-          headers: { Authorization: `Bearer ${token}` },
-          credentials: 'include'
-        });
+      const res = await fetch(`${API_URL}/api/profile/me/credits`, {
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: 'include',
+      });
       const data = await res.json();
-      if (data.success) {
-        setEligibility(prev => prev ? { ...prev, credits: data.credits } : prev);
-      }
+      if (data.success) setEligibility((p) => p ? { ...p, credits: data.credits } : p);
     } catch (err) {
       console.error('refreshCredits error:', err);
     }
   }, [token]);
 
-  const handlePayment = async () => {
+  useEffect(() => {
+    if (!token) { navigate('/login'); return; }
+    const draft = localStorage.getItem('draftQuestion');
+    if (draft) {
+      const autoTitle = draft.length > 50 ? draft.substring(0, 50).trim() + '…' : draft.trim();
+      setFormData((p) => ({ ...p, title: autoTitle, description: draft }));
+      localStorage.removeItem('draftQuestion');
+    }
+    checkEligibility();
+  }, [token, navigate, checkEligibility]);
+
+  // ─── Edit timer ───────────────────────────────────────────────────────────
+
+  
+
+  // ─── Loader animation ─────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (!ui.findingMentor) { setLoaderProgress(0); setLoaderMessage(LOADING_MESSAGES[0]); return; }
+    let p = 6, mIdx = 0;
+    setLoaderProgress(p); setLoaderMessage(LOADING_MESSAGES[0]);
+    const prog = setInterval(() => { p = Math.min(p + Math.floor(Math.random() * 8) + 3, 94); setLoaderProgress(p); }, 450);
+    const msg = setInterval(() => { mIdx = (mIdx + 1) % LOADING_MESSAGES.length; setLoaderMessage(LOADING_MESSAGES[mIdx]); }, 1400);
+    return () => { clearInterval(prog); clearInterval(msg); };
+  }, [ui.findingMentor]);
+
+  // ─── Form helpers ─────────────────────────────────────────────────────────
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((p) => ({ ...p, [name]: value }));
+    if (errors[name]) setErrors((p) => ({ ...p, [name]: null }));
+  };
+
+  const validateForm = () => {
+    const e = {};
+    if (!formData.title.trim()) e.title = 'Title is required';
+    else if (formData.title.length < 10) e.title = 'Title must be at least 10 characters';
+    if (!formData.description.trim()) e.description = 'Description is required';
+    else if (formData.description.length < 10) e.description = 'Description must be at least 10 characters';
+    if (!formData.category) e.category = 'Please select a company domain';
+    setErrors(e);
+    return !Object.keys(e).length;
+  };
+
+  const setUiKey = (key, val) => setUi((p) => ({ ...p, [key]: val }));
+
+  // ─── Submit flow ──────────────────────────────────────────────────────────
+
+  const handleGetAnswer = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    if (!eligibility?.credits) { alert('You have 0 credits. Please buy more to continue.'); return; }
+    setUiKey('findingMentor', true);
     try {
-      const response = await fetch(`${API_URL}/api/payment/create-order`, {
+      const res = await fetch(`${API_URL}/api/questions/preview-match`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         credentials: 'include',
-        body: JSON.stringify({ amount: 1, credits: 5 })
+        body: JSON.stringify({ title: formData.title, description: formData.description, category: formData.category }),
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Create order failed: ${response.status} ${errorText}`);
+      const data = await res.json();
+      if (data.success) {
+        setLoaderProgress(100); setLoaderMessage('Best mentor found!');
+        await new Promise((r) => setTimeout(r, 400));
+        setMentorPreview(data);
+        setUi((p) => ({ ...p, findingMentor: false, showMentorPreview: true }));
+        setCurrentStep(2);
+      } else {
+        alert(data.error || 'Failed to find a mentor. Please try again.');
+        setUiKey('findingMentor', false);
       }
-
-      const order = await response.json();
-
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: order.amount,
-        currency: order.currency,
-        name: 'Atyant',
-        description: 'Question Credits - 5 Credits',
-        order_id: order.id,
-        handler: async function (paymentResponse) {
-          try {
-            const verificationResponse = await fetch(`${API_URL}/api/payment/verify-payment`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-              },
-              credentials: 'include',
-              body: JSON.stringify(paymentResponse)
-            });
-
-            const result = await verificationResponse.json();
-
-            if (result.success) {
-              toast.success(`🎉 Payment successful! ${result.creditsAdded || 5} credits added to your account.`, {
-                position: 'top-center',
-                autoClose: 4000
-              });
-
-              // 🔴 FIX: Instant UI update + DB se fresh sync
-              setEligibility(prev => ({
-                ...prev,
-                credits: (prev?.credits || 0) + (result.creditsAdded || 5)
-              }));
-              await refreshCredits();
-
-            } else {
-              toast.error('Payment verification failed. Please contact support.', {
-                position: 'top-center',
-                autoClose: 5000
-              });
-            }
-          } catch (error) {
-            console.error('Verification error:', error);
-            toast.error('Payment verification failed. Please contact support.');
-          }
-        },
-        prefill: {
-          name: user?.username || '',
-          email: user?.email || ''
-        },
-        theme: { color: '#6366f1' },
-        modal: {
-          ondismiss: function () {
-            toast.info('Payment cancelled. You can try again anytime.', {
-              position: 'top-center',
-              autoClose: 3000
-            });
-          }
-        }
-      };
-
-      if (!window.Razorpay) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement('script');
-          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-          script.onload = resolve;
-          script.onerror = reject;
-          document.body.appendChild(script);
-        });
-      }
-
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast.error('An error occurred while initiating payment. Please try again.', {
-        position: 'top-center',
-        autoClose: 5000
-      });
+    } catch (err) {
+      console.error('Mentor match failed:', err);
+      alert('Failed to find a mentor. Please try again.');
+      setUiKey('findingMentor', false);
     }
   };
 
-  const handleFinalSubmit = async () => {
-    setSubmitting(true);
+  const checkQuestionQuality = async () => {
+    setUiKey('checkingQuality', true);
     try {
-      const response = await fetch(`${API_URL}/api/questions/submit`, {
+      const res = await fetch(`${API_URL}/api/questions/quality-check`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        credentials: 'include',
+        body: JSON.stringify({ title: formData.title, description: formData.description }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setQualityCheck(data);
+        if (data.needsImprovement) {
+          setUi((p) => ({ ...p, showQualityWarning: true, showMentorPreview: false }));
+        } else {
+          // Quality is fine — submit immediately (no separate review/confirm steps)
+          setUi((p) => ({ ...p, showMentorPreview: false }));
+          await handleFinalSubmit();
+        }
+      }
+    } catch (err) {
+      console.error('Quality check failed:', err);
+    } finally {
+      setUiKey('checkingQuality', false);
+    }
+  };
+
+  const handleContinueFromMentor = async () => {
+    if (mentorPreview?.instantAnswer) setForceLive(true);
+    setUiKey('showMentorPreview', false);
+    await handleFinalSubmit();
+  };
+
+  const handleFinalSubmit = async () => {
+    setUiKey('submitting', true);
+    try {
+      const res = await fetch(`${API_URL}/api/questions/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         credentials: 'include',
         body: JSON.stringify({
           ...formData,
           qualityScore: qualityCheck?.qualityScore || 0,
           mentorId: mentorPreview?.mentor?.id || null,
-          // If the preview we showed had an instant answer, assume the user
-          // intends to force live routing when they confirm.
-          forceLive: forceLive || !!mentorPreview?.instantAnswer
-        })
+          forceLive: forceLive || !!mentorPreview?.instantAnswer,
+        }),
       });
-
-      const data = await response.json();
-
+      const data = await res.json();
       if (data.success) {
-        // Always redirect to My Questions so the user sees their question list
-        // and the canonical status (Assigned to Mentor / Answer Ready) instead
-        // of landing directly on the instant-answer view.
-        if (data.instantAnswer) {
-          alert('⚡ Great news! We found an instant answer from a mentor who solved the same problem!');
-        } else {
-          alert('✅ Question submitted successfully! You will receive an answer within 24 hours.');
-        }
+        if (data.instantAnswer) alert('⚡ Instant answer found from a mentor who solved the same problem!');
+        else alert('✅ Question submitted! You will receive an answer within 24 hours.');
         navigate('/my-questions');
       } else {
         alert('❌ ' + data.error);
       }
-    } catch (error) {
-      console.error('❌ Submission failed:', error);
-      alert('Failed to submit question. Please try again.');
-      } finally {
-      setSubmitting(false);
-      setShowConfirmation(false);
+    } catch (err) {
+      console.error('Submission failed:', err);
+      alert('Failed to submit. Please try again.');
+    } finally {
+      setUi((p) => ({ ...p, submitting: false }));
       setForceLive(false);
     }
   };
 
+  const handlePayment = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/payment/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        credentials: 'include',
+        body: JSON.stringify({ amount: 1, credits: 5 }),
+      });
+      if (!res.ok) throw new Error(`Create order failed: ${res.status}`);
+      const order = await res.json();
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Atyant',
+        description: 'Question Credits — 5 Credits',
+        order_id: order.id,
+        handler: async (payment) => {
+          const vRes = await fetch(`${API_URL}/api/payment/verify-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            credentials: 'include',
+            body: JSON.stringify(payment),
+          });
+          const result = await vRes.json();
+          if (result.success) {
+            toast.success(`Payment successful! ${result.creditsAdded || 5} credits added.`, { position: 'top-center', autoClose: 4000 });
+            setEligibility((p) => ({ ...p, credits: (p?.credits || 0) + (result.creditsAdded || 5) }));
+            await refreshCredits();
+          } else {
+            toast.error('Payment verification failed. Contact support.', { position: 'top-center', autoClose: 5000 });
+          }
+        },
+        prefill: { name: user?.username || '', email: user?.email || '' },
+        theme: { color: '#4f46e5' },
+        modal: { ondismiss: () => toast.info('Payment cancelled.', { position: 'top-center', autoClose: 3000 }) },
+      };
+      if (!window.Razorpay) {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          s.onload = resolve; s.onerror = reject;
+          document.body.appendChild(s);
+        });
+      }
+      new window.Razorpay(options).open();
+    } catch (err) {
+      console.error('Payment error:', err);
+      toast.error('Error initiating payment. Please try again.', { position: 'top-center', autoClose: 5000 });
+    }
+  };
+
+  // ─── Loading ───────────────────────────────────────────────────────────────
+
   if (loadingEligibility) {
     return (
-      <div className="enhanced-ask-loading">
-        <div className="spinner"></div>
-        <p>Checking your eligibility...</p>
+      <div className="aq-fullscreen-loader">
+        <div className="aq-spinner" />
+        <p>Checking your eligibility…</p>
       </div>
     );
   }
 
+  const loaderSteps = [
+    { label: 'Read question intent', threshold: 10 },
+    { label: 'Compare mentor expertise', threshold: 35 },
+    { label: 'Rank best match', threshold: 65 },
+    { label: 'Build preview', threshold: 90 },
+  ];
+
   return (
     <>
-      {findingMentor && (
-        <div
-          className="mentor-search-loading-overlay premium"
-          aria-live="polite"
-          aria-atomic="true"
-          aria-busy="true"
-        >
-          <div className="mentor-search-glass-card">
-            <div className="mentor-bg-orb mentor-bg-orb-1"></div>
-            <div className="mentor-bg-orb mentor-bg-orb-2"></div>
-            <div className="mentor-bg-grid"></div>
-
-            <div className="mentor-loader-visual">
-              <div className="mentor-loader-core">
-                <div className="mentor-loader-ring ring-one"></div>
-                <div className="mentor-loader-ring ring-two"></div>
-                <div className="mentor-loader-ring ring-three"></div>
-
-                <div className="mentor-loader-center">
-                  <div className="mentor-loader-center-inner">
-                    <span className="mentor-loader-ai">AI</span>
-                  </div>
-                </div>
-
-                <div className="mentor-scan-line"></div>
-
-                <div className="mentor-floating-chip chip-one">Skill Match</div>
-                <div className="mentor-floating-chip chip-two">Profile Fit</div>
-                <div className="mentor-floating-chip chip-three">Fastest Expert</div>
-              </div>
+      {/* ── Mentor Search Overlay ─────────────────────────────────────────── */}
+      {ui.findingMentor && (
+        <div className="aq-loader-overlay" role="status" aria-live="polite">
+          <div className="aq-loader-card">
+            <div className="aq-loader-rings">
+              <div className="aq-ring r1" /><div className="aq-ring r2" /><div className="aq-ring r3" />
+              <div className="aq-ring-center"><span>AI</span></div>
+              {['Skill Match', 'Profile Fit', 'Top Expert'].map((chip, i) => (
+                <div key={i} className={`aq-chip aq-chip-${i + 1}`}>{chip}</div>
+              ))}
             </div>
-
-            <div className="mentor-loader-content">
-              <div className="mentor-loader-badge">Atyant Intelligence</div>
-              <h2>Finding your best mentor</h2>
-              <p className="mentor-loader-subtitle">
-                We are analyzing your question, searching solved patterns, and ranking the strongest mentor match for your needs.
+            <div className="aq-loader-body">
+              <p className="aq-loader-eyebrow">Atyant Intelligence</p>
+              <h2 className="aq-loader-heading">Finding your best mentor</h2>
+              <p className="aq-loader-sub">
+                Analysing your question, searching solved patterns, and ranking the strongest mentor match.
               </p>
-              <div className="mentor-live-status">
-                <span className="mentor-live-dot"></span>
-                <span>{mentorLoadingMessage}</span>
+              <div className="aq-loader-status">
+                <span className="aq-pulse-dot" />{loaderMessage}
               </div>
-              <div
-                className="mentor-progress-wrap"
-                role="progressbar"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                aria-valuenow={mentorLoadingProgress}
-                aria-label="Mentor search progress"
-              >
-                <div className="mentor-progress-fill" style={{ width: `${mentorLoadingProgress}%` }} />
+              <div className="aq-prog-track" role="progressbar" aria-valuenow={loaderProgress} aria-valuemax={100}>
+                <div className="aq-prog-fill" style={{ width: `${loaderProgress}%` }} />
               </div>
-              <div className="mentor-progress-meta">
-                <span>{mentorLoadingProgress}% completed</span>
-                <span>Usually takes 3–8 seconds</span>
+              <div className="aq-prog-meta">
+                <span>{loaderProgress}% completed</span>
+                <span>Usually 3–8 seconds</span>
               </div>
-              <div className="mentor-loader-steps">
-                <div className={`mentor-loader-step ${mentorLoadingProgress >= 10 ? 'active' : ''}`}>
-                  <span></span>Read question intent
-                </div>
-                <div className={`mentor-loader-step ${mentorLoadingProgress >= 35 ? 'active' : ''}`}>
-                  <span></span>Compare mentor expertise
-                </div>
-                <div className={`mentor-loader-step ${mentorLoadingProgress >= 65 ? 'active' : ''}`}>
-                  <span></span>Rank best match
-                </div>
-                <div className={`mentor-loader-step ${mentorLoadingProgress >= 90 ? 'active' : ''}`}>
-                  <span></span>Build preview
-                </div>
+              <div className="aq-loader-steps">
+                {loaderSteps.map(({ label, threshold }) => (
+                  <div key={label} className={`aq-loader-step ${loaderProgress >= threshold ? 'active' : ''}`}>
+                    <span className="aq-loader-step-dot" />{label}
+                  </div>
+                ))}
               </div>
-              <p className="mentor-loader-sr-only">
-                Mentor search is in progress. {mentorLoadingProgress}% completed. {mentorLoadingMessage}
-              </p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="enhanced-ask-container">
-        <div className="enhanced-ask-header">
-          <h1>Ask Your Question</h1>
-          <p>Get personalized guidance from experienced mentors</p>
+      {/* ── Main Page ─────────────────────────────────────────────────────── */}
+      <div className="aq-container">
 
-          <div className="profile-strength-bar">
-            <div className="strength-label">
-              Profile Strength: <strong>{eligibility?.profileStrength || 0}%</strong>
-            </div>
-            <div className="strength-bar">
-              <div className="strength-fill" style={{ width: `${eligibility?.profileStrength || 0}%` }}></div>
-            </div>
-            {eligibility && eligibility.profileStrength < 100 && (
-              <button className="complete-profile-btn" onClick={() => navigate('/profile')}>
-                Complete Profile
-              </button>
-            )}
+        {/* Header */}
+        <header className="aq-header">
+          <div className="aq-header-text">
+            <h1>Ask Your Question</h1>
+            <p>Get personalised guidance from experienced mentors</p>
           </div>
 
-          <div className="credits-display">
-            <span className="credits-icon">🎫</span>
-            <span className="credits-text">
-              {eligibility?.credits || 0} {eligibility?.credits === 1 ? 'Credit' : 'Credits'} Remaining
-            </span>
-            {eligibility?.credits === 0 ? (
-              <button className="upgrade-btn" onClick={handlePayment}>
-                💳 Buy 5 Credits - ₹1
-              </button>
-            ) : (
-              <button className="buy-more-btn" onClick={handlePayment}>
-                ➕ Buy More
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className="step-indicator">
-          <div className="step-header">
-            <h3>Step 1 of {totalSteps} | Ask Your Question</h3>
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: `${(1 / totalSteps) * 100}%` }}></div>
-            </div>
-          </div>
-          <p className="next-step-hint">Next: Meet Your Matched Mentor 🎯</p>
-        </div>
-
-        <form className="question-form" onSubmit={handleGetAnswer}>
-          <div className="form-group">
-            <label htmlFor="title">
-              Question Title <span className="required">*</span>
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="e.g., How do I prepare for a Product Manager interview?"
-              maxLength={200}
-              className={errors.title ? 'error' : ''}
-            />
-            {errors.title && <span className="error-message">{errors.title}</span>}
-            <span className="char-count">{formData.title.length}/200</span>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="description">
-              Detailed Description <span className="required">*</span>
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Provide context: What's your background? What have you tried? What specific help do you need?"
-              maxLength={1000}
-              rows={8}
-              className={errors.description ? 'error' : ''}
-            />
-            {errors.description && <span className="error-message">{errors.description}</span>}
-            <span className="char-count">{formData.description.length}/1000</span>
-          </div>
-
-          <div className="form-group">
-            <label>Company Domain <span className="required">*</span></label>
-            <div className="domain-cards">
-              {COMPANY_DOMAINS.map(domain => (
-                <button
-                  type="button"
-                  key={domain.value}
-                  className={`domain-card${formData.category === domain.value ? ' selected' : ''}`}
-                  onClick={() => {
-                    setFormData({ ...formData, category: domain.value });
-                    setErrors({ ...errors, category: '' });
-                  }}
-                >
-                  <span className="domain-icon">{domain.icon}</span>
-                  {domain.label}
-                </button>
-              ))}
-            </div>
-            {errors.category && <span className="error-message">{errors.category}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="reason">Why are you asking this? (Optional)</label>
-            <textarea
-              id="reason"
-              name="reason"
-              value={formData.reason}
-              onChange={handleChange}
-              placeholder="e.g., I have an interview next week and want to prepare effectively"
-              maxLength={500}
-              rows={3}
-            />
-            <span className="char-count">{formData.reason.length}/500</span>
-          </div>
-
-          <button
-            type="submit"
-            className="get-answer-btn"
-            disabled={findingMentor || eligibility?.credits === 0}
-          >
-            {findingMentor ? 'Finding Best Mentor...' : 'Get My Answer 🚀'}
-          </button>
-        </form>
-
-        {showMentorPreview && mentorPreview && (
-          <div className="modal-overlay" onClick={() => setShowMentorPreview(false)}>
-            <div className="mentor-preview-modal" onClick={e => e.stopPropagation()}>
-              <button className="close-modal" onClick={() => setShowMentorPreview(false)}>×</button>
-
-              <div className="step-indicator">
-                <div className="step-header">
-                  <h3>
-                    Step 2 of {totalSteps} | {mentorPreview.instantAnswer ? '⚡ Instant Answer Found!' : 'Meet Your Mentor'}
-                  </h3>
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${(2 / totalSteps) * 100}%` }}></div>
-                  </div>
-                </div>
-                <p className="next-step-hint">
-                  {mentorPreview.instantAnswer
-                    ? 'This mentor has already answered a similar question! 🎯'
-                    : 'Next: Quality Check & Review 📝'}
-                </p>
+          <div className="aq-header-meta">
+            {/* Profile Strength */}
+            <div className="aq-profile-strength">
+              <div className="aq-ps-label">
+                <span>Profile Strength</span>
+                <strong>{eligibility?.profileStrength || 0}%</strong>
               </div>
+              <div className="aq-ps-track">
+                <div className="aq-ps-fill" style={{ width: `${eligibility?.profileStrength || 0}%` }} />
+              </div>
+              {(eligibility?.profileStrength || 0) < 100 && (
+                <button className="aq-btn aq-btn-ghost aq-btn-sm" onClick={() => navigate('/profile')}>
+                  Complete profile →
+                </button>
+              )}
+            </div>
 
-              {mentorPreview.mentorFound || mentorPreview.mentorUsername === 'Atyant Engine' || mentorPreview.message?.includes('Atyant Engine') ? (
-                <>
-                  {mentorPreview?.redditStats && (
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-around',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        borderRadius: '12px',
-                        padding: '16px',
-                        marginBottom: '20px',
-                        color: 'white'
-                      }}
-                    >
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold' }}>
-                          {mentorPreview.redditStats.totalSolved}+
-                        </div>
-                        <div style={{ fontSize: '12px', opacity: 0.9 }}>students solved this</div>
-                      </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold' }}>
-                          {mentorPreview.mentor?.matchPercentage || 0}%
-                        </div>
-                        <div style={{ fontSize: '12px', opacity: 0.9 }}>profile match</div>
-                      </div>
-                      <div style={{ textAlign: 'center' }}>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold' }}>
-                          {mentorPreview.redditStats.totalThreads || 0}
-                        </div>
-                        <div style={{ fontSize: '12px', opacity: 0.9 }}>Reddit threads found</div>
-                      </div>
-                    </div>
-                  )}
-
-                  {mentorPreview?.redditStats?.aiSummary && (
-                    <div
-                      style={{
-                        background: '#f8f9ff',
-                        border: '1px solid #e0e3ff',
-                        borderRadius: '12px',
-                        padding: '16px',
-                        marginBottom: '20px',
-                        fontSize: '14px',
-                        lineHeight: '1.6',
-                        color: '#333'
-                      }}
-                    >
-                      <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
-                        💡 What others did in your situation:
-                      </div>
-                      <p style={{ margin: 0 }}>{mentorPreview.redditStats.aiSummary}</p>
-                    </div>
-                  )}
-
-                    <h2>
-                      {mentorPreview.instantAnswer
-                        ? '⚡ Instant Answer Available!'
-                        : '✨ We found the best mentor for your question!'}
-                    </h2>
-
-                    {mentorPreview?.redditStats?.top10Posts?.length > 0 && (
-                    <div
-                      style={{
-                        background: '#fff',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '12px',
-                        padding: '16px',
-                        marginBottom: '20px'
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontWeight: 'bold',
-                          marginBottom: '12px',
-                          fontSize: '14px',
-                          color: '#333',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }}
-                      >
-                        <svg width="18" height="18" viewBox="0 0 20 20" fill="#ff4500" xmlns="http://www.w3.org/2000/svg">
-                          <circle cx="10" cy="10" r="10" fill="#ff4500" />
-                          <text x="5" y="15" fontSize="12" fill="white" fontWeight="bold">r/</text>
-                        </svg>
-                        Top Reddit Threads matching your question
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {mentorPreview.redditStats.top10Posts.map((post, idx) => (
-                          <a
-                            key={idx}
-                            href={post.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              display: 'flex',
-                              alignItems: 'flex-start',
-                              gap: '10px',
-                              padding: '10px 12px',
-                              background: '#f9fafb',
-                              borderRadius: '8px',
-                              textDecoration: 'none',
-                              color: '#111',
-                              border: '1px solid #f0f0f0',
-                              transition: 'background 0.15s'
-                            }}
-                            onMouseEnter={e => (e.currentTarget.style.background = '#f0f4ff')}
-                            onMouseLeave={e => (e.currentTarget.style.background = '#f9fafb')}
-                          >
-                            <span style={{ minWidth: '22px', fontWeight: 'bold', color: '#6b7280', fontSize: '13px', paddingTop: '1px' }}>
-                              {idx + 1}.
-                            </span>
-                            <div style={{ flex: 1 }}>
-                              <div style={{ fontSize: '13px', fontWeight: '500', lineHeight: '1.4', marginBottom: '4px' }}>
-                                {post.title}
-                              </div>
-                              <div style={{ display: 'flex', gap: '10px', fontSize: '11px', color: '#9ca3af' }}>
-                                <span>⬆ {post.ups.toLocaleString()}</span>
-                                <span>💬 {post.numComments.toLocaleString()}</span>
-                                <span>{post.subreddit}</span>
-                              </div>
-                            </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#9ca3af" strokeWidth="2" style={{ marginTop: '3px', flexShrink: 0 }}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  
-
-                  {mentorPreview.instantAnswer && mentorPreview.answerPreview && (
-                    <div className="instant-answer-preview">
-                      <h4>📝 Answer Preview:</h4>
-                      <p>{mentorPreview.answerPreview}</p>
-                      <span className="instant-badge">✨ Based on similar question</span>
-                      {mentorPreview.answerCardId && (
-                        <button
-                          className="view-answer-btn"
-                          style={{
-                            marginTop: '12px',
-                            padding: '8px 16px',
-                            background: '#4f46e5',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            fontSize: '13px',
-                            fontWeight: '600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '6px',
-                            width: '100%',
-                            transition: 'background 0.2s'
-                          }}
-                          onClick={e => {
-                            e.preventDefault();
-                            window.open(`/answer/${mentorPreview.answerCardId}`, '_blank');
-                          }}
-                          onMouseEnter={e => (e.currentTarget.style.background = '#4338ca')}
-                          onMouseLeave={e => (e.currentTarget.style.background = '#4f46e5')}
-                        >
-                          See Full Answer Card ↗
-                        </button>
-                      )}
-                    </div>
-                  )}
-
-                  {mentorPreview?.mentor && (
-                    <>
-                      <div className="mentor-card-preview">
-                        <div className="mentor-avatar">
-                          {mentorPreview.mentor?.profileImage ? (
-                            <img src={mentorPreview.mentor.profileImage} alt="Mentor" />
-                          ) : (
-                            <div className="avatar-placeholder">👤</div>
-                          )}
-                        </div>
-                        <div className="mentor-info">
-                          <h3>{mentorPreview.mentor?.name || 'Matched Mentor'}</h3>
-                          <p className="mentor-bio">{mentorPreview.mentor?.bio || 'A mentor match has been found for your question.'}</p>
-                          <div className="mentor-expertise">
-                            {mentorPreview.mentor?.expertise?.slice(0, 3).map((exp, i) => (
-                              <span key={i} className="expertise-tag">{exp}</span>
-                            ))}
-                          </div>
-                          <div className="match-percentage">
-                            <div className="match-circle">{mentorPreview.mentor?.matchPercentage || 0}%</div>
-                            <span>Match Score</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Mentor Services Section */}
-                      <MentorServicesPreview mentorId={mentorPreview.mentor.id} />
-                    </>
-                  )}
-
-                  <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem', flexDirection: 'row' }}>
-                    {mentorPreview.mentor && mentorPreview.mentor.id && (
-                      <button
-                        className="continue-btn"
-                        style={{ background: '#10b981', flex: 1, opacity: 0.7, cursor: 'not-allowed' }}
-                        disabled
-                        onClick={() => {
-                          toast.info('Chat feature coming soon!', { position: 'top-center', autoClose: 2500 });
-                        }}
-                      >
-                        💬 Chat Now
-                      </button>
-                    )}
-                    <button
-                      className="continue-btn"
-                      onClick={handleContinueFromMentor}
-                      disabled={checkingQuality}
-                      style={{ flex: 1 }}
-                    >
-                      {checkingQuality ? 'Analyzing...' : 'Continue'}
-                    </button>
-                  </div>
-                </>
+            {/* Credits */}
+            <div className="aq-credits-card">
+              <div className="aq-credits-info">
+                <span className="aq-credits-icon">🎫</span>
+                <div>
+                  <span className="aq-credits-count">{eligibility?.credits || 0}</span>
+                  <span className="aq-credits-label">{eligibility?.credits === 1 ? 'credit' : 'credits'} remaining</span>
+                </div>
+              </div>
+              {eligibility?.credits === 0 ? (
+                <button className="aq-btn aq-btn-primary" onClick={handlePayment}>
+                  Buy 5 Credits — ₹1
+                </button>
               ) : (
-                <>
-                  <div className="mentor-card-preview" style={{ marginBottom: '1.5rem' }}>
-                    <div className="mentor-avatar">
-                      <div className="avatar-placeholder">🤖</div>
-                    </div>
-                    <div className="mentor-info">
-                      <h3>Atyant Engine</h3>
-                      <p className="mentor-bio">AI-powered assistant. Your question will be answered by our engine if no human mentor is available right now.</p>
-                      <div className="mentor-expertise">
-                        <span className="expertise-tag">AI Guidance</span>
-                        <span className="expertise-tag">24/7 Support</span>
-                      </div>
-                      <div className="match-percentage">
-                        <div className="match-circle">∞</div>
-                        <span>AI Match</span>
-                      </div>
-                    </div>
-                  </div>
-                  <h2>📋 Question Received</h2>
-                  <p>No mentor match found. Your question will be answered by <strong>Atyant Engine</strong> after submission.</p>
-                  <button className="continue-btn" onClick={handleContinueFromMentor}>
-                    Continue
-                  </button>
-                </>
+                <button className="aq-btn aq-btn-ghost aq-btn-sm" onClick={handlePayment}>
+                  + Buy more
+                </button>
               )}
             </div>
           </div>
-        )}
+        </header>
 
-        {showQualityWarning && qualityCheck && (
-          <div className="modal-overlay" onClick={() => setShowQualityWarning(false)}>
-            <div className="quality-warning-modal" onClick={e => e.stopPropagation()}>
-              <button className="close-modal" onClick={() => setShowQualityWarning(false)}>×</button>
-              <div className="quality-notice">
-                <p>💡 <strong>Quick Quality Check</strong> (before Step 3)</p>
-                <p className="quality-subtitle">Improve your question for better mentor guidance</p>
-              </div>
-              <div className="warning-icon">⚠️</div>
-              <h2>Your question needs more details for better guidance</h2>
-              <div className="quality-score">
-                <div className="score-circle">{qualityCheck.qualityScore}</div>
-                <span>Quality Score</span>
-              </div>
-              <div className="quality-issues">
-                <h3>Suggestions for improvement:</h3>
-                <ul>
-                  {qualityCheck.issues.map((issue, i) => (
-                    <li key={i}>{issue}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="warning-actions">
-                <button className="improve-btn" onClick={handleImproveQuestion}>Improve Question</button>
-                <button className="continue-anyway-btn" onClick={handleContinueAnyway}>Continue Anyway</button>
+        {/* Step Bar */}
+        <StepBar current={currentStep} total={2} />
+
+        {/* Form */}
+        <section className="aq-form-section">
+          <div className="aq-step-hint">
+            <span className="aq-step-hint-label">Step 1 of 2</span>
+            <span className="aq-step-hint-next">Next: Meet your matched mentor 🎯</span>
+          </div>
+
+          <form className="aq-form" onSubmit={handleGetAnswer} noValidate>
+            {/* Title */}
+            <div className={`aq-field ${errors.title ? 'has-error' : ''}`}>
+              <label htmlFor="title">
+                Question Title <span className="aq-required">*</span>
+              </label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="e.g., How do I prepare for a Product Manager interview?"
+                maxLength={200}
+              />
+              <div className="aq-field-footer">
+                {errors.title ? <span className="aq-error-msg">{errors.title}</span> : <span />}
+                <span className="aq-char-count">{formData.title.length}/200</span>
               </div>
             </div>
-          </div>
-        )}
 
-        {showPreview && (
-          <div className="modal-overlay" onClick={() => setShowPreview(false)}>
-            <div className="preview-modal" onClick={e => e.stopPropagation()}>
-              <button className="close-modal" onClick={() => setShowPreview(false)}>×</button>
-              <div className="step-indicator">
-                <div className="step-header">
-                  <h3>Step 3 of {totalSteps} | Review Your Question</h3>
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: `${(3 / totalSteps) * 100}%` }}></div>
-                  </div>
-                </div>
-                <p className="next-step-hint">Final Step: Confirm & Submit ✅</p>
-              </div>
-              <h2>📋 Review Your Question</h2>
-              <div className="preview-content">
-                <div className="preview-item"><label>Title</label><p>{formData.title}</p></div>
-                <div className="preview-item"><label>Description</label><p>{formData.description}</p></div>
-                <div className="preview-item"><label>Category</label><p>{formData.category}</p></div>
-                {formData.reason && (
-                  <div className="preview-item"><label>Reason</label><p>{formData.reason}</p></div>
-                )}
-                {mentorPreview?.mentorFound && (
-                  <div className="preview-item">
-                    <label>Matched Mentor</label>
-                    <p>
-                      <strong>{mentorPreview?.mentor?.name}</strong>
-                      <span className="match-badge">{mentorPreview?.mentor?.matchPercentage}% match</span>
-                    </p>
-                  </div>
-                )}
-                {qualityCheck && (
-                  <div className="preview-item">
-                    <label>Quality Score</label>
-                    <div className="quality-badge" data-score={qualityCheck.qualityScore}>
-                      {qualityCheck.qualityScore}/100
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="preview-actions">
-                <button className="edit-btn" onClick={handleEditFromPreview} disabled={editTimeLeft <= 0}>
-                  ✏️ Edit {editTimeLeft > 0 ? `(${Math.floor(editTimeLeft / 60)}m ${editTimeLeft % 60}s left)` : '(Expired)'}
-                </button>
-                <button className="confirm-btn" onClick={handleConfirmFromPreview}>✅ Confirm</button>
+            {/* Description */}
+            <div className={`aq-field ${errors.description ? 'has-error' : ''}`}>
+              <label htmlFor="description">
+                Detailed Description <span className="aq-required">*</span>
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Provide context: What's your background? What have you tried? What specific help do you need?"
+                maxLength={1000}
+                rows={7}
+              />
+              <div className="aq-field-footer">
+                {errors.description ? <span className="aq-error-msg">{errors.description}</span> : <span />}
+                <span className="aq-char-count">{formData.description.length}/1000</span>
               </div>
             </div>
-          </div>
-        )}
 
-        {showConfirmation && (
-          <div className="modal-overlay" onClick={() => setShowConfirmation(false)}>
-            <div className="confirmation-modal" onClick={e => e.stopPropagation()}>
-              <button className="close-modal" onClick={() => setShowConfirmation(false)}>×</button>
-              <div className="step-indicator">
-                <div className="step-header">
-                  <h3>Step 4 of {totalSteps} | Final Step | Confirm & Submit</h3>
-                  <div className="progress-bar">
-                    <div className="progress-fill" style={{ width: '100%' }}></div>
-                  </div>
-                </div>
-                <p className="next-step-hint final-hint">🎉 Almost done! One click away from getting your answer</p>
+            {/* Domain */}
+            <div className={`aq-field ${errors.category ? 'has-error' : ''}`}>
+              <label>Company Domain <span className="aq-required">*</span></label>
+              <div className="aq-domain-grid">
+                {COMPANY_DOMAINS.map(({ label, value, icon }) => (
+                  <button
+                    type="button"
+                    key={value}
+                    className={`aq-domain-btn ${formData.category === value ? 'selected' : ''}`}
+                    onClick={() => { setFormData((p) => ({ ...p, category: value })); setErrors((p) => ({ ...p, category: null })); }}
+                  >
+                    <span className="aq-domain-icon">{icon}</span>
+                    <span>{label}</span>
+                  </button>
+                ))}
               </div>
-              <h2>Are you sure you want to submit this question?</h2>
-              <p className="confirmation-text">
-                Our mentors will respond within <strong>24 hours</strong>.<br />
-                This will use <strong>1 credit</strong> from your account.
-              </p>
-              <div className="credits-info">
-                <div className="credit-item">
-                  <span>Current Credits:</span>
-                  <strong>{eligibility?.credits}</strong>
-                </div>
-                <div className="credit-item">
-                  <span>After Submission:</span>
-                  <strong>{(eligibility?.credits || 0) - 1}</strong>
-                </div>
-              </div>
-              <div className="confirmation-actions">
-                <button className="cancel-btn" onClick={() => setShowConfirmation(false)} disabled={submitting}>
-                  Cancel
-                </button>
-                <button className="submit-btn" onClick={handleFinalSubmit} disabled={submitting}>
-                  {submitting ? 'Submitting...' : 'Yes, Submit'}
-                </button>
+              {errors.category && <span className="aq-error-msg">{errors.category}</span>}
+            </div>
+
+            {/* Reason */}
+            <div className="aq-field">
+              <label htmlFor="reason">Why are you asking this? <span className="aq-optional">(optional)</span></label>
+              <textarea
+                id="reason"
+                name="reason"
+                value={formData.reason}
+                onChange={handleChange}
+                placeholder="e.g., I have an interview next week and want to prepare effectively"
+                maxLength={500}
+                rows={3}
+              />
+              <div className="aq-field-footer">
+                <span />
+                <span className="aq-char-count">{formData.reason.length}/500</span>
               </div>
             </div>
-          </div>
-        )}
+
+            <button
+              type="submit"
+              className="aq-btn aq-btn-primary aq-btn-lg aq-submit-btn"
+              disabled={ui.findingMentor || !eligibility?.credits}
+            >
+              {ui.findingMentor ? 'Finding best mentor…' : 'Get My Answer 🚀'}
+            </button>
+          </form>
+        </section>
       </div>
+
+      {/* ── Mentor Preview Modal ─────────────────────────────────────────── */}
+      {ui.showMentorPreview && mentorPreview && (
+        <ModalShell onClose={() => setUiKey('showMentorPreview', false)} size="lg">
+          <StepBar current={2} total={2} />
+          <div className="aq-modal-step-hint">
+            <span className="aq-step-hint-label">Step 2 of 2</span>
+            <span className="aq-step-hint-next">
+              {mentorPreview.instantAnswer ? 'Instant answer found! 🎯' : 'Ask for an Answer Card 🎯'}
+            </span>
+          </div>
+
+          {mentorPreview.mentorFound || mentorPreview.mentorUsername === 'Atyant Engine' || mentorPreview.message?.includes('Atyant Engine') ? (
+            <MentorPreviewContent
+              mentorPreview={mentorPreview}
+              checkingQuality={ui.checkingQuality}
+              onContinue={null}
+              onAsk={async () => {
+                // Close preview and submit immediately (ask for answer card)
+                setUiKey('showMentorPreview', false);
+                // mark forceLive if instant answer
+                if (mentorPreview?.instantAnswer) setForceLive(true);
+                await handleFinalSubmit();
+              }}
+            />
+          ) : (
+            <>
+              <div className="aq-mentor-card">
+                <div className="aq-mentor-avatar"><div className="aq-avatar-fallback" style={{fontSize:'22px'}}>🤖</div></div>
+                <div className="aq-mentor-details">
+                  <h3>Atyant Engine</h3>
+                  <p className="aq-mentor-bio">AI-powered assistant — your question will be answered by our engine if no human mentor is available.</p>
+                  <div className="aq-expertise-tags">
+                    <span className="aq-tag">AI Guidance</span><span className="aq-tag">24/7 Support</span>
+                  </div>
+                </div>
+                <div className="aq-match-score">
+                  <div className="aq-match-infinity">∞</div>
+                  <span className="aq-match-label">AI</span>
+                </div>
+              </div>
+              <p className="aq-no-mentor-msg">No mentor match found. Your question will be answered by <strong>Atyant Engine</strong>.</p>
+              <div className="aq-modal-actions">
+                <button className="aq-btn aq-btn-primary" onClick={async () => { setUiKey('showMentorPreview', false); await handleFinalSubmit(); }}>Ask for Answer Card</button>
+              </div>
+            </>
+          )}
+        </ModalShell>
+      )}
+
+      {/* ── Quality Warning Modal ─────────────────────────────────────────── */}
+      {ui.showQualityWarning && qualityCheck && (
+        <ModalShell onClose={() => setUiKey('showQualityWarning', false)}>
+          <div className="aq-quality-header">
+            <span className="aq-quality-icon">⚠️</span>
+            <div>
+              <h2>Improve your question</h2>
+              <p>Better detail means better mentor guidance</p>
+            </div>
+            <div className="aq-quality-score">
+              <span className="aq-score-num">{qualityCheck.qualityScore}</span>
+              <span className="aq-score-label">/100</span>
+            </div>
+          </div>
+          <div className="aq-quality-issues">
+            <p className="aq-issues-title">Suggestions</p>
+            <ul>
+              {qualityCheck.issues.map((issue, i) => <li key={i}>{issue}</li>)}
+            </ul>
+          </div>
+          <div className="aq-modal-actions">
+            <button className="aq-btn aq-btn-primary" onClick={() => { setUiKey('showQualityWarning', false); document.getElementById('description')?.focus(); }}>
+              Improve question
+            </button>
+            <button className="aq-btn aq-btn-ghost" onClick={async () => { setUiKey('showQualityWarning', false); await handleFinalSubmit(); }}>
+              Continue anyway
+            </button>
+          </div>
+        </ModalShell>
+      )}
+
     </>
   );
 };

@@ -62,14 +62,14 @@ app.use(compression({
 }));
 
 // ─── CORS ──────────────────────────────────────────────────────────────────
-const allowedOrigins = [
+const allowedOrigins = Array.from(new Set([
   'https://atyant.in',
   'https://www.atyant.in',
   'http://localhost:5173',
   process.env.FRONTEND_URL,
   process.env.FRONTEND_URL_WWW,
   process.env.DEV_URL
-].filter(Boolean);
+].filter(Boolean)));
 
 console.log('🔒 CORS Allowed Origins:', allowedOrigins);
 

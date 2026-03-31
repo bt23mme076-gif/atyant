@@ -603,30 +603,128 @@ Resume Link: [Resume Link]
       </script>
 
       <article className="internship-page" itemScope itemType="https://schema.org/WebPage">
-      {/* ========== HERO SECTION ========== */}
-      <header className="internship-hero" role="banner">
-        <div className="hero-content">
-          <GraduationCap size={64} className="hero-icon" aria-hidden="true" />
-          <h1 itemProp="name">IIT & IIM Research Internship Portal</h1>
-          <p itemProp="description">Direct access to 1000+ professor emails at IITs & IIMs - For Core & Non-Core Branches</p>
-          {isLoggedIn && user && (
-            <div style={{ marginBottom: '16px', color: '#4ade80', fontSize: '1rem', fontWeight: '600' }}>
-              ✅ Welcome {user.name}!
-            </div>
-          )}
+      {/* ========== HERO SECTION WITH VERTICAL SLIDERS (Topmate Style) ========== */}
+      <header className="internship-hero-topmate" role="banner">
+        <div className="hero-left-content">
+          <h1 itemProp="name">Your All-in-One IIT & IIM Internship Portal</h1>
+          <p itemProp="description">
+            Get research internships at premier institutions. Access 1000+ professor emails, 
+            proven email templates, and strategies from successful students — all from a single platform.
+          </p>
+          
+          
+          
           <button 
             onClick={handleDownloadTemplate}
-            className={`download-template-btn ${!isLoggedIn ? 'locked' : ''}`}
+            className={`hero-cta-btn ${!isLoggedIn ? 'locked' : ''}`}
             aria-label={isLoggedIn ? 'Download IIT IIM internship email templates' : 'Login required to download email templates'}
           >
-            {isLoggedIn ? <Download size={20} aria-hidden="true" /> : <Lock size={20} aria-hidden="true" />}
-            <span>{isLoggedIn ? 'Download Email Template' : 'Login to Download Template'}</span>
+            {isLoggedIn ? (
+              <>
+                <Download size={20} aria-hidden="true" />
+                <span>Download Email Template</span>
+                <span className="arrow">→</span>
+              </>
+            ) : (
+              <>
+                <Lock size={20} aria-hidden="true" />
+                <span>Login to Download</span>
+                <span className="arrow">→</span>
+              </>
+            )}
           </button>
-          {!isLoggedIn && (
-            <p style={{ marginTop: '12px', color: 'rgba(255,255,255,0.85)', fontSize: '0.9rem' }}>
-              🔒 Login required to download template and access faculty links
-            </p>
-          )}
+
+          <div className="hero-stats">
+            <div className="stat-item">
+              <span className="stat-number">1000+</span>
+              <span className="stat-label">⭐ Professor Emails</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">500+</span>
+              <span className="stat-label">Successful Interns</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Vertical Sliders - IIT & IIM Interns */}
+        <div className="vertical-sliders-container">
+          {/* IIT Slider - Bottom to Top */}
+          <div className="vertical-slider slider-up">
+            <div className="slider-track">
+              <div className="intern-card">
+                <img src="/iit-intern-1.jpg" alt="IIT Intern 1" loading="lazy" />
+                <div className="intern-badge">IIT Bombay</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iit-intern-2.jpg" alt="IIT Intern 2" loading="lazy" />
+                <div className="intern-badge">IIT Delhi</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iit-intern-3.jpg" alt="IIT Intern 3" loading="lazy" />
+                <div className="intern-badge">IIT Kanpur</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iit-intern-4.jpg" alt="IIT Intern 4" loading="lazy" />
+                <div className="intern-badge">IIT Madras</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iit-intern-5.jpg" alt="IIT Intern 5" loading="lazy" />
+                <div className="intern-badge">IIT Kharagpur</div>
+              </div>
+              {/* Duplicate for seamless loop */}
+              <div className="intern-card">
+                <img src="/iit-intern-1.jpg" alt="IIT Intern 1" loading="lazy" />
+                <div className="intern-badge">IIT Bombay</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iit-intern-2.jpg" alt="IIT Intern 2" loading="lazy" />
+                <div className="intern-badge">IIT Delhi</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iit-intern-3.jpg" alt="IIT Intern 3" loading="lazy" />
+                <div className="intern-badge">IIT Kanpur</div>
+              </div>
+            </div>
+          </div>
+
+          {/* IIM Slider - Top to Bottom */}
+          <div className="vertical-slider slider-down">
+            <div className="slider-track">
+              <div className="intern-card">
+                <img src="/iim-intern-1.jpg" alt="IIM Intern 1" loading="lazy" />
+                <div className="intern-badge iim-badge">IIM Ahmedabad</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iim-intern-2.jpg" alt="IIM Intern 2" loading="lazy" />
+                <div className="intern-badge iim-badge">IIM Bangalore</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iim-intern-3.jpg" alt="IIM Intern 3" loading="lazy" />
+                <div className="intern-badge iim-badge">IIM Calcutta</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iim-intern-4.jpg" alt="IIM Intern 4" loading="lazy" />
+                <div className="intern-badge iim-badge">IIM Lucknow</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iim-intern-5.jpg" alt="IIM Intern 5" loading="lazy" />
+                <div className="intern-badge iim-badge">IIM Indore</div>
+              </div>
+              {/* Duplicate for seamless loop */}
+              <div className="intern-card">
+                <img src="/iim-intern-1.jpg" alt="IIM Intern 1" loading="lazy" />
+                <div className="intern-badge iim-badge">IIM Ahmedabad</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iim-intern-2.jpg" alt="IIM Intern 2" loading="lazy" />
+                <div className="intern-badge iim-badge">IIM Bangalore</div>
+              </div>
+              <div className="intern-card">
+                <img src="/iim-intern-3.jpg" alt="IIM Intern 3" loading="lazy" />
+                <div className="intern-badge iim-badge">IIM Calcutta</div>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
 
