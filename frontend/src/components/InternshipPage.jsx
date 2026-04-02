@@ -653,11 +653,11 @@ Resume Link: [Resume Link]
             <div className="slider-track">
               <div className="intern-card">
                 <img src="/iit-intern-1.jpg" alt="IIT Intern 1" loading="lazy" />
-                <div className="intern-badge">IIT Bombay</div>
+                <div className="intern-badge">IIT Gandhi Nagar</div>
               </div>
               <div className="intern-card">
                 <img src="/iit-intern-2.jpg" alt="IIT Intern 2" loading="lazy" />
-                <div className="intern-badge">IIT Delhi</div>
+                <div className="intern-badge">IIT Patna</div>
               </div>
               <div className="intern-card">
                 <img src="/iit-intern-3.jpg" alt="IIT Intern 3" loading="lazy" />
@@ -682,7 +682,7 @@ Resume Link: [Resume Link]
               </div>
               <div className="intern-card">
                 <img src="/iit-intern-3.jpg" alt="IIT Intern 3" loading="lazy" />
-                <div className="intern-badge">IIT Kanpur</div>
+                <div className="intern-badge">IIT Indore</div>
               </div>
             </div>
           </div>
@@ -692,7 +692,7 @@ Resume Link: [Resume Link]
             <div className="slider-track">
               <div className="intern-card">
                 <img src="/iim-intern-1.jpg" alt="IIM Intern 1" loading="lazy" />
-                <div className="intern-badge iim-badge">IIM Ahmedabad</div>
+                <div className="intern-badge iim-badge">IIM Indore</div>
               </div>
               <div className="intern-card">
                 <img src="/iim-intern-2.jpg" alt="IIM Intern 2" loading="lazy" />
@@ -708,7 +708,7 @@ Resume Link: [Resume Link]
               </div>
               <div className="intern-card">
                 <img src="/iim-intern-5.jpg" alt="IIM Intern 5" loading="lazy" />
-                <div className="intern-badge iim-badge">IIM Indore</div>
+                <div className="intern-badge iim-badge">IIM Ahmedabad</div>
               </div>
               {/* Duplicate for seamless loop */}
               <div className="intern-card">
@@ -728,11 +728,45 @@ Resume Link: [Resume Link]
         </div>
       </header>
 
-      {/* ========== PROFESSOR DIRECTORY SECTION ========== */}
+      {/* ========== PROFESSOR DIRECTORY USP SECTION ========== */}
       <section className="faculty-directory-combined filter-section-prominent" aria-label="IIT IIM Faculty Directory">
-      <h2 className="professor-directory-info-heading" style={{marginTop: 24, marginBottom: 18, fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.01em'}}>
-              Select a college to view all official professor email addresses and use the search to filter by name or academic area.
-            </h2>
+        
+        {/* USP Heading Section */}
+        <div className="professor-usp-header">
+          <div className="professor-usp-badge">
+            <span className="badge-icon">🎯</span>
+            <span>Direct Access to Top Institutions</span>
+          </div>
+          
+          <h2 className="professor-usp-title">
+            Get Official Email Addresses of
+            <span className="gradient-text-usp"> IIT & IIM Professors</span>
+          </h2>
+          
+          <p className="professor-usp-subtitle">
+            Access verified contact information for thousands of professors across all IITs and IIMs. 
+            Start your research internship journey today.
+          </p>
+
+          {/* Stats Row */}
+          <div className="professor-usp-stats">
+            <div className="usp-stat-item">
+              <div className="usp-stat-number">23+</div>
+              <div className="usp-stat-label">IIT Campuses</div>
+            </div>
+            <div className="usp-stat-divider"></div>
+            <div className="usp-stat-item">
+              <div className="usp-stat-number">20+</div>
+              <div className="usp-stat-label">IIM Campuses</div>
+            </div>
+            <div className="usp-stat-divider"></div>
+            <div className="usp-stat-item">
+              <div className="usp-stat-number">5000+</div>
+              <div className="usp-stat-label">Professor Emails</div>
+            </div>
+          </div>
+        </div>
+
         <h2 className="sr-only">Search IIT and IIM Professor Emails by Institution</h2>
         <div className="faculty-directory-filter-bar" role="search">
           <label htmlFor="category-select">Institution Type: </label>

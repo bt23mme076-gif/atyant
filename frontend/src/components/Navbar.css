@@ -1,28 +1,28 @@
 :root {
-  --nav-bg: rgba(17, 21, 31, 0.91);
+  --nav-bg:linear-gradient(180deg, rgba(26, 31, 58, 0.92) 0%, rgba(21, 27, 53, 0.88) 100%);
   --nav-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 100%);
-  --nav-blur: 20px;
-  --brand-glow: 0 0 16px 4px #ffffff, 0 0 1.2px 1.2px #ffffff;
-  --brand-border: linear-gradient(120deg, #ffffff 20%, #ffffff 80%);
+  --nav-blur: 24px;
+  --brand-glow: 0 0 16px 4px #3b82f6, 0 0 1.2px 1.2px #3b82f6;
+  --brand-border: linear-gradient(120deg, #3b82f6 20%, #06b6d4 80%);
   --nav-radius: 0px;
-  --nav-shadow: 0 8px 32px -12px #3e2e8355, 0 2px 10px 0 #3b0080cc;
-  --nav-text: #f9fafd;
+  --nav-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --nav-text: #ffffff;
   --brand-font: 'Montserrat', 'Quicksand', 'Segoe UI', Arial, sans-serif;
   --nav-link-radius: 10px;
-  --nav-link-shadow: 0 2px 12px 0 #6c63ff33;
-  --nav-btn-grad: linear-gradient(90deg,#6761f3 40%,#39e7fa 98%);
-  --nav-btn-hover: linear-gradient(90deg,#4336ce 50%,#12c2e9 100%);
-  --badge-bg: #e05151;
-  --nav-panel: rgba(30,35,63,0.97);
+  --nav-link-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+  --nav-btn-grad: linear-gradient(90deg, #3b82f6 40%, #06b6d4 98%);
+  --nav-btn-hover: linear-gradient(90deg, #2563eb 50%, #0891b2 100%);
+  --badge-bg: #ef4444;
+  --nav-panel: rgba(26, 31, 58, 0.95);
 
-  --dropdown-bg: rgba(23, 28, 48, 0.98);
-  --dropdown-border: #4c3cff73;
-  --dropdown-shadow: 0 18px 44px -10px #39e7fa55;
-  --muted: #a9b3d6;
+  --dropdown-bg: rgba(30, 41, 59, 0.98);
+  --dropdown-border: rgba(59, 130, 246, 0.3);
+  --dropdown-shadow: 0 18px 44px rgba(0, 0, 0, 0.4);
+  --muted: #cbd5e1;
   
   /* ✅ NEW: Nearby Mentors specific colors */
   --nearby-icon-glow: 0 0 12px #ff6b6b88, 0 0 4px #ff6b6b;
-  --nearby-bg-hover: linear-gradient(135deg, #667eea22, #764ba233);
+  --nearby-bg-hover: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.15));
 }
 
 /* Container and brand */
@@ -32,12 +32,12 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 11px 20px;
+  padding: 8px 24px;
   background: var(--nav-bg);
   box-shadow: var(--nav-shadow);
-  border-radius: 0 0 var(--nav-radius) var(--nav-radius);
+  border-radius: 0;
   backdrop-filter: blur(var(--nav-blur));
-  border-bottom: 1.5px solid #3b0080cc;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
   position: sticky;
   top: 0;
   z-index: 1001;
@@ -59,23 +59,18 @@
   border-bottom: none !important;
   font-family: var(--brand-font);
   font-weight: 900;
-  font-size: 1.5rem;
-  color: var(--nav-text);
+  font-size: 2.0rem;
+  color: #ffffff;
   padding: 10px 10px;
   border-radius: 14px;
   letter-spacing: 1.4px;
-  background: var(--brand-border);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  transition: box-shadow 0.3s, color 0.28s, border-color 0.24s, transform 0.20s;
-  text-shadow: 0 3px 24px #80edff66;
+  transition: color 0.3s, transform 0.20s, text-shadow 0.3s;
   cursor: pointer;
 }
 .brand:hover {
-  border-color: #5bbbf6;
-  box-shadow: 0 0 64px 2px #5bbbf688, 0 3px 16px #ab76f766;
+  color: #f093fb;
   transform: scale(1.06) rotate(-1deg);
+  text-shadow: 0 0 20px rgba(240, 147, 251, 0.6);
 }
 
 /* Desktop link row */
@@ -121,8 +116,8 @@
 }
 .nav-link:hover,
 .nav-button:hover {
-  background: #5530dc44;
-  color: #66faff;
+  background: rgba(59, 130, 246, 0.15);
+  color: #ffffff;
   box-shadow: var(--nav-link-shadow);
   transform: scale(1.06);
 }
@@ -141,9 +136,9 @@
 }
 
 .nav-link.dashboard-link:hover {
-  background: linear-gradient(135deg, #667eea22, #764ba233);
-  color: #66faff;
-  box-shadow: 0 4px 20px #667eea44;
+  background: rgba(59, 130, 246, 0.2);
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
   transform: scale(1.08) translateY(-1px);
 }
 

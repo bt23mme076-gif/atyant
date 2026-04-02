@@ -25,22 +25,29 @@ const HeroSection = () => {
   const { user } = useAuth();
 
   const rotatingQuestions = [
-  'How can I get an IIM internship?',
-   'How can I get an IIT internship?',
-  'How did seniors from my branch crack Google or Amazon?',
-  'What projects help get internship shortlists?',
-  'Why am I getting rejected in placements?'
-];
+    'How can I get an IIM internship?',
+    'How can I get an IIT internship?',
+    'How did seniors from my branch crack Google or Amazon?',
+    'What projects help get internship shortlists?',
+    'Why am I getting rejected in placements?'
+  ];
 
-const fallbackQuestions = [
-  "Placement roadmap from 1st–4th year",
-  "Resume tips for top companies",
-  "How to crack Google from my branch?",
-  "How to crack Amazon placements?",
-  "How to get shortlisted for internships?"
-];
+  const fallbackQuestions = [
+    "Placement roadmap from 1st–4th year",
+    "Resume tips for top companies",
+    "How to crack Google from my branch?",
+    "How to crack Amazon placements?",
+    "How to get shortlisted for internships?"
+  ];
 
-  // Typewriter effect
+  const quickPills = [
+    "CGPA vs skills?",
+    "Off-campus placements",
+    "How to start DSA?",
+    "MBA after engineering"
+  ];
+
+  // ── Typewriter effect ──
   useEffect(() => {
     const currentText = rotatingQuestions[currentQuestion];
     let charIndex = 0;
@@ -54,7 +61,6 @@ const fallbackQuestions = [
       } else {
         clearInterval(typeInterval);
         setIsTyping(false);
-        
         setTimeout(() => {
           setCurrentQuestion((prev) => (prev + 1) % rotatingQuestions.length);
         }, 2000);
@@ -64,7 +70,7 @@ const fallbackQuestions = [
     return () => clearInterval(typeInterval);
   }, [currentQuestion]);
 
-  // Counter animation
+  // ── Counter animation ──
   const animateCounter = (start, end, duration, key) => {
     const increment = (end - start) / (duration / 16);
     let current = start;
@@ -78,14 +84,14 @@ const fallbackQuestions = [
     }, 16);
   };
 
-  // Trigger animation on scroll
+  // ── Trigger counter animation on scroll ──
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !hasAnimated) {
           setHasAnimated(true);
-          animateCounter(0, 500, 2000, 'students');
-          animateCounter(0, 100, 1800, 'mentors');
+          animateCounter(0, 1000, 2000, 'students');
+          animateCounter(0, 200, 1800, 'mentors');
           animateCounter(0, 24, 1500, 'support');
         }
       },
@@ -95,7 +101,7 @@ const fallbackQuestions = [
     return () => observer.disconnect();
   }, [hasAnimated]);
 
-  // Fetch AI suggestions
+  // ── Fetch AI suggestions ──
   useEffect(() => {
     const fetchSuggestions = async () => {
       if (!user?.token) {
@@ -121,33 +127,26 @@ const fallbackQuestions = [
     fetchSuggestions();
   }, [user]);
 
+  // ── Send question (with profile check) ──
   const sendQuestion = async () => {
     setSubmitting(true);
     setLoading(true);
     try {
-      
-      // Check profile completion before redirecting
       const profileRes = await fetch(`${API_URL}/api/profile/me`, {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${user.token}`
-        }
+        headers: { 'Authorization': `Bearer ${user.token}` }
       });
-      
+
       if (!profileRes.ok) {
         alert('Failed to verify profile. Please try again.');
         return;
       }
-      
-      const profileData = await profileRes.json();
-      console.log('📋 Profile Data:', profileData);
 
+      const profileData = await profileRes.json();
       const hasUsername = !!profileData.username;
       const hasBio = !!profileData.bio;
       const hasEducation = profileData.education && Array.isArray(profileData.education) && profileData.education.length > 0;
       const isProfileComplete = hasUsername && hasBio && hasEducation;
-
-      console.log('✅ Profile Complete:', isProfileComplete);
 
       if (!isProfileComplete) {
         const missingFields = [];
@@ -160,10 +159,8 @@ const fallbackQuestions = [
         return;
       }
 
-      // Store question and redirect to enhanced ask page
       localStorage.setItem('draftQuestion', problem);
       navigate('/ask');
-      
     } catch (error) {
       console.error('Error:', error);
       alert('Network error. Please try again.');
@@ -173,6 +170,7 @@ const fallbackQuestions = [
     }
   };
 
+  // ── Handle form submit ──
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!problem.trim()) return;
@@ -184,21 +182,27 @@ const fallbackQuestions = [
     setShowConfirmPrompt(true);
   };
 
+  // ── Click on typewriter question to fill input ──
   const handleQuestionClick = () => {
     setProblem(rotatingQuestions[currentQuestion]);
   };
 
+  // ── Click on quick pill to fill input ──
+  const handlePillClick = (text) => {
+    setProblem(text);
+    document.querySelector('.hero-ask-input')?.focus();
+  };
+
+  // ── Close suggestions on outside click ──
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
         setShowSuggestions(false);
       }
     };
-
     if (showSuggestions) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -210,34 +214,59 @@ const fallbackQuestions = [
 
   return (
     <section className="hero-section" id="hero-section">
+      {/* Background effects */}
+      <div className="hero-grid-pattern" />
+      <div className="hero-glow hero-glow--blue" />
+      <div className="hero-glow hero-glow--cyan" />
+
+      {/* Floating topic cards */}
+      <div className="hero-floating-cards">
+        <div className="hero-float-card hero-fc-1"><span className="hero-fc-emoji">🎯</span>Placement prep</div>
+        <div className="hero-float-card hero-fc-2"><span className="hero-fc-emoji">💼</span>Internship tips</div>
+        <div className="hero-float-card hero-fc-3"><span className="hero-fc-emoji">📝</span>Resume review</div>
+        <div className="hero-float-card hero-fc-4"><span className="hero-fc-emoji">🧠</span>DSA roadmap</div>
+        <div className="hero-float-card hero-fc-5"><span className="hero-fc-emoji">🚀</span>GATE strategy</div>
+      </div>
+
       <div className="hero-content">
-        <h1 className="hero-title">
-          Ask once. Get guidance{' '}
-          <span className="highlight">from seniors who already cracked it.</span>
+        {/* Badge */}
+        <div className="hero-badge">
+          <span className="hero-badge-dot" />
+          AI-powered mentorship — free for students
+        </div>
+
+        {/* Heading */}
+        <h1 className="hero-heading">
+          Ask once. Get matched with<br />
+          <span className="hero-heading-highlight">seniors who cracked it.</span>
         </h1>
 
+        {/* Subtitle */}
         <p className="hero-subtitle">
-          Atyant is an AI-powered personal guidance engine that matches your problem 
-          with seniors who've already solved it and shows you exactly how they did it.
+          Stop guessing. Ask your exact placement, internship, or exam doubt — our AI finds the right senior mentor who's already been through it.
         </p>
 
         {/* Typewriter Rotating Questions */}
-        <div className="rotating-questions" onClick={handleQuestionClick}>
-          <span className="rotating-label">💬 Students ask</span>
-          <div className="question-rotator">
-            <span className="rotating-text">
+        <div className="hero-rotating-questions" onClick={handleQuestionClick}>
+          <span className="hero-rotating-label">💬 Students ask</span>
+          <div className="hero-question-rotator">
+            <span className="hero-rotating-text">
               {displayText}
-              <span className={`cursor ${isTyping ? 'typing' : ''}`}>|</span>
+              <span className={`hero-cursor ${isTyping ? 'hero-cursor--typing' : ''}`}>|</span>
             </span>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="ask-form">
-          <div className="ask-box" ref={suggestionsRef}>
-            <div className="input-wrapper">
+        {/* Ask Bar */}
+        <form onSubmit={handleSubmit} className="hero-ask-form">
+          <div className="hero-ask-bar" ref={suggestionsRef}>
+            <div className="hero-input-wrapper">
+              <svg className="hero-spark-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L14.5 9.5 22 12 14.5 14.5 12 22 9.5 14.5 2 12 9.5 9.5z" />
+              </svg>
               <input
                 type="text"
-                className="ask-input"
+                className="hero-ask-input"
                 placeholder="Ask your exact problem (AI finds the right seniors for you)"
                 value={problem}
                 onChange={e => setProblem(e.target.value)}
@@ -245,38 +274,37 @@ const fallbackQuestions = [
                 maxLength={500}
                 required
               />
-              
-              {/* AI Hint - Inside input */}
+              {/* AI Hint button */}
               {user && !problem && (
-                <div 
-                  className="ai-hint-button"
+                <div
+                  className="hero-ai-hint"
                   onClick={() => setShowSuggestions(true)}
                   title="Click for AI suggestions"
                 >
-                  <span className="ai-hint-icon">✨</span>
+                  <span className="hero-ai-hint-icon">✨</span>
                 </div>
               )}
             </div>
-            
-            <button type="submit" className="ask-button" disabled={submitting}>
+
+            <button type="submit" className="hero-ask-button" disabled={submitting}>
               {submitting ? '...' : 'Get my answer'}
             </button>
 
             {/* AI Suggestions Dropdown */}
             {showSuggestions && !problem && user && (
-              <div className="ai-suggestions-dropdown">
-                <div className="ai-suggestions-title">
+              <div className="hero-ai-dropdown">
+                <div className="hero-ai-dropdown-title">
                   {loadingSuggestions ? '🔄 Loading...' : '🤖 AI-suggested questions:'}
                 </div>
                 {loadingSuggestions ? (
-                  <div className="ai-suggestion-loader">
-                    <div className="spinner"></div>
+                  <div className="hero-ai-loader">
+                    <div className="hero-spinner" />
                   </div>
                 ) : (
                   suggestedQuestions.slice(0, 5).map((sq, idx) => (
                     <div
                       key={idx}
-                      className="ai-suggestion-item"
+                      className="hero-ai-suggestion-item"
                       onClick={() => {
                         setProblem(sq);
                         setShowSuggestions(false);
@@ -291,13 +319,24 @@ const fallbackQuestions = [
           </div>
         </form>
 
-        {/* Confirmation Modal - Outside form */}
+        {/* Quick suggestion pills */}
+        <div className="hero-typing-pills">
+          {quickPills.map((pill, idx) => (
+            <span key={idx} className="hero-pill" onClick={() => handlePillClick(pill)}>
+              {pill}
+            </span>
+          ))}
+        </div>
+
+        {/* Confirmation Modal */}
         {showConfirmPrompt && (
           <div className="hero-confirm-overlay" role="dialog" aria-modal="true" onClick={() => setShowConfirmPrompt(false)}>
             <div className="hero-confirm-card" onClick={(e) => e.stopPropagation()}>
               <p className="hero-confirm-label">Ready to get your answer?</p>
               <h3>Let's find the perfect mentor for you</h3>
-              <p className="hero-confirm-body">We'll match your question with experienced mentors and guide you through a personalized answer flow.</p>
+              <p className="hero-confirm-body">
+                We'll match your question with experienced mentors and guide you through a personalized answer flow.
+              </p>
               <div className="hero-confirm-actions">
                 <button type="button" className="hero-confirm-edit" onClick={() => setShowConfirmPrompt(false)}>
                   Edit question
@@ -317,20 +356,36 @@ const fallbackQuestions = [
           </div>
         )}
 
-        {/* Stats Section */}
-        <div className="stats-container" ref={statsRef}>
-          <div className="stat-item">
-            <span className="stat-number">{counters.students.toLocaleString()}+</span>
-            <span className="stat-label">Students Helped</span>
+        {/* Stats */}
+        <div className="hero-stats" ref={statsRef}>
+          <div className="hero-stat-item">
+            <span className="hero-stat-number">{counters.students.toLocaleString()}+</span>
+            <span className="hero-stat-label">Students Helped</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-number">{counters.mentors}+</span>
-            <span className="stat-label">Verified Mentors</span>
+          <div className="hero-stat-divider" />
+          <div className="hero-stat-item">
+            <span className="hero-stat-number">{counters.mentors}+</span>
+            <span className="hero-stat-label">Verified Mentors</span>
           </div>
-          <div className="stat-item">
-            <span className="stat-number">{counters.support}/7</span>
-            <span className="stat-label">Support</span>
+          <div className="hero-stat-divider" />
+          <div className="hero-stat-item">
+            <span className="hero-stat-number">{counters.support}/7</span>
+            <span className="hero-stat-label">AI Support</span>
           </div>
+        </div>
+
+        {/* Social Proof */}
+        <div className="hero-social-proof">
+          <div className="hero-avatar-stack">
+            <div className="hero-avatar hero-avatar-1">A</div>
+            <div className="hero-avatar hero-avatar-2">R</div>
+            <div className="hero-avatar hero-avatar-3">P</div>
+            <div className="hero-avatar hero-avatar-4">S</div>
+            <div className="hero-avatar hero-avatar-5">M</div>
+          </div>
+          <span className="hero-social-text">
+            <strong>50+ students</strong> asked questions today
+          </span>
         </div>
       </div>
     </section>

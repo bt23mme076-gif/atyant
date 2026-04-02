@@ -199,27 +199,7 @@ function App() {
       {!isChatPage && <Footer />}
       <Analytics />
 
-      {/* Community Chat FAB — home page only */}
-      {!showCommunityChat && isHomePage && (
-        <button
-          className={`community-chat-fab ${newMessageCount > 0 ? 'has-new-messages' : ''}`}
-          onClick={handleToggleCommunityChat}
-          title="Open Community Chat"
-          aria-label="Open Community Chat"
-        >
-          <MessageCircle size={24} />
-          <span className="pulse-ring" />
-          {newMessageCount > 0 && (
-            <>
-              <span className="notification-badge pulse">{newMessageCount > 9 ? '9+' : newMessageCount}</span>
-              <span className="new-message-text">New!</span>
-            </>
-          )}
-          <span className="flying-notification" key={currentNotification}>
-            {COMMUNITY_NOTIFICATIONS[currentNotification]}
-          </span>
-        </button>
-      )}
+      {/* Community Chat FAB removed per request */}
 
       {showCommunityChat && (
         <Suspense fallback={null}>
