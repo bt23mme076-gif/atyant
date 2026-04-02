@@ -274,16 +274,6 @@ const HeroSection = () => {
                 maxLength={500}
                 required
               />
-              {/* AI Hint button */}
-              {user && !problem && (
-                <div
-                  className="hero-ai-hint"
-                  onClick={() => setShowSuggestions(true)}
-                  title="Click for AI suggestions"
-                >
-                  <span className="hero-ai-hint-icon">✨</span>
-                </div>
-              )}
             </div>
 
             <button type="submit" className="hero-ask-button" disabled={submitting}>
