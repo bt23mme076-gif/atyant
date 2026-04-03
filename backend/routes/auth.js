@@ -168,18 +168,17 @@ router.post('/google-login', async (req, res) => {
       user = new User({
         username,
         email,
-        password: await bcrypt.hash(sub + email, 8),
+        googleId: sub, // Save googleId
         role: 'user',
         profilePicture: picture || null,
-        // Do NOT set location unless valid GeoJSON
       });
       try {
         await user.save();
       } catch (err) {
         return res.status(400).json({ message: 'Signup required. Please sign up first.' });
       }
-    } else if (!user.profilePicture && picture) {
-      user.profilePicture = picture;
+    } else if (!user.googleId) {
+      user.googleId = sub; // Update googleId if missing
       await user.save();
     }
 

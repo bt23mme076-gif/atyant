@@ -5,7 +5,9 @@ const userSchema = new mongoose.Schema({
   // ─── ROLE & IDENTITY ───────────────────────
    googleId: {
     type: String,
-    required: true,
+    required: function () {
+      return !this.password; // Required if no password (OAuth user)
+    },
     unique: true,
     index: true
   },
