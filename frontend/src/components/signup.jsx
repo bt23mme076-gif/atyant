@@ -3,7 +3,7 @@ import { API_URL } from '../services/api.js';
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 import "./AuthForm.css";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, GraduationCap, Users } from "lucide-react";
 import LoadingSpinner from "./LoadingSpinner";
 
 const Signup = () => {
@@ -13,8 +13,7 @@ const Signup = () => {
     phone: "",
     password: "",
     confirmPassword: "",
-    // Purane code ke mutabik trailing space. Agar backend ko yehi chahiye to isko rakho.
-    role: "user ",
+    role: "",
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -27,61 +26,104 @@ const Signup = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
-    } else if (formData.username.trim().length < 3) {
-      newErrors.username = "Username must be at least 3 characters";
+    
+    // Role validation - most important
+    if (!formData.role) {
+      newErrors.role = "Please select whether you're a Student or Mentor";
     }
+    
+    // Username validation
+    if (!formData.username.trim()) {
+      newErrors.username = "Full name is required";
+    } else if (formData.username.trim().length < 3) {
+      newErrors.username = "Name must be at least 3 characters";
+    }
+    
+    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
       newErrors.email = "Email is required";
     } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Enter a valid email";
+      newErrors.email = "Please enter a valid email address";
     }
+    
+    // Phone validation - Indian mobile numbers
     const phoneRegex = /^[6-9]\d{9}$/;
     if (!formData.phone) {
       newErrors.phone = "Mobile number is required";
     } else if (!phoneRegex.test(formData.phone)) {
-      newErrors.phone = "Enter a valid 10-digit Indian mobile number";
+      newErrors.phone = "Enter a valid 10-digit mobile number";
     }
+    
+    // Password validation
     if (!formData.password) {
       newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
     }
-    if (formData.password !== formData.confirmPassword) {
+    
+    // Confirm password validation
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Please confirm your password";
+    } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
-    const { name, value, type } = e.target;
-    // Radios ke liye as-is value rakho (purane jaisa)
-    const next = type === "radio" ? value : value;
-    setFormData((prev) => ({ ...prev, [name]: next }));
-    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+    // Clear general message when user makes changes
+    if (message) {
+      setMessage("");
+    }
+  };
+
+  const handleRoleSelect = (role) => {
+    setFormData((prev) => ({ ...prev, role }));
+    // Clear role error when user selects a role
+    if (errors.role) {
+      setErrors((prev) => ({ ...prev, role: "" }));
+    }
   };
 
   const safeParseJson = async (response) => {
-    const ct = response.headers.get("content-type") || "";
-    if (ct.includes("application/json")) {
-      try { return await response.json(); } catch { return {}; }
+    const contentType = response.headers.get("content-type") || "";
+    if (contentType.includes("application/json")) {
+      try {
+        return await response.json();
+      } catch {
+        return {};
+      }
     }
-    try { return { message: await response.text() }; } catch { return {}; }
+    try {
+      return { message: await response.text() };
+    } catch {
+      return {};
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    
+    // Validate form before submitting
+    if (!validateForm()) {
+      setMessage("");
+      return;
+    }
 
     setLoading(true);
     setMessage("");
     setErrors({});
 
     try {
-      // Purane waale pattern ke hisaab se default 3000 rakha tha. Aap VITE_API_URL ko 5000 set kar lo.
-
-      // Payload ko purane jaisa hi bhejo (confirmPassword hatao, role as-is)
       const { confirmPassword, ...submitData } = formData;
 
       const res = await fetch(`${API_URL}/api/auth/signup`, {
@@ -93,39 +135,39 @@ const Signup = () => {
       const data = await safeParseJson(res);
 
       if (res.ok) {
-        setMessage("Signup successful! Redirecting...");
+        setMessage("Account created successfully! Redirecting...");
+        
         if (data?.token) {
           localStorage.setItem("token", data.token);
           localStorage.setItem(
             "role",
             data.role || (data.user && data.user.role) || formData.role
           );
-          // Auth update
           login(data.token);
 
-          const role =
-            data.role || (data.user && data.user.role) || formData.role;
+          const role = data.role || (data.user && data.user.role) || formData.role;
 
+          // Navigate based on role
           setTimeout(() => {
             if (role?.trim() === "mentor") {
               navigate("/");
             } else {
               navigate("/profile");
             }
-          }, 100);
+          }, 1000);
         } else {
           setMessage("Signup completed but no authentication token received.");
         }
       } else if (res.status === 409) {
-        setErrors({ general: "Username or email already exists." });
+        setErrors({ general: "This email or username is already registered. Please login instead." });
       } else if (res.status === 400) {
-        setMessage(data?.message || "Invalid request. Please check inputs.");
+        setErrors({ general: data?.message || "Invalid request. Please check your inputs." });
       } else {
-        setMessage(data?.message || "Signup failed. Please try again.");
+        setErrors({ general: data?.message || "Signup failed. Please try again." });
       }
     } catch (err) {
       console.error("Signup error:", err);
-      setMessage("Network error. Please check your connection.");
+      setErrors({ general: "Network error. Please check your connection and try again." });
     } finally {
       setLoading(false);
     }
@@ -153,53 +195,95 @@ const Signup = () => {
           </p>
         )}
 
-        {/* Role selection (labels Student/Mentor, values purane jaise) */}
-        <div className="form-group">
-          <label>Sign up as:</label>
-          <div className="role-selector" role="radiogroup" aria-label="Select role">
-            <label className="role-option">
-              <input
-                type="radio"
-                name="role"
-                value="user"
-                checked={formData.role === "user"}
-                onChange={handleChange}
-              />
-              <div className="role-button" tabIndex={0} aria-pressed={formData.role === "user"}>
-                Student
+        {/* Role Selection */}
+        <div className="form-group role-selection-group">
+          <label className="role-main-label">I want to join as:</label>
+          <p className="role-helper-text">Choose the option that best describes you</p>
+          
+          <div className="role-cards">
+            {/* Student Card */}
+            <div
+              className={`role-card ${formData.role === "user" ? "selected" : ""} ${
+                errors.role && !formData.role ? "error-border" : ""
+              }`}
+              onClick={() => handleRoleSelect("user")}
+              role="button"
+              tabIndex={0}
+              aria-label="Select Student role"
+              onKeyPress={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleRoleSelect("user");
+                }
+              }}
+            >
+              <div className="role-card-icon student-icon">
+                <GraduationCap size={32} strokeWidth={2.5} />
               </div>
-            </label>
-            <label className="role-option">
-              <input
-                type="radio"
-                name="role"
-                value="mentor"
-                checked={formData.role === "mentor"}
-                onChange={handleChange}
-              />
-              <div className="role-button" tabIndex={0} aria-pressed={formData.role === "mentor"}>
-                Mentor
+              <h3 className="role-card-title">Student</h3>
+              <p className="role-card-description">
+                I want to learn and connect with mentors for guidance
+              </p>
+              <div className="role-card-check">
+                {formData.role === "user" && (
+                  <div className="check-circle">✓</div>
+                )}
               </div>
-            </label>
+            </div>
+
+            {/* Mentor Card */}
+            <div
+              className={`role-card ${formData.role === "mentor" ? "selected" : ""} ${
+                errors.role && !formData.role ? "error-border" : ""
+              }`}
+              onClick={() => handleRoleSelect("mentor")}
+              role="button"
+              tabIndex={0}
+              aria-label="Select Mentor role"
+              onKeyPress={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleRoleSelect("mentor");
+                }
+              }}
+            >
+              <div className="role-card-icon mentor-icon">
+                <Users size={32} strokeWidth={2.5} />
+              </div>
+              <h3 className="role-card-title">Mentor</h3>
+              <p className="role-card-description">
+                I want to guide and help students achieve their goals
+              </p>
+              <div className="role-card-check">
+                {formData.role === "mentor" && (
+                  <div className="check-circle">✓</div>
+                )}
+              </div>
+            </div>
           </div>
+          
+          {errors.role && <p className="error-text role-error">{errors.role}</p>}
         </div>
 
+        {/* Full Name */}
         <div className="form-group">
-          <label htmlFor="username">Username</label>
+          <label htmlFor="username">Full Name</label>
           <input
             id="username"
             name="username"
             type="text"
-            placeholder="Enter full name or handle"
+            placeholder="Enter your full name"
             value={formData.username}
             onChange={handleChange}
             required
+            autoComplete="name"
           />
           {errors.username && <p className="error-text">{errors.username}</p>}
         </div>
 
+        {/* Email */}
         <div className="form-group">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">Email Address</label>
           <input
             id="email"
             name="email"
@@ -208,10 +292,12 @@ const Signup = () => {
             value={formData.email}
             onChange={handleChange}
             required
+            autoComplete="email"
           />
           {errors.email && <p className="error-text">{errors.email}</p>}
         </div>
 
+        {/* Mobile Number */}
         <div className="form-group">
           <label htmlFor="phone">Mobile Number</label>
           <div className="phone-input-row">
@@ -225,49 +311,54 @@ const Signup = () => {
               onChange={handleChange}
               maxLength={10}
               required
+              autoComplete="tel"
             />
           </div>
           {errors.phone && <p className="error-text">{errors.phone}</p>}
         </div>
 
+        {/* Password */}
         <div className="form-group password-group">
           <label htmlFor="password">Password</label>
           <input
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
-            placeholder="Create a password"
+            placeholder="Create a strong password (min. 6 characters)"
             value={formData.password}
             onChange={handleChange}
             required
+            autoComplete="new-password"
           />
           <button
             type="button"
             className="password-toggle-btn"
-            aria-label="Toggle password visibility"
-            onClick={() => setShowPassword((s) => !s)}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowPassword((prev) => !prev)}
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
           {errors.password && <p className="error-text">{errors.password}</p>}
         </div>
 
+        {/* Confirm Password */}
         <div className="form-group password-group">
           <label htmlFor="confirmPassword">Confirm Password</label>
           <input
             id="confirmPassword"
             name="confirmPassword"
             type={showConfirmPassword ? "text" : "password"}
-            placeholder="Re-enter password"
+            placeholder="Re-enter your password"
             value={formData.confirmPassword}
             onChange={handleChange}
             required
+            autoComplete="new-password"
           />
           <button
             type="button"
             className="password-toggle-btn"
-            aria-label="Toggle confirm password visibility"
-            onClick={() => setShowConfirmPassword((s) => !s)}
+            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowConfirmPassword((prev) => !prev)}
           >
             {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
@@ -276,10 +367,12 @@ const Signup = () => {
           )}
         </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Signing up..." : "Sign Up"}
+        {/* Submit Button */}
+        <button type="submit" className="submit-btn" disabled={loading}>
+          {loading ? "Creating Account..." : "Create Account"}
         </button>
 
+        {/* Login Link */}
         <p className="auth-switch">
           Already have an account? <Link to="/login">Login here</Link>
         </p>
