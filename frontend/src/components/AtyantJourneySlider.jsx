@@ -18,6 +18,14 @@ const AtyantJourneySlider = () => {
       description: 'Overview of Atyant platform helping students with AI-matched senior mentorship and career roadmaps'
     },
     { 
+      id: 11, 
+      src: 'https://www.youtube.com/embed/40RwkrtP4dA', 
+     caption: 'IIM Mumbai Success Story 🎯', 
+type: 'video',
+alt: 'Atyant student testimonial - How he secured IIM Mumbai internship with Atyant mentorship and guidance',
+description: 'Video testimonial showcasing how Atyant helped a student successfully land an internship at IIM Mumbai through expert mentorship and preparation'
+    },
+    { 
       id: 2, 
       src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1773681257/IMG_20251107_172259_sgixft.jpg', 
       caption: 'Campus Moments PCE 🎓', 
@@ -59,7 +67,7 @@ const AtyantJourneySlider = () => {
     },
     { 
       id: 10, 
-      src: 'https://www.youtube.com/embed/NziKXiqjqBQ', 
+      src: 'https://www.youtube.com/embed/gLkwflzjU88', 
       caption: 'Watch Our First Pitch🎥', 
       type: 'video',
       alt: 'Atyant First Pitchvideo - how AI matches students with senior mentors for career success',
