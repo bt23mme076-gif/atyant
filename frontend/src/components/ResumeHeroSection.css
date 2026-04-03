@@ -2,13 +2,13 @@
 
 .resume-hero-section {
   position: relative;
-  min-height: 85vh;
+  min-height: 60vh; /* Reduced from 70vh */
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(145deg, #eef0ff 0%, #e8eeff 40%, #ede8ff 100%);
   overflow: hidden;
-  padding: 4rem 1.5rem;
+  padding: 1rem 1.5rem 0.5rem; /* Adjusted bottom padding */
 }
 
 /* Animated Background Blobs */
@@ -83,7 +83,7 @@
   letter-spacing: 0.08em;
   color: #92400e;
   box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem; /* Reduced from 0.75rem */
   animation: pulse-badge 2s ease-in-out infinite;
 }
 
@@ -112,11 +112,11 @@
 
 /* Title */
 .resume-hero-title {
-  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-size: clamp(2rem, 5vw, 3.2rem); /* Reduced font size */
   font-weight: 900;
-  line-height: 1.2;
+  line-height: 1.15; /* Reduced line height */
   color: #111827;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem; /* Reduced from 0.75rem */
   font-family: 'Georgia', 'Times New Roman', serif;
 }
 
@@ -140,11 +140,11 @@
 
 /* Subtitle */
 .resume-hero-subtitle {
-  font-size: clamp(1rem, 2vw, 1.15rem);
+  font-size: clamp(0.95rem, 2vw, 1.1rem); /* Reduced font size */
   color: #6b7280;
   max-width: 650px;
-  margin: 0 auto 2.5rem;
-  line-height: 1.7;
+  margin: 0 auto 0.75rem; /* Reduced from 1rem */
+  line-height: 1.6; /* Reduced line height */
 }
 
 .resume-hero-subtitle strong {
@@ -201,13 +201,13 @@
   color: white;
   border: none;
   border-radius: 16px;
-  padding: 18px 40px;
-  font-size: 16px;
+  padding: 16px 36px; /* Reduced padding */
+  font-size: 15px; /* Reduced font size */
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3);
   transition: all 0.3s ease;
-  margin-bottom: 3rem;
+  margin-bottom: 0; /* Removed margin */
 }
 
 .resume-hero-cta:hover {
@@ -317,22 +317,25 @@
 @media (max-width: 768px) {
   .resume-hero-section {
     min-height: auto;
-    padding: 3rem 1rem;
+    padding: 1rem 1rem 0.5rem; /* Adjusted bottom padding */
   }
 
   .resume-hero-badge {
     font-size: 10px;
     padding: 6px 16px;
+    margin-bottom: 0.4rem; /* Reduced */
   }
 
   .resume-hero-title {
-    font-size: 2rem;
-    margin-bottom: 1rem;
+    font-size: 1.85rem; /* Reduced font size */
+    margin-bottom: 0.5rem; /* Reduced */
+    line-height: 1.2; /* Adjusted line height */
   }
 
   .resume-hero-subtitle {
-    font-size: 0.95rem;
-    margin-bottom: 2rem;
+    font-size: 0.9rem; /* Reduced font size */
+    margin-bottom: 1rem; /* Reduced */
+    line-height: 1.5; /* Adjusted line height */
   }
 
   .resume-hero-features {
@@ -348,9 +351,9 @@
 
   .resume-hero-cta {
     width: 100%;
-    padding: 16px 32px;
-    font-size: 15px;
-    margin-bottom: 2rem;
+    padding: 14px 28px; /* Reduced padding */
+    font-size: 14px; /* Reduced font size */
+    margin-bottom: 0; /* Removed */
   }
 
   .resume-hero-stats {
@@ -407,11 +410,13 @@
 
 @media (max-width: 480px) {
   .resume-hero-title {
-    font-size: 1.75rem;
+    font-size: 1.65rem; /* Reduced font size */
+    margin-bottom: 0.4rem; /* Reduced */
   }
 
   .resume-hero-subtitle {
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Reduced font size */
+    margin-bottom: 0.75rem; /* Reduced */
   }
 
   .resume-hero-stats {

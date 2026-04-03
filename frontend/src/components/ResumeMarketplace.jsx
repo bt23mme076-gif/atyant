@@ -160,7 +160,7 @@ export default function ResumeMarketplace() {
               lineHeight: 1.2, marginBottom: 14,
               fontFamily: "Georgia, 'Times New Roman', serif",
             }}>
-              Resume templates that get you
+              Resume Links that get you
               <br />
               <span style={{ color: "#4f46e5" }}>shortlisted & selected</span>
             </h1>

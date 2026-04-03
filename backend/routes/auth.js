@@ -123,6 +123,8 @@ router.post('/login', async (req, res) => {
 
     console.log('✅ Login token generated with profilePicture:', user.profilePicture);
 
+    const requiresCalendarSetup = user.role === 'mentor' && !user.calendarConnected;
+
     res.json({
       token,
       user: {
@@ -132,7 +134,9 @@ router.post('/login', async (req, res) => {
         email: user.email,
         role: user.role,
         profilePicture: user.profilePicture, // ✅ ADD THIS
+        calendarConnected: user.calendarConnected // ✅ ADD THIS
       },
+      requiresCalendarSetup // ✅ NEW FIELD
     });
   } catch (error) {
     console.error('Login error:', error);

@@ -191,8 +191,7 @@ const userSchema = new mongoose.Schema({
 
   calendarConnected: {
     type: Boolean,
-    default: false,
-    index: true
+    default: false
   },
 
   calendarProvider: {

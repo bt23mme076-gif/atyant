@@ -59,19 +59,20 @@ const Login = () => {
 
       toast.success('Login successful! 🎉');
       
-      // Check for pending question from home page
-      const pendingQuestion = localStorage.getItem('pendingQuestion');
-      if (pendingQuestion) {
-        // Keep the question in localStorage as 'draftQuestion' for enhanced flow
-        localStorage.removeItem('pendingQuestion');
-        localStorage.setItem('draftQuestion', pendingQuestion);
-        // Redirect to enhanced ask page
-        navigate('/ask');
-      } else {
-        // Normal redirect
-        const userRole = response.data.user?.role || 'user';
-        navigate(userRole === 'mentor' ? '/dashboard' : '/');
+      const requiresCalendarSetup = response.data.requiresCalendarSetup;
+      if (requiresCalendarSetup) {
+        const shouldConnect = window.confirm(
+          '🚀 Enable auto-scheduling! Connect your Google Calendar to automatically create meeting links. Connect now?'
+        );
+        if (shouldConnect) {
+          window.location.href = `${API_URL}/auth/google`;
+          return;
+        }
       }
+
+      // Normal redirect
+      const userRole = response.data.user?.role || 'user';
+      navigate(userRole === 'mentor' ? '/dashboard' : '/');
     } catch (error) {
       const friendly = mapLoginError(error);
       setMessage(friendly);
