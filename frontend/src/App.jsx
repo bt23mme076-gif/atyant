@@ -25,7 +25,7 @@ const Signup            = lazy(() => import('./components/signup'));
 const ChatPage          = lazy(() => import('./components/ChatPage'));
 const MentorListPage    = lazy(() => import('./components/MentorListPage'));
 const ForgotPassword    = lazy(() => import('./components/ForgotPassword'));
-const ResetPassword     = lazy(() => import('./components/ResetPassword'));
+const ResetPasswordPage = lazy(() => import('./components/ResetPasswordPage'));
 const ProfilePage       = lazy(() => import('./components/ProfilePage'));
 const PublicProfilePage = lazy(() => import('./components/PublicProfilePage'));
 const NearbyMentors     = lazy(() => import('./components/NearbyMentors'));
@@ -41,6 +41,7 @@ const MyQuestions       = lazy(() => import('./components/MyQuestionsEnhanced'))
 const EnhancedAskQuestion = lazy(() => import('./components/EnhancedAskQuestion'));
 const AdminDashboard    = lazy(() => import('./components/AdminDashboard'));
 const CareerGuidesPage  = lazy(() => import('./components/CareerGuidesPage'));
+const AuthSuccess       = lazy(() => import('./components/AuthSuccess'));
 // Community notifications — static, no need inside component
 const COMMUNITY_NOTIFICATIONS = [
   '💬 Join the Community Chat!',
@@ -168,8 +169,9 @@ function App() {
               <Route path="/"                      element={<Home />} />
               <Route path="/signup"                element={<Signup />} />
               <Route path="/login"                 element={<Login />} />
+              <Route path="/auth-success"          element={<AuthSuccess />} />
               <Route path="/forgot-password"       element={<ForgotPassword />} />
-              <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/internships"           element={<InternshipPage />} />
               <Route path="/career-guides"         element={<CareerGuidesPage />} />
               <Route path="/profile/:username"     element={<PublicProfilePage />} />

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { API_URL } from '../services/api.js';
+import '../styles/reset-password.css';
 
 const ResetPasswordPage = () => {
   const [password, setPassword] = useState('');

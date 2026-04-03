@@ -9,9 +9,12 @@ import compression from 'compression';
 import jwt from 'jsonwebtoken';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import mongoose from 'mongoose';
 import { Resend } from 'resend';
 import path from 'path';
+import passport from 'passport';
 
 // ─── Routes ────────────────────────────────────────────────────────────────
 import authRoutes          from './routes/auth.js';
@@ -33,6 +36,7 @@ import resumeRoutes        from './routes/resumeRoutes.js';
 import monetizationRoutes  from './routes/monetizationRoutes.js';
 import pushRoutes          from './routes/pushRoutes.js';
 import notificationRoutes  from './routes/notificationRoutes.js';
+import meetingroutes       from './routes/meetings.js';
 
 // ─── Models / utils ────────────────────────────────────────────────────────
 import Message      from './models/Message.js';
@@ -41,6 +45,9 @@ import { moderator } from './utils/ContentModerator.js';
 import { globalRateLimit } from './middleware/globalRateLimiter.js';
 import { sendAutoReply }   from './controllers/messageController.js';
 import ReminderCron from './services/ReminderCron.js';
+
+// ─── Passport Configuration ────────────────────────────────────────────────
+import './config/passport.js';
 
 // ─────────────────────────────────────────────
 //  APP SETUP
@@ -168,8 +175,29 @@ app.use('/api/', (req, res, next) => {
   globalRateLimit(req, res, next);
 });
 
+// ─── Session & Passport (for Google OAuth) ─────────────────────────────────
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    touchAfter: 24 * 3600
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // Important for cross-domain
+  }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 // ─── Routes ────────────────────────────────────────────────────────────────
 app.use('/api/auth',            authRoutes);
+app.use('/auth',                authRoutes); // For Google OAuth callbacks
 app.use('/api',                 chatRoutes);
 app.use('/api/feedback',        feedbackRoutes);
 app.use('/api/profile',         profileRoutes);
@@ -191,6 +219,7 @@ app.use('/api/resume',          resumeRoutes);
 app.use('/api/monetization',    monetizationRoutes);
 app.use('/api/push',            pushRoutes);
 app.use('/api/notifications',   notificationRoutes);
+app.use('/api/meetings',        meetingroutes);
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
@@ -278,6 +307,28 @@ if (process.env.NODE_ENV !== 'production') {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+
+  app.get('/api/debug/routes', (req, res) => {
+  const routes = [];
+  app._router.stack.forEach(middleware => {
+    if (middleware.route) {
+      routes.push({
+        path: middleware.route.path,
+        methods: Object.keys(middleware.route.methods)
+      });
+    } else if (middleware.name === 'router') {
+      middleware.handle.stack.forEach(handler => {
+        if (handler.route) {
+          routes.push({
+            path: handler.route.path,
+            methods: Object.keys(handler.route.methods)
+          });
+        }
+      });
+    }
+  });
+  res.json(routes);
+});
 }
 
 // ─────────────────────────────────────────────

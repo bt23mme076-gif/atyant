@@ -3,6 +3,12 @@ import mongoose from 'mongoose';
 const userSchema = new mongoose.Schema({
 
   // ─── ROLE & IDENTITY ───────────────────────
+   googleId: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true
+  },
   role: {
     type   : String,
     enum   : ['user', 'mentor', 'admin'],
@@ -11,10 +17,13 @@ const userSchema = new mongoose.Schema({
   },
 
   username: {
-    type     : String,
-    required : true,
-    unique   : true,
-    trim     : true,
+    type: String,
+    required: function() {
+      return !this.googleId;  // Only required if NOT OAuth
+    },
+    unique: true,
+    sparse: true,  // Allow multiple nulls
+    trim: true,
     minlength: 3,
     maxlength: 50
   },
@@ -28,8 +37,10 @@ const userSchema = new mongoose.Schema({
   },
 
   password: {
-    type     : String,
-    required : true,
+    type: String,
+    required: function() {
+      return !this.googleId;  // Only required if NOT OAuth
+    },
     minlength: 8,
     select   : false   // 🔴 FIX: never leak password in queries
   },
@@ -158,7 +169,40 @@ const userSchema = new mongoose.Schema({
     }],
 
   // ─── PROFILE STRENGTH ──────────────────────
-  profileStrength: { type: Number, min: 0, max: 100, default: 0 }
+  profileStrength: { type: Number, min: 0, max: 100, default: 0 },
+
+  // OAuth Tokens and Calendar Integration
+  accessToken: {
+    type: String,
+    select: false  // Security - never auto-include in queries
+  },
+
+  refreshToken: {
+    type: String,
+    select: false
+  },
+
+  picture: {
+    type: String,
+    default: null
+  },
+
+  calendarConnected: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+
+  calendarProvider: {
+    type: String,
+    enum: ['google', 'outlook', 'manual', null],
+    default: null
+  },
+
+  lastLogin: {
+    type: Date,
+    default: null
+  }
 
 }, {
   timestamps: true

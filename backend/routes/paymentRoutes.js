@@ -6,6 +6,7 @@ import User from '../models/User.js';
 import Payment from '../models/Payment.js';
 import Question from '../models/Question.js';
 import { sendMentorPaymentNotification } from '../utils/emailService.js';
+import { scheduleMeetingForBooking } from '../controllers/meetingController.js';
 
 const router = express.Router();
 
@@ -480,15 +481,13 @@ router.post('/verify-booking', protect, async (req, res) => {
       return res.status(400).json({ success: false, error: `Payment not captured (status: ${payment.status})` });
     }
 
-    // Import models
     const Booking = (await import('../models/Booking.js')).default;
     const Service = (await import('../models/Service.js')).default;
-    
-    // Check if booking already exists for this payment
+
     const existingBooking = await Booking.findOne({ 
       'razorpayPaymentId': razorpay_payment_id 
     });
-    
+
     if (existingBooking) {
       console.log('⏭️ Booking already exists for payment:', razorpay_payment_id);
       return res.json({ 
@@ -498,16 +497,13 @@ router.post('/verify-booking', protect, async (req, res) => {
       });
     }
 
-    // Fetch service details
     const service = await Service.findById(serviceId);
     if (!service) {
       return res.status(404).json({ success: false, error: 'Service not found' });
     }
 
-    // Import BookingService dynamically
     const BookingService = (await import('../services/BookingService.js')).default;
-    
-    // Create booking with razorpay payment ID
+
     const booking = await BookingService.createBooking({
       userId: req.user.userId,
       mentorId,
@@ -521,10 +517,34 @@ router.post('/verify-booking', protect, async (req, res) => {
 
     console.log(`✅ Service booking payment: ₹${payment.amount / 100} | Service:${serviceId}`);
 
+    let meetingDetails = null;
+    if (service.type === 'video-call' && scheduledAt) {
+      try {
+        meetingDetails = await scheduleMeetingForBooking({
+          bookingId: booking._id,
+          mentorId,
+          userId: req.user.userId,
+          scheduledAt,
+          duration: service.duration || 30,
+          title: service.name || 'Mentorship Session',
+          description: notes || 'Video mentorship session'
+        });
+
+        booking.meetingLink = meetingDetails.meetLink;
+        booking.googleCalendarEventId = meetingDetails.googleEventId;
+        await booking.save();
+
+        console.log(`✅ Google Meet created: ${meetingDetails.meetLink}`);
+      } catch (meetError) {
+        console.error('❌ Failed to create Google Meet:', meetError.message);
+      }
+    }
+
     res.json({
       success: true,
       message: 'Booking confirmed successfully',
-      booking
+      booking,
+      meetingLink: meetingDetails?.meetLink || null
     });
   } catch (error) {
     console.error('verify-booking error:', error);

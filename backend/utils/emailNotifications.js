@@ -113,3 +113,35 @@ export const sendUserAnswerReadyNotification = async (userEmail, userName, quest
   if (result.success) console.log(`✅ Student notification sent → ${userEmail}`);
   return result;
 };
+
+// ─────────────────────────────────────────────
+//  MEETING: meeting notification
+// ─────────────────────────────────────────────
+export const sendMeetingNotification = async (mentorEmail, userEmail, meetingDetails) => {
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+      <h1 style="color:#10b981;text-align:center;margin:0 0 30px">📅 Meeting Scheduled</h1>
+      <div style="background:#f0fdf4;padding:30px;border-radius:10px;border-left:4px solid #10b981">
+        <h2 style="color:#1f2937;margin-top:0">Meeting Details</h2>
+        <p style="color:#6b7280;line-height:1.6">Hi,</p>
+        <p style="color:#6b7280;line-height:1.6">A new meeting has been scheduled. Here are the details:</p>
+        <div style="background:#fff;padding:20px;border-radius:8px;margin:20px 0;border:2px solid #10b981">
+          <p><strong>Title:</strong> ${meetingDetails.title}</p>
+          <p><strong>Description:</strong> ${meetingDetails.description}</p>
+          <p><strong>Start Time:</strong> ${new Date(meetingDetails.startTime).toLocaleString()}</p>
+          <p><strong>End Time:</strong> ${new Date(meetingDetails.endTime).toLocaleString()}</p>
+          <p><strong>Meeting Link:</strong> <a href="${meetingDetails.meetLink}">${meetingDetails.meetLink}</a></p>
+        </div>
+      </div>
+      <p style="text-align:center;color:#9ca3af;font-size:12px;margin-top:30px">© ${new Date().getFullYear()} Atyant. All rights reserved.</p>
+    </div>
+  `;
+
+  const mentorResult = await sendEmail({ to: mentorEmail, subject: '📅 New Meeting Scheduled', html });
+  const userResult = await sendEmail({ to: userEmail, subject: '📅 New Meeting Scheduled', html });
+
+  if (mentorResult.success) console.log(`✅ Meeting notification sent to mentor → ${mentorEmail}`);
+  if (userResult.success) console.log(`✅ Meeting notification sent to user → ${userEmail}`);
+
+  return { mentorResult, userResult };
+};

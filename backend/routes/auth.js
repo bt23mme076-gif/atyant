@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import nodemailer from 'nodemailer';
 import User from '../models/User.js';
+import passport from 'passport';
+import { protect } from '../middleware/authMiddleware.js';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const router = express.Router();
@@ -287,6 +289,100 @@ router.post('/reset-password/:token', async (req, res) => {
     console.timeEnd('reset-password-operation');
     console.error('Reset password error:', error);
     res.status(500).json({ message: 'Server error during password reset.' });
+  }
+});
+
+router.get('/google',
+  passport.authenticate('google', { 
+    accessType: 'offline',
+    prompt: 'consent'
+  })
+);
+
+// OAuth callback
+router.get('/google/callback',
+  passport.authenticate('google', { 
+    failureRedirect: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?error=auth_failed`
+  }),
+  (req, res) => {
+    try {
+      // Generate JWT token for the authenticated user
+      const token = jwt.sign(
+        {
+          userId: req.user._id,
+          role: req.user.role,
+          username: req.user.username,
+          name: req.user.name,
+          email: req.user.email,
+          profilePicture: req.user.profilePicture || req.user.picture || null,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      // Redirect to frontend with token
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.redirect(`${frontendUrl}/auth-success?token=${token}`);
+    } catch (error) {
+      console.error('OAuth callback error:', error);
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      res.redirect(`${frontendUrl}/login?error=auth_failed`);
+    }
+  }
+);
+
+// Get current user
+router.get('/me', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({
+      id: req.user._id,
+      email: req.user.email,
+      name: req.user.name,
+      picture: req.user.picture
+    });
+  } else {
+    res.status(401).json({ error: 'Not authenticated' });
+  }
+});
+
+// Logout
+router.post('/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Logout failed' });
+    }
+    req.session.destroy();
+    res.json({ success: true, message: 'Logged out successfully' });
+  });
+});
+
+// Add routes for calendar status and disconnection
+router.get('/calendar-status', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select('calendarConnected calendarProvider email');
+
+    res.json({
+      connected: user.calendarConnected || false,
+      provider: user.calendarProvider || null,
+      email: user.email
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to check calendar status' });
+  }
+});
+
+router.post('/disconnect-calendar', protect, async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user.userId, {
+      calendarConnected: false,
+      calendarProvider: null,
+      accessToken: null,
+      refreshToken: null
+    });
+
+    res.json({ success: true, message: 'Calendar disconnected' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to disconnect calendar' });
   }
 });
 

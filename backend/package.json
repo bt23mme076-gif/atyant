@@ -10,22 +10,26 @@
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.7.0",
     "compression": "^1.8.1",
+    "connect-mongo": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^4.18.2",
     "express-rate-limit": "^8.0.1",
+    "express-session": "^1.19.0",
     "google-auth-library": "^10.3.0",
     "googleapis": "^170.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "lru-cache": "^11.2.5",
     "mongodb": "^6.19.0",
-    "mongoose": "^8.19.1",
+    "mongoose": "^8.23.0",
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
     "node-fetch": "^3.3.2",
     "nodemailer": "^8.0.4",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "razorpay": "^2.9.6",
     "resend": "^6.1.2",
     "socket.io": "^4.7.5",
@@ -34,5 +38,8 @@
   },
   "scripts": {
     "start": "node server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }
