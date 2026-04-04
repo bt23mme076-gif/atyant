@@ -22,12 +22,99 @@ const razorpay = new Razorpay({
 
 // ─── Template Data (server side — Canva links NEVER sent to frontend directly)
 const TEMPLATES = {
-  1: { name: "Industrial focus", price: 6900, canvaLink: "https://docs.google.com/presentation/d/11T7fhWnJeA9OdM97OsvIF8cJIFdPP_h6qlcGh8uVogw/copy" },
-  2: { name: "Tech Developer",  price: 6900, canvaLink: "https://docs.google.com/presentation/d/1y7yxncBrlXJpf9k9q7q82LjbzzxDl4xoW54YDl_sh3I/copy" },
-  3: { name: "Executive Pro",   price: 6900, canvaLink: "https://docs.google.com/presentation/d/1e6_JNRCLxX4QVQhx-Lmb1cBGpE4URGjcCpAqULhB-o4/copy" },
-  4: { name: "Creative Bold",   price: 6900, canvaLink: "https://docs.google.com/presentation/d/1LLkgH59RSz4WdZQNOHaJqd4NAZaEnBSby96OyjLK99A/copy" },
-  5: { name: "Corporate Edge",  price: 6900, canvaLink: "https://docs.google.com/presentation/d/1e6_JNRCLxX4QVQhx-Lmb1cBGpE4URGjcCpAqULhB-o4/copy" },
-  6: { name: "IIM Ahmedabad",   price: 6900, canvaLink: "https://docs.google.com/presentation/d/1rDfuWeIQLZ__7-G7GHaiHpuf3ewzSiIJusSpoaQ-V9E/copy" },
+  // SDE / Software Engineering Templates
+  1: { 
+    name: "SDE Fresher (AI/Data Focus)", 
+    price: 6900, 
+    canvaLink: "https://canva.link/6gikq57p86xps5x",
+    category: "SDE"
+  },
+  2: { 
+    name: "FAANG SDE Fresher (C/C++, DSA)", 
+    price: 6900, 
+    canvaLink: "https://canva.link/nrixlrpb3d754g0",
+    category: "SDE"
+  },
+  3: { 
+    name: "Software Engineer (15+ Years)", 
+    price: 6900, 
+    canvaLink: "https://canva.link/au7uv1esw0muykt",
+    category: "SDE"
+  },
+  
+  // AI/ML Templates
+  4: { 
+    name: "AI/ML Developer Fresher", 
+    price: 6900, 
+    canvaLink: "https://canva.link/874swvjik78lpfs",
+    category: "AI/ML"
+  },
+  5: { 
+    name: "AI/ML Research", 
+    price: 6900, 
+    canvaLink: "https://canva.link/o778wru2giyg2lg",
+    category: "AI/ML"
+  },
+  6: { 
+    name: "AI/ML FAANG (Deep Learning, NLP, CV)", 
+    price: 6900, 
+    canvaLink: "https://canva.link/w4w810zi5imswfr",
+    category: "AI/ML"
+  },
+  
+  // Core Engineering Templates
+  7: { 
+    name: "Metallurgical/Materials Engineering", 
+    price: 6900, 
+    canvaLink: "https://canva.link/gaq7800siqhzh5e",
+    category: "Core Engineering"
+  },
+  8: { 
+    name: "Electrical Engineering (Power Systems)", 
+    price: 6900, 
+    canvaLink: "https://canva.link/35b4044nka71kct",
+    category: "Core Engineering"
+  },
+  9: { 
+    name: "Chemical Engineering", 
+    price: 6900, 
+    canvaLink: "https://canva.link/8sbcpbxaqgayu0z",
+    category: "Core Engineering"
+  },
+  
+  // Data Analytics Templates
+  10: { 
+    name: "Data Analyst/Science (Finance)", 
+    price: 6900, 
+    canvaLink: "https://canva.link/3aavor642ic41zo",
+    category: "Data"
+  },
+  11: { 
+    name: "Product/Consulting/Data Analytics", 
+    price: 6900, 
+    canvaLink: "https://canva.link/5hpibnj4pgj8516",
+    category: "Data"
+  },
+  
+  // Additional Premium Templates
+  12: { 
+    name: "Tech Professional", 
+    price: 6900, 
+    canvaLink: "https://canva.link/zartalfdbrxac9j",
+    category: "General"
+  },
+  13: { 
+    name: "Modern Professional", 
+    price: 6900, 
+    canvaLink: "https://canva.link/ct83y2pg8cn2izv",
+    category: "General"
+  },
+  14: { 
+    name: "Executive Professional", 
+    price: 6900, 
+    canvaLink: "https://canva.link/rb092pzb4es867z",
+    category: "General"
+  },
 };
 
 // ─── POST /api/resume/create-order ───────────────────────────────────────────
@@ -112,8 +199,6 @@ router.post("/verify-payment", optionalAuth, async (req, res) => {
   }
 });
 
-export default router;
-
 // ─── GET /api/resume/purchase-status?templateId=1 ───────────────────────────
 // Returns whether authenticated user owns an active purchase for the template
 router.get('/purchase-status', optionalAuth, async (req, res) => {
@@ -140,3 +225,23 @@ router.get('/purchase-status', optionalAuth, async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+// ─── GET /api/resume/templates ───────────────────────────────────────────────
+// Returns all available templates (without Canva links)
+router.get('/templates', (req, res) => {
+  try {
+    const templates = Object.entries(TEMPLATES).map(([id, data]) => ({
+      id: Number(id),
+      name: data.name,
+      price: data.price,
+      category: data.category
+    }));
+    
+    res.json({ templates });
+  } catch (err) {
+    console.error('templates error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+export default router;

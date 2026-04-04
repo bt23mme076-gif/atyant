@@ -4,26 +4,172 @@ import { motion } from "framer-motion";
 
 // ─── Template Data ────────────────────────────────────────────────────────────
 const TEMPLATES = [
-  { id: 1, name: "Industrial focus", cat: "Fresher",     price: 69, desc: "Clean 1-page layout for core engineering freshers", image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774380593/image_6_hg2ma1.jpg",                                  canvaLink: "https://docs.google.com/presentation/d/11T7fhWnJeA9OdM97OsvIF8cJIFdPP_h6qlcGh8uVogw/copy", proof: "3 students got Reliance Industries internship",   proofIcon: "🏭" },
-  { id: 2, name: "Tech Developer",  cat: "Experienced", price: 69, desc: "Modern 2-column layout for software developers",     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774380116/Screenshot_2026-03-25_004919_jtemge.jpg",         canvaLink: "https://docs.google.com/presentation/d/1y7yxncBrlXJpf9k9q7q82LjbzzxDl4xoW54YDl_sh3I/copy", proof: "4 students got software internships from this",   proofIcon: "💻" },
-  { id: 3, name: "Executive Pro",   cat: "Executive",   price: 69, desc: "Premium layout for leadership & senior roles",       image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774379922/image_5_iwtsl7.jpg",                                  canvaLink: "https://docs.google.com/presentation/d/1LLkgH59RSz4WdZQNOHaJqd4NAZaEnBSby96OyjLK99A/copy", proof: "2 students selected at top MNCs",                proofIcon: "🏆" },
-  { id: 4, name: "Creative Bold",   cat: "Fresher",     price: 69, desc: "Stand-out design for creative & design fields",      image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774379826/image_4_nik3ol.jpg",                                  canvaLink: "https://docs.google.com/presentation/d/1e6_JNRCLxX4QVQhx-Lmb1cBGpE4URGjcCpAqULhB-o4/copy", proof: "5 students got IIT Kanpur research internship",  proofIcon: "🎓" },
-  { id: 5, name: "Corporate Edge",  cat: "Experienced", price: 69, desc: "Clean structured layout for corporate roles",        image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774379716/image_3_jad3zp.jpg",                                  canvaLink: "https://docs.google.com/presentation/d/1e6_JNRCLxX4QVQhx-Lmb1cBGpE4URGjcCpAqULhB-o4/copy", proof: "3 students placed in Fortune 500 companies",    proofIcon: "📈" },
-  { id: 6, name: "IIM Ahmedabad",   cat: "MBA",         price: 69, desc: "Crafted for MBA & management aspirants",             image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto,f_auto/v1774381400/cf814da1-04d0-4db5-961f-1e141e4b0bb4.png",           canvaLink: "https://docs.google.com/presentation/d/1rDfuWeIQLZ__7-G7GHaiHpuf3ewzSiIJusSpoaQ-V9E/copy",  proof: "Selected at IIM Ahmedabad from this resume",    proofIcon: "🌟" },
+  // SDE Templates
+  { 
+    id: 1, 
+    name: "SDE Fresher (AI/Data Focus)", 
+    cat: "Fresher", 
+    price: 69, 
+    desc: "Modern layout perfect for CS freshers with AI/ML/Data projects", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260487/192ce5b8-1161-4d59-90ef-65933272b689.png",
+    proof: "4 students placed at startups via this template",   
+    proofIcon: "💻" 
+  },
+  { 
+    id: 2, 
+    name: "FAANG SDE Fresher (C/C++, DSA)", 
+    cat: "Fresher", 
+    price: 69, 
+    desc: "Optimized for SDE roles - highlights DSA, system design & core CS", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260468/88e07c37-dd26-473a-b63e-b191ab16595a.png",
+    proof: "Used by Google SDE intern from IIT Delhi",   
+    proofIcon: "🚀" 
+  },
+  { 
+    id: 3, 
+    name: "Software Engineer (15+ Years)", 
+    cat: "Experienced", 
+    price: 69, 
+    desc: "Executive-level layout for senior backend/DevOps engineers", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260446/eb430f3b-1d8c-4761-a154-d72baa26acbf.png",
+    proof: "3 senior engineers got FAANG offers",                
+    proofIcon: "🏆" 
+  },
+
+  // AI/ML Templates
+  { 
+    id: 4, 
+    name: "AI/ML Developer Fresher", 
+    cat: "Fresher", 
+    price: 69, 
+    desc: "Designed for ML freshers - showcases projects, frameworks & papers", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260080/3fb22bd9-9b54-4368-bd94-0092527604f8.png",
+    proof: "5 ML interns selected from this resume",  
+    proofIcon: "🤖" 
+  },
+  { 
+    id: 5, 
+    name: "AI/ML Research", 
+    cat: "Experienced", 
+    price: 69, 
+    desc: "Academic-focused layout for ML researchers & PhD candidates", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775259942/0bf22d93-7481-4a15-84bf-883d6166a9a6.png",
+    proof: "2 students got IIT research positions",    
+    proofIcon: "🎓" 
+  },
+  { 
+    id: 6, 
+    name: "AI/ML FAANG (Deep Learning, NLP, CV)", 
+    cat: "Experienced", 
+    price: 69, 
+    desc: "Premium ML layout highlighting deep learning, NLP & computer vision", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775259922/31b08a66-b4ba-4b88-9a9f-be52d502d411.png",
+    proof: "Selected at Google AI Research team",    
+    proofIcon: "⚡" 
+  },
+
+  // Core Engineering Templates
+  { 
+    id: 7, 
+    name: "Metallurgical/Materials Engineering", 
+    cat: "Core", 
+    price: 69, 
+    desc: "Structured layout for metallurgy & materials science roles", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775259864/0aa2311d-5fe8-401b-8dd1-3834dc666bc8.png",
+    proof: "3 students got Tata Steel internships",   
+    proofIcon: "🏭" 
+  },
+  { 
+    id: 8, 
+    name: "Electrical Engineering (Power Systems)", 
+    cat: "Core", 
+    price: 69, 
+    desc: "Clean design for electrical & power systems engineers", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775259847/f5adddef-2c2a-45d9-899c-fba0aa562f48.png",
+    proof: "4 students selected at power companies",   
+    proofIcon: "⚙️" 
+  },
+  { 
+    id: 9, 
+    name: "Chemical Engineering", 
+    cat: "Core", 
+    price: 69, 
+    desc: "Professional layout tailored for chemical & process engineers", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775251730/WhatsApp_Image_2026-04-04_at_2.34.22_AM_xhyxpl.jpg",
+    proof: "2 students placed at Reliance Industries",                
+    proofIcon: "🧪" 
+  },
+
+  // Data & Analytics Templates
+  { 
+    id: 10, 
+    name: "Data Analyst/Science (Finance)", 
+    cat: "Data", 
+    price: 69, 
+    desc: "Finance-focused data analytics layout with metrics & insights", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775251710/WhatsApp_Image_2026-04-04_at_2.40.43_AM_zsr8bu.jpg",
+    proof: "Selected at JP Morgan & Goldman Sachs",  
+    proofIcon: "📊" 
+  },
+  { 
+    id: 11, 
+    name: "Product/Consulting/Data Analytics", 
+    cat: "Product", 
+    price: 69, 
+    desc: "Hybrid layout for product analysts & consulting roles", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775251670/WhatsApp_Image_2026-04-04_at_2.45.15_AM_b1nkcg.jpg",
+    proof: "4 students got consulting firm offers",    
+    proofIcon: "💼" 
+  },
+
+  // General Professional Templates
+  { 
+    id: 12, 
+    name: "Tech Professional", 
+    cat: "General", 
+    price: 69, 
+    desc: "Versatile modern design for various tech roles", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775259884/a81b79a3-2a00-4ed1-bed5-384fadf07b65.png",
+    proof: "Popular template across all domains",    
+    proofIcon: "💻" 
+  },
+  { 
+    id: 13, 
+    name: "Modern Professional", 
+    cat: "General", 
+    price: 69, 
+    desc: "Contemporary clean layout suitable for any industry", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260487/192ce5b8-1161-4d59-90ef-65933272b689.png",
+    proof: "5+ students hired across sectors",   
+    proofIcon: "✨" 
+  },
+  { 
+    id: 14, 
+    name: "Executive Professional", 
+    cat: "Executive", 
+    price: 69, 
+    desc: "Premium executive layout for leadership positions", 
+    image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260446/eb430f3b-1d8c-4761-a154-d72baa26acbf.png",
+    proof: "2 VPs hired with this template",   
+    proofIcon: "👔" 
+  },
 ];
 
 const CAT_COLORS = {
   Fresher:     { bg: "#E8F4FD", color: "#1565C0", border: "#BBDEFB" },
   Experienced: { bg: "#E8F5E9", color: "#2E7D32", border: "#C8E6C9" },
   Executive:   { bg: "#FFF8E1", color: "#F57F17", border: "#FFE082" },
-  MBA:         { bg: "#FCE4EC", color: "#880E4F", border: "#F48FB1" },
+  Core:        { bg: "#FFF3E0", color: "#E65100", border: "#FFCC80" },
+  Data:        { bg: "#E1F5FE", color: "#01579B", border: "#B3E5FC" },
+  Product:     { bg: "#F3E5F5", color: "#6A1B9A", border: "#E1BEE7" },
+  General:     { bg: "#F5F5F5", color: "#424242", border: "#E0E0E0" },
 };
 
 const STEPS = [
   { num: 1, emoji: "👀", title: "Preview Resume",       desc: "See the top half — get a feel of the design" },
   { num: 2, emoji: "💳", title: "Pay ₹69",              desc: "One-time via Razorpay — UPI, card, netbanking" },
-  { num: 3, emoji: "🔗", title: "Get Slides Link",      desc: "Your unique editing link unlocks instantly" },
-  { num: 4, emoji: "✏️", title: "Edit Your Name",       desc: "Change name, skills, experience — Google Slides free" },
+  { num: 3, emoji: "🔗", title: "Get Canva Link",       desc: "Your unique editing link unlocks instantly" },
+  { num: 4, emoji: "✏️", title: "Edit Your Details",    desc: "Change name, skills, experience — free on Canva" },
   { num: 5, emoji: "📥", title: "Download PDF",         desc: "Export & apply to jobs right away!" },
 ];
 
@@ -45,6 +191,36 @@ function ResumePreview({ image, name }) {
   );
 }
 
+// ─── Category Filter ─────────────────────────────────────────────────────────
+function CategoryFilter({ selected, onChange }) {
+  const categories = ["All", "Fresher", "Experienced", "Core", "Data", "Product", "Executive", "General"];
+  
+  return (
+    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginBottom: "2rem" }}>
+      {categories.map(cat => (
+        <button
+          key={cat}
+          onClick={() => onChange(cat)}
+          style={{
+            padding: "8px 20px",
+            borderRadius: 20,
+            border: "2px solid",
+            borderColor: selected === cat ? "#4f46e5" : "#e5e7eb",
+            background: selected === cat ? "#4f46e5" : "#fff",
+            color: selected === cat ? "#fff" : "#6b7280",
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+            transition: "all 0.2s",
+          }}
+        >
+          {cat}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ResumeMarketplace() {
   const [selected, setSelected]   = useState(null);
@@ -52,6 +228,11 @@ export default function ResumeMarketplace() {
   const [canvaLink, setCanvaLink] = useState(null);
   const [error, setError]         = useState("");
   const [ownedTemplates, setOwnedTemplates] = useState({});
+  const [categoryFilter, setCategoryFilter] = useState("All");
+
+  const filteredTemplates = categoryFilter === "All" 
+    ? TEMPLATES 
+    : TEMPLATES.filter(t => t.cat === categoryFilter);
 
   async function handlePayment(template) {
     setLoading(true);
@@ -150,7 +331,7 @@ export default function ResumeMarketplace() {
               fontWeight: 700, letterSpacing: "0.05em",
               boxShadow: "0 2px 8px rgba(245,158,11,0.15)",
             }}>
-              ⚡ INDIA'S FIRST RESUME MARKETPLACE WITH INSTANT EDITING
+              ⚡ 14 PREMIUM TEMPLATES - INSTANT CANVA EDITING
             </div>
 
             {/* Headline */}
@@ -160,7 +341,7 @@ export default function ResumeMarketplace() {
               lineHeight: 1.2, marginBottom: 14,
               fontFamily: "Georgia, 'Times New Roman', serif",
             }}>
-              Resume Links that get you
+              Resume Templates that get you
               <br />
               <span style={{ color: "#4f46e5" }}>shortlisted & selected</span>
             </h1>
@@ -168,12 +349,12 @@ export default function ResumeMarketplace() {
             {/* Subtext */}
             <p style={{ fontSize: 15, color: "#6b7280", maxWidth: 520, margin: "0 auto 28px", lineHeight: 1.7 }}>
               ATS-friendly designs used by real students at IITs, IIMs & top companies.
-              Buy → Edit → Download. Done in 10 minutes.
+              Buy → Edit on Canva → Download. Done in 10 minutes.
             </p>
 
             {/* Stats */}
             <div style={{ display: "flex", justifyContent: "center", gap: "3rem", flexWrap: "wrap" }}>
-              {[["500+", "Students helped"], ["IIT/IIM", "Proven results"], ["10 min", "Edit & download"], ["₹69", "One-time only"]].map(([val, lbl]) => (
+              {[["14", "Templates"], ["IIT/IIM", "Proven results"], ["10 min", "Edit & download"], ["₹69", "One-time only"]].map(([val, lbl]) => (
                 <div key={lbl} style={{ textAlign: "center" }}>
                   <div style={{ fontSize: 22, fontWeight: 900, color: "#111827", fontFamily: "Georgia, serif" }}>{val}</div>
                   <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2 }}>{lbl}</div>
@@ -227,11 +408,14 @@ export default function ResumeMarketplace() {
           </div>
         </div>
 
+        {/* ══ CATEGORY FILTER ══════════════════════════════════════════════ */}
+        <CategoryFilter selected={categoryFilter} onChange={setCategoryFilter} />
+
         {/* ══ CARDS GRID ═══════════════════════════════════════════════════ */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: 20 }}>
-          {TEMPLATES.map((t) => {
+          {filteredTemplates.map((t) => {
             const owned    = ownedTemplates[t.id];
-            const catStyle = CAT_COLORS[t.cat] || CAT_COLORS["Fresher"];
+            const catStyle = CAT_COLORS[t.cat] || CAT_COLORS["General"];
             return (
               <div key={t.id}
                 style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", transition: "transform 0.2s, box-shadow 0.2s" }}
@@ -264,7 +448,7 @@ export default function ResumeMarketplace() {
                       <span style={{ fontSize: 10, color: "#999", marginLeft: 4 }}>one-time</span>
                     </div>
                     {owned ? (
-                      <a href={owned.canvaLink || t.canvaLink} target="_blank" rel="noreferrer"
+                      <a href={owned.canvaLink} target="_blank" rel="noreferrer"
                         style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", textDecoration: "none", boxShadow: "0 2px 8px rgba(99,102,241,0.3)" }}>
                         Open & Edit ↗
                       </a>
@@ -303,8 +487,8 @@ export default function ResumeMarketplace() {
                 <div style={{ borderTop: "1px solid #f3f4f6", paddingTop: "0.8rem", marginBottom: "0.8rem" }}>
                   {[
                     ["Price",         `₹${selected.price} (one-time)`],
-                    ["After payment", "Unique Google Slides link"],
-                    ["Edit in",       "Google Slides (free)"],
+                    ["After payment", "Unique Canva editing link"],
+                    ["Edit in",       "Canva (free online)"],
                     ["Downloads",     "Unlimited PDF exports"],
                   ].map(([lbl, val]) => (
                     <div key={lbl} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 7 }}>
@@ -332,12 +516,12 @@ export default function ResumeMarketplace() {
                 <div style={{ fontSize: "3rem", marginBottom: 10 }}>🎉</div>
                 <h3 style={{ fontFamily: "Georgia, serif", fontSize: "1.2rem", marginBottom: 6, color: "#111827" }}>Payment Successful!</h3>
                 <p style={{ fontSize: 13, color: "#6b7280", marginBottom: "1.2rem", lineHeight: 1.6 }}>
-                  Your Google Slides link is ready! Click below, make your copy, edit your details, then download as PDF.
+                  Your Canva link is ready! Click below, make your copy, edit your details, then download as PDF.
                 </p>
                 <a href={canvaLink} target="_blank" rel="noreferrer"
                   style={{ display: "block", width: "100%", padding: "12px", background: "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "#fff", borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: "none", textAlign: "center", boxShadow: "0 4px 16px rgba(79,70,229,0.3)", marginBottom: 8 }}
                 >
-                  ✏️ Open & Edit Resume →
+                  ✏️ Open & Edit Resume in Canva →
                 </a>
                 <button onClick={closeModal} style={{ width: "100%", padding: "8px", background: "none", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 12, color: "#6b7280", cursor: "pointer" }}>
                   Close

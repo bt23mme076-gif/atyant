@@ -173,6 +173,9 @@ function App() {
               <Route path="/forgot-password"       element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPasswordPage />} />
               <Route path="/internships"           element={<InternshipPage />} />
+
+               {/* Added: /dad route shows InternshipPage */}
+               <Route path="/dad"           element={<InternshipPage />} />
               <Route path="/career-guides"         element={<CareerGuidesPage />} />
               <Route path="/profile/:username"     element={<PublicProfilePage />} />
               <Route path="/resume-store" element={<ResumeMarketplace />} />
