@@ -40,7 +40,7 @@ const Footer = () => {
         <div className="footer-contact">
           <h4>Contact Us</h4>
           <p>Email: support@atyant.in</p>
-          <p>Phone: +91 9579040183</p>
+          <p>Phone: +91 9753324876</p>
           <p>Nagpur, Maharashtra, India</p>
         </div>
       </div>
