@@ -34,6 +34,11 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'All fields required including mobile number' });
     }
 
+    // Validate password length
+    if (password.length < 8) {
+      return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+
     const phoneRegex = /^[6-9]\d{9}$/;
     if (!phoneRegex.test(phone)) {
       return res.status(400).json({ message: 'Enter a valid 10-digit Indian mobile number' });
@@ -43,21 +48,27 @@ router.post('/signup', async (req, res) => {
     const existingUser = await User.findOne({ $or: [{ email }, { username }, { phone }] });
     if (existingUser) {
       if (existingUser.phone === phone) {
-        return res.status(400).json({ message: 'Mobile number already registered' });
+        return res.status(409).json({ message: 'Mobile number already registered' });
       }
-      return res.status(400).json({ message: 'User already exists' });
+      if (existingUser.email === email) {
+        return res.status(409).json({ message: 'Email already registered' });
+      }
+      if (existingUser.username === username) {
+        return res.status(409).json({ message: 'Username already taken' });
+      }
+      return res.status(409).json({ message: 'User already exists' });
     }
     
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // Create user
+    // Create user with proper role
     const newUser = new User({
       username,
       email,
       password: hashedPassword,
       phone,
-      role: role || 'student'
+      role: role || 'user' // Default to 'user' not 'student'
     });
     
     await newUser.save();
@@ -72,6 +83,7 @@ router.post('/signup', async (req, res) => {
     res.status(201).json({
       message: 'User created successfully',
       token,
+      role: newUser.role,
       user: {
         id: newUser._id,
         username: newUser.username,
@@ -80,7 +92,20 @@ router.post('/signup', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Signup error:', error); // ✅ Check this in terminal
+    console.error('Signup error:', error);
+    
+    // Handle mongoose validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ message: messages.join(', ') });
+    }
+    
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(409).json({ message: `${field} already exists` });
+    }
+    
     res.status(500).json({ message: 'Error creating user', error: error.message });
   }
 });

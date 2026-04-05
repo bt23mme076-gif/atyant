@@ -3,14 +3,13 @@ import mongoose from 'mongoose';
 const userSchema = new mongoose.Schema({
 
   // ─── ROLE & IDENTITY ───────────────────────
-   googleId: {
+  googleId: {
     type: String,
-    required: function () {
-      return !this.password; // Required if no password (OAuth user)
-    },
     unique: true,
+    sparse: true, // Allow multiple nulls for non-OAuth users
     index: true
   },
+  
   role: {
     type   : String,
     enum   : ['user', 'mentor', 'admin'],
