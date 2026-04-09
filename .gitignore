@@ -17,3 +17,4 @@ backend/google-key.json
 
 # ─── Misc ─────────────────────────────────────────────
 *.log
+node_modules

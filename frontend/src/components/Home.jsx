@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import SEO from './SEO'; // ✅ NEW IMPORT
 import HeroSection from './HeroSection';
+import TrustedBySlider from './TrustedBySlider';
 import AboutUs from './AboutUs';
 import HowItWorks from './HowItWorks';
 import WhyChooseUs from './WhyChooseUs';
@@ -69,19 +70,19 @@ const Home = () => {
     <>
       {/* ✅ SEO FOR HOMEPAGE */}
       <SEO 
-        title="AI-Powered Student Guidance | Senior Roadmaps for Placements"
-        description="AI matches you with seniors who've already cracked it. Get human-verified roadmaps for internships, placements & career clarity — not generic AI answers."
-        keywords="AI student guidance, senior roadmaps, internship help, placement preparation, career guidance AI, mentor matching, Atyant"
+        title="Atyant | Intelligent Career Guidance Engine"
+        description="Atyant is an AI-powered guidance engine that analyzes your career block and connects you directly with the verified roadmap or individual who solved it."
+        keywords="AI career guidance, problem solving engine, career roadmap AI, semantic matching, Atyant"
         url="https://atyant.in/"
       />
 
       <div id="home"><HeroSection /></div>
-      <div id="about"><AboutUs /></div>
+      <TrustedBySlider />
       <AtyantJourneySlider />
       <ResumeheroSection />
       <div id="why-choose-us"><WhyChooseUs /></div>
       <div id="how-it-works"><HowItWorks /></div>
-      <ReviewsSlider />
+      {/* <ReviewsSlider /> */}
     </>
   );
 };

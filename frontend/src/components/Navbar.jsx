@@ -10,13 +10,13 @@ import { API_URL } from '../services/api.js';
 
 
 const Navbar = () => {
-  const navigate    = useNavigate();
+  const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
-  const [open,         setOpen]         = useState(false);
+  const [open, setOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [userPhoto,    setUserPhoto]    = useState(null);
+  const [userPhoto, setUserPhoto] = useState(null);
   const dropdownRef = useRef(null);
-  const panelRef    = useRef(null);
+  const panelRef = useRef(null);
 
   useEffect(() => {
     if (!user) { setUserPhoto(null); return; }
@@ -29,7 +29,7 @@ const Navbar = () => {
     fetch(`${API_URL}/api/profile/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (!cancelled && data?.profilePicture) setUserPhoto(data.profilePicture); })
-      .catch(() => {});
+      .catch(() => { });
 
     return () => { cancelled = true; };
   }, [user?.id || user?._id]);
@@ -46,7 +46,7 @@ const Navbar = () => {
   }, [showDropdown]);
 
   useEffect(() => {
-    const handler = () => {};
+    const handler = () => { };
     window.addEventListener('openCommunityChat', handler);
     return () => window.removeEventListener('openCommunityChat', handler);
   }, []);
@@ -66,30 +66,28 @@ const Navbar = () => {
 
     if (!user) return (
       <>
-        <Link to="/internships"    className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
-        <Link to="/career-guides"  className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
-        <Link to="/resume-store"   className="nav-link resume-store-link"  onClick={close}><ShoppingBag size={18} /> Resume Store</Link>
-        <Link to="/login"          className="nav-button"                  onClick={close}>Login</Link>
-        <Link to="/signup"         className="nav-button primary"          onClick={close}>Sign Up</Link>
+        <Link to="/internships" className="nav-link internship-link" onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/career-guides" className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
+        <Link to="/resume-store" className="nav-link resume-store-link" onClick={close}><ShoppingBag size={18} /> Resume Store</Link>
+        <Link to="/login" className="nav-button" onClick={close}>Login</Link>
+        <Link to="/signup" className="nav-button primary" onClick={close}>Sign Up</Link>
       </>
     );
 
     if (user.role === 'mentor') return (
       <>
-        <Link to="/dashboard"      className="nav-link dashboard-link"     onClick={close}>Dashboard</Link>
-        <Link to="/chat"           className="nav-link mentor-chat-link"   onClick={close}>Student Chats</Link>
-        <Link to="/internships"    className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
-        <Link to="/career-guides"  className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
-        <Link to="/resume-store"   className="nav-link resume-store-link"  onClick={close}><ShoppingBag size={18} /> Resume Store</Link>
+        <Link to="/dashboard" className="nav-link dashboard-link" onClick={close}>Dashboard</Link>
+        <Link to="/chat" className="nav-link mentor-chat-link" onClick={close}>Student Chats</Link>
+        <Link to="/internships" className="nav-link internship-link" onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/resume-store" className="nav-link resume-store-link" onClick={close}><ShoppingBag size={18} /> Resume Store</Link>
       </>
     );
 
     return (
       <>
-        <Link to="/my-questions"   className="nav-link"                    onClick={close}>My Questions</Link>
-        <Link to="/internships"    className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
-        <Link to="/career-guides"  className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
-        <Link to="/resume-store"   className="nav-link resume-store-link"  onClick={close}><ShoppingBag size={18} /> Resume Store</Link>
+        <Link to="/my-questions" className="nav-link" onClick={close}>My Questions</Link>
+        <Link to="/internships" className="nav-link internship-link" onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/resume-store" className="nav-link resume-store-link" onClick={close}><ShoppingBag size={18} /> Resume Store</Link>
       </>
     );
   };
@@ -141,7 +139,7 @@ const Navbar = () => {
         <div
           className="mobile-menu-overlay"
           onClick={() => setOpen(false)}
-          style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.18)', zIndex:2001 }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.18)', zIndex: 2001 }}
         />
       )}
 

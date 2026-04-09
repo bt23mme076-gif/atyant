@@ -3,39 +3,39 @@ import React, { useEffect, useRef, useState } from 'react';
 const steps = [
   {
     id: '01',
-    icon: '🎯',
-    title: 'You Ask',
-    desc: 'One clear question with your context, goals & constraints',
-    color: '#7c3aed',
+    icon: '⚡',
+    title: 'Input Your Context',
+    desc: 'Describe your blocker, goal, and current state. The more context you provide, the deeper the analysis.',
+    color: '#3B82F6', // Neon Blue
   },
   {
     id: '02',
     icon: '🧠',
-    title: 'Atyant Engine Processes',
-    desc: 'Question cleaned, meaning extracted, context understood',
-    color: '#6d28d9',
+    title: 'Semantic Processing',
+    desc: 'The engine parses your query, extracts key entities, and understands the underlying constraints.',
+    color: '#6366F1', // Indigo
+  },
+  {
+    id: '03',
+    icon: '🔍',
+    title: 'Database & Pathway Search',
+    desc: "Vector similarity search scours thousands of verified career data points and exact solution matches.",
+    color: '#7C3AED', // Electric Purple
+    tags: ['📊 Vector Matching', '✅ Verified Data', '⏱️ Millisecond Search'],
   },
   {
     id: '04',
-    icon: '✨',
-    title: 'AI Structures the Answer',
-    desc: "Raw experience → Steps, timeline, mistakes, do's & don'ts",
-    color: '#5b21b6',
-    tags: ['📋 Steps', '⏱️ Timeline', '❌ Mistakes', '✅ Tips'],
-  },
-  {
-    id: '05',
-    icon: '🏆',
-    title: 'Your Atyant Answer Card',
-    desc: 'Personalized, actionable, real — not generic advice',
-    color: '#4c1d95',
+    icon: '🎯',
+    title: 'Synthesized Solution',
+    desc: 'You receive an exact, actionable roadmap generated from real-world success pathways.',
+    color: '#A855F7', // Magenta Purple
   },
 ];
 
 const benefits = [
-  { icon: '🔄', title: 'Self-Learning', desc: 'Every answer helps future students' },
-  { icon: '📈', title: 'Scalable', desc: 'Mentors solve once, impact thousands' },
-  { icon: '🎯', title: 'Personalized', desc: 'Context-aware, not copy-paste advice' },
+  { icon: '🔄', title: 'Self-Improving', desc: 'Every solved query enhances the global knowledge graph.' },
+  { icon: '🚀', title: 'High Velocity', desc: 'Get accurate career pathways in seconds, not weeks.' },
+  { icon: '🎯', title: 'Hyper-Personalized', desc: 'Context-aware modeling, avoiding generic copy-paste advice.' },
 ];
 
 const HowItWorks = () => {
@@ -62,87 +62,45 @@ const HowItWorks = () => {
 
   return (
     <section ref={sectionRef} style={styles.section}>
-      {/* Background blobs */}
+      {/* Background glow effects */}
       <div style={styles.blob1} />
       <div style={styles.blob2} />
+      <div style={styles.gridPattern} />
 
       <div style={styles.container}>
 
-        {/* ── Header (always visible) ── */}
+        {/* ── Header ── */}
         <div className="hiw-animate" style={styles.header}>
-          <span style={styles.badge}>✨ The Magic Behind</span>
+          <span style={styles.badge}>ENGINE ARCHITECTURE</span>
           <div style={styles.titleRow}>
             <h2 style={styles.title}>
-              How <span style={styles.gradientText}>Atyant</span> Works
+              How The <span style={styles.gradientText}>Atyant Engine</span> Works
             </h2>
-            <button
-              onClick={toggleOpen}
-              aria-expanded={isOpen}
-              aria-label={isOpen ? 'Collapse details' : 'Expand details'}
-              style={styles.toggleBtn}
-            >
-              {isOpen ? 'Show less' : 'Show more'}
-            </button>
           </div>
           <p style={styles.subtitle}>
-            From your question to personalized guidance —{' '}
-            powered by <strong>AI + real experience</strong>
+            From unstructured query to high-fidelity career roadmap —{' '}
+            powered by semantic matching and verified human data.
           </p>
+          <button
+              onClick={toggleOpen}
+              aria-expanded={isOpen}
+              style={styles.toggleBtn}
+            >
+              {isOpen ? 'Collapse Architecture' : 'View Architecture'}
+          </button>
         </div>
 
         {/* ── Expandable Content ── */}
         <div
           style={{
             ...styles.expandable,
-            maxHeight: isOpen ? '3000px' : '0px',
+            maxHeight: isOpen ? '2000px' : '0px',
             opacity: isOpen ? 1 : 0,
             pointerEvents: isOpen ? 'auto' : 'none',
           }}
         >
 
-          {/* Smart Split Card */}
-          <div className="hiw-animate" style={styles.splitCard}>
-            <div style={styles.splitCardInner}>
-              <div style={styles.splitLabel}>
-                <span style={styles.splitLabelIcon}>⚡</span> Smart Matching
-              </div>
-              <div style={styles.splitPaths}>
-                {/* Instant */}
-                <div style={{ ...styles.pathBox, background: 'linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%)' }}>
-                  <div style={styles.pathIcon}>💨</div>
-                  <h4 style={styles.pathTitle}>Instant Answer</h4>
-                  <p style={styles.pathDesc}>Similar question already solved?</p>
-                  <ul style={styles.pathList}>
-                    <li>Vector similarity search</li>
-                    <li>High-quality match found</li>
-                    <li>Delivered in seconds</li>
-                  </ul>
-                  <span style={{ ...styles.pathTag, background: '#7c3aed', color: '#fff' }}>⚡ &lt; 5 sec</span>
-                </div>
-
-                <div style={styles.orDivider}>
-                  <div style={styles.orLine} />
-                  <span style={styles.orText}>OR</span>
-                  <div style={styles.orLine} />
-                </div>
-
-                {/* Mentor */}
-                <div style={{ ...styles.pathBox, background: 'linear-gradient(135deg, #faf5ff 0%, #ede9fe 100%)' }}>
-                  <div style={styles.pathIcon}>🎓</div>
-                  <h4 style={styles.pathTitle}>Live Mentor</h4>
-                  <p style={styles.pathDesc}>New problem? We find the perfect senior</p>
-                  <ul style={styles.pathList}>
-                    <li>Multi-factor scoring</li>
-                    <li>Domain + achievements match</li>
-                    <li>Top mentor notified</li>
-                  </ul>
-                  <span style={{ ...styles.pathTag, background: '#4c1d95', color: '#fff' }}>🎯 Best Match</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Steps */}
+          {/* Steps Array */}
           <div style={styles.stepsRow}>
             {steps.map((step, i) => (
               <div key={step.id} className="hiw-animate" style={styles.stepCard}>
@@ -159,14 +117,15 @@ const HowItWorks = () => {
                     ))}
                   </div>
                 )}
+                {/* Visual Connector */}
                 {i < steps.length - 1 && (
-                  <div style={styles.stepArrow}>↓</div>
+                  <div style={styles.stepConnector} />
                 )}
               </div>
             ))}
           </div>
 
-          {/* Benefits */}
+          {/* Post Architecture Benefits */}
           <div style={styles.benefitsRow}>
             {benefits.map((b) => (
               <div key={b.title} className="hiw-animate" style={styles.benefitCard}>
@@ -177,31 +136,21 @@ const HowItWorks = () => {
             ))}
           </div>
 
-          {/* Social proof ticker */}
-          <div className="hiw-animate" style={styles.ticker}>
-            🎉 <strong>Ravi got IIT research intern!</strong> &nbsp;·&nbsp;
-            🚀 <strong>Priya cracked Microsoft internship!</strong> &nbsp;·&nbsp;
-            🏆 <strong>Arjun landed his first startup role!</strong>
-          </div>
-
         </div>
         {/* end expandable */}
 
       </div>
 
       <style>{`
+         /* Shared Reset/Anim */
         .hiw-animate {
           opacity: 0;
-          transform: translateY(28px);
-          transition: opacity 0.55s ease, transform 0.55s ease;
+          transform: translateY(20px);
+          transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .hiw-visible {
           opacity: 1 !important;
           transform: translateY(0) !important;
-        }
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(6px); }
         }
       `}</style>
     </section>
@@ -211,39 +160,52 @@ const HowItWorks = () => {
 const styles = {
   section: {
     position: 'relative',
-    padding: '100px 24px',
-    background: 'linear-gradient(160deg, #faf5ff 0%, #ede9fe 40%, #f5f3ff 100%)',
+    padding: '120px 24px',
+    background: '#FFFFFF',
     overflow: 'hidden',
-    fontFamily: "'Inter', sans-serif",
+    fontFamily: "'Inter', -apple-system, sans-serif",
+  },
+  gridPattern: {
+    position: 'absolute',
+    inset: 0,
+    backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px)',
+    backgroundSize: '40px 40px',
+    maskImage: 'radial-gradient(circle at center, black 40%, transparent 80%)',
+    WebkitMaskImage: 'radial-gradient(circle at center, black 40%, transparent 80%)',
+    pointerEvents: 'none',
+    zIndex: 0,
   },
   blob1: {
-    position: 'absolute', top: '-120px', right: '-120px',
-    width: '500px', height: '500px', borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%)',
+    position: 'absolute', top: '-150px', right: '-150px',
+    width: '600px', height: '600px', borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(124, 58, 237, 0.08) 0%, transparent 70%)',
     pointerEvents: 'none',
+    filter: 'blur(60px)',
   },
   blob2: {
-    position: 'absolute', bottom: '-100px', left: '-100px',
-    width: '400px', height: '400px', borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(109,40,217,0.12) 0%, transparent 70%)',
+    position: 'absolute', bottom: '-150px', left: '-150px',
+    width: '600px', height: '600px', borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%)',
     pointerEvents: 'none',
+    filter: 'blur(60px)',
   },
   container: {
-    maxWidth: '860px', margin: '0 auto', position: 'relative', zIndex: 1,
+    maxWidth: '900px', margin: '0 auto', position: 'relative', zIndex: 1,
   },
   header: {
-    textAlign: 'center', marginBottom: '24px',
+    textAlign: 'center', marginBottom: '40px',
   },
   badge: {
     display: 'inline-block',
-    padding: '6px 18px',
-    borderRadius: '999px',
-    background: 'rgba(124,58,237,0.1)',
-    color: '#7c3aed',
-    fontSize: '0.85rem',
-    fontWeight: 600,
-    marginBottom: '16px',
-    border: '1px solid rgba(124,58,237,0.2)',
+    padding: '6px 16px',
+    borderRadius: '100px',
+    background: 'rgba(59, 130, 246, 0.1)',
+    color: '#3B82F6',
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    letterSpacing: '0.1em',
+    marginBottom: '20px',
+    border: '1px solid rgba(59, 130, 246, 0.2)',
   },
   titleRow: {
     display: 'flex',
@@ -251,104 +213,57 @@ const styles = {
     justifyContent: 'center',
     gap: '12px',
     flexWrap: 'wrap',
-    marginBottom: '10px',
+    marginBottom: '16px',
   },
   title: {
-    fontSize: 'clamp(2rem, 5vw, 2.8rem)',
+    fontFamily: "'Outfit', sans-serif",
+    fontSize: 'clamp(2.2rem, 5vw, 3.5rem)',
     fontWeight: 800,
-    color: '#1e1b4b',
+    color: '#0F172A',
     margin: 0,
-    lineHeight: 1.2,
+    lineHeight: 1.1,
+    letterSpacing: '-0.02em',
   },
   gradientText: {
-    background: 'linear-gradient(135deg, #7c3aed, #a78bfa)',
+    background: 'linear-gradient(135deg, #7C3AED, #3B82F6)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
   },
+  subtitle: {
+    fontSize: '1.1rem',
+    color: '#475569',
+    lineHeight: 1.6,
+    margin: '0 auto 24px',
+    maxWidth: '600px',
+  },
   toggleBtn: {
-    background: 'rgba(124,58,237,0.08)',
-    border: '1px solid rgba(124,58,237,0.25)',
-    color: '#7c3aed',
-    padding: '6px 16px',
-    borderRadius: '999px',
-    fontSize: '0.85rem',
+    background: '#F8FAFC',
+    border: '1px solid #E2E8F0',
+    color: '#0F172A',
+    padding: '10px 24px',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
     fontWeight: 600,
     cursor: 'pointer',
-    transition: 'background 0.2s ease',
-  },
-  subtitle: {
-    fontSize: '1.05rem',
-    color: '#6b7280',
-    lineHeight: 1.7,
-    margin: 0,
+    transition: 'all 0.2s',
   },
   expandable: {
     overflow: 'hidden',
-    transition: 'max-height 0.6s ease, opacity 0.4s ease',
+    transition: 'max-height 0.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease',
   },
-  splitCard: {
-    marginTop: '36px',
-    marginBottom: '48px',
-    borderRadius: '20px',
-    background: '#fff',
-    boxShadow: '0 8px 40px rgba(109,40,217,0.1)',
-    border: '1px solid rgba(124,58,237,0.1)',
-    overflow: 'hidden',
-  },
-  splitCardInner: { padding: '32px' },
-  splitLabel: {
-    textAlign: 'center',
-    fontWeight: 700,
-    fontSize: '1rem',
-    color: '#7c3aed',
-    marginBottom: '24px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-  },
-  splitLabelIcon: { fontSize: '1.2rem' },
-  splitPaths: {
-    display: 'flex',
-    gap: '16px',
-    alignItems: 'stretch',
-    flexWrap: 'wrap',
-  },
-  pathBox: {
-    flex: 1,
-    minWidth: '200px',
-    borderRadius: '14px',
-    padding: '24px',
-    border: '1px solid rgba(124,58,237,0.15)',
-  },
-  pathIcon: { fontSize: '2rem', marginBottom: '10px' },
-  pathTitle: { margin: '0 0 6px', fontWeight: 700, color: '#1e1b4b', fontSize: '1rem' },
-  pathDesc: { fontSize: '0.85rem', color: '#6b7280', margin: '0 0 12px' },
-  pathList: { fontSize: '0.82rem', color: '#4b5563', paddingLeft: '18px', margin: '0 0 16px', lineHeight: 1.8 },
-  pathTag: {
-    display: 'inline-block', padding: '4px 12px', borderRadius: '999px',
-    fontSize: '0.78rem', fontWeight: 600,
-  },
-  orDivider: {
-    display: 'flex', flexDirection: 'column', alignItems: 'center',
-    justifyContent: 'center', gap: '8px', padding: '0 4px',
-  },
-  orLine: { width: '1px', height: '40px', background: 'rgba(124,58,237,0.2)' },
-  orText: { fontWeight: 700, color: '#7c3aed', fontSize: '0.85rem' },
   stepsRow: {
-    display: 'flex', flexDirection: 'column', gap: '0', marginBottom: '48px',
+    display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px', marginTop: '24px',
   },
   stepCard: {
-    background: '#fff',
+    background: '#FFFFFF',
     borderRadius: '16px',
-    padding: '28px 32px',
-    marginBottom: '4px',
-    boxShadow: '0 4px 24px rgba(109,40,217,0.07)',
-    border: '1px solid rgba(124,58,237,0.08)',
+    padding: '32px',
+    border: '1px solid #E2E8F0',
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
   },
   stepNumber: {
     position: 'absolute', top: '24px', right: '24px',
@@ -357,49 +272,43 @@ const styles = {
     color: '#fff', fontWeight: 800, fontSize: '0.75rem',
   },
   stepIconWrap: {
-    width: '52px', height: '52px', borderRadius: '14px',
-    background: 'linear-gradient(135deg, #ede9fe, #ddd6fe)',
+    width: '48px', height: '48px', borderRadius: '12px',
+    background: '#F8FAFC',
+    border: '1px solid #E2E8F0',
     display: 'flex', alignItems: 'center', justifyContent: 'center',
-    marginBottom: '14px',
+    marginBottom: '20px',
   },
-  stepEmoji: { fontSize: '1.6rem' },
-  stepTitle: { margin: '0 0 6px', fontWeight: 700, color: '#1e1b4b', fontSize: '1.05rem' },
-  stepDesc: { margin: 0, color: '#6b7280', fontSize: '0.9rem', lineHeight: 1.6 },
-  tagsWrap: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '14px' },
+  stepEmoji: { fontSize: '1.4rem' },
+  stepTitle: { margin: '0 0 8px', fontWeight: 700, color: '#0F172A', fontSize: '1.2rem', fontFamily: "'Outfit', sans-serif" },
+  stepDesc: { margin: 0, color: '#475569', fontSize: '0.95rem', lineHeight: 1.6 },
+  tagsWrap: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '16px' },
   tag: {
-    padding: '4px 10px', borderRadius: '999px', fontSize: '0.78rem',
-    background: 'rgba(124,58,237,0.08)', color: '#7c3aed', fontWeight: 600,
-    border: '1px solid rgba(124,58,237,0.15)',
+    padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem',
+    background: 'rgba(124, 58, 237, 0.05)', color: '#7C3AED', fontWeight: 600,
+    border: '1px solid rgba(124, 58, 237, 0.2)',
   },
-  stepArrow: {
-    alignSelf: 'center', fontSize: '1.4rem', color: '#a78bfa',
-    marginTop: '16px', animation: 'bounce 1.5s infinite',
+  stepConnector: {
+    position: 'absolute',
+    bottom: '-16px',
+    left: '56px',
+    width: '2px',
+    height: '16px',
+    background: '#E2E8F0',
   },
   benefitsRow: {
-    display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '40px',
+    display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '20px',
   },
   benefitCard: {
-    flex: 1, minWidth: '180px',
-    background: '#fff',
-    borderRadius: '14px',
+    flex: 1, minWidth: '220px',
+    background: '#F8FAFC',
+    borderRadius: '16px',
     padding: '24px',
-    textAlign: 'center',
-    boxShadow: '0 4px 20px rgba(109,40,217,0.07)',
-    border: '1px solid rgba(124,58,237,0.08)',
+    border: '1px solid #E2E8F0',
+    textAlign: 'left',
   },
-  benefitIcon: { fontSize: '2rem', marginBottom: '10px' },
-  benefitTitle: { display: 'block', color: '#1e1b4b', marginBottom: '6px', fontSize: '0.95rem' },
-  benefitDesc: { margin: 0, color: '#6b7280', fontSize: '0.82rem', lineHeight: 1.6 },
-  ticker: {
-    textAlign: 'center',
-    padding: '14px 24px',
-    borderRadius: '12px',
-    background: 'linear-gradient(135deg, rgba(124,58,237,0.08), rgba(167,139,250,0.08))',
-    border: '1px solid rgba(124,58,237,0.15)',
-    fontSize: '0.85rem',
-    color: '#4b5563',
-    lineHeight: 1.8,
-  },
+  benefitIcon: { fontSize: '1.8rem', marginBottom: '16px' },
+  benefitTitle: { display: 'block', color: '#0F172A', marginBottom: '8px', fontSize: '1rem', fontWeight: 600 },
+  benefitDesc: { margin: 0, color: '#475569', fontSize: '0.85rem', lineHeight: 1.6 },
 };
 
 export default HowItWorks;

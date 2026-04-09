@@ -7,71 +7,70 @@ const AtyantJourneySlider = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   // 📸 Campus photos array - Cloudinary hosted images + YouTube video
-  // SEO-optimized with detailed alt text and descriptions
   const campusPhotos = [
     { 
       id: 1, 
       src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1773683474/Yellow_Modern_Untold_Mystery_YouTube_Thumbnail_5_1_eyzls9.png', 
-      caption: 'Atyant Journey 💻', 
+      caption: 'Atyant AI Trajectory 💻', 
       type: 'image',
-      alt: 'Atyant AI-powered student mentorship platform journey - connecting students with senior mentors for career guidance',
-      description: 'Overview of Atyant platform helping students with AI-matched senior mentorship and career roadmaps'
+      alt: 'Atyant AI-powered placement platform - connecting students with verified internship roadmaps',
+      description: 'Overview of Atyant AI platform helping students with intelligent internship and placement algorithms'
     },
     { 
       id: 11, 
       src: 'https://www.youtube.com/embed/40RwkrtP4dA', 
-     caption: 'IIM Mumbai Success Story 🎯', 
-type: 'video',
-alt: 'Atyant student testimonial - How he secured IIM Mumbai internship with Atyant mentorship and guidance',
-description: 'Video testimonial showcasing how Atyant helped a student successfully land an internship at IIM Mumbai through expert mentorship and preparation'
+      caption: 'IIM Mumbai Direct Match 🎯', 
+      type: 'video',
+      alt: 'Atyant student testimonial - How he secured IIM Mumbai internship with Atyant AI capabilities',
+      description: 'Video testimonial showcasing how Atyant matched a student perfectly for an internship at IIM Mumbai'
     },
     { 
       id: 2, 
       src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1773681257/IMG_20251107_172259_sgixft.jpg', 
-      caption: 'Campus Moments PCE 🎓', 
+      caption: 'PCE Placement Drive 🎓', 
       type: 'image',
-      alt: 'Atyant campus workshop at PCE - students learning about internships and placements guidance',
-      description: 'Atyant conducting mentorship workshop at PCE campus for placement preparation'
+      alt: 'Atyant campus workshop at PCE - students learning about AI placement and resume parsing',
+      description: 'Atyant conducting placement preparation using data-backed resume frameworks at PCE'
     },
     { 
       id: 3, 
       src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1773680981/WhatsApp_Image_2026-03-16_at_10.38.48_PM_pc7vaj.jpg', 
-      caption: 'Workshop Sessions At GHRC', 
+      caption: 'GHRC AI Roadmap Sessions', 
       type: 'image',
-      alt: 'Atyant career guidance workshop at GHRC - student mentor interaction sessions',
-      description: 'Interactive mentorship workshop at GHRC where students connect with experienced seniors'
+      alt: 'Atyant career trajectory engine workshop at GHRC',
+      description: 'Interactive AI roadmap session at GHRC where students connect with exactly matched senior solutions'
     },
     { 
       id: 5, 
       src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1773682691/IMG_20260202_140103_1_pqtfmc.jpg', 
       caption: 'ATYANT AT MANIT 🔥', 
       type: 'image',
-      alt: 'Atyant at MANIT Bhopal - NIT student mentorship and placement guidance program',
-      description: 'Atyant expanding to MANIT Bhopal NIT, providing AI-powered career guidance to engineering students'
+      alt: 'Atyant at MANIT Bhopal - NIT student placement and tech internship optimization',
+      description: 'Atyant expanding to MANIT Bhopal NIT, providing exact placement matching data'
     },
     { 
       id: 6, 
       src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1773680772/IMG_20260202_135846_bf3lyw.jpg', 
-      caption: 'ECELL MANIT + ATYANT Together 📚', 
+      caption: 'ECELL MANIT + ATYANT Tech 📚', 
       type: 'image',
-      alt: 'Atyant partnership with E-Cell MANIT for entrepreneurship and career mentorship',
-      description: 'Strategic collaboration between Atyant and E-Cell MANIT for student career development'
+      alt: 'Atyant partnership with E-Cell MANIT for AI software placements',
+      description: 'Strategic collaboration between Atyant and E-Cell MANIT for quantitative career development'
     },
     { 
       id: 9, 
       src: 'https://res.cloudinary.com/dny6dtmox/image/upload/v1770470903/Screenshot_2026-02-07_180106_yynpqs.png', 
-      caption: 'Growth & Success 🎯', 
+      caption: 'Algorithmic Growth 🎯', 
       type: 'image',
-      alt: 'Atyant platform growth metrics - successful student mentor connections and career outcomes',
-      description: 'Demonstrating Atyant impact through student success stories and mentorship outcomes'
+      alt: 'Atyant platform growth metrics - accurate student outcome matching',
+      description: 'Demonstrating Atyant impact through data points and placement successes'
     },
     { 
       id: 10, 
       src: 'https://www.youtube.com/embed/gLkwflzjU88', 
-      caption: 'Watch Our First Pitch🎥', 
+      caption: 'Watch Our Platform Pitch 🎥', 
       type: 'video',
-      alt: 'Atyant First Pitchvideo - how AI matches students with senior mentors for career success',
-      description: 'Video showcasing Atyant First Pitch in revolutionizing student mentorship through AI'
+      alt: 'Atyant First Pitch - how our engine resolves student blockers for career success',
+      description: 'Video showcasing Atyant AI architecture revolutionizing student placements'
     },
   ];
 
@@ -85,43 +84,6 @@ description: 'Video testimonial showcasing how Atyant helped a student successfu
 
     return () => clearInterval(interval);
   }, [isAutoPlaying, campusPhotos.length]);
-
-  // Generate Schema.org structured data for SEO
-  const generateSchemaMarkup = () => {
-    const imageObjects = campusPhotos
-      .filter(photo => photo.type === 'image')
-      .map(photo => ({
-        "@type": "ImageObject",
-        "contentUrl": photo.src,
-        "description": photo.description,
-        "name": photo.caption,
-        "caption": photo.caption
-      }));
-
-    const schema = {
-      "@context": "https://schema.org",
-      "@type": "ImageGallery",
-      "name": "Atyant Journey - Student Mentorship Platform Campus Activities",
-      "description": "Photo gallery showcasing Atyant AI-powered student mentorship platform journey across top engineering colleges including MANIT, VNIT, GHRC, and PCE. Features workshops, mentorship sessions, and student success stories.",
-      "image": imageObjects,
-      "author": {
-        "@type": "Organization",
-        "name": "Atyant",
-        "url": "https://atyant.in"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Atyant",
-        "url": "https://atyant.in",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://atyant.in/favicon.png"
-        }
-      }
-    };
-
-    return schema;
-  };
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % campusPhotos.length);
@@ -141,56 +103,32 @@ description: 'Video testimonial showcasing how Atyant helped a student successfu
   return (
     <section 
       className="journey-slider-section" 
-      itemScope 
-      itemType="https://schema.org/ImageGallery"
       aria-label="Atyant Journey Photo Gallery"
     >
-      {/* Schema.org Structured Data for Rich Snippets */}
-      <script 
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(generateSchemaMarkup()) }}
-      />
-
+      <div className="journey-grid-pattern"></div>
       <div className="journey-container">
-        {/* 🎯 SEO-Optimized Heading with Semantic HTML */}
+        
+        {/* 🎯 SEO-Optimized Heading */}
         <header className="journey-header">
           <div className="heading-wrapper">
-            <span className="heading-icon" aria-hidden="true">✨</span>
-            <h2 className="journey-title" itemProp="name">
-              My Journey with Atyant: Student Mentorship Success Stories
-            </h2>
-            <span className="heading-icon" aria-hidden="true">✨</span>
+          <span className="journey-badge">DATA & OUTCOMES</span>
           </div>
-          <p className="journey-subtitle" itemProp="description">
-           
+          <h2 className="journey-title">
+            The Atyant Trajectory: <br/>
+            <span className="journey-title-highlight">Proven Internship & Placement Outcomes</span>
+          </h2>
+          <p className="journey-subtitle">
+            See the real-world tech and product outcomes built through our career analytics engine.
           </p>
-          
-          {/* SEO Content - Hidden but crawlable */}
-          <div className="seo-content" style={{ position: 'absolute', left: '-9999px' }}>
-            <h3>About This Gallery</h3>
-            <p>
-              This photo gallery showcases Atyant platform journey in revolutionizing student 
-              mentorship across India premier engineering institutions. From workshops at GHRC 
-              to partnerships with E-Cell MANIT, see how we connecting students with senior 
-              mentors for internship guidance, placement preparation, and career roadmaps.
-            </p>
-            <p>
-              Features include: AI-powered mentor matching, campus workshops, Inter NIT presentations, 
-              student success stories, and community building at top engineering colleges. 
-              Keywords: student mentorship, career guidance, placement preparation, internship help, 
-              senior advice, engineering college mentorship, AI career guidance India.
-            </p>
-          </div>
         </header>
 
-        {/* 🎨 Slider Container with 3D Effect and SEO Optimization */}
+        {/* 🎨 Slider Container */}
         <div className="slider-wrapper" role="region" aria-roledescription="carousel" aria-label="Atyant Journey Image Carousel">
           <div 
             className="slides-container"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
             role="group"
             aria-live="polite"
-            aria-atomic="false"
           >
             {campusPhotos.map((photo, index) => (
               <article 
@@ -200,9 +138,6 @@ description: 'Video testimonial showcasing how Atyant helped a student successfu
                 aria-roledescription="slide"
                 aria-label={`Slide ${index + 1} of ${campusPhotos.length}: ${photo.caption}`}
                 aria-hidden={index !== currentSlide}
-                itemProp="associatedMedia"
-                itemScope
-                itemType="https://schema.org/ImageObject"
               >
                 <div className="slide-image-wrapper">
                   {photo.type === 'video' ? (
@@ -213,7 +148,6 @@ description: 'Video testimonial showcasing how Atyant helped a student successfu
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                       loading="lazy"
-                      itemProp="contentUrl"
                     />
                   ) : (
                     <>
@@ -223,29 +157,24 @@ description: 'Video testimonial showcasing how Atyant helped a student successfu
                         title={photo.caption}
                         className="slide-image"
                         loading={index === 0 ? 'eager' : 'lazy'}
-                        decoding="async"
-                        itemProp="contentUrl"
                         width="1200"
                         height="675"
                       />
-                      <meta itemProp="name" content={photo.caption} />
-                      <meta itemProp="description" content={photo.description} />
                     </>
                   )}
                   <div className="slide-overlay">
-                    <p className="slide-caption" itemProp="caption">{photo.caption}</p>
+                    <p className="slide-caption">{photo.caption}</p>
                   </div>
                 </div>
               </article>
             ))}
           </div>
 
-          {/* 🎮 Navigation Controls with Accessibility */}
+          {/* 🎮 Navigation Controls */}
           <button 
             className="nav-btn prev-btn" 
             onClick={prevSlide}
-            aria-label="View previous slide in Atyant journey gallery"
-            aria-controls="journey-slides"
+            aria-label="View previous slide"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -254,46 +183,36 @@ description: 'Video testimonial showcasing how Atyant helped a student successfu
           <button 
             className="nav-btn next-btn" 
             onClick={nextSlide}
-            aria-label="View next slide in Atyant journey gallery"
-            aria-controls="journey-slides"
+            aria-label="View next slide"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
 
-          {/* 🔵 Dot Indicators with Semantic Labels */}
-          <div className="dots-container" role="tablist" aria-label="Gallery slide selection">
+          {/* 🔵 Dot Indicators */}
+          <div className="dots-container" role="tablist">
             {campusPhotos.map((photo, index) => (
               <button
                 key={index}
                 className={`dot ${index === currentSlide ? 'active' : ''}`}
                 onClick={() => goToSlide(index)}
                 role="tab"
-                aria-label={`Go to slide ${index + 1}: ${photo.caption}`}
+                aria-label={`Go to slide ${index + 1}`}
                 aria-selected={index === currentSlide}
-                aria-controls={`slide-${index}`}
                 tabIndex={index === currentSlide ? 0 : -1}
               />
             ))}
           </div>
 
-          {/* ⏯️ Auto-play Toggle with Clear Labels */}
+          {/* ⏯️ Auto-play Toggle */}
           <button 
             className="autoplay-toggle"
             onClick={() => setIsAutoPlaying(!isAutoPlaying)}
             aria-label={isAutoPlaying ? 'Pause automatic slideshow' : 'Play automatic slideshow'}
-            aria-pressed={isAutoPlaying}
           >
             {isAutoPlaying ? '⏸️' : '▶️'}
           </button>
-        </div>
-
-        {/* 📊 Slide Counter with Semantic HTML */}
-        <div className="slide-counter" role="status" aria-live="polite" aria-atomic="true">
-          <span className="current-slide" aria-label="Current slide">{currentSlide + 1}</span>
-          <span className="counter-divider" aria-hidden="true">/</span>
-          <span className="total-slides" aria-label="Total slides">{campusPhotos.length}</span>
         </div>
       </div>
     </section>

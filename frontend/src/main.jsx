@@ -28,14 +28,13 @@ initCarouselFix();
 //   });
 // }
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '906654136908-78n0mflji3f1tipai19auc545bf96tdj.apps.googleusercontent.com';
 
 // Debug: Check if client ID is loaded
-if (!GOOGLE_CLIENT_ID) {
-  console.error('❌ VITE_GOOGLE_CLIENT_ID is not defined!');
-  console.log('Available env vars:', import.meta.env);
+if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
+  console.warn('⚠️ VITE_GOOGLE_CLIENT_ID missing in .env, using hardcoded fallback');
 } else {
-  console.log('✅ Google Client ID loaded successfully');
+  console.log('✅ Google Client ID loaded from .env');
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

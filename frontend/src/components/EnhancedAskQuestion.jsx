@@ -376,6 +376,8 @@ const EnhancedAskQuestion = () => {
   const [forceLive, setForceLive] = useState(false);
   const [errors, setErrors] = useState({});
   const [currentStep, setCurrentStep] = useState(1);
+  const [autoRecommended, setAutoRecommended] = useState(null);
+  const [userManuallySelected, setUserManuallySelected] = useState(false);
 
   const [ui, setUi] = useState({
     findingMentor: false,
@@ -434,6 +436,41 @@ const EnhancedAskQuestion = () => {
     }
     checkEligibility();
   }, [token, navigate, checkEligibility]);
+
+  // ─── Auto-Categorization based on Question Text ────────────────────────────
+  useEffect(() => {
+    if (userManuallySelected) return; // Respect user choice
+
+    const text = (formData.title + ' ' + formData.description).toLowerCase();
+    if (text.length < 5) return;
+
+    const rules = [
+      { category: 'Consulting', keywords: ['iim', 'mba', 'consulting', 'business', 'case interview', 'mckinsey', 'bain', 'bcg'] },
+      { category: 'Tech', keywords: ['iit', 'software', 'developer', 'coding', 'dsa', 'web', 'app', 'sde', 'react', 'java', 'frontend', 'backend'] },
+      { category: 'Data Analytics', keywords: ['data', 'analytics', 'machine learning', 'ai', 'sql', 'python', 'analyst', 'dashboard'] },
+      { category: 'Product', keywords: ['product manager', 'pm', 'product management', 'roadmap', 'agile'] },
+      { category: 'Core Engineering', keywords: ['mechanical', 'civil', 'chemical', 'electrical', 'core engineering', 'gate'] }
+    ];
+
+    let matchedCategory = null;
+    let highestScore = 0;
+
+    rules.forEach(rule => {
+      let score = 0;
+      rule.keywords.forEach(kw => {
+        if (text.includes(kw)) score++;
+      });
+      if (score > highestScore) {
+        highestScore = score;
+        matchedCategory = rule.category;
+      }
+    });
+
+    if (matchedCategory && matchedCategory !== autoRecommended) {
+      setFormData(prev => ({ ...prev, category: matchedCategory }));
+      setAutoRecommended(matchedCategory);
+    }
+  }, [formData.title, formData.description, userManuallySelected, autoRecommended]);
 
   // ─── Edit timer ───────────────────────────────────────────────────────────
 
@@ -786,11 +823,21 @@ const EnhancedAskQuestion = () => {
                   <button
                     type="button"
                     key={value}
-                    className={`aq-domain-btn ${formData.category === value ? 'selected' : ''}`}
-                    onClick={() => { setFormData((p) => ({ ...p, category: value })); setErrors((p) => ({ ...p, category: null })); }}
+                    className={`aq-domain-btn ${formData.category === value ? 'selected' : ''} ${autoRecommended === value ? 'recommended' : ''}`}
+                    onClick={() => { 
+                      setFormData((p) => ({ ...p, category: value })); 
+                      setErrors((p) => ({ ...p, category: null })); 
+                      setUserManuallySelected(true);
+                      if (autoRecommended !== value) setAutoRecommended(null);
+                    }}
                   >
+                    {autoRecommended === value && (
+                      <div style={{ position: 'absolute', top: -10, right: -10, background: '#7C3AED', color: 'white', fontSize: '10px', padding: '2px 8px', borderRadius: '12px', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.2)'}}>
+                        ✨ Recommended
+                      </div>
+                    )}
                     <span className="aq-domain-icon">{icon}</span>
-                    <span>{label}</span>
+                    <span className="aq-domain-label">{label}</span>
                   </button>
                 ))}
               </div>

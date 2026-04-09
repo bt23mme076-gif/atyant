@@ -1,28 +1,23 @@
 :root {
-  --nav-bg:linear-gradient(180deg, rgba(26, 31, 58, 0.92) 0%, rgba(21, 27, 53, 0.88) 100%);
-  --nav-gradient: linear-gradient(90deg, #ffffff 0%, #ffffff 100%);
-  --nav-blur: 24px;
-  --brand-glow: 0 0 16px 4px #3b82f6, 0 0 1.2px 1.2px #3b82f6;
-  --brand-border: linear-gradient(120deg, #3b82f6 20%, #06b6d4 80%);
+  --nav-bg: rgba(11, 15, 25, 0.85); /* Deep AI background match */
+  --nav-blur: 40px;
+  --brand-glow: 0 0 20px rgba(124, 58, 237, 0.4);
   --nav-radius: 0px;
-  --nav-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  --nav-text: #ffffff;
-  --brand-font: 'Montserrat', 'Quicksand', 'Segoe UI', Arial, sans-serif;
-  --nav-link-radius: 10px;
-  --nav-link-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
-  --nav-btn-grad: linear-gradient(90deg, #3b82f6 40%, #06b6d4 98%);
-  --nav-btn-hover: linear-gradient(90deg, #2563eb 50%, #0891b2 100%);
-  --badge-bg: #ef4444;
-  --nav-panel: rgba(26, 31, 58, 0.95);
+  --nav-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  --nav-text: #CBD5E1;
+  --nav-text-hover: #FFFFFF;
+  --brand-font: 'Outfit', 'Inter', sans-serif;
+  --nav-link-radius: 8px;
+  --nav-link-shadow: 0 4px 16px rgba(124, 58, 237, 0.2);
+  --nav-btn-grad: linear-gradient(135deg, #7C3AED 0%, #3B82F6 100%);
+  --nav-btn-hover: linear-gradient(135deg, #6D28D9 0%, #2563EB 100%);
+  --badge-bg: #EF4444;
+  --nav-panel: rgba(15, 23, 42, 0.95);
 
-  --dropdown-bg: rgba(30, 41, 59, 0.98);
-  --dropdown-border: rgba(59, 130, 246, 0.3);
-  --dropdown-shadow: 0 18px 44px rgba(0, 0, 0, 0.4);
-  --muted: #cbd5e1;
-  
-  /* ✅ NEW: Nearby Mentors specific colors */
-  --nearby-icon-glow: 0 0 12px #ff6b6b88, 0 0 4px #ff6b6b;
-  --nearby-bg-hover: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.15));
+  --dropdown-bg: rgba(15, 23, 42, 0.98);
+  --dropdown-border: rgba(124, 58, 237, 0.2);
+  --dropdown-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  --muted: #94A3B8;
 }
 
 /* Container and brand */
@@ -34,10 +29,11 @@
   gap: 12px;
   padding: 8px 24px;
   background: var(--nav-bg);
-  box-shadow: var(--nav-shadow);
+  box-shadow: none;
   border-radius: 0;
   backdrop-filter: blur(var(--nav-blur));
-  border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+  -webkit-backdrop-filter: blur(var(--nav-blur));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   position: sticky;
   top: 0;
   z-index: 1001;
@@ -56,21 +52,20 @@
 .brand {
   border: none;
   text-decoration: none !important;
-  border-bottom: none !important;
   font-family: var(--brand-font);
-  font-weight: 900;
-  font-size: 2.0rem;
-  color: #ffffff;
-  padding: 10px 10px;
-  border-radius: 14px;
-  letter-spacing: 1.4px;
-  transition: color 0.3s, transform 0.20s, text-shadow 0.3s;
+  font-weight: 800;
+  font-size: 1.8rem;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #7C3AED, #3B82F6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: transform 0.3s ease, filter 0.3s ease;
   cursor: pointer;
 }
 .brand:hover {
-  color: #f093fb;
-  transform: scale(1.06) rotate(-1deg);
-  text-shadow: 0 0 20px rgba(240, 147, 251, 0.6);
+  transform: scale(1.02);
+  filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.3));
 }
 
 /* Desktop link row */
@@ -86,45 +81,26 @@
 .nav-link,
 .nav-button {
   font-family: var(--brand-font);
-  padding: 11px 20px;
+  padding: 8px 16px;
   border-radius: var(--nav-link-radius);
-  color: var(--nav-text);
-  font-size: 1.07rem;
+  color: #94A3B8; /* Muted base color */
+  font-size: 0.95rem;
   border: none;
   background: transparent;
   position: relative;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   box-shadow: none;
-  transition:
-    background .20s cubic-bezier(.42,0,.58,1),
-    box-shadow .15s,
-    color .17s,
-    transform .17s;
+  transition: color 0.2s ease, background 0.2s ease, transform 0.2s ease;
   outline: none;
-}
-.nav-link::after, .nav-button::after {
-  content: "";
-  display: block;
-  position: absolute; bottom:7px; left:27%; width:46%;
-  height: 2.4px;
-  border-radius: 3px;
-  background: linear-gradient(90deg, #39e7fa 0%, #b07fff 95%);
-  opacity: 0;
-  transform: scaleX(0.48);
-  transition: opacity .23s, transform .12s;
 }
 .nav-link:hover,
 .nav-button:hover {
-  background: rgba(59, 130, 246, 0.15);
-  color: #ffffff;
-  box-shadow: var(--nav-link-shadow);
-  transform: scale(1.06);
+  background: rgba(255, 255, 255, 0.05);
+  color: #FFFFFF;
+  transform: translateY(-1px);
 }
-.nav-link:hover::after, .nav-button:hover::after {
-  opacity: 1;
-  transform: scaleX(1.08);
-}
+/* Removed duplicate */
 
 /* ✅ Mentor Dashboard Link Styling */
 .nav-link.dashboard-link {

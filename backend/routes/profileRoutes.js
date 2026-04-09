@@ -4,6 +4,11 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import cloudinary from '../config/cloudinary.js';
 import protect from '../middleware/authMiddleware.js';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -164,6 +169,64 @@ router.post('/upload-picture', protect, upload.single('profilePicture'), async (
   } catch (error) {
     console.error('POST /upload-picture error:', error);
     res.status(500).json({ message: 'Upload failed', error: error.message });
+  }
+});
+
+// ─────────────────────────────────────────────
+//  POST /parse-linkedin  — Extract Profile Data
+// ─────────────────────────────────────────────
+router.post('/parse-linkedin', protect, upload.single('resumePdf'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+    // 1. Convert PDF to Text
+    const pdfData = await pdfParse(req.file.buffer);
+    const resumeText = pdfData.text;
+
+    if (!resumeText || resumeText.length < 50) {
+      return res.status(400).json({ message: 'Could not read text from PDF.' });
+    }
+
+    // 2. Call Gemini API to extract data
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = `
+      You are an expert resume parser. Extract profile details from the text below.
+      Format the output ONLY as a strict JSON object matching this schema exactly:
+      {
+        "bio": "A precise 2-sentence professional summary",
+        "city": "Extracted City Name (e.g. Pune, Bangalore, Delhi)",
+        "topCompanies": ["Company1", "Company2"],
+        "expertise": ["Skill1", "Skill2", "Skill3"],
+        "education": [
+          {
+            "institution": "Full College Name", 
+            "degree": "Clean Degree Name (e.g. B.Tech, Master's)", 
+            "year": "Graduation Year (YYYY)", 
+            "field": "Branch/Major (e.g. Computer Science)"
+          }
+        ]
+      }
+      
+      RULES:
+      - Return ONLY raw JSON, NO markdown wrapping (no \`\`\`json).
+      - If a field is not found, leave it empty.
+      
+      RESUME TEXT:
+      ${resumeText.substring(0, 8000)}
+    `;
+
+    const result = await model.generateContent(prompt);
+    let cleanJson = result.response.text();
+    // Strip markdown formatting if AI accidentally adds it
+    cleanJson = cleanJson.replace(/```json/g, '').replace(/```/g, '').trim();
+
+    const parsedData = JSON.parse(cleanJson);
+    res.json({ success: true, data: parsedData });
+  } catch (error) {
+    console.error('POST /parse-linkedin error:', error);
+    res.status(500).json({ message: 'Failed to process resume', error: error.message });
   }
 });
 

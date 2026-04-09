@@ -1,114 +1,102 @@
-/* 🎨 Atyant Journey Slider - Exciting Choudary Flow Design */
+/* 🎨 Atyant Journey Slider - AI Theme */
 
 .journey-slider-section {
-  padding: 40px 10px; /* Reduced from 10px 10px (was likely 80px+ before) */
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 80px 10px;
+  background: #0F172A; /* Standard Deep Dark for AI Theme */
   position: relative;
   overflow: hidden;
+  font-family: 'Inter', -apple-system, sans-serif;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* ✨ Animated Background Particles */
-.journey-slider-section::before {
-  content: '';
+.journey-grid-pattern {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background-image: 
-    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-  animation: particleFloat 15s ease-in-out infinite;
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+  mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
   pointer-events: none;
-}
-
-@keyframes particleFloat {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+  z-index: 0;
 }
 
 .journey-container {
-  max-width: 900px; /* Reduced from 1200px */
+  max-width: 1000px;
   margin: 0 auto;
   position: relative;
   z-index: 1;
 }
 
-/* 🎯 Exciting Header Animation */
+/* 🎯 Header */
 .journey-header {
   text-align: center;
   margin-bottom: 50px;
-  animation: fadeInDown 1s ease-out;
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .heading-wrapper {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 15px;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
-.heading-icon {
-  font-size: 2rem;
-  animation: sparkle 2s ease-in-out infinite;
-}
-
-@keyframes sparkle {
-  0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
-  50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+.journey-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(124, 58, 237, 0.1);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 100px;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: #7C3AED;
 }
 
 .journey-title {
-  font-size: 3rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
   font-weight: 800;
-  background: linear-gradient(135deg, #fff, #f0f0f0);
+  color: #fff;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.journey-title-highlight {
+  background: linear-gradient(135deg, #7C3AED, #3B82F6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  margin: 0;
-  letter-spacing: -1px;
 }
 
 .journey-subtitle {
-  color: #000000; /* changed to black per request */
+  color: #94A3B8;
   font-size: 1.1rem;
-  font-weight: 300;
-  margin: 0;
+  font-weight: 400;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
-/* 🎨 Slider Wrapper with 3D Perspective */
+/* 🎨 Slider Wrapper */
 .slider-wrapper {
   position: relative;
   width: 100%;
   height: 500px;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.2);
-  perspective: 1000px;
-  transform-style: preserve-3d;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* 🎬 Slides Container */
 .slides-container {
   display: flex;
   height: 100%;
-  transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
 }
 
@@ -116,9 +104,9 @@
   min-width: 100%;
   height: 100%;
   position: relative;
-  opacity: 0.6;
+  opacity: 0.4;
   transform: scale(0.95);
-  transition: all 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .slide.active {
@@ -140,24 +128,15 @@
   transition: transform 0.8s ease;
 }
 
+.slide.active .slide-image {
+  transform: scale(1);
+}
+
 .slide-video {
   width: 100%;
   height: 100%;
   border: none;
-  border-radius: 0;
-}
-
-.slide.active .slide-image {
-  animation: zoomIn 0.8s ease-out;
-}
-
-@keyframes zoomIn {
-  from {
-    transform: scale(1.1);
-  }
-  to {
-    transform: scale(1);
-  }
+  background: #000;
 }
 
 /* 🎭 Slide Overlay */
@@ -166,10 +145,10 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-  padding: 40px 30px 30px;
+  background: linear-gradient(to top, rgba(11, 15, 25, 1) 0%, transparent 100%);
+  padding: 60px 40px 40px;
   transform: translateY(100%);
-  transition: transform 0.5s ease;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .slide.active .slide-overlay {
@@ -177,23 +156,11 @@
 }
 
 .slide-caption {
-  color: #f8f8f8;
-  font-size: 1.5rem;
-  font-weight: 600;
+  color: #fff;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
   margin: 0;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  animation: slideUp 0.6s ease-out 0.3s backwards;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* 🎮 Navigation Buttons */
@@ -201,8 +168,9 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -210,59 +178,45 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #667eea;
+  color: #fff;
   transition: all 0.3s ease;
   z-index: 10;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .nav-btn:hover {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.1);
   transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-.nav-btn:active {
-  transform: translateY(-50%) scale(0.95);
-}
-
-.prev-btn {
-  left: 20px;
-}
-
-.next-btn {
-  right: 20px;
-}
+.prev-btn { left: 20px; }
+.next-btn { right: 20px; }
 
 /* 🔵 Dot Indicators */
 .dots-container {
   position: absolute;
-  bottom: 20px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 10px;
+  gap: 12px;
   z-index: 10;
 }
 
 .dot {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  border: 2px solid #fff;
-  background: transparent;
+  border: none;
+  background: rgba(255, 255, 255, 0.2);
   cursor: pointer;
   transition: all 0.3s ease;
   padding: 0;
 }
 
-.dot:hover {
-  background: rgba(255, 255, 255, 0.5);
-  transform: scale(1.2);
-}
+.dot:hover { background: rgba(124, 58, 237, 0.6); }
 
 .dot.active {
-  background: #fff;
+  background: #7C3AED;
   width: 30px;
   border-radius: 6px;
 }
@@ -272,8 +226,9 @@
   position: absolute;
   top: 20px;
   right: 20px;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   width: 45px;
   height: 45px;
   border-radius: 50%;
@@ -281,130 +236,24 @@
   font-size: 1.2rem;
   transition: all 0.3s ease;
   z-index: 10;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .autoplay-toggle:hover {
-  background: #fff;
-  transform: scale(1.1);
-}
-
-/* 📊 Slide Counter */
-.slide-counter {
-  text-align: center;
-  margin-top: 30px;
-  font-size: 1.2rem;
-  color: #1e293b;
-  font-weight: 600;
-  letter-spacing: 2px;
-}
-
-.current-slide {
-  font-size: 2rem;
-  background: linear-gradient(135deg, #fff, #f0f0f0);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.counter-divider {
-  margin: 0 10px;
-  opacity: 0.7;
-}
-
-.total-slides {
-  opacity: 0.8;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* 📱 Responsive Design */
 @media (max-width: 768px) {
-  .journey-title {
-    font-size: 2rem;
-  }
-
-  .heading-icon {
-    font-size: 1.5rem;
-  }
-
-  .journey-subtitle {
-    font-size: 0.9rem;
-  }
-
-  .slider-wrapper {
-    height: 350px;
-  }
-
-  .slide-caption {
-    font-size: 1.1rem;
-  }
-
-  .nav-btn {
-    width: 40px;
-    height: 40px;
-  }
-
-  .prev-btn {
-    left: 10px;
-  }
-
-  .next-btn {
-    right: 10px;
-  }
-
-  .slide-counter {
-    font-size: 1rem;
-  }
-
-  .current-slide {
-    font-size: 1.5rem;
-  }
+  .journey-slider-section { padding: 60px 16px; }
+  .slider-wrapper { height: 350px; }
+  .slide-caption { font-size: 1.2rem; }
+  .nav-btn { width: 40px; height: 40px; }
+  .slide-overlay { padding: 40px 20px 24px; }
 }
 
 @media (max-width: 480px) {
-  .journey-slider-section {
-    padding: 60px 15px;
-  }
-
-  .slider-wrapper {
-    height: 280px;
-    border-radius: 15px;
-  }
-
-  .journey-title {
-    font-size: 1.5rem;
-  }
-
-  .slide-caption {
-    font-size: 0.9rem;
-    padding: 30px 20px 20px;
-  }
-}
-
-/* 🎯 Hover Effects for Desktop */
-@media (hover: hover) {
-  .slide-image-wrapper:hover .slide-image {
-    transform: scale(1.05);
-  }
-}
-
-/* 🔍 SEO Content - Hidden but Crawlable */
-.seo-content {
-  position: absolute;
-  left: -9999px;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-
-/* Ensure images are optimized for Core Web Vitals */
-.slide-image {
-  content-visibility: auto;
-  contain-intrinsic-size: 1200px 675px;
-}
-
-/* Preload optimization for first slide */
-.slide:first-child .slide-image {
-  priority: high;
+  .slider-wrapper { height: 280px; border-radius: 16px; }
 }

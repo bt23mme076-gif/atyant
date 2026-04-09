@@ -33,11 +33,11 @@ const HeroSection = () => {
   ];
 
   const fallbackQuestions = [
-    "Placement roadmap from 1st–4th year",
-    "Resume tips for top companies",
-    "How to crack Google from my branch?",
-    "How to crack Amazon placements?",
-    "How to get shortlisted for internships?"
+    "Generate a structured DSA roadmap",
+    "How to get shortlists for product roles",
+    "Analyze my resume for ATS matching",
+    "Identify exact gaps in my prep",
+    "Connect me with someone who solved this"
   ];
 
   const quickPills = [
@@ -232,7 +232,7 @@ const HeroSection = () => {
         {/* Badge */}
         <div className="hero-badge">
           <span className="hero-badge-dot" />
-          AI-powered mentorship — free for students
+          Atyant AI Guidance Engine
         </div>
 
         {/* Heading */}
@@ -243,12 +243,12 @@ const HeroSection = () => {
 
         {/* Subtitle */}
         <p className="hero-subtitle">
-          Stop guessing. Ask your exact placement, internship, or exam doubt — our AI finds the right senior mentor who's already been through it.
+          Stop guessing. Ask your exact placement, internship, or exam doubt Our AI finds the right senior mentor who's already been through
         </p>
 
         {/* Typewriter Rotating Questions */}
         <div className="hero-rotating-questions" onClick={handleQuestionClick}>
-          <span className="hero-rotating-label">💬 Students ask</span>
+          <span className="hero-rotating-label"></span>
           <div className="hero-question-rotator">
             <span className="hero-rotating-text">
               {displayText}
@@ -267,10 +267,9 @@ const HeroSection = () => {
               <input
                 type="text"
                 className="hero-ask-input"
-                placeholder="Ask your exact problem (AI finds the right seniors for you)"
+                placeholder="Describe your current blocker or goal..."
                 value={problem}
                 onChange={e => setProblem(e.target.value)}
-                onFocus={() => !problem && user && setShowSuggestions(true)}
                 maxLength={500}
                 required
               />
@@ -279,33 +278,6 @@ const HeroSection = () => {
             <button type="submit" className="hero-ask-button" disabled={submitting}>
               {submitting ? '...' : 'Get my answer'}
             </button>
-
-            {/* AI Suggestions Dropdown */}
-            {showSuggestions && !problem && user && (
-              <div className="hero-ai-dropdown">
-                <div className="hero-ai-dropdown-title">
-                  {loadingSuggestions ? '🔄 Loading...' : '🤖 AI-suggested questions:'}
-                </div>
-                {loadingSuggestions ? (
-                  <div className="hero-ai-loader">
-                    <div className="hero-spinner" />
-                  </div>
-                ) : (
-                  suggestedQuestions.slice(0, 5).map((sq, idx) => (
-                    <div
-                      key={idx}
-                      className="hero-ai-suggestion-item"
-                      onClick={() => {
-                        setProblem(sq);
-                        setShowSuggestions(false);
-                      }}
-                    >
-                      {sq}
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
           </div>
         </form>
 
@@ -322,10 +294,10 @@ const HeroSection = () => {
         {showConfirmPrompt && (
           <div className="hero-confirm-overlay" role="dialog" aria-modal="true" onClick={() => setShowConfirmPrompt(false)}>
             <div className="hero-confirm-card" onClick={(e) => e.stopPropagation()}>
-              <p className="hero-confirm-label">Ready to get your answer?</p>
-              <h3>Let's find the perfect mentor for you</h3>
+              <p className="hero-confirm-label">Analyzing request...</p>
+              <h3>Initializing Match</h3>
               <p className="hero-confirm-body">
-                We'll match your question with experienced mentors and guide you through a personalized answer flow.
+                Our semantic engine will process your query and connect you with the most relevant verified solution pathways.
               </p>
               <div className="hero-confirm-actions">
                 <button type="button" className="hero-confirm-edit" onClick={() => setShowConfirmPrompt(false)}>
@@ -339,7 +311,7 @@ const HeroSection = () => {
                     sendQuestion();
                   }}
                 >
-                  Continue to submit
+                  Run Query
                 </button>
               </div>
             </div>
@@ -350,33 +322,20 @@ const HeroSection = () => {
         <div className="hero-stats" ref={statsRef}>
           <div className="hero-stat-item">
             <span className="hero-stat-number">{counters.students.toLocaleString()}+</span>
-            <span className="hero-stat-label">Students Helped</span>
+            <span className="hero-stat-label">STUDENTS HELPED</span>
           </div>
           <div className="hero-stat-divider" />
           <div className="hero-stat-item">
             <span className="hero-stat-number">{counters.mentors}+</span>
-            <span className="hero-stat-label">Verified Mentors</span>
+            <span className="hero-stat-label">VERIFIED MENTORS</span>
           </div>
           <div className="hero-stat-divider" />
           <div className="hero-stat-item">
-            <span className="hero-stat-number">{counters.support}/7</span>
-            <span className="hero-stat-label">AI Support</span>
+            <span className="hero-stat-number">24/7</span>
+            <span className="hero-stat-label">AI SUPPORT</span>
           </div>
         </div>
 
-        {/* Social Proof */}
-        <div className="hero-social-proof">
-          <div className="hero-avatar-stack">
-            <div className="hero-avatar hero-avatar-1">A</div>
-            <div className="hero-avatar hero-avatar-2">R</div>
-            <div className="hero-avatar hero-avatar-3">P</div>
-            <div className="hero-avatar hero-avatar-4">S</div>
-            <div className="hero-avatar hero-avatar-5">M</div>
-          </div>
-          <span className="hero-social-text">
-            <strong>50+ students</strong> asked questions today
-          </span>
-        </div>
       </div>
     </section>
   );

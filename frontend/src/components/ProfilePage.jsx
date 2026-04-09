@@ -254,6 +254,57 @@ const ProfilePage = () => {
     }
   };
 
+  // LinkedIn / Resume PDF Parsing
+  const [isParsing, setIsParsing] = useState(false);
+
+  const handleResumeUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsParsing(true);
+    setMessage({ text: 'AI is reading your LinkedIn Profile...', type: 'success' });
+
+    const uploadData = new FormData();
+    uploadData.append('resumePdf', file);
+
+    try {
+      const res = await fetch(`${API_URL}/api/profile/parse-linkedin`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${user.token}` },
+        body: uploadData
+      });
+      
+      const resData = await res.json();
+      
+      if (res.ok && resData.success) {
+        const parsed = resData.data;
+        
+        setFormData(prev => {
+          const newEdu = Array.isArray(parsed.education) && parsed.education.length > 0 
+            ? parsed.education 
+            : prev.education;
+
+          return {
+            ...prev,
+            bio: parsed.bio || prev.bio,
+            city: parsed.city || prev.city,
+            topCompanies: [...new Set([...(prev.topCompanies || []), ...(parsed.topCompanies || [])])],
+            expertise: [...new Set([...(prev.expertise || []), ...(parsed.expertise || [])])],
+            education: newEdu
+          };
+        });
+        setMessage({ text: '✨ Form auto-filled magic successful!', type: 'success' });
+      } else {
+        setMessage({ text: resData.message || 'Failed to parse resume.', type: 'error' });
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage({ text: 'An error occurred during AI extraction.', type: 'error' });
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
   // Form handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -467,27 +518,64 @@ const ProfilePage = () => {
           )}
         </div>
 
-        {/* Profile Picture Section */}
+        {/* LinkedIn-style Top Profile Card */}
         <div className="profile-picture-container">
-          <img 
-            src={imagePreview || `https://ui-avatars.com/api/?name=${formData.username || 'User'}&background=random&size=150`} 
-            alt="Profile" 
-            className="profile-avatar" 
-          />
+          <div className="profile-banner-bg"></div>
           
-          <input 
-            type="file" 
-            id="imageUpload" 
-            accept="image/*" 
-            onChange={handleImageChange} 
-            style={{ display: 'none' }} 
-          />
-          <label htmlFor="imageUpload" className="upload-btn">Choose Image</label>
-          {imageFile && (
-            <button onClick={handleImageUpload} className="save-photo-btn" disabled={loading}>
-              Save Photo
-            </button>
-          )}
+          <div className="profile-header-content">
+            <div className="avatar-wrapper">
+              <img 
+                src={imagePreview || `https://ui-avatars.com/api/?name=${formData.username || 'User'}&background=random&size=150`} 
+                alt="Profile" 
+                className="profile-avatar" 
+              />
+              <input 
+                type="file" 
+                id="imageUpload" 
+                accept="image/*" 
+                onChange={handleImageChange} 
+                style={{ display: 'none' }} 
+              />
+            </div>
+
+            <div className="profile-text-header">
+              <h1>{formData.username || 'Your Name'}</h1>
+              <p className="profile-headline">{formData.bio || 'Add a bio or headline...'}</p>
+              <p className="profile-location">
+                {currentLocation?.city ? `${currentLocation.city}, ` : ''}{currentLocation?.state || ''} 
+                <span className="location-dot">•</span> Atyant Member
+              </p>
+            </div>
+
+            <div className="profile-action-buttons">
+              {imageFile ? (
+                <button onClick={handleImageUpload} className="primary-action-btn" disabled={loading}>
+                  Save Photo
+                </button>
+              ) : (
+                <button className="primary-action-btn" type="button" onClick={() => document.getElementById('imageUpload').click()}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{marginRight: '6px'}}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m4-5 5-5 5 5m-5-5v12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  Update Picture
+                </button>
+              )}
+              <input 
+                type="file" 
+                id="resumeUpload" 
+                accept=".pdf" 
+                onChange={handleResumeUpload} 
+                style={{ display: 'none' }} 
+              />
+              <button 
+                className="linkedin-import-btn" 
+                onClick={() => document.getElementById('resumeUpload').click()}
+                disabled={isParsing}
+              >
+                {isParsing ? <div className="spinner-small"></div> : <CheckCircle size={16} />} 
+                {isParsing ? 'Extracting...' : 'Import Data'}
+              </button>
+              <button className="more-action-btn">•••</button>
+            </div>
+          </div>
         </div>
 
         {/* Profile Form Section */}
