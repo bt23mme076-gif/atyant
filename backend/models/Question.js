@@ -3,105 +3,103 @@ import mongoose from 'mongoose';
 const questionSchema = new mongoose.Schema({
 
   userId: {
-    type    : mongoose.Schema.Types.ObjectId,
-    ref     : 'User',
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
-    index   : true   // 🔴 FIX: index added — my-questions query uses this
+    index: true
   },
 
   title: {
-    type     : String,
-    required : false,
-    trim     : true,
+    type: String,
+    required: false,
+    trim: true,
     minlength: 10,
     maxlength: 200,
-    default  : function () {
+    default: function () {
       return this.questionText ? this.questionText.substring(0, 50) : '';
     }
   },
 
   questionText: {
-    type     : String,
-    required : true,
-    trim     : true,
+    type: String,
+    required: true,
+    trim: true,
     minlength: 10,
     maxlength: 1000
   },
 
   category: {
-    type   : String,
+    type: String,
     required: false,
-    enum   : [
+    enum: [
       'Tech', 'Data Analytics', 'Consulting', 'Product', 'Core Engineering',
-      // Legacy
       'Academic & College Life', 'Technical Skills', 'Career Growth',
       'Personal Development', 'Entrepreneurship'
     ],
     default: 'Tech'
   },
 
-  reason      : { type: String, trim: true, maxlength: 500, default: '' },
+  reason: { type: String, trim: true, maxlength: 500, default: '' },
   qualityScore: { type: Number, min: 0, max: 100, default: 0 },
-  keywords    : [{ type: String, trim: true }],
+  keywords: [{ type: String, trim: true }],
 
   selectedMentorId: {
-    type : mongoose.Schema.Types.ObjectId,
-    ref  : 'User',
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     default: null,
-    index: true   // 🔴 FIX: mentor dashboard query uses this
+    index: true
   },
 
   matchPercentage: { type: Number, min: 0, max: 100, default: 0 },
   selectionReason: { type: String, default: '' },
 
   status: {
-    type   : String,
-    enum   : [
+    type: String,
+    enum: [
       'draft', 'submitted', 'pending', 'mentor_assigned',
       'awaiting_experience', 'experience_submitted',
       'answer_generated', 'delivered', 'answered_instantly', 'failed'
     ],
     default: 'draft',
-    index  : true   // 🔴 FIX: status filter queries
+    index: true
   },
 
   answerCardId: {
-    type   : mongoose.Schema.Types.ObjectId,
-    ref    : 'AnswerCard',
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'AnswerCard',
     default: null
   },
 
   followUpQuestions: [{
     questionText: String,
-    questionId  : { type: mongoose.Schema.Types.ObjectId, ref: 'Question' },
-    askedAt     : { type: Date, default: Date.now },
+    questionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Question' },
+    askedAt: { type: Date, default: Date.now },
     answerCardId: { type: mongoose.Schema.Types.ObjectId, ref: 'AnswerCard' }
   }],
 
-  isFollowUp      : { type: Boolean, default: false },
+  isFollowUp: { type: Boolean, default: false },
   parentQuestionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Question', default: null },
 
   // ─── PAYMENT ───────────────────────────────
-  isPaid           : { type: Boolean, default: false },
+  isPaid: { type: Boolean, default: false },
   paidMentorshipType: {
-    type   : String,
-    enum   : ['chat', 'video', 'roadmap', null],
+    type: String,
+    enum: ['chat', 'video', 'roadmap', null],
     default: null
   },
   paidAt: { type: Date, default: null },
 
   // ─── EDIT WINDOW ───────────────────────────
   lastEditedAt: { type: Date, default: null },
-  isEditable  : { type: Boolean, default: true },
+  isEditable: { type: Boolean, default: true },
 
   // ─── VECTOR / MATCHING ─────────────────────
-  isInstant  : { type: Boolean, default: false },
-  matchScore : { type: Number, min: 0, max: 100, default: null },
+  isInstant: { type: Boolean, default: false },
+  matchScore: { type: Number, min: 0, max: 100, default: null },
 
-  // 🔴 FIX: Added missing enum values that AtyantEngine returns
   matchMethod: {
-    type   : String,
-    enum   : [
+    type: String,
+    enum: [
       'vector_semantic',
       'live_routing',
       'pending_assignment',
@@ -110,12 +108,22 @@ const questionSchema = new mongoose.Schema({
       null
     ],
     default: null
-  }
+  },
+
+  // ─── FEEDBACK ──────────────────────────────
+  studentFeedback: {
+    type: String,
+    enum: ['helpful', 'not_helpful', null],
+    default: null,
+  },
+  feedbackAt: {
+    type: Date,
+  },
 
 }, {
   timestamps: true,
-  toJSON    : { virtuals: true, getters: true },
-  toObject  : { virtuals: true, getters: true }
+  toJSON: { virtuals: true, getters: true },
+  toObject: { virtuals: true, getters: true }
 });
 
 // ─────────────────────────────────────────────
@@ -126,6 +134,9 @@ questionSchema.index({ selectedMentorId: 1, status: 1, createdAt: -1 });
 
 // Student history
 questionSchema.index({ userId: 1, isFollowUp: 1, createdAt: -1 });
+
+// Feedback analytics
+questionSchema.index({ selectedMentorId: 1, studentFeedback: 1 });
 
 // ─────────────────────────────────────────────
 //  VIRTUALS
@@ -151,6 +162,7 @@ questionSchema.pre('save', function (next) {
   }
   next();
 });
+
 
 const Question = mongoose.model('Question', questionSchema);
 export default Question;

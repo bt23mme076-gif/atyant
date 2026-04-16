@@ -6,51 +6,47 @@ const userSchema = new mongoose.Schema({
   googleId: {
     type: String,
     unique: true,
-    sparse: true, // Allow multiple nulls for non-OAuth users
+    sparse: true,
     index: true
   },
-  
+
   role: {
-    type   : String,
-    enum   : ['user', 'mentor', 'admin'],
+    type: String,
+    enum: ['user', 'mentor', 'admin'],
     default: 'user',
-    index  : true   // 🔴 FIX: heavily queried in AtyantEngine
+    index: true
   },
 
   username: {
     type: String,
-    required: function() {
-      return !this.googleId;  // Only required if NOT OAuth
-    },
+    required: function () { return !this.googleId; },
     unique: true,
-    sparse: true,  // Allow multiple nulls
+    sparse: true,
     trim: true,
     minlength: 3,
     maxlength: 50
   },
 
   email: {
-    type     : String,
-    required : true,
-    unique   : true,
-    trim     : true,
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
     lowercase: true
   },
 
   password: {
     type: String,
-    required: function() {
-      return !this.googleId;  // Only required if NOT OAuth
-    },
+    required: function () { return !this.googleId; },
     minlength: 8,
-    select   : false   // 🔴 FIX: never leak password in queries
+    select: false
   },
 
   phone: {
-    type  : String,
+    type: String,
     unique: true,
     sparse: true,
-    trim  : true
+    trim: true
   },
 
   // ─── MENTOR MATCHING FIELDS ────────────────
@@ -61,12 +57,12 @@ const userSchema = new mongoose.Schema({
   },
 
   topCompanies: [{ type: String }],
-  milestones  : [{ type: String }],
-  specialTags : [{ type: String }],
+  milestones: [{ type: String }],
+  specialTags: [{ type: String }],
 
   companyDomain: {
-    type   : String,
-    enum   : ['Tech', 'Data Analytics', 'Consulting', 'Product', 'Core Engineering', null],
+    type: String,
+    enum: ['Tech', 'Data Analytics', 'Consulting', 'Product', 'Core Engineering', null],
     default: null
   },
 
@@ -74,108 +70,110 @@ const userSchema = new mongoose.Schema({
 
   // ─── PROFILE ───────────────────────────────
   profilePicture: { type: String, default: null },
-  bio           : { type: String, default: null, maxlength: 500 },
-  city          : { type: String, default: '' },
+  bio: { type: String, default: null, maxlength: 500 },
+  city: { type: String, default: '' },
 
   // ─── SKILLS ────────────────────────────────
-  skills        : [{ type: String, trim: true }],
-  expertise     : { type: [String], default: [] },
-  interests     : { type: [String], default: [] },
+  skills: [{ type: String, trim: true }],
+  expertise: { type: [String], default: [] },
+  interests: { type: [String], default: [] },
   domainExperience: { type: [String], default: [] },
 
   // ─── EDUCATION ─────────────────────────────
   education: [{
-    // 🔴 FIX: renamed 'institution' → 'institutionName' to match AtyantEngine
     institutionName: { type: String },
-    institution    : { type: String }, // kept for backward compat
-    degree         : { type: String },
-    field          : { type: String },
-    year           : { type: String },
-    cgpa           : { type: Number }
+    institution: { type: String },
+    degree: { type: String },
+    field: { type: String },
+    year: { type: String },
+    cgpa: { type: Number }
   }],
 
   // ─── SOCIAL ────────────────────────────────
   linkedinProfile: { type: String, default: '' },
-  socialLinks    : { type: Map, of: String, default: {} },
+  socialLinks: { type: Map, of: String, default: {} },
 
   // ─── VERIFICATION ──────────────────────────
-  isVerified       : { type: Boolean, default: false },
+  isVerified: { type: Boolean, default: false },
   verificationToken: { type: String, select: false },
 
   // ─── PASSWORD RESET ────────────────────────
-  passwordResetToken  : { type: String, select: false },
-  passwordResetExpires: { type: Date,   select: false },
+  passwordResetToken: { type: String, select: false },
+  passwordResetExpires: { type: Date, select: false },
 
   // ─── LOCATION ──────────────────────────────
   location: {
     type: {
-      type       : String,
-      enum       : ['Point'],
-      required   : false
+      type: String,
+      enum: ['Point'],
+      required: false
     },
     coordinates: {
-      type    : [Number],
+      type: [Number],
       required: false,
       validate: {
         validator: v => !v || v.length === 0 || (Array.isArray(v) && v.length === 2 && !isNaN(v[0]) && !isNaN(v[1])),
-        message  : 'Coordinates must be [longitude, latitude]'
+        message: 'Coordinates must be [longitude, latitude]'
       }
     },
-    city       : { type: String, default: null },
-    state      : { type: String, default: null },
-    country    : { type: String, default: 'India' },
-    lastUpdated: { type: Date,   default: null }
+    city: { type: String, default: null },
+    state: { type: String, default: null },
+    country: { type: String, default: 'India' },
+    lastUpdated: { type: Date, default: null }
   },
 
   // ─── MENTOR OPERATIONAL FIELDS ─────────────
-  price              : { type: Number, default: 0, min: 0 },
-  acceptsCredits     : { type: Boolean, default: false },
-  isOnline           : { type: Boolean, default: false },
-  lastActive         : { type: Date, default: Date.now, index: true }, // 🔴 FIX: indexed
-  yearsOfExperience  : { type: Number, default: 0 },
+  price: { type: Number, default: 0, min: 0 },
+  acceptsCredits: { type: Boolean, default: false },
+  isOnline: { type: Boolean, default: false },
+  lastActive: { type: Date, default: Date.now, index: true },
+  yearsOfExperience: { type: Number, default: 0 },
 
   // ─── MENTOR STATS ──────────────────────────
-  profileViews  : { type: Number, default: 0 },
-  totalChats    : { type: Number, default: 0 },
-
-  // 🔴 FIX: These 3 fields were MISSING but AtyantEngine uses them
-  rating        : { type: Number, default: 0, min: 0, max: 5 },
-  responseRate  : { type: Number, default: 0, min: 0, max: 100 },
+  profileViews: { type: Number, default: 0 },
+  totalChats: { type: Number, default: 0 },
+  rating: { type: Number, default: 0, min: 0, max: 5 },
+  responseRate: { type: Number, default: 0, min: 0, max: 100 },
   activeQuestions: { type: Number, default: 0, min: 0 },
   successfulMatches: { type: Number, default: 0, min: 0 },
 
+  // ─── FEEDBACK STATS ────────────────────────
+  feedbackScore: { type: Number, default: 0, min: 0, max: 1 },
+  totalAnswered: { type: Number, default: 0 },
+  helpfulCount: { type: Number, default: 0 },
+
   // ─── MENTOR STRATEGY ───────────────────────
   strategy: {
-    tone          : String,
-    language      : String,
-    hardTruth     : [String],
-    timeWaste     : [String],
-    roadmap       : [String],
-    resumeTip     : [String],
+    tone: String,
+    language: String,
+    hardTruth: [String],
+    timeWaste: [String],
+    roadmap: [String],
+    resumeTip: [String],
     neverRecommend: [String],
-    permission    : Boolean
+    permission: Boolean
   },
 
   // ─── CREDITS ───────────────────────────────
   messageCredits: { type: Number, default: 5 },
-  credits       : { type: Number, default: 3, min: 0 },
+  credits: { type: Number, default: 3, min: 0 },
 
-    // ─── PURCHASED TEMPLATES (Resume marketplace)
-    purchasedTemplates: [{
-      templateId: { type: Number, required: true },
-      paymentId:  { type: String },
-      canvaLink:  { type: String },
-      expiresAt:  { type: Date, required: true },
-      createdAt:  { type: Date, default: Date.now }
-    }],
+  // ─── PURCHASED TEMPLATES ───────────────────
+  purchasedTemplates: [{
+    templateId: { type: Number, required: true },
+    paymentId: { type: String },
+    canvaLink: { type: String },
+    expiresAt: { type: Date, required: true },
+    createdAt: { type: Date, default: Date.now }
+  }],
 
   // ─── PROFILE STRENGTH ──────────────────────
   profileStrength: { type: Number, min: 0, max: 100, default: 0 },
 
-  // OAuth Tokens and Calendar Integration
+  // ─── OAUTH & CALENDAR ──────────────────────
   accessToken: {
     type: String,
-    select: false  // Security - never auto-include in queries
+    select: false
   },
 
   refreshToken: {
@@ -183,15 +181,9 @@ const userSchema = new mongoose.Schema({
     select: false
   },
 
-  picture: {
-    type: String,
-    default: null
-  },
+  picture: { type: String, default: null },
 
-  calendarConnected: {
-    type: Boolean,
-    default: false
-  },
+  calendarConnected: { type: Boolean, default: false },
 
   calendarProvider: {
     type: String,
@@ -199,10 +191,7 @@ const userSchema = new mongoose.Schema({
     default: null
   },
 
-  lastLogin: {
-    type: Date,
-    default: null
-  }
+  lastLogin: { type: Date, default: null },
 
 }, {
   timestamps: true
@@ -211,13 +200,8 @@ const userSchema = new mongoose.Schema({
 // ─────────────────────────────────────────────
 //  INDEXES
 // ─────────────────────────────────────────────
-// 2dsphere for geo queries
 userSchema.index({ 'location.coordinates': '2dsphere' }, { sparse: true });
-
-// AtyantEngine mentor fetch query
 userSchema.index({ role: 1, lastActive: -1, activeQuestions: 1 });
-
-// Matching engine — company lookup
 userSchema.index({ role: 1, topCompanies: 1 });
 
 // ─────────────────────────────────────────────
@@ -233,6 +217,7 @@ userSchema.pre('save', function (next) {
   ) {
     this.location = undefined;
   }
+
   // Auto-sync institutionName ↔ institution (backward compat)
   if (Array.isArray(this.education)) {
     this.education.forEach(e => {
@@ -240,6 +225,7 @@ userSchema.pre('save', function (next) {
       if (e.institution && !e.institutionName) e.institutionName = e.institution;
     });
   }
+
   // Recalculate profile strength
   this.profileStrength = this.calculateProfileStrength();
   next();
@@ -251,14 +237,14 @@ userSchema.pre('save', function (next) {
 userSchema.methods.calculateProfileStrength = function () {
   let strength = 0;
   const checks = {
-    username      : 10,
-    bio           : 15,
+    username: 10,
+    bio: 15,
     profilePicture: 10,
-    education     : 20,
-    interests     : 15,
-    city          : 10,
+    education: 20,
+    interests: 15,
+    city: 10,
     linkedinProfile: 10,
-    expertise     : 10
+    expertise: 10
   };
 
   for (const [field, points] of Object.entries(checks)) {

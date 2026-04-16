@@ -1,24 +1,29 @@
+// routes/feedback.js
+// POST /api/feedback/:questionId
+// Body: { isHelpful: true/false }
+
 import express from 'express';
-import Feedback from '../models/Feedback.js';
+import { protect } from '../middleware/authMiddleware.js'; // your existing auth middleware
+import AtyantEngine from '../services/AtyantEngine.js';
 
 const router = express.Router();
 
-// POST /api/feedback
-router.post('/', async (req, res) => {
+router.post('/:questionId', protect, async (req, res) => {
   try {
-    const { name, email, rating, feedback } = req.body;
+    const { questionId } = req.params;
+    const { isHelpful } = req.body;
+    const studentId = req.user._id;
 
-    if (!rating || !feedback) {
-      return res.status(400).json({ message: 'Rating and feedback are required.' });
+    if (typeof isHelpful !== 'boolean') {
+      return res.status(400).json({ success: false, message: 'isHelpful must be true or false' });
     }
 
-    const newFeedback = new Feedback({ name, email, rating, feedback });
-    await newFeedback.save();
+    const result = await AtyantEngine.recordFeedback(questionId, studentId, isHelpful);
+    return res.status(result.success ? 200 : 404).json(result);
 
-    res.status(201).json({ message: '✅ Feedback submitted successfully!' });
-  } catch (error) {
-    console.error('Error saving feedback:', error);
-    res.status(500).json({ message: '❌ Server error. Try again later.' });
+  } catch (err) {
+    console.error('Feedback route error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

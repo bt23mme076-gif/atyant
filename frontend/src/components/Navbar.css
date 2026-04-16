@@ -4,7 +4,7 @@
   --brand-glow: 0 0 20px rgba(124, 58, 237, 0.4);
   --nav-radius: 0px;
   --nav-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-  --nav-text: #CBD5E1;
+  --nav-text: #FFFFFF;
   --nav-text-hover: #FFFFFF;
   --brand-font: 'Outfit', 'Inter', sans-serif;
   --nav-link-radius: 8px;
@@ -56,16 +56,13 @@
   font-weight: 800;
   font-size: 1.8rem;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #7C3AED, #3B82F6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #FFFFFF;
   transition: transform 0.3s ease, filter 0.3s ease;
   cursor: pointer;
 }
 .brand:hover {
   transform: scale(1.02);
-  filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.3));
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
 }
 
 /* Desktop link row */

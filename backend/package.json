@@ -20,6 +20,7 @@
     "google-auth-library": "^10.3.0",
     "googleapis": "^170.1.0",
     "helmet": "^8.1.0",
+    "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.2",
     "lru-cache": "^11.2.5",
     "mongodb": "^6.19.0",
