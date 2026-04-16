@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import format from 'date-fns/format';
 import parse from 'date-fns/parse';
@@ -8,7 +8,7 @@ import enUS from 'date-fns/locale/en-US';
 import addDays from 'date-fns/addDays';
 import setHours from 'date-fns/setHours';
 import setMinutes from 'date-fns/setMinutes';
-import isEqual from 'date-fns/isEqual';
+import './MentorAvailabilityCalendar.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { API_URL } from '../services/api.js';
 
@@ -28,6 +28,8 @@ export default function MentorAvailabilityCalendar({ availability, setAvailabili
   const [selectedDate, setSelectedDate] = useState(null);
   const [showDayModal, setShowDayModal] = useState(false);
   const [isMobileView, setIsMobileView] = useState(typeof window !== 'undefined' ? window.innerWidth < 720 : false);
+  const [popoverEvent, setPopoverEvent] = useState(null);
+  const popoverRef = useRef(null);
 
   useEffect(() => {
     const onResize = () => setIsMobileView(window.innerWidth < 720);
@@ -35,64 +37,66 @@ export default function MentorAvailabilityCalendar({ availability, setAvailabili
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  const weekStart = useMemo(() => startOfWeek(new Date(), { weekStartsOn: 1 }), []); // Monday
+  // Close popover on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popoverRef.current && !popoverRef.current.contains(event.target)) {
+        setPopoverEvent(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const [viewDate, setViewDate] = useState(new Date());
 
   const events = useMemo(() => {
     if (!availability || !availability.weeklySchedule) return [];
 
     const evts = [];
-    Object.keys(availability.weeklySchedule).forEach((dayKey) => {
+    const daysToGenerate = isMobileView ? 14 : 60; // Generate roughly 2 months of preview
+    
+    // Calculate start of current viewed week/month to generate around
+    const start = startOfWeek(viewDate, { weekStartsOn: 1 });
+    const startDate = addDays(start, -14); // Start 2 weeks before current view
+    
+    for (let i = 0; i < daysToGenerate; i++) {
+      const date = addDays(startDate, i);
+      const dayKey = dayIndexToKey[date.getDay()];
       const dayCfg = availability.weeklySchedule[dayKey];
-      if (!dayCfg || !dayCfg.enabled) return;
-      const dayIndex = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].indexOf(dayKey);
-      if (dayIndex === -1) return;
-      const date = addDays(weekStart, dayIndex);
-      (dayCfg.slots || []).forEach((slot, idx) => {
-        const [sh, sm] = slot.start.split(':').map(Number);
-        const [eh, em] = slot.end.split(':').map(Number);
-        const start = setMinutes(setHours(new Date(date), sh), sm);
-        const end = setMinutes(setHours(new Date(date), eh), em);
-        evts.push({
-          id: `${dayKey}-${idx}-${slot.start}-${slot.end}`,
-          title: 'Available',
-          start,
-          end,
-          dayKey,
-          slot
+      
+      if (dayCfg && dayCfg.enabled && dayCfg.slots) {
+        dayCfg.slots.forEach((slot, idx) => {
+          const [sh, sm] = slot.start.split(':').map(Number);
+          const [eh, em] = slot.end.split(':').map(Number);
+          
+          const startDateTime = setMinutes(setHours(new Date(date), sh), sm);
+          const endDateTime = setMinutes(setHours(new Date(date), eh), em);
+          
+          evts.push({
+            id: `${date.toISOString()}-${dayKey}-${idx}`,
+            title: slot.label || 'Available',
+            start: startDateTime,
+            end: endDateTime,
+            dayKey,
+            slot,
+            isRepeating: true // purely for internal reference if needed
+          });
         });
-      });
-    });
-    return evts;
-  }, [availability, weekStart]);
-
-  const persistAvailability = async (newAvailability) => {
-    setAvailability(newAvailability);
-    try {
-      await fetch(`${API_URL}/api/monetization/availability`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(newAvailability)
-      });
-    } catch (err) {
-      console.error('Failed to save availability', err);
+      }
     }
-  };
+    return evts;
+  }, [availability, viewDate, isMobileView]);
 
   const handleSelectSlot = ({ start, end }) => {
-    // On mobile open the day editor modal; on desktop keep existing quick-add behavior
-    const weekday = start.getDay(); // 0=Sun
+    const weekday = start.getDay(); 
     const dayKey = dayIndexToKey[weekday];
     const startHM = timeToHM(start);
     const endHM = timeToHM(end);
 
     if (isMobileView) {
-      // open modal and prefill a slot candidate
       setSelectedDate(start);
       setShowDayModal(true);
-      // store a temporary prefill on availability object so modal can pick it up
       const temp = { ...availability };
       if (!temp.weeklySchedule) temp.weeklySchedule = {};
       if (!temp.weeklySchedule[dayKey]) temp.weeklySchedule[dayKey] = { enabled: true, slots: [] };
@@ -101,20 +105,31 @@ export default function MentorAvailabilityCalendar({ availability, setAvailabili
       return;
     }
 
-    const title = window.prompt('Add availability slot (optional label)', 'Available');
-
     const newAvailability = { ...availability };
     if (!newAvailability.weeklySchedule) newAvailability.weeklySchedule = {};
     if (!newAvailability.weeklySchedule[dayKey]) newAvailability.weeklySchedule[dayKey] = { enabled: true, slots: [] };
     newAvailability.weeklySchedule[dayKey].enabled = true;
     newAvailability.weeklySchedule[dayKey].slots = newAvailability.weeklySchedule[dayKey].slots || [];
-    newAvailability.weeklySchedule[dayKey].slots.push({ start: startHM, end: endHM, label: title || 'Available' });
+    
+    const isDuplicate = newAvailability.weeklySchedule[dayKey].slots.some(s => s.start === startHM && s.end === endHM);
+    if (isDuplicate) return;
 
-    persistAvailability(newAvailability);
+    newAvailability.weeklySchedule[dayKey].slots.push({ start: startHM, end: endHM, label: 'Available' });
+    setAvailability(newAvailability);
   };
 
-  const handleSelectEvent = (event) => {
-    if (!confirm('Remove this availability slot?')) return;
+  const handleSelectEvent = (event, e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setPopoverEvent({ 
+      ...event, 
+      position: { 
+        top: rect.top + window.scrollY - 10, 
+        left: rect.left + rect.width / 2 
+      } 
+    });
+  };
+
+  const removeEvent = (event) => {
     const { dayKey, slot } = event;
     const newAvailability = { ...availability };
     const slots = (newAvailability.weeklySchedule?.[dayKey]?.slots || []).filter(s => !(s.start === slot.start && s.end === slot.end));
@@ -122,22 +137,16 @@ export default function MentorAvailabilityCalendar({ availability, setAvailabili
       newAvailability.weeklySchedule[dayKey].slots = slots;
       if (slots.length === 0) newAvailability.weeklySchedule[dayKey].enabled = false;
     }
-    persistAvailability(newAvailability);
+    setAvailability(newAvailability);
+    setPopoverEvent(null);
   };
 
-  const dateToDayKey = (date) => {
-    // map JS getDay() 0..6 -> sunday..saturday
-    return dayIndexToKey[date.getDay()];
-  };
-
-  // Day modal: edit a single day's slots on mobile or when user requests
   const openDayEditor = (date) => {
     setSelectedDate(date);
     setShowDayModal(true);
   };
 
   const closeDayEditor = () => {
-    // remove any prefill temp
     if (availability && availability._prefill) {
       const a = { ...availability };
       delete a._prefill;
@@ -148,17 +157,29 @@ export default function MentorAvailabilityCalendar({ availability, setAvailabili
   };
 
   const saveDaySlots = async (slots) => {
-    const dayKey = dateToDayKey(selectedDate || new Date());
+    const dayKey = dayIndexToKey[(selectedDate || new Date()).getDay()];
     const newAvailability = { ...availability };
     if (!newAvailability.weeklySchedule) newAvailability.weeklySchedule = {};
     newAvailability.weeklySchedule[dayKey] = { enabled: slots.length > 0, slots };
-    await persistAvailability(newAvailability);
+    setAvailability(newAvailability);
     closeDayEditor();
   };
 
+  const handleNavigate = (newDate) => {
+    setViewDate(newDate);
+  };
+
   return (
-    <div style={{ marginTop: 12 }}>
-      <h4 style={{ marginBottom: 8 }}>Calendar View (tap a day to edit on mobile)</h4>
+    <div className="calendar-card">
+      <div className="calendar-header">
+        <div>
+          <h3>Weekly Schedule</h3>
+          <p className="calendar-info">
+            {isMobileView ? 'Tap a day to manage slots' : 'Click and drag to add availability'}
+          </p>
+        </div>
+      </div>
+
       <Calendar
         localizer={localizer}
         events={events}
@@ -167,17 +188,49 @@ export default function MentorAvailabilityCalendar({ availability, setAvailabili
         selectable
         onSelectSlot={handleSelectSlot}
         onSelectEvent={handleSelectEvent}
+        date={viewDate}
+        onNavigate={handleNavigate}
         defaultView={isMobileView ? 'day' : 'week'}
         views={{ week: true, day: true, month: true }}
         step={30}
         timeslots={1}
-        style={{ height: isMobileView ? 520 : 450 }}
+        style={{ height: isMobileView ? 520 : 500 }}
         onDrillDown={(date, view) => {
-          // when user taps a day in month view, open editor
           if (isMobileView || view === 'month') openDayEditor(date);
         }}
-        onNavigate={() => { /* noop - keep calendar responsive */ }}
+        messages={{
+          allDay: 'All Day',
+          previous: 'Back',
+          next: 'Next',
+          today: 'Today',
+          month: 'Month',
+          week: 'Week',
+          day: 'Day',
+        }}
       />
+
+      {popoverEvent && (
+        <div 
+          className="event-popover-overlay"
+          ref={popoverRef}
+          style={{ 
+            top: popoverEvent.position.top, 
+            left: popoverEvent.position.left,
+            transform: 'translate(-50%, -100%)'
+          }}
+        >
+          <div className="event-popover-header">
+            <p className="event-popover-title">{popoverEvent.title}</p>
+            <button className="modal-close-btn" onClick={() => setPopoverEvent(null)} style={{ width: 24, height: 24, fontSize: 14 }}>✕</button>
+          </div>
+          <p style={{ fontSize: '0.8rem', color: '#718096', marginBottom: '1rem' }}>
+            {format(popoverEvent.start, 'p')} - {format(popoverEvent.end, 'p')}
+          </p>
+          <button className="delete-event-btn" onClick={() => removeEvent(popoverEvent)}>
+            Remove Slot
+          </button>
+        </div>
+      )}
 
       {showDayModal && selectedDate && (
         <DayEditorModal
@@ -193,54 +246,76 @@ export default function MentorAvailabilityCalendar({ availability, setAvailabili
 }
 
 function DayEditorModal({ date, availability, prefill, onClose, onSave }) {
-  const dayIndex = date.getDay();
-  const dayKey = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'][dayIndex];
+  const dayKey = dayIndexToKey[date.getDay()];
   const existing = availability?.weeklySchedule?.[dayKey]?.slots || [];
   const [slots, setSlots] = useState(() => {
-    if (prefill) return [...existing, { start: prefill.start, end: prefill.end }];
+    if (prefill) {
+      const isDuplicate = existing.some(s => s.start === prefill.start && s.end === prefill.end);
+      if (!isDuplicate) return [...existing, { start: prefill.start, end: prefill.end }];
+    }
     return [...existing];
   });
 
-  useEffect(() => {
-    // if availability changes externally, update slots list
-    setSlots(existing.slice());
-  }, [availability]);
-
   const updateSlot = (idx, field, value) => {
-    const s = slots.slice(); s[idx] = { ...s[idx], [field]: value }; setSlots(s);
+    const s = [...slots];
+    s[idx] = { ...s[idx], [field]: value };
+    setSlots(s);
   };
-  const removeSlot = (idx) => { setSlots(slots.filter((_,i) => i !== idx)); };
-  const addSlot = () => { setSlots([...slots, { start: '09:00', end: '10:00' }]); };
+
+  const removeSlot = (idx) => {
+    setSlots(slots.filter((_, i) => i !== idx));
+  };
+
+  const addSlot = () => {
+    setSlots([...slots, { start: '09:00', end: '10:00' }]);
+  };
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-      <div style={{ width: '92%', maxWidth: 520, background: '#fff', borderRadius: 10, padding: 16, boxShadow: '0 8px 30px rgba(0,0,0,0.2)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <h3 style={{ margin: 0 }}>Edit Availability — {date.toDateString()}</h3>
-          <button onClick={onClose} style={{ border: 'none', background: 'transparent', fontSize: 20 }}>✕</button>
+    <div className="modal-overlay">
+      <div className="modal-container">
+        <div className="modal-header">
+          <h3>Edit {format(date, 'EEEE')}</h3>
+          <button className="modal-close-btn" onClick={onClose}>✕</button>
         </div>
 
-        <div>
-          {slots.length === 0 && <p style={{ color: '#666' }}>No slots yet. Add one below.</p>}
+        <div className="slots-list">
+          {slots.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '2rem 0', color: '#a0aec0' }}>
+              <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>⏰</span>
+              <p>No availability slots for this day.</p>
+            </div>
+          )}
           {slots.map((slot, idx) => (
-            <div key={idx} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-              <input type="time" value={slot.start} onChange={e => updateSlot(idx, 'start', e.target.value)} />
-              <span>to</span>
-              <input type="time" value={slot.end} onChange={e => updateSlot(idx, 'end', e.target.value)} />
-              <button onClick={() => removeSlot(idx)} style={{ marginLeft: 'auto' }}>Remove</button>
+            <div key={idx} className="slot-item">
+              <div className="slot-time-group">
+                <input 
+                  type="time" 
+                  value={slot.start} 
+                  onChange={e => updateSlot(idx, 'start', e.target.value)} 
+                />
+                <span className="slot-to">to</span>
+                <input 
+                  type="time" 
+                  value={slot.end} 
+                  onChange={e => updateSlot(idx, 'end', e.target.value)} 
+                />
+              </div>
+              <button className="remove-slot-btn" onClick={() => removeSlot(idx)}>✕</button>
             </div>
           ))}
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12 }}>
-          <button onClick={addSlot}>+ Add Time Slot</button>
-          <div>
-            <button onClick={onClose} style={{ marginRight: 8 }}>Cancel</button>
-            <button onClick={() => onSave(slots)}>Save</button>
-          </div>
+        <button className="add-slot-btn" onClick={addSlot}>
+          <span>+</span> Add Time Slot
+        </button>
+
+        <div className="modal-footer">
+          <button className="cancel-btn" onClick={onClose}>Cancel</button>
+          <button className="save-btn" onClick={() => onSave(slots)}>Save Changes</button>
         </div>
       </div>
     </div>
   );
 }
+
  

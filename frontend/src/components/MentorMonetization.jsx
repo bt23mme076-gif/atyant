@@ -177,7 +177,7 @@ const MentorMonetization = () => {
         )}
         
         {activeTab === 'availability' && (
-          <AvailabilityTab token={token} />
+          <AvailabilityTab token={token} user={user} />
         )}
         
         {activeTab === 'earnings' && (
@@ -604,11 +604,27 @@ const AvailabilityTab = ({ token }) => {
   return (
     <div className="availability-tab">
       <div className="tab-header">
-        <h1>⏰ Set Your Availability</h1>
-        <button className="save-btn" onClick={handleSave} disabled={saving}>
-          {saving ? 'Saving...' : '💾 Save Changes'}
+        <h1>Availability Settings</h1>
+        <button 
+          className="save-btn" 
+          onClick={handleSave} 
+          disabled={saving}
+          style={{ 
+            background: 'white', 
+            color: '#667eea', 
+            borderRadius: '12px',
+            padding: '0.8rem 1.5rem',
+            fontWeight: '600',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+          }}
+        >
+          {saving ? 'Saving...' : '💾 Save All Changes'}
         </button>
       </div>
+
+      <p style={{ color: 'rgba(255,255,255,0.8)', marginBottom: '2rem' }}>
+        Configure your timezone, session buffers, and weekly schedule to let students know when you're free.
+      </p>
 
       <div className="availability-settings">
         <div className="setting-card">
@@ -644,8 +660,7 @@ const AvailabilityTab = ({ token }) => {
         </div>
       </div>
 
-      <div className="weekly-schedule">
-        <h3>Weekly Schedule</h3>
+      <div className="weekly-schedule-section">
         <MentorAvailabilityCalendar availability={availability} setAvailability={setAvailability} token={token} />
       </div>
 
