@@ -141,6 +141,16 @@
   font-size: 0.9rem;
 }
 
+.form-group .hint {
+  display: block;
+  font-size: 0.9rem;
+  color: #4b5563; /* Darker hint text */
+  font-weight: 400;
+  margin-top: 6px;
+  font-style: italic;
+  line-height: 1.5;
+}
+
 .question-title {
   font-size: 1.25rem;
   color: #1f2937;
@@ -157,7 +167,7 @@
 
 .meta-item {
   font-size: 0.9rem;
-  color: #6b7280;
+  color: #475569;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -215,7 +225,7 @@
 /* Question Description */
 .question-description {
   font-size: 0.95rem;
-  color: #6b7280;
+  color: #475569; /* Darker gray */
   line-height: 1.6;
   margin: 0 0 16px 0;
 }
@@ -321,35 +331,37 @@
   margin-bottom: 2rem;
 }
 
-.stat-card {
+.student-stat-card {
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
-  border: 2px solid #e5e7eb;
+  border: 1px solid #e2e8f0;
   text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
 }
 
-.stat-card.highlight {
+.student-stat-card.highlight {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border-color: #667eea;
 }
 
-.stat-card:hover {
+.student-stat-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-.stat-value {
+.student-stat-value {
   font-size: 2.5rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
+  color: #667eea; /* Indigo for contrast */
 }
 
-.stat-label {
+.student-stat-label {
   font-size: 0.9rem;
-  opacity: 0.8;
+  color: #64748b;
   font-weight: 600;
 }
 

@@ -61,13 +61,11 @@ const Login = () => {
       
       const requiresCalendarSetup = response.data.requiresCalendarSetup;
       if (requiresCalendarSetup) {
-        const shouldConnect = window.confirm(
-          '🚀 Enable auto-scheduling! Connect your Google Calendar to automatically create meeting links. Connect now?'
-        );
-        if (shouldConnect) {
+        toast.info('📅 Please connect your Google Calendar to continue as a mentor.', { autoClose: 3000 });
+        setTimeout(() => {
           window.location.href = `${API_URL}/auth/google`;
-          return;
-        }
+        }, 1500);
+        return;
       }
 
       // Normal redirect
@@ -98,6 +96,16 @@ const Login = () => {
 
         // Check for pending question from home page
         const pendingQuestion = localStorage.getItem('pendingQuestion');
+        
+        const requiresCalendarSetup = data.requiresCalendarSetup;
+        if (requiresCalendarSetup) {
+          toast.info('📅 Please connect your Google Calendar to continue as a mentor.', { autoClose: 3000 });
+          setTimeout(() => {
+            window.location.href = `${API_URL}/auth/google`;
+          }, 1500);
+          return;
+        }
+
         if (pendingQuestion) {
           // Keep the question in localStorage as 'draftQuestion' for enhanced flow
           localStorage.removeItem('pendingQuestion');

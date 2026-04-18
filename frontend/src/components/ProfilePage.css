@@ -1,12 +1,6 @@
 /* frontend/src/components/ProfilePage.css */
 
-/* ========== LINKEDIN DARK MODE AESTHETIC GLOBAL OVERRIDES ========== */
-body {
-  background-color: #000000 !important; /* Base black background */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-  color: #E9EAEC !important;
-}
-
+/* ========== DESIGN TOKENS ========== */
 :root {
   --linkedin-blue: #7C3AED; /* Atyant Electric Purple */
   --linkedin-blue-hover: #9333EA; /* Lighter Purple */
@@ -29,6 +23,7 @@ body {
   gap: 16px;
   min-height: 100vh;
   background: var(--linkedin-bg);
+  color: var(--linkedin-text);
 }
 
 /* ========== TOP PROFILE CARD (HERO) ========== */

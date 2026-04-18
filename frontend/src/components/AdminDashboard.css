@@ -1,8 +1,7 @@
-/* ====== GLOBAL ====== */
-body {
+/* Removed global body override to prevent style leakage */
+.admin-global-wrapper {
   margin: 0;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #f4f6fa;
 }
 
 textarea {

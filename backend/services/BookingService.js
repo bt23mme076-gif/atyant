@@ -9,11 +9,20 @@ class BookingService {
     // Initialize Google Calendar
     this.calendar = null;
     if (process.env.GOOGLE_CALENDAR_ENABLED === 'true') {
-      const auth = new google.auth.GoogleAuth({
-        keyFile: process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
-        scopes: ['https://www.googleapis.com/auth/calendar']
-      });
-      this.calendar = google.calendar({ version: 'v3', auth });
+      const credentials = {
+        client_email: process.env.GOOGLE_CLIENT_EMAIL,
+        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+      };
+      
+      if (credentials.client_email && credentials.private_key) {
+        const auth = new google.auth.GoogleAuth({
+          credentials,
+          scopes: ['https://www.googleapis.com/auth/calendar']
+        });
+        this.calendar = google.calendar({ version: 'v3', auth });
+      } else {
+        console.warn('⚠️ Google Calendar credentials missing or incomplete');
+      }
     }
 
     // Initialize email transporter

@@ -1,75 +1,91 @@
 /* MentorInfo summary card styles */
 .mentor-dna-summary-card {
-  max-width: 600px;
+  max-width: 800px;
   margin: 2rem auto;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px #e0e7ef99;
-  padding: 2.2rem 2rem 2rem 2rem;
-  border: 1.5px solid #e0e7ef;
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: 3rem;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.mentor-dna-summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
 }
 .mentor-dna-summary-title {
-  color: #1976d2;
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 0.2rem;
+  color: var(--text-main);
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
   text-align: center;
-  letter-spacing: 0.5px;
+  letter-spacing: -0.02em;
 }
 .mentor-dna-summary-email {
   text-align: center;
-  font-size: 1.08rem;
-  color: #333;
-  margin-bottom: 1.2rem;
+  font-size: 1.1rem;
+  color: var(--text-dim);
+  margin-bottom: 2rem;
 }
 .mentor-dna-summary-section {
   margin-top: 1.5rem;
 }
 .mentor-dna-summary-heading {
-  color: #2350c5;
-  font-size: 1.18rem;
+  color: var(--secondary);
+  font-size: 1rem;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  margin-bottom: 0.7rem;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
   text-transform: uppercase;
+  opacity: 0.8;
 }
 .mentor-dna-summary-list {
   list-style: none;
   padding: 0;
-  font-size: 1.13rem;
+  font-size: 1.1rem;
   margin: 0;
+  color: var(--text-main);
 }
 .mentor-dna-summary-list li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
   line-height: 1.6;
 }
 .mentor-dna-summary-list b {
-  color: #1976d2;
+  color: var(--secondary);
   font-weight: 700;
-  margin-right: 0.3rem;
+  margin-right: 0.5rem;
 }
 .mentor-dna-summary-permission {
   font-weight: 600;
   color: #388e3c;
 }
 .mentor-dna-summary-btn {
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   display: block;
   margin-left: auto;
   margin-right: auto;
-  background: #1976d2;
+  background: var(--primary);
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 10px 28px;
-  font-size: 1.08rem;
-  font-weight: 600;
-  box-shadow: 0 2px 8px #e0e7ef33;
+  border-radius: var(--radius-md);
+  padding: 12px 32px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 16px var(--primary-glow);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
 }
 .mentor-dna-summary-btn:hover {
-  background: #1251a3;
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--primary-glow);
 }
 @media (max-width: 600px) {
   .mentor-dna-summary-card {

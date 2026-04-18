@@ -1,10 +1,6 @@
 /* MentorDNAForm custom styles */
-body {
-  background: #f6f8fa;
-}
-
 .mentor-dna-bg {
-  background: linear-gradient(120deg, #e0e7ef 0%, #f6f8fa 100%);
+  background: var(--bg-deep);
   min-height: 100vh;
 }
 
@@ -17,19 +13,20 @@ body {
 }
 
 .mentor-dna-form-card {
-  max-width: 540px;
+  max-width: 700px;
   width: 100%;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 8px 32px #e0e7ef;
+  background: var(--bg-card);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
   padding: 0;
-  transition: box-shadow 0.2s;
+  transition: transform 0.3s;
 }
 
 .mentor-dna-glass {
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 8px 32px #b0c4de44;
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .mentor-dna-form-content {
@@ -39,19 +36,18 @@ body {
 .mentor-dna-title {
   text-align: center;
   font-size: 2.1rem;
-  font-weight: 700;
-  color: #1976d2 !important;
+  font-weight: 800;
+  color: var(--text-main) !important;
   margin-bottom: 0.5rem;
-  letter-spacing: 0.5px;
-  opacity: 1 !important;
+  letter-spacing: -0.02em;
 }
 
 .mentor-dna-subtitle {
   text-align: center;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 400;
-  margin-bottom: 1.5rem;
-  color: #444;
+  margin-bottom: 2rem;
+  color: var(--text-dim);
 }
 
 .mentor-dna-divider {
@@ -75,10 +71,10 @@ body {
 
 .mentor-dna-label {
   font-size: 1.1rem !important;
-  font-weight: 600 !important;
-  color: #333 !important;
-  margin-bottom: 1rem !important;
-  line-height: 1.5 !important;
+  font-weight: 700 !important;
+  color: var(--text-main) !important;
+  margin-bottom: 1.5rem !important;
+  line-height: 1.4 !important;
 }
 
 /* Radio group styling */
@@ -88,12 +84,12 @@ body {
 }
 
 .mentor-dna-radio-option {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  margin: 0.3rem 0 !important;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 0.8rem 1.2rem;
+  margin: 0.5rem 0 !important;
   transition: all 0.2s;
-  border: 2px solid transparent;
+  border: 1px solid var(--border);
 }
 
 .mentor-dna-radio-option:hover {
@@ -103,7 +99,7 @@ body {
 
 .mentor-dna-radio-option .MuiFormControlLabel-label {
   font-size: 1.05rem;
-  color: #333;
+  color: var(--text-main);
 }
 
 /* Checkbox group styling */
@@ -113,12 +109,12 @@ body {
 }
 
 .mentor-dna-checkbox-option {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  margin: 0.3rem 0 !important;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 0.8rem 1.2rem;
+  margin: 0.5rem 0 !important;
   transition: all 0.2s;
-  border: 2px solid transparent;
+  border: 1px solid var(--border);
 }
 
 .mentor-dna-checkbox-option:hover {
@@ -128,7 +124,7 @@ body {
 
 .mentor-dna-checkbox-option .MuiFormControlLabel-label {
   font-size: 1.02rem;
-  color: #333;
+  color: var(--text-main);
   line-height: 1.4;
 }
 

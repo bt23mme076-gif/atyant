@@ -1,7 +1,7 @@
 /* ChatPage.css - Professional Design with Perfect Alignment */
 
-/* ====== VARIABLES ====== */
-:root {
+/* ====== VARIABLES (Scoped to component) ====== */
+.chat-page {
   --primary-gradient: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
   --secondary-gradient: linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%);
   --sent-message-bg: linear-gradient(135deg, #6366F1 0%, #818CF8 100%);
@@ -11,11 +11,11 @@
   --text-primary: #1F2937;
   --text-secondary: #6B7280;
   --text-white: #FFFFFF;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --border-radius: 12px;
-  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --chat-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05); /* Renamed to avoid clashing with global shadow-sm */
+  --chat-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --chat-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --border-radius-chat: 12px;
+  --transition-chat: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --single-tick: #8696A0;
   --double-tick: #8696A0;
   --double-tick-blue: #53BDEB;
@@ -644,7 +644,7 @@
   align-self: flex-start;
   margin-bottom: 8px;
   border: 1px solid rgba(229, 231, 235, 0.8);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--chat-shadow-sm);
   width: fit-content;
 }
 

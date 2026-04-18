@@ -1,10 +1,10 @@
 // src/main.jsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import './index.css';
 import App from './App';
 import { inject } from '@vercel/analytics'; // if using analytics
 inject(); // if using analytics
-import './index.css';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './AuthContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';

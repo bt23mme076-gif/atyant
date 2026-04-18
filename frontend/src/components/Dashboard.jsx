@@ -107,7 +107,7 @@ const Dashboard = () => {
         </div>
 
         <div className="stats-grid">
-          <div className="stat-card">
+          <div className="overview-stat-card">
             <div className="stat-icon messages">
               <MessageSquare size={24} />
             </div>
@@ -117,7 +117,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className="overview-stat-card">
             <div className="stat-icon active">
               <Users size={24} />
             </div>
@@ -127,7 +127,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className="overview-stat-card">
             <div className="stat-icon views">
               <TrendingUp size={24} />
             </div>

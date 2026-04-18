@@ -279,8 +279,8 @@ const MentorDashboard = () => {
           <p>Share your real experience to help students</p>
         </div>
         <div className="stats-row">
-          <div className="stat-card"><div className="stat-number">{pendingQuestions.length}</div><div className="stat-label">Pending</div></div>
-          <div className="stat-card"><div className="stat-number">{answeredQuestions.length}</div><div className="stat-label">Answered</div></div>
+          <div className="mentor-stat-card"><div className="mentor-stat-number">{pendingQuestions.length}</div><div className="mentor-stat-label">Pending</div></div>
+          <div className="mentor-stat-card"><div className="mentor-stat-number">{answeredQuestions.length}</div><div className="mentor-stat-label">Answered</div></div>
         </div>
       </div>
 

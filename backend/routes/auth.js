@@ -225,7 +225,9 @@ router.post('/google-login', async (req, res) => {
         role: user.role,
         profilePicture: user.profilePicture,
         credits: user.credits,
-      }
+        calendarConnected: user.calendarConnected || false,
+      },
+      requiresCalendarSetup: user.role === 'mentor' && !user.calendarConnected
     });
   } catch (error) {
     console.timeEnd('google-login-operation');
