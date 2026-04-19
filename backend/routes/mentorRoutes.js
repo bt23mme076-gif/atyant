@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { LRUCache } from 'lru-cache';
 import User from '../models/User.js';
 import Message from '../models/Message.js';
+import Service from '../models/Service.js';
 import protect from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -42,7 +43,7 @@ router.post('/update-strategy', protect, async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-//  GET ALL MENTORS (cached)
+//  GET ALL MENTORS (cached) - UPDATED WITH SERVICES
 // ─────────────────────────────────────────────
 router.get('/mentors', async (req, res) => {
   try {
@@ -52,15 +53,34 @@ router.get('/mentors', async (req, res) => {
       return res.json(cached);
     }
 
+    // 1. Mentors fetch karein
     const mentors = await User.find({ role: 'mentor' })
-      .select('name username profilePicture profileImage bio city expertise skills isOnline lastActive yearsOfExperience price location rating responseRate')
-      .sort({ lastActive: -1 })  // 🔴 FIX: sort by recent activity, not insertion order
+      .select('name username profilePicture profileImage bio city expertise skills isOnline lastActive yearsOfExperience price location rating responseRate companyDomain')
+      .sort({ lastActive: -1 })
       .lean();
 
-    mentorListCache.set('all', mentors);
-    if (isDev) console.log(`✅ Fetched ${mentors.length} mentors from DB`);
+    // 2. Saari active services fetch karein 
+    const allServices = await Service.find({ isActive: true }).lean();
 
-    res.json(mentors);
+    // 3. Mentors ke saath unki services link karein (Join logic)
+    const mentorsWithServices = mentors.map(mentor => {
+      const mentorServices = allServices
+        .filter(s => s.mentorId.toString() === mentor._id.toString())
+        .map(s => s.type); // Example: ['video-call', 'audio-call']
+
+      return {
+        ...mentor,
+        serviceType: mentorServices[0] || null, // Primary service
+        services: mentorServices                // All services list
+      };
+    });
+
+    // 4. Cache update karein
+    mentorListCache.set('all', mentorsWithServices);
+    
+    if (isDev) console.log(`✅ Fetched ${mentors.length} mentors with services from DB`);
+    res.json(mentorsWithServices);
+
   } catch (error) {
     console.error('GET /mentors error:', error.message);
     res.status(500).json({ message: 'Server error' });
