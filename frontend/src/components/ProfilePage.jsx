@@ -455,27 +455,6 @@ const ProfilePage = () => {
     }
   };
 
-  // Data
-  const branches = [
-    'Computer Science and Engineering', 'Information Technology', 'Mechanical Engineering', 
-    'Civil Engineering', 'Electrical Engineering', 'Electronics and Communication Engineering', 
-    'Chemical Engineering', 'Biomedical Engineering', 'Aerospace Engineering', 
-    'Environmental Engineering', 'Artificial Intelligence and Data Science', 'Electronics Engineering', 
-    'Instrumentation Engineering', 'Automobile Engineering', 'Biotechnology Engineering', 
-    'Mining Engineering', 'Production/Manufacturing Engineering', 'Industrial Engineering', 
-    'Metallurgy and Materials Engineering', 'Other'
-  ];
-
-  const collegeData = {
-    'Indore': ['IIT Indore', 'SGSITS', 'IET-DAVV', 'Acropolis Institute of Technology and Research', 'Indore Institute of Science & Technology'],
-    'Bhopal': ['MANIT Bhopal', 'IIIT Bhopal', 'LNCT Bhopal', 'VIT Bhopal University', 'Radharaman Engineering College'],
-    'Nagpur': ['IIIT Nagpur', 'VNIT Nagpur', 'GHRCE Nagpur', 'RCOEM Nagpur', 'YCCE Nagpur', 'Priyadarshini College of Engineering'],
-    'Other': ['Other']
-  };
-
-  const cities = Object.keys(collegeData);
-  const degrees = ['B.Tech', 'B.Sc', 'MBA', 'M.Tech', 'Other'];
-  const years = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduated'];
 
   if (loading) {
     return <LoadingSpinner message="Loading profile..." fullScreen={true} />;
@@ -671,64 +650,59 @@ const ProfilePage = () => {
 
             {/* Education */}
             <h3>Education</h3>
-            <select 
-              name="city" 
-              value={formData.city} 
-              onChange={handleChange} 
-              required 
-              autoComplete="off"
-            >
-              <option value="">-- Select Your City / None --</option>
-              {cities.map(city => (
-                <option key={city} value={city}>{city}</option>
-              ))}
-            </select>
+            <div className="education-info-group">
+              <label>Current City</label>
+              <input 
+                name="city" 
+                value={formData.city} 
+                onChange={handleChange} 
+                placeholder="Type your city (e.g. Nagpur, Indore, Delhi)"
+                required 
+                autoComplete="off"
+              />
+            </div>
 
             {formData.education.map((edu, index) => (
               <div key={index} className="education-group">
-                <select 
-                  value={edu.institution} 
-                  onChange={(e) => handleEducationChange(index, 'institution', e.target.value)} 
-                  required
-                >
-                  <option value="">-- Select Your College / None --</option>
-                  {formData.city && collegeData[formData.city]?.map(college => (
-                    <option key={college} value={college}>{college}</option>
-                  ))}
-                </select>
+                <div className="edu-field-wrap">
+                  <label>College / University</label>
+                  <input 
+                    value={edu.institution} 
+                    onChange={(e) => handleEducationChange(index, 'institution', e.target.value)} 
+                    placeholder="Type your College name..."
+                    required
+                  />
+                </div>
 
-                <select 
-                  value={edu.degree} 
-                  onChange={(e) => handleEducationChange(index, 'degree', e.target.value)} 
-                  required
-                >
-                  <option value="">-- Degree / None --</option>
-                  {degrees.map(degree => (
-                    <option key={degree} value={degree}>{degree}</option>
-                  ))}
-                </select>
+                <div className="edu-field-wrap">
+                  <label>Degree</label>
+                  <input 
+                    value={edu.degree} 
+                    onChange={(e) => handleEducationChange(index, 'degree', e.target.value)} 
+                    placeholder="e.g. B.Tech, MBA"
+                    required
+                  />
+                </div>
 
-                <select 
-                  value={edu.year} 
-                  onChange={(e) => handleEducationChange(index, 'year', e.target.value)} 
-                  required
-                >
-                  <option value="">-- Year / None --</option>
-                  {years.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
+                <div className="edu-field-wrap">
+                  <label>Expected Graduation</label>
+                  <input 
+                    value={edu.year} 
+                    onChange={(e) => handleEducationChange(index, 'year', e.target.value)} 
+                    placeholder="e.g. 4th Year, Graduated"
+                    required
+                  />
+                </div>
 
-                <select 
-                  value={edu.field} 
-                  onChange={(e) => handleEducationChange(index, 'field', e.target.value)} 
-                  required
-                >
-                  <option value="">-- Branch / None --</option>
-                  {branches.map(branch => (
-                    <option key={branch} value={branch}>{branch}</option>
-                  ))}
-                </select>
+                <div className="edu-field-wrap">
+                  <label>Branch / Field of Study</label>
+                  <input 
+                    value={edu.field} 
+                    onChange={(e) => handleEducationChange(index, 'field', e.target.value)} 
+                    placeholder="e.g. Computer Science"
+                    required
+                  />
+                </div>
 
                 <div>
                   <label>CGPA</label>

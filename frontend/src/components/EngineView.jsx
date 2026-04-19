@@ -161,30 +161,59 @@ const EngineView = ({ isAnswerView }) => {
           <p className="current-status">Current Status: <strong>{question?.status?.replace(/_/g, ' ').toUpperCase()}</strong></p>
           <p>Atyant Engine is selecting the best mentor who has already solved this exact problem...</p>
           
-          <div className="status-steps">
-            <div className={`status-step ${currentStep >= 1 ? 'completed' : ''}`}>
-              <div className="step-icon">1</div>
-              <div className="step-label">Question Received</div>
+          <div className="status-steps-premium">
+            {/* Step 1: Received */}
+            <div className="premium-step completed animate-in" style={{ animationDelay: '0.1s' }}>
+              <div className="premium-step-dot">
+                <span className="dot-inner">✓</span>
+              </div>
+              <div className="premium-step-content">
+                <span className="step-title">Question Received</span>
+                <span className="step-desc">Atyant engine has your data</span>
+              </div>
             </div>
             
-            <div className={`status-step ${currentStep >= 2 ? 'active' : ''} ${currentStep > 2 ? 'completed' : ''}`}>
-              <div className="step-icon">2</div>
-              <div className="step-label">Mentor Selected</div>
+            {/* Step 2: Mentor Selected */}
+            <div className={`premium-step ${currentStep >= 2 ? 'completed' : 'active'} animate-in`} style={{ animationDelay: '0.2s' }}>
+              <div className="premium-step-dot">
+                <span className="dot-inner">{currentStep >= 2 ? '✓' : '2'}</span>
+              </div>
+              <div className="premium-step-content">
+                <span className="step-title">Mentor Selected</span>
+                <span className="step-desc">{currentStep >= 2 ? 'The best mentor has been found' : 'Identifying the best profile...'}</span>
+              </div>
             </div>
             
-            <div className={`status-step ${currentStep >= 3 ? 'active' : ''} ${currentStep > 3 ? 'completed' : ''}`}>
-              <div className="step-icon">3</div>
-              <div className="step-label">Experience Collected</div>
+            {/* Step 3: Experience Collected */}
+            <div className={`premium-step ${currentStep >= 3 ? 'completed' : currentStep === 2 ? 'active' : ''} animate-in`} style={{ animationDelay: '0.3s' }}>
+              <div className="premium-step-dot">
+                <span className="dot-inner">{currentStep >= 3 ? '✓' : '3'}</span>
+              </div>
+              <div className="premium-step-content">
+                <span className="step-title">Experience Collected</span>
+                <span className="step-desc">Processing mentor's real-world DNA</span>
+              </div>
             </div>
             
-            <div className={`status-step ${currentStep >= 4 ? 'active' : ''}`}>
-              <div className="step-icon">4</div>
-              <div className="step-label">Answer Ready</div>
+            {/* Step 4: Answer Ready */}
+            <div className={`premium-step ${currentStep >= 4 ? 'completed' : currentStep === 3 ? 'active' : ''} animate-in`} style={{ animationDelay: '0.4s' }}>
+              <div className="premium-step-dot">
+                <span className="dot-inner">{currentStep >= 4 ? '✨' : '4'}</span>
+              </div>
+              <div className="premium-step-content">
+                <span className="step-title">Answer Ready</span>
+                <span className="step-desc">Your premium card is being finalized</span>
+              </div>
+            </div>
+            
+            {/* Animated Connector Line */}
+            <div className="step-connector-line">
+              <div className="line-fill" style={{ height: `${Math.min((currentStep) * 33.33, 100)}%` }}></div>
             </div>
           </div>
           
-          <p style={{ marginTop: '24px', fontSize: '0.9rem', color: '#6b7280' }}>
-            This usually takes 1-2 hours. You'll be notified when your answer is ready.
+          <p style={{ marginTop: '32px', fontSize: '0.95rem', color: '#6b7280', fontStyle: 'italic' }}>
+            This usually takes 1-2 hours. You'll be notified when your answer card is finalized.
           </p>
           
           <button className="refresh-button" onClick={fetchQuestionStatus}>

@@ -205,9 +205,19 @@ const MentorMonetization = () => {
 const OverviewTab = ({ earnings, services, bookings, formatCurrency, setActiveTab, user }) => {
   const navigate = useNavigate();
   const activeServices = services.filter(s => s.isActive).length;
-  const upcomingBookings = bookings.filter(b => 
-    b.status === 'confirmed' && new Date(b.scheduledAt) > new Date()
-  ).length;
+  const upcomingBookingsList = bookings
+    .filter(b => b.status === 'confirmed' && new Date(b.scheduledAt) > new Date())
+    .sort((a, b) => new Date(a.scheduledAt) - new Date(b.scheduledAt))
+    .slice(0, 3);
+
+  const getServiceIcon = (type) => {
+    switch(type) {
+      case 'video-call': return '📹';
+      case 'audio-call': return '🎤';
+      case 'chat': return '💬';
+      default: return '🎯';
+    }
+  };
 
   return (
     <div className="overview-tab">
@@ -236,7 +246,7 @@ const OverviewTab = ({ earnings, services, bookings, formatCurrency, setActiveTa
           <div className="stat-icon">📅</div>
           <div className="stat-content">
             <p className="stat-label">Upcoming Bookings</p>
-            <h2 className="stat-value">{upcomingBookings}</h2>
+            <h2 className="stat-value">{upcomingBookingsList.length}</h2>
             <p className="stat-meta">{bookings.length} total</p>
           </div>
         </div>
@@ -250,6 +260,32 @@ const OverviewTab = ({ earnings, services, bookings, formatCurrency, setActiveTa
           </div>
         </div>
       </div>
+
+      {upcomingBookingsList.length > 0 && (
+        <div className="upcoming-sessions-section">
+          <div className="section-header">
+            <h3>🚀 Upcoming Sessions</h3>
+            <button className="view-all-link" onClick={() => setActiveTab('bookings')}>View All →</button>
+          </div>
+          <div className="upcoming-sessions-list">
+            {upcomingBookingsList.map(booking => (
+              <div key={booking._id} className="upcoming-session-card" onClick={() => setActiveTab('bookings')}>
+                <div className="session-type-badge">
+                  {getServiceIcon(booking.serviceId?.type)} {booking.serviceId?.type?.replace('-', ' ')}
+                </div>
+                <div className="session-user-info">
+                  <img src={booking.userId?.profilePicture || '/default-avatar.png'} alt="" className="mini-avatar" />
+                  <span>{booking.userId?.username}</span>
+                </div>
+                <div className="session-time-info">
+                  <span className="session-date">📅 {new Date(booking.scheduledAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+                  <span className="session-time">⏰ {new Date(booking.scheduledAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="quick-actions">
         <h3>Quick Actions</h3>
@@ -436,37 +472,78 @@ const BookingsTab = ({ bookings, formatDate, formatCurrency }) => {
         </div>
       ) : (
         <div className="bookings-list">
-          {filteredBookings.map(booking => (
-            <div key={booking._id} className="booking-card">
-              <div className="booking-header">
-                <div className="booking-user">
-                  <img 
-                    src={booking.userId?.profilePicture || '/default-avatar.png'} 
-                    alt={booking.userId?.username}
-                    className="user-avatar"
-                  />
-                  <div>
-                    <h4>{booking.userId?.username}</h4>
-                    <p>{booking.userId?.email}</p>
+          {filteredBookings.map(booking => {
+            const isUpcoming = booking.status === 'confirmed' && new Date(booking.scheduledAt) > new Date();
+            const isToday = new Date(booking.scheduledAt).toDateString() === new Date().toDateString();
+            
+            return (
+              <div key={booking._id} className={`booking-card ${isUpcoming ? 'upcoming' : ''} ${isToday ? 'today' : ''}`}>
+                <div className="booking-header">
+                  <div className="booking-user">
+                    <img 
+                      src={booking.userId?.profilePicture || '/default-avatar.png'} 
+                      alt={booking.userId?.username}
+                      className="user-avatar"
+                    />
+                    <div>
+                      <h4>{booking.userId?.username}</h4>
+                      <p>{booking.userId?.email}</p>
+                    </div>
+                  </div>
+                  <div className="booking-badges">
+                    {isToday && isUpcoming && <span className="today-badge">Today</span>}
+                    <span className={`booking-status ${booking.status}`}>
+                      {booking.status}
+                    </span>
                   </div>
                 </div>
-                <span className={`booking-status ${booking.status}`}>
-                  {booking.status}
-                </span>
+                
+                <div className="booking-info-row">
+                  <div className="info-item">
+                    <span className="info-icon">🎯</span>
+                    <div className="info-content">
+                      <label>Service</label>
+                      <span>{booking.serviceId?.title}</span>
+                    </div>
+                  </div>
+                  
+                  {booking.scheduledAt && (
+                    <div className="info-item highlight">
+                      <span className="info-icon">⏰</span>
+                      <div className="info-content">
+                        <label>Scheduled For</label>
+                        <span className="scheduled-time">{formatDate(booking.scheduledAt)}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="info-item">
+                    <span className="info-icon">💰</span>
+                    <div className="info-content">
+                      <label>Amount</label>
+                      <span>{formatCurrency(booking.amount)}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="booking-footer">
+                  {booking.meetingLink ? (
+                    <a href={booking.meetingLink} target="_blank" rel="noopener noreferrer" className="join-btn">
+                      📹 Join Meeting
+                    </a>
+                  ) : (
+                    <div className="no-link-placeholder">Meeting link will appear here</div>
+                  )}
+                  
+                  {booking.serviceId?.type === 'chat' && (
+                    <button className="chat-btn" onClick={() => window.location.href='/chat'}>
+                      💬 Open Chat
+                    </button>
+                  )}
+                </div>
               </div>
-              
-              <div className="booking-details">
-                <p><strong>Service:</strong> {booking.serviceId?.title}</p>
-                {booking.scheduledAt && (
-                  <p><strong>Scheduled:</strong> {formatDate(booking.scheduledAt)}</p>
-                )}
-                <p><strong>Amount:</strong> {formatCurrency(booking.amount)}</p>
-                {booking.meetingLink && (
-                  <p><strong>Meeting Link:</strong> <a href={booking.meetingLink} target="_blank" rel="noopener noreferrer">Join</a></p>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

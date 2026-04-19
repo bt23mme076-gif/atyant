@@ -24,14 +24,12 @@ class ErrorBoundary extends React.Component {
     const isChunkError = chunkErrorKeywords.some(keyword => errorMessage.includes(keyword));
 
     if (isChunkError) {
-      console.log('Chunk load error detected. Reloading page...');
-      // Small timeout to avoid infinite reload loops if something is really broken
-      const lastReload = sessionStorage.getItem('atyant_last_chunk_reload');
+      console.warn('Chunk load error detected. Forcing site refresh to latest version...');
+      const lastReload = sessionStorage.getItem('atyant_err_reload');
       const now = Date.now();
       
-      // If we haven't reloaded in the last 10 seconds, reload now
       if (!lastReload || now - parseInt(lastReload) > 10000) {
-        sessionStorage.setItem('atyant_last_chunk_reload', now.toString());
+        sessionStorage.setItem('atyant_err_reload', now.toString());
         window.location.reload();
       }
     }
@@ -39,39 +37,105 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
+      // If it's a chunk error, show a more specific "Update Found" UI
+      const errorMessage = this.state.error?.message || '';
+      const isChunkError = errorMessage.includes('Failed to fetch') || errorMessage.includes('Loading chunk');
+
       return (
-        <div className="error-boundary" style={{
-          padding: '40px 20px',
-          textAlign: 'center',
-          background: 'white',
-          borderRadius: '12px',
-          margin: '20px auto',
-          maxWidth: '600px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+        <div className="error-boundary-container" style={{
+          minHeight: '60vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          background: '#f9fafb',
+          fontFamily: 'Inter, system-ui, sans-serif'
         }}>
-          <h2 style={{ color: '#1f2937', marginBottom: '16px' }}>Something went wrong.</h2>
-          <p style={{ color: '#4b5563', marginBottom: '24px' }}>
-            We've updated Atyant! Please click the button below to load the latest version.
-          </p>
-          <button 
-            onClick={() => window.location.reload()}
-            style={{
-              padding: '12px 24px',
-              backgroundColor: '#6366f1',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'background 0.2s'
-            }}
-          >
-            Refresh App
-          </button>
-          
-          <div style={{ marginTop: '20px', fontSize: '12px', color: '#9ca3af' }}>
-            Technical breakdown: {this.state.error?.message}
+          <div style={{
+            background: 'white',
+            padding: '40px',
+            borderRadius: '24px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            maxWidth: '500px',
+            width: '100%',
+            textAlign: 'center'
+          }}>
+            <div style={{ 
+              fontSize: '48px', 
+              marginBottom: '20px',
+              animation: 'bounce 2s infinite'
+            }}>
+              {isChunkError ? '🚀' : '⚠️'}
+            </div>
+            <h2 style={{ 
+              color: '#111827', 
+              fontSize: '24px', 
+              fontWeight: '800', 
+              marginBottom: '12px' 
+            }}>
+              {isChunkError ? 'New Update Available!' : 'Something went wrong'}
+            </h2>
+            <p style={{ 
+              color: '#4b5563', 
+              fontSize: '16px', 
+              lineHeight: '1.6', 
+              marginBottom: '32px' 
+            }}>
+              {isChunkError 
+                ? "We've just pushed some exciting updates to Atyant. Please refresh to load the latest version."
+                : "An unexpected error occurred. Don't worry, a quick refresh usually fixes this."
+              }
+            </p>
+            <button 
+              onClick={() => window.location.reload()}
+              style={{
+                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '16px 32px',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                width: '100%',
+                boxShadow: '0 10px 15px -3px rgba(99, 102, 241, 0.4)'
+              }}
+              onMouseOver={e => e.currentTarget.style.transform = 'scale(1.02)'}
+              onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              Refresh Now
+            </button>
+            
+            <details style={{ marginTop: '24px', textAlign: 'left' }}>
+              <summary style={{ 
+                fontSize: '12px', 
+                color: '#9ca3af', 
+                cursor: 'pointer', 
+                userSelect: 'none' 
+              }}>
+                Technical error details
+              </summary>
+              <pre style={{ 
+                marginTop: '10px', 
+                padding: '12px', 
+                background: '#f3f4f6', 
+                borderRadius: '8px', 
+                fontSize: '11px', 
+                color: '#ef4444', 
+                overflowX: 'auto',
+                whiteSpace: 'pre-wrap'
+              }}>
+                {errorMessage}
+              </pre>
+            </details>
           </div>
+          <style>{`
+            @keyframes bounce {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+            }
+          `}</style>
         </div>
       );
     }

@@ -117,20 +117,7 @@ const MentorProfilePage = () => {
               )}
             </div>
 
-            <div className="mentor-actions">
-              <button 
-                className="btn-primary"
-                onClick={() => navigate(`/chat/${mentorId}`)}
-              >
-                💬 Start Chat
-              </button>
-              <button 
-                className="btn-secondary"
-                onClick={() => navigate('/ask')}
-              >
-                ❓ Ask Question
-              </button>
-            </div>
+            {/* Actions removed from here, moved to dedicated section below */}
           </div>
         </div>
       </div>
@@ -146,6 +133,38 @@ const MentorProfilePage = () => {
           </div>
         </div>
       )}
+
+      {/* Premium AnswerCard Promo Section */}
+      <div className="mentor-section answer-card-promo-section">
+        <div className="promo-content">
+          <div className="promo-badge">💎 ATYANT PREMIUM SYSTEM</div>
+          <h2>Get a Personalized Answer Card</h2>
+          <p>
+            Skip the 1:1 call and get a detailed <strong>Answer Card</strong> from {mentor.name || mentor.username}. 
+            Our AI engine collects the mentor's exact experience to solve your specific problem.
+          </p>
+          <div className="promo-features">
+            <div className="promo-feature">✨ Real experience-based solution</div>
+            <div className="promo-feature">⚡ Faster than scheduling a call</div>
+            <div className="promo-feature">📄 Lifetime access to your answer</div>
+          </div>
+          <div className="promo-actions">
+            <button 
+              className="btn-promo-primary"
+              onClick={() => navigate('/my-questions')}
+            >
+              🎯 Get Answer Card
+            </button>
+          </div>
+        </div>
+        <div className="promo-visual">
+          <div className="visual-card">
+            <div className="visual-line"></div>
+            <div className="visual-line short"></div>
+            <div className="visual-check">✓</div>
+          </div>
+        </div>
+      </div>
 
       {/* Skills Section */}
       {mentor.skills && mentor.skills.length > 0 && (

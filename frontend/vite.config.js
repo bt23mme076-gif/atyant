@@ -10,10 +10,15 @@ export default defineConfig({
     compression({ algorithm: 'gzip', ext: '.gz' }),
     compression({ algorithm: 'brotliCompress', ext: '.br' }),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt', // Better to prompt or handle manually for more reliability
       manifest: require('./public/manifest.json'),
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg,ico,json}'],
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
+        // Remove .html from patterns so index.html is NOT cached by service worker
+        // This ensures the browser always fetches the latest index.html from server
+        globPatterns: ['**/*.{js,css,png,svg,ico,json}'],
       },
     }),
   ],

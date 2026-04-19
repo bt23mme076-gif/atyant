@@ -3045,3 +3045,111 @@
   }
 }
 
+
+/* Institute Toggle Filter */
+.institute-toggle-bar {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.toggle-pill {
+  padding: 8px 20px;
+  border-radius: 50px;
+  border: 1.5px solid var(--color-brand-border);
+  background: transparent;
+  color: var(--color-brand);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.toggle-pill:hover {
+  background: var(--color-brand-light);
+}
+
+.toggle-pill.active {
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  color: #fff;
+}
+
+/* Success Stories 2-Column Grid */
+.success-stories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+  padding: 2rem 0;
+}
+
+@media (max-width: 768px) {
+  .success-stories-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.story-card {
+  background: var(--bg-card);
+  border: 1px solid var(--color-brand-border);
+  border-radius: var(--card-radius);
+  padding: 2rem;
+  box-shadow: var(--shadow-card);
+  transition: var(--transition);
+}
+
+.story-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(105, 101, 188, 0.12);
+}
+
+/* Chips & Expand */
+.skill-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.skill-chip {
+  background: var(--color-brand-light);
+  color: var(--color-brand);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.show-more-chips {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  padding: 4px;
+}
+
+/* Email Personalization Re-design */
+.email-personalization-box {
+  background: linear-gradient(135deg, #FFFAF0 0%, #FFFFFF 100%);
+  border: 1px dashed #F59E0B;
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 3rem 0;
+  text-align: center;
+}
+
+.email-pers-title {
+  color: #B45309;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.email-pers-step {
+  color: #D97706;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+

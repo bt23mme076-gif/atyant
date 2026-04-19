@@ -136,6 +136,23 @@ const MyQuestionsEnhanced = () => {
         <p>Track all your questions, services, and call schedules</p>
       </div>
 
+      {/* Answer Card Info Section */}
+      <div className="premium-info-section">
+        <div className="info-content">
+          <h3>🚀 Atyant Premium: Answer Cards</h3>
+          <p>
+            An <strong>Answer Card</strong> is a high-value, experience-backed document created by expert mentors. 
+            It includes step-by-step guidance, industry secrets, and a personalized roadmap for your career.
+          </p>
+          <div className="info-footer">
+            <span className="info-tip">💡 Need more clarity or have follow-ups?</span>
+            <button className="book-session-link" onClick={() => navigate('/mentors')}>
+              Book a 1:1 Session →
+            </button>
+          </div>
+        </div>
+      </div>
+
       {stats && (
         <div className="dashboard-stats">
           <div className="stat-card">

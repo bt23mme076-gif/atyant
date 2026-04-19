@@ -344,11 +344,6 @@ const MentorPreviewContent = ({ mentorPreview, checkingQuality, onContinue, onAs
 
       {/* 8. Actions */}
       <div className="aq-modal-actions">
-        {mentorPreview.mentor?.id && (
-          <button className="aq-btn aq-btn-chat" disabled title="Coming soon">
-            💬 Chat Now
-          </button>
-        )}
         <button
           className="aq-btn aq-btn-primary"
           onClick={onAsk}
