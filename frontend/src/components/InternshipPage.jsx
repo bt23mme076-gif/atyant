@@ -767,9 +767,19 @@ Resume Link: [Resume Link]
           </div>
         </div>
 
-        <h2 className="sr-only">Search IIT and IIM Professor Emails by Institution</h2>
         <div className="faculty-directory-filter-bar" role="search">
-          <label htmlFor="category-select">Institution Type: </label>
+          <div className="directory-call-to-action" style={{ gridColumn: '1 / -1', textAlign: 'center', marginBottom: '20px', background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))', padding: '20px', borderRadius: '16px', border: '1px solid rgba(118, 75, 162, 0.25)' }}>
+             <h3 style={{ fontSize: '1.6rem', color: '#1e293b', fontWeight: '800', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+               <span style={{ fontSize: '1.8rem' }}>🇮🇳</span> India's 1st Premium Database
+             </h3>
+             <p style={{ fontSize: '1.1rem', color: '#334155', fontWeight: '500', lineHeight: '1.5', margin: '0 0 12px 0' }}>
+               Get <strong>instant access</strong> to complete Professor data, official emails, and academic domains.
+             </p>
+             <div style={{ display: 'inline-block', background: '#764ba2', color: 'white', padding: '8px 20px', borderRadius: '30px', fontWeight: '700', fontSize: '1.05rem', boxShadow: '0 4px 12px rgba(118, 75, 162, 0.3)' }}>
+               👇 Just Select a College & Explore 👇
+             </div>
+          </div>
+          <label htmlFor="category-select" style={{ justifySelf: 'end' }}>Institution Type: </label>
           <select
             id="category-select"
             value={category}
@@ -777,10 +787,10 @@ Resume Link: [Resume Link]
             className="filter-dropdown"
             aria-label="Select institution type - IIT or IIM"
           > 
-            <option value="IIT">IIT (Indian Institute of Technology)</option>
-            <option value="IIM">IIM (Indian Institute of Management)</option>
+            <option value="IIT">IITs</option>
+            <option value="IIM">IIMs</option>
           </select>
-          <label htmlFor="college-select">Select Institution: </label>
+          <label htmlFor="college-select" style={{ justifySelf: 'end' }}>Select Institution: </label>
           <select
             id="college-select"
             value={college}

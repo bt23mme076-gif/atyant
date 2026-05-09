@@ -81,7 +81,6 @@
   animation: fadeInUp 0.6s ease-out 0.2s backwards;
 }
 
-/* USP Stats */
 .professor-usp-stats {
   display: flex;
   align-items: center;
@@ -90,9 +89,9 @@
   padding: 32px;
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(240, 147, 251, 0.08));
   border-radius: 20px;
-  border: 2px solid rgba(102, 126, 234, 0.15);
+  border: 2px solid rgba(118, 75, 162, 0.4);
   box-shadow: 0 8px 24px rgba(102, 126, 234, 0.1);
-  animation: fadeInUp 0.6s ease-out 0.3s backwards;
+  animation: fadeInUp 0.6s ease-out 0.3s backwards, filterBarPulse 2s infinite 1s;
 }
 
 .usp-stat-item {
@@ -143,11 +142,18 @@
   font-weight: 600;
   background: #ffffff;
   border-radius: 20px;
-  border: 2px solid rgba(102, 126, 234, 0.15);
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.12);
+  border: 2px solid #764ba2;
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
   padding: 40px 48px;
   max-width: 900px;
   position: relative;
+  animation: filterBarPulse 2s infinite;
+}
+
+@keyframes filterBarPulse {
+  0% { box-shadow: 0 0 0 0 rgba(118, 75, 162, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(118, 75, 162, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(118, 75, 162, 0); }
 }
 
 .faculty-directory-filter-bar::before {

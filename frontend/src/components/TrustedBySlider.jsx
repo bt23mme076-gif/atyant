@@ -19,7 +19,7 @@ const TrustedBySlider = () => {
     <section className="trusted-section">
       <div className="trusted-container">
 
-        <h2 className="trusted-title">Trusted Across Top Campuses</h2>
+        <h2 className="trusted-title">Trusted By Students Across Top Campuses</h2>
 
 
         <div className="trusted-slider-wrapper">
