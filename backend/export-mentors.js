@@ -14,10 +14,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-// ─── CONFIG ────────────────────────────────────────────────────────────────
-// Option 1: .env file use karo (recommended)
-// Option 2: Seedha yahan paste karo (sirf local use ke liye)
-const MONGODB_URI = process.env.MONGODB_URI || 'YOUR_MONGODB_ATLAS_URI_HERE';
+import 'dotenv/config';
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGO_URI || 'YOUR_MONGODB_ATLAS_URI_HERE';
 
 const OUTPUT_FILE = 'mentors_export.csv';
 
