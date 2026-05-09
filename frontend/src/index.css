@@ -128,8 +128,7 @@ body {
 
 /* Fix for images and media */
 img,
-video,
-iframe {
+video {
   max-width: 100%;
   height: auto;
   display: block;
@@ -306,4 +305,31 @@ a {
 .bg-clip-text {
   -webkit-background-clip: text;
   background-clip: text;
+}
+
+/* Custom animation for getgabs WhatsApp widget */
+@keyframes whatsapp-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+#setgetitsmsiframe button img {
+  animation: whatsapp-pulse 2s infinite !important;
+  border-radius: 50% !important;
+  transition: transform 0.3s ease-in-out !important;
+}
+
+#setgetitsmsiframe button:hover img {
+  transform: scale(1.1) !important;
+  animation-play-state: paused !important;
 }
