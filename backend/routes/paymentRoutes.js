@@ -6,7 +6,7 @@ import User from '../models/User.js';
 import Payment from '../models/Payment.js';
 import Question from '../models/Question.js';
 import { sendMentorPaymentNotification } from '../utils/emailService.js';
-import { scheduleMeetingForBooking } from '../controllers/meetingController.js';
+
 
 const router = express.Router();
 
@@ -517,34 +517,14 @@ router.post('/verify-booking', protect, async (req, res) => {
 
     console.log(`✅ Service booking payment: ₹${payment.amount / 100} | Service:${serviceId}`);
 
-    let meetingDetails = null;
-    if (service.type === 'video-call' && scheduledAt) {
-      try {
-        meetingDetails = await scheduleMeetingForBooking({
-          bookingId: booking._id,
-          mentorId,
-          userId: req.user.userId,
-          scheduledAt,
-          duration: service.duration || 30,
-          title: service.name || 'Mentorship Session',
-          description: notes || 'Video mentorship session'
-        });
-
-        booking.meetingLink = meetingDetails.meetLink;
-        booking.googleCalendarEventId = meetingDetails.googleEventId;
-        await booking.save();
-
-        console.log(`✅ Google Meet created: ${meetingDetails.meetLink}`);
-      } catch (meetError) {
-        console.error('❌ Failed to create Google Meet:', meetError.message);
-      }
-    }
-
+    // Meeting link is already generated inside BookingService.createBooking
+    // for both video-call and audio-call types.
+    
     res.json({
       success: true,
       message: 'Booking confirmed successfully',
       booking,
-      meetingLink: meetingDetails?.meetLink || null
+      meetingLink: booking.meetingLink || null
     });
   } catch (error) {
     console.error('verify-booking error:', error);

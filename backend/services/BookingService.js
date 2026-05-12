@@ -47,51 +47,114 @@ class BookingService {
   // Generate Google Meet link
   async generateMeetingLink(booking, mentor, user) {
     try {
-      if (!this.calendar) {
-        // Fallback: Generate a simple meeting room link
-        return `https://meet.atyant.in/${booking._id}`;
+      // 1. Try using Mentor's Google OAuth first (preferred)
+      if (mentor.accessToken && mentor.refreshToken) {
+        try {
+          const oauth2Client = new google.auth.OAuth2(
+            process.env.GOOGLE_CALENDAR_CLIENT_ID,
+            process.env.GOOGLE_CALENDAR_CLIENT_SECRET
+          );
+
+          oauth2Client.setCredentials({
+            access_token: mentor.accessToken,
+            refresh_token: mentor.refreshToken
+          });
+
+          const mentorCalendar = google.calendar({ version: 'v3', auth: oauth2Client });
+          
+          const event = {
+            summary: `${booking.serviceType === 'video-call' ? 'Video' : 'Audio'} Call: ${user.name || user.username} & ${mentor.name || mentor.username}`,
+            description: `Atyant Mentorship Session\nBooking ID: ${booking._id}\nNotes: ${booking.notes || 'None'}`,
+            start: {
+              dateTime: booking.scheduledAt.toISOString(),
+              timeZone: 'Asia/Kolkata'
+            },
+            end: {
+              dateTime: new Date(booking.scheduledAt.getTime() + (booking.duration || 30) * 60000).toISOString(),
+              timeZone: 'Asia/Kolkata'
+            },
+            attendees: [
+              { email: user.email },
+              { email: mentor.email }
+            ],
+            conferenceData: {
+              createRequest: {
+                requestId: `atyant-${booking._id}-${Date.now()}`,
+                conferenceSolutionKey: { type: 'hangoutsMeet' }
+              }
+            }
+          };
+
+          const response = await mentorCalendar.events.insert({
+            calendarId: 'primary',
+            resource: event,
+            conferenceDataVersion: 1,
+            sendUpdates: 'all'
+          });
+
+          booking.googleCalendarEventId = response.data.id;
+          booking.meetingLink = response.data.hangoutLink;
+          await booking.save();
+          
+          console.log(`✅ Meeting created via Mentor OAuth: ${response.data.hangoutLink}`);
+          return response.data.hangoutLink;
+        } catch (oauthError) {
+          console.error('Mentor OAuth meeting generation failed, falling back to Service Account:', oauthError.message);
+        }
       }
 
-      const event = {
-        summary: `${booking.serviceType === 'video-call' ? 'Video' : 'Audio'} Call with ${mentor.name}`,
-        description: `Booking ID: ${booking._id}\nNotes: ${booking.notes || 'None'}`,
-        start: {
-          dateTime: booking.scheduledAt.toISOString(),
-          timeZone: 'Asia/Kolkata'
-        },
-        end: {
-          dateTime: new Date(booking.scheduledAt.getTime() + booking.duration * 60000).toISOString(),
-          timeZone: 'Asia/Kolkata'
-        },
-        attendees: [
-          { email: user.email },
-          { email: mentor.email }
-        ],
-        conferenceData: {
-          createRequest: {
-            requestId: booking._id.toString(),
-            conferenceSolutionKey: { type: 'hangoutsMeet' }
+      // 2. Fallback to Service Account if Mentor OAuth fails or is missing
+      if (this.calendar) {
+        const event = {
+          summary: `${booking.serviceType === 'video-call' ? 'Video' : 'Audio'} Call: ${user.name || user.username} & ${mentor.name || mentor.username}`,
+          description: `Atyant Mentorship Session\nBooking ID: ${booking._id}\nNotes: ${booking.notes || 'None'}`,
+          start: {
+            dateTime: booking.scheduledAt.toISOString(),
+            timeZone: 'Asia/Kolkata'
+          },
+          end: {
+            dateTime: new Date(booking.scheduledAt.getTime() + (booking.duration || 30) * 60000).toISOString(),
+            timeZone: 'Asia/Kolkata'
+          },
+          attendees: [
+            { email: user.email },
+            { email: mentor.email }
+          ],
+          conferenceData: {
+            createRequest: {
+              requestId: booking._id.toString(),
+              conferenceSolutionKey: { type: 'hangoutsMeet' }
+            }
           }
-        }
-      };
+        };
 
-      const response = await this.calendar.events.insert({
-        calendarId: 'primary',
-        resource: event,
-        conferenceDataVersion: 1,
-        sendUpdates: 'all'
-      });
+        const response = await this.calendar.events.insert({
+          calendarId: 'primary',
+          resource: event,
+          conferenceDataVersion: 1,
+          sendUpdates: 'all'
+        });
 
-      // Save Google Calendar event ID
-      booking.googleCalendarEventId = response.data.id;
-      booking.meetingLink = response.data.hangoutLink;
+        booking.googleCalendarEventId = response.data.id;
+        booking.meetingLink = response.data.hangoutLink;
+        await booking.save();
+
+        console.log(`✅ Meeting created via Service Account: ${response.data.hangoutLink}`);
+        return response.data.hangoutLink;
+      }
+
+      // 3. Last Fallback: Generic Link
+      const fallbackLink = `https://meet.atyant.in/${booking._id}`;
+      booking.meetingLink = fallbackLink;
       await booking.save();
+      return fallbackLink;
 
-      return response.data.hangoutLink;
     } catch (error) {
-      console.error('Generate meeting link error:', error);
-      // Fallback
-      return `https://meet.atyant.in/${booking._id}`;
+      console.error('Generate meeting link total failure:', error);
+      const finalFallback = `https://meet.atyant.in/${booking._id}`;
+      booking.meetingLink = finalFallback;
+      await booking.save();
+      return finalFallback;
     }
   }
 
@@ -220,7 +283,7 @@ class BookingService {
 
       // Fetch mentor and user details
       const [mentor, user] = await Promise.all([
-        User.findById(mentorId),
+        User.findById(mentorId).select('+accessToken +refreshToken email name username'),
         User.findById(userId)
       ]);
 

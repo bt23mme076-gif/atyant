@@ -551,13 +551,15 @@ const BookingsTab = ({ bookings, formatDate, formatCurrency }) => {
 };
 
 // Availability Tab Component
-const AvailabilityTab = ({ token }) => {
+const AvailabilityTab = ({ token, user }) => {
   const [availability, setAvailability] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [calendarStatus, setCalendarStatus] = useState({ connected: false, email: '' });
 
   useEffect(() => {
     fetchAvailability();
+    fetchCalendarStatus();
   }, []);
 
   const fetchAvailability = async () => {
@@ -573,6 +575,40 @@ const AvailabilityTab = ({ token }) => {
       console.error('Fetch availability error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCalendarStatus = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/calendar-status`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setCalendarStatus(data);
+    } catch (error) {
+      console.error('Fetch calendar status error:', error);
+    }
+  };
+
+  const handleConnectCalendar = () => {
+    // Redirect to backend OAuth route
+    window.location.href = `${API_URL}/api/auth/google`;
+  };
+
+  const handleDisconnectCalendar = async () => {
+    if (!confirm('Are you sure you want to disconnect your Google Calendar?')) return;
+    try {
+      const res = await fetch(`${API_URL}/api/auth/disconnect-calendar`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCalendarStatus({ connected: false, email: '' });
+        alert('Calendar disconnected successfully');
+      }
+    } catch (error) {
+      console.error('Disconnect calendar error:', error);
     }
   };
 
@@ -699,9 +735,134 @@ const AvailabilityTab = ({ token }) => {
         </button>
       </div>
 
-      <p style={{ color: 'rgba(255,255,255,0.8)', marginBottom: '2rem' }}>
+      <p style={{ color: '#4a5568', marginBottom: '2rem', fontSize: '1.05rem', lineHeight: '1.6' }}>
         Configure your timezone, session buffers, and weekly schedule to let students know when you're free.
       </p>
+
+      {/* Google Calendar Integration Section */}
+      <div className="integration-section-calendar" style={{ marginBottom: '2.5rem' }}>
+        <div className={`calendar-status-card ${calendarStatus.connected ? 'connected' : 'disconnected'}`} style={{
+          background: 'white',
+          borderRadius: '20px',
+          padding: '1.5rem 2rem',
+          boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          border: '1px solid rgba(0,0,0,0.05)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Subtle background decoration */}
+          <div style={{
+            position: 'absolute',
+            top: '-20px',
+            right: '-20px',
+            width: '100px',
+            height: '100px',
+            background: calendarStatus.connected ? 'rgba(16, 185, 129, 0.05)' : 'rgba(66, 133, 244, 0.05)',
+            borderRadius: '50%',
+            zIndex: 0
+          }}></div>
+
+          <div className="status-info" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', zIndex: 1 }}>
+            <div className="calendar-icon-bg" style={{
+              background: calendarStatus.connected ? '#10b981' : '#4285F4',
+              width: '56px',
+              height: '56px',
+              borderRadius: '16px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              fontSize: '28px',
+              boxShadow: calendarStatus.connected ? '0 4px 12px rgba(16, 185, 129, 0.2)' : '0 4px 12px rgba(66, 133, 244, 0.2)'
+            }}>
+              📅
+            </div>
+            <div>
+              <h3 style={{ margin: 0, color: '#1a202c', fontSize: '1.2rem', fontWeight: '700' }}>Google Calendar Integration</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                <span style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  background: calendarStatus.connected ? '#10b981' : '#cbd5e0',
+                  display: 'inline-block'
+                }}></span>
+                <p style={{ margin: 0, color: '#4a5568', fontSize: '0.95rem', fontWeight: '500' }}>
+                  {calendarStatus.connected 
+                    ? `Active: ${calendarStatus.email}` 
+                    : 'Not connected. Connect to automate meeting links.'}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div style={{ zIndex: 1 }}>
+            {calendarStatus.connected ? (
+              <button 
+                className="disconnect-calendar-btn"
+                onClick={handleDisconnectCalendar}
+                style={{
+                  background: '#fff1f2',
+                  color: '#e11d48',
+                  border: '1px solid #fda4af',
+                  padding: '0.7rem 1.5rem',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  boxShadow: '0 2px 4px rgba(225, 29, 72, 0.05)'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = '#ffe4e6';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = '#fff1f2';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                Disconnect
+              </button>
+            ) : (
+              <button 
+                className="connect-calendar-btn"
+                onClick={handleConnectCalendar}
+                style={{
+                  background: '#4285F4',
+                  color: 'white',
+                  border: 'none',
+                  padding: '0.8rem 1.8rem',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '0.95rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  boxShadow: '0 4px 15px rgba(66, 133, 244, 0.3)',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.background = '#3367d6';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 20px rgba(66, 133, 244, 0.4)';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.background = '#4285F4';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(66, 133, 244, 0.3)';
+                }}
+              >
+                <img src="https://www.gstatic.com/images/branding/product/1x/calendar_2020q4_48dp.png" alt="G" style={{ width: '20px', height: '20px' }} />
+                Connect Google Calendar
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
 
       <div className="availability-settings">
         <div className="setting-card">

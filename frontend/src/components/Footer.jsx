@@ -36,6 +36,7 @@ const Footer = () => {
             <li><Link to="/internships">Internships</Link></li>
             <li><Link to="/resume-store">Resume Architecture</Link></li>
             <li><Link to="/career-guides">Career Guides</Link></li>
+            <li><Link to="/privacy">Privacy Policy</Link></li>
           </ul>
         </div>
 
