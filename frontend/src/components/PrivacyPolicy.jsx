@@ -269,6 +269,9 @@ const PrivacyPolicy = () => {
                   <a href="https://atyant.in" target="_blank" rel="noopener noreferrer" className="pp-contact-link secondary">
                     ↗ atyant.in
                   </a>
+                  <a href="/terms" className="pp-contact-link secondary">
+                    ↗ Terms of Service
+                  </a>
                 </div>
               </div>
             </section>

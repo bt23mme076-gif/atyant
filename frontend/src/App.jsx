@@ -44,6 +44,7 @@ const AdminDashboard    = lazy(() => import('./components/AdminDashboard'));
 const CareerGuidesPage  = lazy(() => import('./components/CareerGuidesPage'));
 const AuthSuccess       = lazy(() => import('./components/AuthSuccess'));
 const PrivacyPolicy     = lazy(() => import('./components/PrivacyPolicy'));
+const TermsOfService     = lazy(() => import('./components/TermsOfService'));
 // Community notifications — static, no need inside component
 const COMMUNITY_NOTIFICATIONS = [
   '💬 Join the Community Chat!',
@@ -197,6 +198,7 @@ function App() {
               <Route path="/mentor-monetization" element={<ProtectedRoute><MentorMonetization /></ProtectedRoute>} />
               <Route path="/mentor/:mentorId" element={<MentorProfilePage />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
               <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
               <Route path="/admin-dashboard"  element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             </Routes>
