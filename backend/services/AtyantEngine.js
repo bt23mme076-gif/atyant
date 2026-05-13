@@ -918,6 +918,34 @@ class AtyantEngine {
   async processQuestion(userId, questionText, options = {}) {
     const retryCount = options._retryCount || 0;
 
+    // Direct mentor assignment — skip all matching when user explicitly chose a mentor
+    if (options.preferredMentorId) {
+      try {
+        const mentor = await User.findById(options.preferredMentorId).lean();
+        if (mentor) {
+          const keywords = extractSmartKeywords(questionText);
+          const question = new Question({
+            userId, questionText, keywords,
+            status: 'mentor_assigned',
+            selectedMentorId: mentor._id,
+            matchMethod: 'user_selected',
+          });
+          await question.save();
+          await User.findByIdAndUpdate(mentor._id, { $inc: { activeQuestions: 1 } });
+          sendMentorNewQuestionNotification(mentor.email, mentor.username, questionText)
+            .catch(err => console.error(`⚠️ Email failed:`, err.message));
+          return {
+            success: true, questionId: question._id,
+            message: `Question sent to ${mentor.username}`,
+            mentorId: mentor._id, mentorUsername: mentor.username,
+            matchMethod: 'user_selected',
+          };
+        }
+      } catch (err) {
+        console.error('preferredMentorId lookup failed, falling through to engine:', err.message);
+      }
+    }
+
     try {
       await Promise.all([getAllTargetCompanies(), getActiveMentors()]);
 

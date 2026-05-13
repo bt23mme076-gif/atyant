@@ -111,4 +111,94 @@ router.get('/mentors', optionalAuth, async (req, res) => {
   }
 });
 
+
+
+// �������������������������������������
+// �������������������������������������
+// �������������������������������������
+
+// �������������������������������������
+// INTELLIGENCE SEARCH WITH GROQ
+// �������������������������������������
+router.post('/intelligence/search', async (req, res) => {
+  try {
+    const { query, college, branch } = req.body;
+
+    if (!query || query.trim().length < 3) {
+      return res.status(400).json({ error: 'Query too short' });
+    }
+
+    const systemPrompt = `You are AtyantEngine — the AI intelligence layer of Atyant, a career guidance platform for Indian engineering students.
+
+Your job: analyze the student's career question and return a sharp, data-backed response.
+
+STRICT OUTPUT FORMAT — return ONLY valid JSON, no markdown, no extra text:
+{
+  "context": "One line like 'VNIT Metallurgy → IIM · 3 paths found'",
+  "analysis": "2-3 sentences of sharp, specific, actionable analysis for Indian engineering context. Mention specific colleges (NITs, IITs, IIMs), companies (Google, Amazon, Razorpay), exams (CAT, GATE, GRE) where relevant.",
+  "callout": {
+    "label": "// Verified · [College] → [Company/Achievement] · [Year]",
+    "quote": "A realistic, specific quote from a student who solved this exact problem. 1-2 sentences. Casual tone."
+  },
+  "followUps": ["Natural follow-up question 1", "Natural follow-up question 2", "Natural follow-up question 3"]
+}
+
+Rules:
+- Be specific to Indian engineering context
+- Analysis must be actionable, not generic platitudes
+- Quote must feel real — casual, specific, not corporate
+- followUps must be the natural next questions a student would ask
+- Return ONLY the JSON object`;
+
+    const userPrompt = `Student background: College: ${college || 'Not specified'}, Branch: ${branch || 'Not specified'}
+
+Their question: "${query}"
+
+Analyze this and return the JSON response.`;
+
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY || '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'}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama3-70b-8192',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.65,
+        max_tokens: 700,
+        response_format: { type: 'json_object' }
+      })
+    });
+
+    if (!groqResponse.ok) {
+      const errorText = await groqResponse.text();
+      console.error('Groq API Error:', groqResponse.status, errorText);
+      return res.status(500).json({ error: 'Groq API unavailable' });
+    }
+
+    const groqData = await groqResponse.json();
+    const content = groqData.choices?.[0]?.message?.content;
+    if (!content) return res.status(500).json({ error: 'Empty Groq response' });
+
+    let resultJson;
+    try {
+      resultJson = JSON.parse(content);
+    } catch {
+      const match = content.match(/\{[\s\S]*\}/);
+      if (!match) return res.status(500).json({ error: 'Invalid JSON from Groq' });
+      resultJson = JSON.parse(match[0]);
+    }
+
+    res.json(resultJson);
+  } catch (error) {
+    console.error('Intelligence search error:', error);
+    res.status(500).json({ error: 'Internal intelligence failure' });
+  }
+});
+
 export default router;
+

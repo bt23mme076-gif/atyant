@@ -10,28 +10,24 @@ export default defineConfig({
     compression({ algorithm: 'gzip', ext: '.gz' }),
     compression({ algorithm: 'brotliCompress', ext: '.br' }),
     VitePWA({
-      registerType: 'prompt', // Better to prompt or handle manually for more reliability
+      registerType: 'prompt',
       manifest: require('./public/manifest.json'),
       workbox: {
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
-        // Remove .html from patterns so index.html is NOT cached by service worker
-        // This ensures the browser always fetches the latest index.html from server
-        globPatterns: ['**/*.{js,css,png,svg,ico,json}'],
+        globPatterns: ['**/*.{png,svg,ico,json,woff,woff2,ttf,eot}'],
       },
     }),
   ],
   build: {
-    target: 'esnext', // Modern browsers ke liye faster build
-    minify: 'esbuild', // Terser se jyada stable hai React 18 ke liye
+    target: 'esnext',
+    minify: 'esbuild',
     sourcemap: false,
-    cssCodeSplit: true,
+    cssCodeSplit: false,
     chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
-        // Sabhi node_modules ko ek hi vendor file mein rakhein
-        // Isse "Children of undefined" wali error hamesha ke liye khatam ho jayegi
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
             return 'vendor';
@@ -40,7 +36,6 @@ export default defineConfig({
       },
     },
   },
-  // Esbuild debugging ke liye best hai
   esbuild: {
     drop: ['console', 'debugger'],
   }

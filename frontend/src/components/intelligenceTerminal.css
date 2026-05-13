@@ -1,0 +1,530 @@
+/* intelligenceTerminal.css - Dark theme design system */
+/* Scoped to .it-page so variables never leak to other pages */
+
+.it-page {
+  /* Dark backgrounds */
+  --bg: #0A0E27;
+  --bg-2: #141829;
+  --bg-3: #1E2541;
+
+  /* Text colors */
+  --text-t-1: #FFFFFF;
+  --text-t-2: #B4BAC4;
+  --text-t-3: #6B7280;
+
+  /* Borders */
+  --border: #2D3748;
+  --border-2: #4A5568;
+  --border-bdr: #2D3748;
+
+  /* Signal/accent color (bright green) */
+  --signal: #B6FF3C;
+  --signal-dim: rgba(182, 255, 60, 0.1);
+  --signal-bdr: rgba(182, 255, 60, 0.3);
+}
+
+/* Apply background to main container */
+.bg-bg {
+  background-color: var(--bg);
+}
+
+.bg-bg-2 {
+  background-color: var(--bg-2);
+}
+
+.bg-bg-3 {
+  background-color: var(--bg-3);
+}
+
+/* Text colors */
+.text-t-1 {
+  color: var(--text-t-1);
+}
+
+.text-t-2 {
+  color: var(--text-t-2);
+}
+
+.text-t-3 {
+  color: var(--text-t-3);
+}
+
+/* Border colors */
+.border-border {
+  border-color: var(--border);
+}
+
+.border-border-2 {
+  border-color: var(--border-2);
+}
+
+.border-signal-bdr {
+  border-color: var(--signal-bdr);
+}
+
+/* Signal/accent styling */
+.bg-signal {
+  background-color: var(--signal);
+}
+
+.text-signal {
+  color: var(--signal);
+}
+
+.bg-signal-dim {
+  background-color: var(--signal-dim);
+}
+
+.border-signal-bdr {
+  border-color: var(--signal-bdr);
+}
+
+/* Animations */
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-ticker {
+  animation: ticker-scroll 20s linear infinite;
+}
+
+@keyframes dot-pulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-dot1 {
+  animation: dot-pulse 0.6s ease-in-out infinite;
+}
+
+.animate-dot2 {
+  animation: dot-pulse 0.6s ease-in-out 0.2s infinite;
+}
+
+.animate-dot3 {
+  animation: dot-pulse 0.6s ease-in-out 0.4s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Mobile responsive utilities — scoped to .it-page to avoid breaking global navbar */
+.it-page .mobile-only {
+  display: none;
+}
+
+.it-page .desktop-only {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .it-page .mobile-only {
+    display: block;
+  }
+
+  .it-page .desktop-only {
+    display: none;
+  }
+}
+
+/* Focus states */
+.focus-within\:border-signal-bdr:focus-within {
+  border-color: var(--signal-bdr);
+}
+
+/* Shadow for glow effect */
+.focus-within\:shadow-\[0_0_20px_rgba\(182,255,60,0.1\)\]:focus-within {
+  box-shadow: 0 0 20px rgba(182, 255, 60, 0.1);
+}
+
+/* Hover transitions */
+.hover\:opacity-90:hover {
+  opacity: 0.9;
+}
+
+.hover\:border-border-2:hover {
+  border-color: var(--border-2);
+}
+
+.hover\:text-t-1:hover {
+  color: var(--text-t-1);
+}
+
+.hover\:bg-signal:hover {
+  background-color: var(--signal);
+}
+
+.hover\:text-bg:hover {
+  color: var(--bg);
+}
+
+.hover\:bg-signal-dim:hover {
+  background-color: var(--signal-dim);
+}
+
+.hover\:bg-bg-3:hover {
+  background-color: var(--bg-3);
+}
+
+/* Utility classes */
+.font-sans {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+.font-serif {
+  font-family: 'Georgia', 'Garamond', serif;
+}
+
+.font-mono {
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+/* Text utilities */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+
+/* Layout utilities */
+.relative {
+  position: relative;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.inset-0 {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.z-0 {
+  z-index: 0;
+}
+
+.z-10 {
+  z-index: 10;
+}
+
+.pointer-events-none {
+  pointer-events: none;
+}
+
+/* Transition utilities */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-opacity {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.transition-colors {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.duration-200 {
+  transition-duration: 200ms;
+}
+
+.duration-500 {
+  transition-duration: 500ms;
+}
+
+/* Flex utilities */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+/* Sizing utilities */
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.max-w-\[700px\] {
+  max-width: 700px;
+}
+
+.max-w-\[640px\] {
+  max-width: 640px;
+}
+
+.max-w-\[85%\] {
+  max-width: 85%;
+}
+
+/* Spacing utilities */
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.py-4 {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.pt-4 {
+  padding-top: 1rem;
+}
+
+.pb-4 {
+  padding-bottom: 1rem;
+}
+
+.mb-3 {
+  margin-bottom: 0.75rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
+.mt-3 {
+  margin-top: 0.75rem;
+}
+
+.ml-auto {
+  margin-left: auto;
+}
+
+/* Grid utilities */
+.grid {
+  display: grid;
+}
+
+/* Opacity utilities */
+.opacity-90 {
+  opacity: 0.9;
+}
+
+/* Border utilities */
+.border {
+  border-width: 1px;
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+
+.rounded-2xl {
+  border-radius: 1rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+/* Line height utilities */
+.leading-relaxed {
+  line-height: 1.625;
+}
+
+.leading-\[1.08\] {
+  line-height: 1.08;
+}
+
+/* Font weight utilities */
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+/* Text size utilities */
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-base {
+  font-size: 1rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.text-\[14px\] {
+  font-size: 14px;
+}
+
+.text-\[15px\] {
+  font-size: 15px;
+}
+
+.text-\[16px\] {
+  font-size: 16px;
+}
+
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+.text-5xl {
+  font-size: 3rem;
+}
+
+/* Overflow utilities */
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-x-hidden {
+  overflow-x: hidden;
+}
+
+/* Min/max content utilities */
+.min-w-0 {
+  min-width: 0;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+/* Aspect ratio and sizing */
+.object-cover {
+  object-fit: cover;
+}
+
+/* Backdrop utilities */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+}
+
+/* Shadow utilities */
+.shadow-\[0_0_20px_rgba\(182,255,60,0.1\)\] {
+  box-shadow: 0 0 20px rgba(182, 255, 60, 0.1);
+}

@@ -105,6 +105,7 @@ const questionSchema = new mongoose.Schema({
       'pending_assignment',
       'atyant_engine_fallback',
       'retry_exhausted',
+      'user_selected',
       null
     ],
     default: null

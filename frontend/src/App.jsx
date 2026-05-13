@@ -45,6 +45,7 @@ const CareerGuidesPage  = lazy(() => import('./components/CareerGuidesPage'));
 const AuthSuccess       = lazy(() => import('./components/AuthSuccess'));
 const PrivacyPolicy     = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService     = lazy(() => import('./components/TermsOfService'));
+const IntelligenceTerminal = lazy(() => import('./components/intelligenceTerminal'));
 // Community notifications — static, no need inside component
 const COMMUNITY_NOTIFICATIONS = [
   '💬 Join the Community Chat!',
@@ -71,6 +72,7 @@ function App() {
 
   const isChatPage = location.pathname === '/chat';
   const isHomePage = location.pathname === '/';
+  const isIntelligencePage = location.pathname === '/intelligence';
 
   // Show Google modal once per session if not logged in
   useEffect(() => {
@@ -162,7 +164,7 @@ function App() {
 
   return (
     <div className={isChatPage && user ? 'App chat-active' : 'App'}>
-      <Navbar />
+      {!isIntelligencePage && <Navbar />}
       <main>
         <ScrollToTop />
         <Suspense fallback={<LoadingSpinner />}>
@@ -194,6 +196,7 @@ function App() {
               <Route path="/answer/:answerCardId" element={<ProtectedRoute><EngineView isAnswerView={true} /></ProtectedRoute>} />
               <Route path="/my-questions"     element={<ProtectedRoute><MyQuestions /></ProtectedRoute>} />
               <Route path="/ask"              element={<ProtectedRoute><EnhancedAskQuestion /></ProtectedRoute>} />
+              <Route path="/intelligence"     element={<ProtectedRoute><IntelligenceTerminal /></ProtectedRoute>} />
               <Route path="/mentor-dashboard" element={<ProtectedRoute><MentorDashboard /></ProtectedRoute>} />
               <Route path="/mentor-monetization" element={<ProtectedRoute><MentorMonetization /></ProtectedRoute>} />
               <Route path="/mentor/:mentorId" element={<MentorProfilePage />} />
@@ -206,7 +209,7 @@ function App() {
         </Suspense>
       </main>
 
-      {!isChatPage && <Footer />}
+      {!isChatPage && !isIntelligencePage && <Footer />}
       <Analytics />
 
       {/* Community Chat FAB removed per request */}

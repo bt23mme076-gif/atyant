@@ -1,6 +1,6 @@
 // src/components/HeroSection.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import './HeroSection.css';
 import LoadingSpinner from './LoadingSpinner';
@@ -40,12 +40,7 @@ const HeroSection = () => {
     "Connect me with someone who solved this"
   ];
 
-  const quickPills = [
-    "CGPA vs skills?",
-    "Off-campus placements",
-    "How to start DSA?",
-    "MBA after engineering"
-  ];
+  const quickPills = [];
 
   // ── Typewriter effect ──
   useEffect(() => {
@@ -232,7 +227,7 @@ const HeroSection = () => {
         {/* Badge */}
         <div className="hero-badge">
           <span className="hero-badge-dot" />
-          Atyant AI Guidance Engine
+           India's career execution intelligence platform
         </div>
 
         {/* Heading */}
@@ -243,7 +238,7 @@ const HeroSection = () => {
 
         {/* Subtitle */}
         <p className="hero-subtitle">
-          Stop guessing. Ask your exact placement, internship, or exam doubt Our AI finds the right senior mentor who's already been through
+          Connecting students with seniors who already solved their exact problem, and training AI on every real outcome
         </p>
 
         {/* Typewriter Rotating Questions */}
@@ -281,14 +276,17 @@ const HeroSection = () => {
           </div>
         </form>
 
-        {/* Quick suggestion pills */}
-        <div className="hero-typing-pills">
-          {quickPills.map((pill, idx) => (
-            <span key={idx} className="hero-pill" onClick={() => handlePillClick(pill)}>
-              {pill}
-            </span>
-          ))}
-        </div>
+        {/* Atyant AI — inline banner */}
+        <Link to="/intelligence" className="hero-ai-banner">
+          <div className="hero-ai-banner-left">
+            <span className="hero-ai-banner-icon">✦</span>
+            <div>
+              <div className="hero-ai-banner-title">Try Atyant AI <span className="hero-ai-banner-badge">New</span></div>
+              <div className="hero-ai-banner-sub">Deep career intelligence — just tell me your college, branch &amp; goal</div>
+            </div>
+          </div>
+          <span className="hero-ai-banner-arrow">→</span>
+        </Link>
 
         {/* Confirmation Modal */}
         {showConfirmPrompt && (
@@ -335,6 +333,7 @@ const HeroSection = () => {
             <span className="hero-stat-label">AI SUPPORT</span>
           </div>
         </div>
+
 
       </div>
     </section>

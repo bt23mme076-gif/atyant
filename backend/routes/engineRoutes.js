@@ -14,11 +14,11 @@ const router = express.Router();
  */
 router.post('/submit-question', protect, async (req, res) => {
   try {
-    const { questionText } = req.body;
+    const { questionText, preferredMentorId } = req.body;
     if (!questionText || questionText.trim().length < 10) {
       return res.status(400).json({ success: false, error: 'Question too short' });
     }
-    const result = await atyantEngine.processQuestion(req.user.userId, questionText);
+    const result = await atyantEngine.processQuestion(req.user.userId, questionText, { preferredMentorId: preferredMentorId || null });
     res.json(result);
   } catch (error) {
     console.error('Error submitting question:', error);

@@ -7,28 +7,19 @@
 }
 
 .app-container {
-  width: 100vw;
+  width: 100%;
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
 }
 
-/* Hide scrollbar */
-.app-container::-webkit-scrollbar {
-  display: none;
-}
-
-.app-container {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-/* Ensure content fits viewport */
 main {
   width: 100%;
   overflow-x: hidden;
 }
-/* Simple Floating Button */
+
+/* Floating AI Chat Button */
+
 .ai-chat-fab {
   position: fixed;
   bottom: 30px;
@@ -36,18 +27,39 @@ main {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
   border: none;
-  cursor: pointer;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-  transition: transform 0.2s;
+
+  background: linear-gradient(135deg,
+      #667eea 0%,
+      #764ba2 100%);
+
+  color: white;
+
+  box-shadow:
+    0 6px 20px rgba(102, 126, 234, 0.4);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+
   z-index: 9998;
 }
 
 .ai-chat-fab:hover {
-  transform: scale(1.1);
+  transform: scale(1.08);
+  box-shadow:
+    0 10px 30px rgba(102, 126, 234, 0.5);
+}
+
+@media (max-width: 768px) {
+  .ai-chat-fab {
+    width: 54px;
+    height: 54px;
+    bottom: 20px;
+    right: 20px;
+  }
 }

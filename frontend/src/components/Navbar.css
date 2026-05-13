@@ -37,11 +37,11 @@
   position: sticky;
   top: 0;
   z-index: 1001;
-  animation: navDrop 0.70s cubic-bezier(.22,1.05,.81,.97);
+  animation: navDrop 0.40s ease-out both;
 }
 @keyframes navDrop {
-  0% {opacity:0;transform: translateY(-36px) scale(0.97);}
-  10% {opacity:0;transform: translateY(0) scale(1);}
+  from {opacity:0; transform: translateY(-8px);}
+  to   {opacity:1; transform: translateY(0);}
 }
 
 .navbar-left,
@@ -832,3 +832,115 @@
 }
 .resume-store-link { color: #7B61FF; }
 .resume-store-link:hover { opacity: 0.8; }
+
+/* ── Intelligence Terminal navbar theme ────────────────────────────────────── */
+.navbar--intelligence {
+  background: rgba(10, 14, 39, 0.95) !important;
+  border-bottom: 1px solid #2D3748 !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  /* Fix: lock height/padding so it never needs a refresh to settle */
+  height: 56px !important;
+  min-height: 56px !important;
+  max-height: 56px !important;
+  padding: 0 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-sizing: border-box !important;
+  animation: none !important;
+}
+
+.brand--intelligence {
+  font-family: 'Monaco', 'Courier New', monospace !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  line-height: 1 !important;
+  color: #FFFFFF !important;
+}
+
+.brand-signal {
+  color: #B6FF3C;
+}
+
+.navbar--intelligence .nav-link {
+  color: #B4BAC4 !important;
+  font-family: 'Monaco', 'Courier New', monospace !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.04em !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.navbar--intelligence .nav-link:hover {
+  color: #B6FF3C !important;
+  background: rgba(182, 255, 60, 0.06) !important;
+  border-radius: 6px !important;
+}
+
+.navbar--intelligence .nav-button {
+  background: transparent !important;
+  border: 1px solid #2D3748 !important;
+  color: #B4BAC4 !important;
+  font-family: 'Monaco', 'Courier New', monospace !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.04em !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+.navbar--intelligence .nav-button:hover,
+.navbar--intelligence .nav-button.primary {
+  background: #B6FF3C !important;
+  border-color: #B6FF3C !important;
+  color: #0A0E27 !important;
+  box-shadow: none !important;
+}
+
+.navbar--intelligence .nav-button.primary:hover {
+  opacity: 0.9 !important;
+}
+
+.navbar--intelligence .internship-link,
+.navbar--intelligence .career-guides-link,
+.navbar--intelligence .dashboard-link,
+.navbar--intelligence .mentor-chat-link {
+  color: #B4BAC4 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.navbar--intelligence .internship-link:hover,
+.navbar--intelligence .career-guides-link:hover {
+  color: #B6FF3C !important;
+  background: rgba(182, 255, 60, 0.06) !important;
+}
+
+.navbar--intelligence .hamburger {
+  color: #B4BAC4 !important;
+}
+
+.navbar--intelligence .hamburger:hover {
+  color: #B6FF3C !important;
+}
+
+.navbar--intelligence .menu-panel {
+  background: #0A0E27 !important;
+  border-right: 1px solid #2D3748 !important;
+}
+
+.navbar--intelligence .profile-dropdown {
+  background: #141829 !important;
+  border: 1px solid #2D3748 !important;
+}
+
+.navbar--intelligence .dropdown-item {
+  color: #B4BAC4 !important;
+}
+
+.navbar--intelligence .dropdown-item:hover {
+  background: rgba(182, 255, 60, 0.06) !important;
+  color: #B6FF3C !important;
+}

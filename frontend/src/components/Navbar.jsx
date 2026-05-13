@@ -1,6 +1,6 @@
 // src/components/Navbar.jsx
 import React, { useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
 import UserAvatar from './UserAvatar';
 import NotificationBell from './NotificationBell';
@@ -11,7 +11,9 @@ import { API_URL } from '../services/api.js';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useContext(AuthContext);
+  const isIntelligence = location.pathname === '/intelligence';
   const [open, setOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
@@ -92,8 +94,10 @@ const Navbar = () => {
   const avatarUser = user ? { ...user, profilePicture: userPhoto } : null;
 
   return (
-    <header className="navbar">
-      <Link to="/" className="brand">Atyant</Link>
+    <header className={`navbar${isIntelligence ? ' navbar--intelligence' : ''}`}>
+      <Link to="/" className={`brand${isIntelligence ? ' brand--intelligence' : ''}`}>
+        {isIntelligence ? <><span className="brand-signal">A</span>TYANT</> : 'Atyant'}
+      </Link>
 
       {/* Desktop */}
       <nav className="navbar-links desktop-only">
