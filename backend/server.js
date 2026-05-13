@@ -37,6 +37,7 @@ import monetizationRoutes  from './routes/monetizationRoutes.js';
 import pushRoutes          from './routes/pushRoutes.js';
 import notificationRoutes  from './routes/notificationRoutes.js';
 import meetingroutes       from './routes/meetings.js';
+import aiRoutes            from './routes/aiRoutes.js';
 
 // ─── Models / utils ────────────────────────────────────────────────────────
 import Message      from './models/Message.js';
@@ -225,6 +226,7 @@ app.use('/api/monetization',    monetizationRoutes);
 app.use('/api/push',            pushRoutes);
 app.use('/api/notifications',   notificationRoutes);
 app.use('/api/meetings',        meetingroutes);
+app.use('/api/ai',              aiRoutes);
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

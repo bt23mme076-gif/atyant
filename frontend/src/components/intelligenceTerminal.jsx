@@ -7,8 +7,6 @@ import { API_URL } from '../services/api';
 import { MOCK_RESPONSES, detectIntent } from '../lib/responses';
 import './intelligenceTerminal.css';
 
-const GROQ_KEY = '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';
-const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 // ── Star canvas ───────────────────────────────────────────────────────────────
 const StarCanvas = () => {
@@ -125,8 +123,8 @@ function getProfileCompleteness(profile) {
 }
 
 // ── API layer ─────────────────────────────────────────────────────────────────
-async function callGroqChat(history, profileCtx) {
-  const sys = `You are Atyant AI - a sharp, warm career advisor for Indian engineering students.
+async function callGroqChat(history, profileCtx, token) {
+  const systemPrompt = `You are Atyant AI - a sharp, warm career advisor for Indian engineering students.
 ${profileCtx ? `\nStudent profile: ${profileCtx}` : '\nStudent profile: not filled yet.'}
 
 Conversation Flow:
@@ -149,18 +147,14 @@ Personality rules:
 - NEVER jump to solutions without understanding their problem first
 - NEVER say "As an AI" - you ARE Atyant AI`;
 
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const res = await fetch(`${API_URL}/api/ai/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_KEY}` },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages: [{ role: 'system', content: sys }, ...history],
-      temperature: 0.72, max_tokens: 280,
-    }),
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ messages: history, systemPrompt }),
   });
   if (!res.ok) throw new Error('Groq chat failed');
   const d = await res.json();
-  return d.choices?.[0]?.message?.content || "Tell me more about your situation - college, branch, what you are aiming for?";
+  return d.reply || "Tell me more about your situation - college, branch, what you are aiming for?";
 }
 
 async function callIntelligenceSearch(query, profileCtx) {
@@ -306,10 +300,10 @@ function AnswerCardView({ answerCard, questionId, navigate }) {
 
 // ── Service icons ─────────────────────────────────────────────────────────────
 const SERVICE_META = {
-  'video-call':   { icon: Video,         label: 'Video Call',   color: '#7C3AED' },
-  'audio-call':   { icon: Phone,         label: 'Audio Call',   color: '#0891B2' },
-  'chat':         { icon: MessageSquare, label: 'Chat Session', color: '#059669' },
-  'answer-card':  { icon: FileText,      label: 'Answer Card',  color: '#D97706' },
+  'video-call': { icon: Video, label: 'Video Call', color: '#7C3AED' },
+  'audio-call': { icon: Phone, label: 'Audio Call', color: '#0891B2' },
+  'chat': { icon: MessageSquare, label: 'Chat Session', color: '#059669' },
+  'answer-card': { icon: FileText, label: 'Answer Card', color: '#D97706' },
 };
 
 // ── Service popup ─────────────────────────────────────────────────────────────
@@ -797,7 +791,7 @@ export default function IntelligenceTerminal() {
         const msgs = JSON.parse(saved);
         return msgs.length === 0;
       }
-    } catch {}
+    } catch { }
     return true;
   });
   const [query, setQuery] = useState('');
@@ -861,7 +855,7 @@ export default function IntelligenceTerminal() {
     setIsLoading(true);
 
     const userMsgId = `u-${Date.now()}`;
-    const aiMsgId   = `a-${Date.now() + 1}`;
+    const aiMsgId = `a-${Date.now() + 1}`;
 
     const profileCtx = buildProfileContext(userProfile);
     const { score: profileScore, missing: profileMissing } = getProfileCompleteness(userProfile);
@@ -917,7 +911,7 @@ export default function IntelligenceTerminal() {
         // Try Groq for a better reply, fall back to smart local response
         let reply = smartReply;
         try {
-          const groqReply = await callGroqChat(newHistory, profileCtx);
+          const groqReply = await callGroqChat(newHistory, profileCtx, token);
           if (groqReply && groqReply.length > 10) reply = groqReply;
         } catch { /* use smartReply as fallback */ }
 
