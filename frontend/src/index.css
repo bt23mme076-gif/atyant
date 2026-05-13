@@ -214,6 +214,11 @@ video {
   }
 }
 
+/* Hide widget on all pages except home */
+body:not(.page-home) #setgetitsmsiframe {
+  display: none !important;
+}
+
 #setgetitsmsiframe img {
   animation: whatsapp-pulse 2s infinite;
   border-radius: 50%;

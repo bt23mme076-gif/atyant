@@ -74,6 +74,11 @@ function App() {
   const isHomePage = location.pathname === '/';
   const isIntelligencePage = location.pathname === '/intelligence';
 
+  // Show WhatsApp widget only on home page
+  useEffect(() => {
+    document.body.classList.toggle('page-home', isHomePage);
+  }, [isHomePage]);
+
   // Show Google modal once per session if not logged in
   useEffect(() => {
     if (!user && !localStorage.getItem('atyant_google_modal_dismissed')) {
@@ -220,8 +225,8 @@ function App() {
         </Suspense>
       )}
 
-      {/* Custom WhatsApp Text Popup */}
-      <FloatingWhatsAppPopup />
+      {/* Custom WhatsApp Text Popup — home page only */}
+      {isHomePage && <FloatingWhatsAppPopup />}
 
       <GoogleLoginModal
         isOpen={showGoogleModal && !user}
