@@ -33,12 +33,21 @@ const InternshipPage = () => {
 
   // ✅ ADD STATE FOR COLLAPSIBLE STEPS
   const [expandedSteps, setExpandedSteps] = useState([]);
+  const [openSkillCategories, setOpenSkillCategories] = useState([]);
 
   const toggleStep = (stepNumber) => {
     setExpandedSteps(prev => 
       prev.includes(stepNumber) 
         ? prev.filter(s => s !== stepNumber)
         : [...prev, stepNumber]
+    );
+  };
+
+  const toggleSkillCategory = (category) => {
+    setOpenSkillCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(item => item !== category)
+        : [...prev, category]
     );
   };
 
@@ -296,6 +305,7 @@ Resume Link: [Resume Link]
 
 
 
+
   // ========== NEW IIM & IIT FILTER LOGIC =========
   // Example: Replace with your actual data source or API fetch
   const [category, setCategory] = useState('IIT'); // 'IIT' or 'IIM'
@@ -305,6 +315,7 @@ Resume Link: [Resume Link]
   const [loadingEmails, setLoadingEmails] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [copiedIndex, setCopiedIndex] = useState(null);
+  const [activeAreaFilter, setActiveAreaFilter] = useState('All');
 
   // Simulate fetching college list on category change
   useEffectReact(() => {
@@ -359,6 +370,7 @@ Resume Link: [Resume Link]
     }
     setCollege('');
     setProfessors([]);
+    setActiveAreaFilter('All');
   }, [category]);
 
   // Protected college selection handler
@@ -374,6 +386,7 @@ Resume Link: [Resume Link]
       return;
     }
     setCollege(selected);
+    setActiveAreaFilter('All');
   };
 
   // Fetch professors for selected college/category
@@ -808,18 +821,42 @@ Resume Link: [Resume Link]
           
           {college && (
             <>
-              <div className="iim-directory-controls" style={{marginBottom: 16}}>
+              <div className="iim-directory-controls" style={{marginBottom: 12}}>
                 <input
                   type="text"
                   placeholder="Search by Name or Academic Area"
                   value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
+                  onChange={e => { setSearchTerm(e.target.value); setActiveAreaFilter('All'); }}
                   className="filter-dropdown"
-                  style={{maxWidth: 400, width: '100%'}}
+                  style={{maxWidth: 440, width: '100%'}}
                 />
               </div>
+
+              {/* ---- Area / Department filter chips ---- */}
+              {professors.length > 0 && (() => {
+                const areas = ['All', ...Array.from(new Set(
+                  professors
+                    .map(p => p.academicarea || p.academicaarea || '')
+                    .filter(Boolean)
+                )).sort()];
+                return (
+                  <div className="prof-filter-bar">
+                    <span className="prof-filter-label">Filter by Area:</span>
+                    {areas.map(area => (
+                      <button
+                        key={area}
+                        className={`prof-filter-chip ${activeAreaFilter === area ? 'active' : ''}`}
+                        onClick={() => { setActiveAreaFilter(area); setSearchTerm(''); }}
+                      >
+                        {area}
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
             </>
           )}
+
           {loadingEmails ? (
             <div className="email-list-loading">Loading emails...</div>
           ) : (
@@ -831,10 +868,12 @@ Resume Link: [Resume Link]
                     .filter(prof => {
                       const name = prof.name || prof.Name || '';
                       const area = prof.academicarea || prof.academicaarea || '';
-                      return (
+                      const matchesSearch =
                         name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        area.toLowerCase().includes(searchTerm.toLowerCase())
-                      );
+                        area.toLowerCase().includes(searchTerm.toLowerCase());
+                      const matchesArea =
+                        activeAreaFilter === 'All' || area === activeAreaFilter;
+                      return matchesSearch && matchesArea;
                     })
                     .map((prof, idx) => {
                       const name = prof.name || prof.Name || 'Unknown Name';
@@ -848,8 +887,10 @@ Resume Link: [Resume Link]
                           </div>
                           <span className="department-badge">{academicarea || ""}</span>
                           <div className="professor-card-email-row">
-                            <span className="professor-card-email-label">Official Email</span>
-                            <a href={`mailto:${email}`} className="professor-card-email">{email}</a>
+                            <div style={{flex: 1, minWidth: 0}}>
+                              <span className="professor-card-email-label">Official Email</span>
+                              <a href={`mailto:${email}`} className="professor-card-email">{email}</a>
+                            </div>
                             <button
                               className="email-copy-btn"
                               onClick={() => {
@@ -860,8 +901,8 @@ Resume Link: [Resume Link]
                               title="Copy Email"
                             >
                               <svg height="18" width="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="6" y="6" width="10" height="12" rx="2" stroke="#174ea6" strokeWidth="1.5" fill="#e0f7fa"/>
-                                <rect x="2" y="2" width="10" height="12" rx="2" stroke="#90cdf4" strokeWidth="1.2" fill="#fff"/>
+                                <rect x="6" y="6" width="10" height="12" rx="2" stroke="#fff" strokeWidth="1.5" fill="rgba(255,255,255,0.15)"/>
+                                <rect x="2" y="2" width="10" height="12" rx="2" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" fill="transparent"/>
                               </svg>
                             </button>
                             {copiedIndex === idx && (
@@ -1025,43 +1066,71 @@ Resume Link: [Resume Link]
 
         <div className="skills-container">
           {/* IIT Skills */}
-          <div className="skills-category">
-            <div className="category-header iit-header">
-              <GraduationCap size={28} />
-              <h3>For IIT Research Internships</h3>
-            </div>
-            <div className="skills-grid">
-              {skillsData.IIT.map((item, index) => (
-                <div key={index} className="skill-card">
-                  <div className="skill-icon">{item.icon}</div>
-                  <h4>{item.skill}</h4>
-                  <p>{item.description}</p>
+          <div className={`skills-category ${openSkillCategories.includes('IIT') ? 'expanded' : 'collapsed'}`}>
+            <button
+              type="button"
+              className="category-header iit-header"
+              onClick={() => toggleSkillCategory('IIT')}
+              aria-expanded={openSkillCategories.includes('IIT')}
+            >
+              <div className="category-header-left">
+                <GraduationCap size={28} />
+                <h3>For IIT Research Internships</h3>
+              </div>
+              <div className={`category-toggle-icon ${openSkillCategories.includes('IIT') ? 'expanded' : ''}`}>
+                <ChevronDown size={20} />
+              </div>
+            </button>
+            {openSkillCategories.includes('IIT') && (
+              <div className="skills-content">
+                <div className="skills-grid">
+                  {skillsData.IIT.map((item, index) => (
+                    <div key={index} className="skill-card">
+                      <div className="skill-icon">{item.icon}</div>
+                      <h4>{item.skill}</h4>
+                      <p>{item.description}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="category-footer">
-              <p>💡 <strong>Pro Tip:</strong> Mention relevant coursework, projects, or certifications in your email</p>
-            </div>
+                <div className="category-footer">
+                  <p>💡 <strong>Pro Tip:</strong> Mention relevant coursework, projects, or certifications in your email</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* IIM Skills */}
-          <div className="skills-category">
-            <div className="category-header iim-header">
-              <Building2 size={28} />
-              <h3>For IIM Management Internships</h3>
-            </div>
-            <div className="skills-grid">
-              {skillsData.IIM.map((item, index) => (
-                <div key={index} className="skill-card">
-                  <div className="skill-icon">{item.icon}</div>
-                  <h4>{item.skill}</h4>
-                  <p>{item.description}</p>
+          <div className={`skills-category ${openSkillCategories.includes('IIM') ? 'expanded' : 'collapsed'}`}>
+            <button
+              type="button"
+              className="category-header iim-header"
+              onClick={() => toggleSkillCategory('IIM')}
+              aria-expanded={openSkillCategories.includes('IIM')}
+            >
+              <div className="category-header-left">
+                <Building2 size={28} />
+                <h3>For IIM Management Internships</h3>
+              </div>
+              <div className={`category-toggle-icon ${openSkillCategories.includes('IIM') ? 'expanded' : ''}`}>
+                <ChevronDown size={20} />
+              </div>
+            </button>
+            {openSkillCategories.includes('IIM') && (
+              <div className="skills-content">
+                <div className="skills-grid">
+                  {skillsData.IIM.map((item, index) => (
+                    <div key={index} className="skill-card">
+                      <div className="skill-icon">{item.icon}</div>
+                      <h4>{item.skill}</h4>
+                      <p>{item.description}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="category-footer">
-              <p>💡 <strong>Pro Tip:</strong> Highlight consulting club experience, case competitions, and business projects</p>
-            </div>
+                <div className="category-footer">
+                  <p>💡 <strong>Pro Tip:</strong> Highlight consulting club experience, case competitions, and business projects</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1182,22 +1251,6 @@ Resume Link: [Resume Link]
         </div>
       </section>
 
-      {/* ========== EXAMPLE SECTION ========== */}
-      <section className="example-section" aria-labelledby="email-examples">
-        <div className="example-box">
-          <h2 id="email-examples">💡 Email Personalization: Good vs Bad Examples</h2>
-          <div className="example-content">
-            <article className="bad-example">
-              <span className="badge bad" aria-label="Bad example">❌ Generic</span>
-              <p>"I am interested in doing an internship in your lab."</p>
-            </article>
-            <article className="good-example">
-              <span className="badge good" aria-label="Good example">✅ Personalized</span>
-              <p>"I read your recent publication on 'Graphene-based sensors for biomedical applications' in Nature Materials (2024). Your approach to functionalizing graphene sheets particularly intrigued me, as I have worked on similar nanomaterial synthesis in my recent project on carbon nanotubes."</p>
-            </article>
-          </div>
-        </div>
-      </section>
     </article>
     </>
   );
