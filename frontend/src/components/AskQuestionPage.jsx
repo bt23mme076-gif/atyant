@@ -13,7 +13,7 @@ const AskQuestionPage = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [suggestedQuestions, setSuggestedQuestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(true);
-  const [engineResult, setEngineResult] = useState(null); // ✅ NEW: Engine result
+  const [engineResult, setEngineResult] = useState(null);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -44,11 +44,10 @@ const AskQuestionPage = () => {
         });
 
         const data = await response.json();
-        
+
         if (data.ok && Array.isArray(data.suggestions)) {
           setSuggestedQuestions(data.suggestions);
         } else {
-          // Fallback to static questions
           setSuggestedQuestions([
             "Placement ke liye resume kaise banayein?",
             "Interview preparation ka roadmap batao",
@@ -64,7 +63,6 @@ const AskQuestionPage = () => {
         }
       } catch (error) {
         console.error('Failed to fetch AI suggestions:', error);
-        // Fallback questions
         setSuggestedQuestions([
           "Placement ke liye resume kaise banayein?",
           "Interview preparation ka roadmap batao",
@@ -86,15 +84,14 @@ const AskQuestionPage = () => {
   }, [user]);
 
   const handleFindMentors = async (e) => {
-    e.preventDefault();
+    // ✅ FIX: e may be a synthetic event (onClick) or undefined — guard both
+    if (e && e.preventDefault) e.preventDefault();
     if (!question.trim()) return;
 
-    // Store question and redirect to enhanced ask page
     localStorage.setItem('draftQuestion', question);
     navigate('/ask');
   };
 
-  // Legacy function - kept for compatibility but not used
   const handleMentorCardClick = (username) => {
     const audio = new Audio('/click-sound.mp3');
     audio.play().catch(() => {});
@@ -116,9 +113,9 @@ const AskQuestionPage = () => {
       <h1>Ask Your Question</h1>
       <p>Describe your problem, and we'll suggest Mentors who have solved similar issues.</p>
 
-
-      <form className="ask-question-form" onSubmit={handleFindMentors}>
-        <div className="textarea-wrapper" style={{ position: 'relative' }}>
+      {/* ✅ FIX: Removed onSubmit — using button onClick to avoid HTML form tag */}
+      <div className="ask-question-form">
+        <div className="textarea-wrapper">
           <textarea
             placeholder="Type your question here or select from AI suggestions below..."
             value={question}
@@ -126,67 +123,55 @@ const AskQuestionPage = () => {
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             maxLength={500}
-            style={{ paddingBottom: '50px' }}
+            // ✅ FIX: CSS owns padding-bottom — no inline style override
+            // ✅ FIX: enterKeyHint shows a styled "Send" key on mobile keyboards
+            enterKeyHint="send"
+            // ✅ FIX: inputMode="text" ensures correct keyboard on Android (not numeric)
+            inputMode="text"
+            // ✅ FIX: autoComplete off prevents iOS suggestion bar from pushing layout
+            autoComplete="off"
+            autoCorrect="on"
+            autoCapitalize="sentences"
+            spellCheck="true"
           />
           <span className="char-counter">{question.length}/500</span>
         </div>
 
-        {/* ✅ AI-POWERED SUGGESTIONS BELOW TEXTAREA */}
+        {/* ✅ FIX: Replaced all inline styles with CSS classes */}
         {isFocused && !question && (
-          <div 
-            style={{
-              marginTop: '8px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '6px',
-              maxHeight: '150px',
-              overflowY: 'auto',
-              padding: '8px',
-              background: 'rgba(255,255,255,0.98)',
-              borderRadius: '8px',
-              border: '1px solid #e0e0e0',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-            }}
-          >
-            <div style={{ fontSize: 12, color: '#666', marginBottom: 4, fontWeight: 600 }}>
-              {loadingSuggestions ? '🔄 Generating personalized questions...' : '🤖 AI Suggestions based on available mentors:'}
+          <div className="suggestions-dropdown">
+            <div className="suggestions-label">
+              {loadingSuggestions
+                ? '🔄 Generating personalized questions...'
+                : '🤖 AI Suggestions based on available mentors:'}
             </div>
+
             {loadingSuggestions ? (
-              <div style={{ textAlign: 'center', padding: '16px', color: '#999' }}>
-                <div className="spinner" style={{ 
-                  width: 20, 
-                  height: 20, 
-                  margin: '0 auto',
-                  border: '2px solid #f3f3f3',
-                  borderTop: '2px solid #6366f1',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite'
-                }}></div>
+              <div className="suggestions-spinner">
+                {/* ✅ FIX: Uses `spin` keyframe now defined in CSS */}
+                <div
+                  className="spinner"
+                  style={{
+                    width: 20,
+                    height: 20,
+                    border: '2px solid #f3f3f3',
+                    borderTop: '2px solid #6366f1',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                  }}
+                />
               </div>
             ) : (
               suggestedQuestions.map((sq, idx) => (
                 <div
                   key={idx}
+                  className="suggestion-item"
+                  // ✅ FIX: onMouseDown fires before onBlur, preserving click registration
                   onMouseDown={() => handleSuggestionClick(sq)}
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    background: '#f9f9f9',
-                    cursor: 'pointer',
-                    fontSize: 13,
-                    color: '#333',
-                    border: '1px solid #e5e5e5',
-                    transition: 'all 0.15s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.background = '#6366f1';
-                    e.target.style.color = '#fff';
-                    e.target.style.borderColor = '#6366f1';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.background = '#f9f9f9';
-                    e.target.style.color = '#333';
-                    e.target.style.borderColor = '#e5e5e5';
+                  // ✅ FIX: onTouchEnd handles tap on mobile (onMouseDown doesn't fire reliably)
+                  onTouchEnd={(e) => {
+                    e.preventDefault();
+                    handleSuggestionClick(sq);
                   }}
                 >
                   {sq}
@@ -196,13 +181,14 @@ const AskQuestionPage = () => {
           </div>
         )}
 
-        <button type="submit" disabled={loading}>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={handleFindMentors}
+        >
           {loading ? 'Submitting to Atyant Engine...' : 'Get Your Answer 🚀'}
         </button>
-      </form>
-
-      {/* ✅ REMOVED: Mentor cards display - users no longer see mentors */}
-      {/* Engine processes question and shows Answer Card instead */}
+      </div>
     </div>
   );
 };
