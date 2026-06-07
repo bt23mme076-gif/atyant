@@ -71,7 +71,7 @@ function App() {
   const [currentNotification, setCurrentNotification] = useState(0);
 
   const isChatPage = location.pathname === '/chat';
-  const isHomePage = location.pathname === '/';
+  const isHomePage = location.pathname === '/home';
   const isIntelligencePage = location.pathname === '/intelligence';
 
   // Show WhatsApp widget only on home page
@@ -176,7 +176,7 @@ function App() {
           <ErrorBoundary>
             <Routes>
               {/* Public */}
-              <Route path="/"                      element={<Home />} />
+              <Route path="/home"                      element={<Home />} />
               <Route path="/signup"                element={<Signup />} />
               <Route path="/login"                 element={<Login />} />
               <Route path="/auth-success"          element={<AuthSuccess />} />

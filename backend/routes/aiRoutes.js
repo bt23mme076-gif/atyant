@@ -1,5 +1,6 @@
 import express from 'express';
 import protect from '../middleware/authMiddleware.js';
+import { generateProblemStatement, isEngineReady } from '../services/ProblemStatementGenerator.js';
 
 const router = express.Router();
 
@@ -78,22 +79,27 @@ router.post('/agent/turn', async (req, res) => {
 
 ${profileBlock}
 
-YOUR JOB: Have a real conversation. Read the full thread. Understand what they actually need.
+YOUR JOB: Have a real conversation. Read the full thread. Map the student's situation across 5 layers before handing off to the engine.
+
+THE 5 LAYERS YOU MUST MAP:
+1. Identity   — college, branch, year, cgpa
+2. Target     — what they actually want (specific company, IIM, internship type, switch path)
+3. Gap        — what's blocking them (no coding, no projects, wrong branch, weak resume, no network)
+4. Timeline   — how long they have (this month, 5 months, next semester, long-term)
+5. Constraint — hard limits (no paid courses, no CS peers, time-bound, first-gen, Tier-3 pedigree)
 
 CORE RULES:
 1. Read emotion first. If they sound lost or anxious, acknowledge it before solving.
-2. Ask ONE question at a time, only when a specific missing detail would change your answer.
-3. NEVER ask for info you already have — re-read the thread before asking anything.
-4. When you have enough context (college + goal + some specificity), set should_trigger_engine to true.
-5. Talk like a human. Use contractions. Be specific. Reference their college/branch by name.
-6. For greetings, just ask warmly what's on their mind.
-7. For vague messages, ask the single most useful clarifying question.
+2. Ask ONE question at a time, targeting the most important MISSING layer.
+3. NEVER ask for info you already have — re-read the thread and profile before asking anything.
+4. Talk like a human. Use contractions. Be specific. Reference their college/branch by name.
+5. For greetings, just ask warmly what's on their mind.
+6. For vague messages, ask the single most useful clarifying question.
 
 ENGINE TRIGGER — set should_trigger_engine to true ONLY when ALL are true:
-- You know their college (or it's in profile)
-- You know their branch/domain
-- They've stated a concrete goal (specific company, IIM, internship type, switch path)
-- Enough specificity that a senior could actually answer
+- Identity known (college + branch, from chat or profile)
+- Target is concrete (a real goal a senior could act on)
+- At least 3 of the 5 layers are filled (identity + target + one of gap/timeline/constraint)
 
 OUTPUT: Respond ONLY with valid JSON, no markdown, no extra text:
 {
@@ -105,12 +111,14 @@ OUTPUT: Respond ONLY with valid JSON, no markdown, no extra text:
     "year": "string or null",
     "cgpa": "string or null",
     "goal": "string or null",
+    "gap": "string or null",
+    "timeline": "string or null",
     "constraints": "string or null",
     "emotion": "anxious" | "confident" | "neutral" | "lost" | "excited" | null
   },
   "should_trigger_engine": true or false,
   "engine_query": "refined query for mentor matching, or null",
-  "missing_critical": ["list of what's still needed, or empty array"],
+  "missing_critical": ["list of layers still needed, or empty array"],
   "confidence": 0.0 to 1.0
 }`;
 
@@ -159,13 +167,29 @@ OUTPUT: Respond ONLY with valid JSON, no markdown, no extra text:
       });
     }
 
+    const extracted = parsed.extracted || {};
+
+    // ── Build the structured problem statement once the context is rich enough ──
+    // This is what the matching engine consumes — not the loose engine_query.
+    const ready = isEngineReady(extracted, profile);
+    const problem = (parsed.should_trigger_engine || ready)
+      ? generateProblemStatement(extracted, profile)
+      : null;
+
     return res.json({
       intent: parsed.intent || 'discovery',
       reply: typeof parsed.reply === 'string' ? parsed.reply.trim() : "What's on your mind?",
-      extracted: parsed.extracted || {},
-      should_trigger_engine: !!parsed.should_trigger_engine,
-      engine_query: parsed.engine_query || null,
-      missing_critical: Array.isArray(parsed.missing_critical) ? parsed.missing_critical : [],
+      extracted,
+      // Only trust the engine trigger when the structured statement is genuinely ready
+      should_trigger_engine: !!parsed.should_trigger_engine && ready,
+      // engine_query is the clean brief (no Confidence line) — feed THIS to the engine
+      engine_query: problem ? problem.engineText : (parsed.engine_query || null),
+      problemStatement: problem ? problem.statement : null,
+      problemConfidence: problem ? problem.confidence : null,
+      layersFilled: problem ? problem.layersFilled : 0,
+      missing_critical: problem
+        ? problem.missing
+        : (Array.isArray(parsed.missing_critical) ? parsed.missing_critical : []),
       confidence: typeof parsed.confidence === 'number' ? parsed.confidence : 0.5,
     });
 

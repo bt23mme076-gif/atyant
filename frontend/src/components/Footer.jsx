@@ -8,7 +8,7 @@ const Footer = () => {
     <footer className="footer-section">
       <div className="footer-content">
         <div className="footer-brand">
-          <Link to="/" className="footer-logo">Atyant</Link>
+          <Link to="/home" className="footer-logo">Atyant</Link>
           <p className="footer-tagline">The Intelligent Placement & Career Guidance Engine.</p>
           <div className="social-links">
             <a href="https://www.linkedin.com/company/107608123/" target="_blank" rel="noopener noreferrer">
@@ -32,7 +32,7 @@ const Footer = () => {
         <div className="footer-links">
           <h4>Platform</h4>
           <ul>
-            <li><Link to="/">Home</Link></li>
+            <li><Link to="/home">Home</Link></li>
             <li><Link to="/internships">Internships</Link></li>
             <li><Link to="/privacy">Privacy Policy</Link></li>
             <li><Link to="/terms">Terms of Service</Link></li>

@@ -153,4 +153,34 @@ router.post('/answer', async (req, res) => {
   }
 });
 
+// GET all mentors
+router.get('/mentors', async (req, res) => {
+  try {
+    const mentors = await User.find({ role: 'mentor' })
+      .select('name username email phone college state branch year rating sessions createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json({ success: true, mentors });
+  } catch (e) {
+    console.error('admin/mentors error:', e);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
+// DELETE any user or mentor account
+router.delete('/users/:id', async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const userToDelete = await User.findById(userId);
+    if (!userToDelete) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+    await User.deleteOne({ _id: userId });
+    res.json({ success: true, message: 'User account deleted successfully' });
+  } catch (e) {
+    console.error('admin/delete-user error:', e);
+    res.status(500).json({ success: false, error: e.message });
+  }
+});
+
 export default router;

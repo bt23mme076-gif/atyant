@@ -95,7 +95,7 @@ const Navbar = () => {
 
   return (
     <header className={`navbar${isIntelligence ? ' navbar--intelligence' : ''}`}>
-      <Link to="/" className={`brand${isIntelligence ? ' brand--intelligence' : ''}`}>
+      <Link to="/home" className={`brand${isIntelligence ? ' brand--intelligence' : ''}`}>
         {isIntelligence ? <><span className="brand-signal">A</span>TYANT</> : 'Atyant'}
       </Link>
 

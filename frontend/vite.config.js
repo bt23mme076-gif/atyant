@@ -17,6 +17,12 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         globPatterns: ['**/*.{png,svg,ico,json,woff,woff2,ttf,eot}'],
+        // Do NOT let the SPA navigation fallback hijack the proxied product site.
+        // These paths must hit the network so Vercel's rewrites serve the product app.
+        navigateFallbackDenylist: [
+          /^\/$/,                // exact root "/"  -> product site (Vercel rewrite)
+          /^\/product-assets\//, // product asset proxy
+        ],
       },
     }),
   ],

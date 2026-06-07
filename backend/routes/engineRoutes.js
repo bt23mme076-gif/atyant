@@ -5,9 +5,60 @@ import Question from '../models/Question.js';
 import AnswerCard from '../models/AnswerCard.js';
 import MentorExperience from '../models/MentorExperience.js';
 import User from '../models/User.js';
+import { generateProblemStatement, isEngineReady } from '../services/ProblemStatementGenerator.js';
 import { sendMentorNewQuestionNotification, sendUserAnswerReadyNotification } from '../utils/emailNotifications.js';
 
 const router = express.Router();
+
+/**
+ * 0. CONVERSATION → ENGINE HANDOFF
+ * Takes the 5-layer context extracted during the AI conversation,
+ * builds the structured problem statement server-side, and feeds it
+ * to the matching engine. This is the authoritative handoff —
+ * the problem statement is generated here, not trusted from the client.
+ */
+router.post('/submit-conversation', protect, async (req, res) => {
+  try {
+    const { extracted, preferredMentorId } = req.body;
+    if (!extracted || typeof extracted !== 'object') {
+      return res.status(400).json({ success: false, error: 'extracted context required' });
+    }
+
+    // Pull profile for identity fallback (college/branch/year/cgpa from signup)
+    const profile = await User.findById(req.user.userId).select('name education').lean();
+
+    if (!isEngineReady(extracted, profile)) {
+      const { missing, layersFilled } = generateProblemStatement(extracted, profile);
+      return res.status(422).json({
+        success: false,
+        error: 'Not enough context to route to a mentor yet',
+        missing,
+        layersFilled,
+      });
+    }
+
+    const problem = generateProblemStatement(extracted, profile);
+
+    // engineText (clean brief, no Confidence line) IS the engine's question text —
+    // it carries college, branch, target, gap, timeline and constraints,
+    // which detectQueryDetails() mines for intent, companies, tech and tags.
+    // Cap at 1000 — Question.questionText maxlength would otherwise reject it.
+    const engineText = problem.engineText.slice(0, 1000);
+    const result = await atyantEngine.processQuestion(req.user.userId, engineText, {
+      preferredMentorId: preferredMentorId || null,
+    });
+
+    res.json({
+      ...result,
+      problemStatement: problem.statement,
+      confidence: problem.confidence,
+      layersFilled: problem.layersFilled,
+    });
+  } catch (error) {
+    console.error('Error in submit-conversation handoff:', error);
+    res.status(500).json({ success: false, error: 'Failed to route conversation to engine' });
+  }
+});
 
 /**
  * 1. STUDENT: Question Submit

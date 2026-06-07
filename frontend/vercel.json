@@ -28,10 +28,14 @@
       ]
     }
   ],
+  "redirects": [
+    { "source": "/", "has": [{ "type": "host", "value": "www.atyant.in" }], "destination": "https://atyant.in/home", "permanent": true },
+    { "source": "/:path*", "has": [{ "type": "host", "value": "www.atyant.in" }], "destination": "https://atyant.in/:path*", "permanent": true }
+  ],
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/product-assets/:path*", "destination": "https://atyantproduct.vercel.app/product-assets/:path*" },
+    { "source": "/", "destination": "https://atyantproduct.vercel.app/" },
+
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
