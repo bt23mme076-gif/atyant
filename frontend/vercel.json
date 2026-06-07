@@ -1,44 +1,16 @@
 {
-  "headers": [
-    {
-      "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/index.html",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    }
-  ],
-  "redirects": [
-    { "source": "/", "has": [{ "type": "host", "value": "www.atyant.in" }], "destination": "https://atyant.in/home", "permanent": true },
-    { "source": "/:path*", "has": [{ "type": "host", "value": "www.atyant.in" }], "destination": "https://atyant.in/:path*", "permanent": true }
-  ],
-  "rewrites": {
-    "beforeFiles": [
-      { "source": "/", "destination": "https://atyantproduct.vercel.app/" },
-      { "source": "/product-assets/:path*", "destination": "https://atyantproduct.vercel.app/product-assets/:path*" }
-    ],
-    "afterFiles": [
-      { "source": "/(.*)", "destination": "/index.html" }
-    ]
-  }
+  "routes": [
+    { "src": "/assets/(.*)", "headers": { "cache-control": "public, max-age=31536000, immutable" }, "continue": true },
+    { "src": "/index.html", "headers": { "cache-control": "public, max-age=0, must-revalidate" }, "continue": true },
+
+    { "src": "/", "has": [{ "type": "host", "value": "www.atyant.in" }], "status": 308, "headers": { "Location": "https://atyant.in/home" } },
+    { "src": "/(.*)", "has": [{ "type": "host", "value": "www.atyant.in" }], "status": 308, "headers": { "Location": "https://atyant.in/$1" } },
+
+    { "src": "/", "dest": "https://atyantproduct.vercel.app/" },
+    { "src": "/product-assets/(.*)", "dest": "https://atyantproduct.vercel.app/product-assets/$1" },
+
+    { "handle": "filesystem" },
+
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
 }
