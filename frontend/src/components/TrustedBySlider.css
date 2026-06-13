@@ -1,0 +1,128 @@
+/* src/components/TrustedBySlider.css */
+
+.trusted-section {
+  padding: 40px 16px; /* Reduced vertical padding */
+  background: #FCFBF7; /* Warm cream/off-white background */
+  overflow: hidden;
+  position: relative;
+  font-family: 'Inter', -apple-system, sans-serif;
+  z-index: 10;
+}
+
+.trusted-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.trusted-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(1.25rem, 3vw, 1.75rem); /* Small/Medium text */
+  font-weight: 700;
+  margin-bottom: 30px; 
+  text-align: center;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  /* Glowing gradient to match trajectory */
+  background: linear-gradient(135deg, #7C3AED, #3B82F6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.trusted-subtitle {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 1.15rem;
+  color: #475569; 
+  margin-bottom: 60px; /* More space before logos */
+  text-align: center;
+  font-weight: 400;
+  max-width: 700px;
+  line-height: 1.6;
+}
+
+/* Infinite Slider Wrapper */
+.trusted-slider-wrapper {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+}
+
+/* Moving Track */
+.trusted-slider-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: slideLogos 30s linear infinite;
+  gap: 40px; /* Reduced gap to fill space */
+  padding-left: 20px;
+}
+
+/* Pause animation on hover */
+.trusted-slider-wrapper:hover .trusted-slider-track {
+  animation-play-state: paused;
+}
+
+@keyframes slideLogos {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 20px)); }
+}
+
+.trusted-logo-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 320px; /* Wider logo box */
+  height: 140px; /* Taller logo box so image gets big */
+  transition: transform 0.3s ease;
+}
+
+.trusted-logo-item:hover {
+  transform: scale(1.05);
+}
+
+.trusted-logo-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transform: scale(1.15); /* Boosts visual size of the actual logo image */
+}
+
+/* Minimalist Light Fallback Boxes */
+.trusted-logo-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  font-size: 2rem; /* Much bigger text for fallbacks */
+  font-weight: 800;
+  color: #334155;
+  text-align: center;
+  padding: 0 10px;
+  font-family: 'Outfit', sans-serif; /* Match headings */
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .trusted-slider-track {
+    gap: 20px;
+  }
+  .trusted-logo-item {
+    width: 160px;
+    height: 70px;
+  }
+  .trusted-title {
+    font-size: 2rem;
+  }
+  .trusted-subtitle {
+    font-size: 1rem;
+    margin-bottom: 40px;
+  }
+}

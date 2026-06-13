@@ -1,8 +1,16 @@
 {
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+  "routes": [
+    { "src": "/assets/(.*)", "headers": { "cache-control": "public, max-age=31536000, immutable" }, "continue": true },
+    { "src": "/index.html", "headers": { "cache-control": "public, max-age=0, must-revalidate" }, "continue": true },
+
+    { "src": "/", "has": [{ "type": "host", "value": "www.atyant.in" }], "status": 308, "headers": { "Location": "https://atyant.in/home" } },
+    { "src": "/(.*)", "has": [{ "type": "host", "value": "www.atyant.in" }], "status": 308, "headers": { "Location": "https://atyant.in/$1" } },
+
+    { "src": "/", "dest": "https://atyantproduct.vercel.app/" },
+    { "src": "/product-assets/(.*)", "dest": "https://atyantproduct.vercel.app/product-assets/$1" },
+
+    { "handle": "filesystem" },
+
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }

@@ -1,13 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Static sitemap for routes this frontend repo actually owns.
-  Mentor / AnswerCard / college / path URLs do NOT exist yet (no routing).
-  When they ship, generate them dynamically from the backend (see SEO spec).
--->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- ===== HOMEPAGE ===== -->
   <url>
     <loc>https://atyant.in/</loc>
+    <lastmod>2026-03-14</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+    <image:image xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+      <image:loc>https://res.cloudinary.com/dny6dtmox/image/upload/v1773683474/Yellow_Modern_Untold_Mystery_YouTube_Thumbnail_5_1_eyzls9.png</image:loc>
+      <image:caption>Atyant Journey 💻</image:caption>
+      <image:title>Atyant AI-powered student mentorship platform journey - connecting students with senior mentors for career guidance</image:title>
+    </image:image>
+    <image:image xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+      <image:loc>https://res.cloudinary.com/dny6dtmox/image/upload/v1773681257/IMG_20251107_172259_sgixft.jpg</image:loc>
+      <image:caption>Campus Moments PCE 🎓</image:caption>
+      <image:title>Atyant campus workshop at PCE - students learning about internships and placements guidance</image:title>
+    </image:image>
+    <image:image xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+      <image:loc>https://res.cloudinary.com/dny6dtmox/image/upload/v1773680981/WhatsApp_Image_2026-03-16_at_10.38.48_PM_pc7vaj.jpg</image:loc>
+      <image:caption>Workshop Sessions At GHRC</image:caption>
+      <image:title>Atyant career guidance workshop at GHRC - student mentor interaction sessions</image:title>
+    </image:image>
+    <image:image xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+      <image:loc>https://res.cloudinary.com/dny6dtmox/image/upload/v1773682691/IMG_20260202_140103_1_pqtfmc.jpg</image:loc>
+      <image:caption>ATYANT AT MANIT 🔥</image:caption>
+      <image:title>Atyant at MANIT Bhopal - NIT student mentorship and placement guidance program</image:title>
+    </image:image>
+    <image:image xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+      <image:loc>https://res.cloudinary.com/dny6dtmox/image/upload/v1773680772/IMG_20260202_135846_bf3lyw.jpg</image:loc>
+      <image:caption>ECELL MANIT + ATYANT Together 📚</image:caption>
+      <image:title>Atyant partnership with E-Cell MANIT for entrepreneurship and career mentorship</image:title>
+    </image:image>
+    <image:image xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+      <image:loc>https://res.cloudinary.com/dny6dtmox/image/upload/v1770470903/Screenshot_2026-02-07_180106_yynpqs.png</image:loc>
+      <image:caption>Growth & Success 🎯</image:caption>
+      <image:title>Atyant platform growth metrics - successful student mentor connections and career outcomes</image:title>
+    </image:image>
   </url>
+
+  <!-- ===== INTERNSHIPS ===== -->
+  <url>
+    <loc>https://atyant.in/internships</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- ===== CAREER GUIDES ===== -->
+  <url>
+    <loc>https://atyant.in/career-guides</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- ===== NEARBY MENTORS ===== -->
+  <url>
+    <loc>https://atyant.in/nearby-mentors</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- ===== SIGNUP / LOGIN (for indexing brand) ===== -->
+  <!-- Remove these if you don't want them indexed -->
+  <!-- 
+  <url>
+    <loc>https://atyant.in/Signup</loc>
+    <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  -->
+
 </urlset>
