@@ -1,45 +1,32 @@
-# Atyant - robots.txt
-# AI-Powered Student Guidance Engine
-# https://atyant.in
+# Atyant — https://atyant.in
+# Indexable: homepage, blog, mentor, answers, colleges, paths, guides
+# Blocked: app shell, auth, booking, dashboard, internal APIs
 
-User-agent: *
-
-# ===== ALLOW PUBLIC PAGES =====
-Allow: /$
-Allow: /internships$
-Allow: /career-guides$
-Allow: /faq$
-Allow: /blog$
-Allow: /forum$
-Allow: /ask$
-Allow: /profile/
-Allow: /internship-journey$
-
-# ===== BLOCK AUTH PAGES =====
+User-agent: Googlebot
+Allow: /
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /api/
+Disallow: /chat
 Disallow: /login
 Disallow: /signup
-Disallow: /forgot-password
-Disallow: /reset-password
+Disallow: /book/
+Disallow: /profile/edit
+Disallow: /settings
+# Do NOT block /product-assets/ — Googlebot needs the JS/CSS to render the SPA.
 
-# ===== BLOCK PRIVATE ROUTES =====
+User-agent: *
+Crawl-delay: 1
+Allow: /
 Disallow: /dashboard
-Disallow: /chat
-Disallow: /mentors
-Disallow: /engine
-Disallow: /my-questions
-Disallow: /mentor-dashboard
-Disallow: /admin-dashboard
-Disallow: /nearby-mentors
-Disallow: /answer
-Disallow: /profile$
-
-# ===== BLOCK SYSTEM FILES =====
+Disallow: /admin
 Disallow: /api/
-Disallow: /sw.js
-Disallow: /manifest.json
+Disallow: /chat
+Disallow: /login
+Disallow: /signup
+Disallow: /book/
+Disallow: /profile/edit
+Disallow: /settings
 
-# ===== BLOCK DUPLICATE CONTENT =====
-Disallow: /*?*
-
-# ===== SITEMAP =====
 Sitemap: https://atyant.in/sitemap.xml
+Sitemap: https://atyant.in/blog/sitemap.xml
