@@ -14,7 +14,7 @@ import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 import ResumeMarketplace from './components/ResumeMarketplace';
-import FloatingWhatsAppPopup from './components/FloatingWhatsAppPopup';
+
 import { API_URL } from './services/api.js';
 
 
@@ -220,7 +220,6 @@ function App() {
       )}
 
       {/* Custom WhatsApp Text Popup — home page only */}
-      {isHomePage && <FloatingWhatsAppPopup />}
 
       <GoogleLoginModal
         isOpen={showGoogleModal && !user}
