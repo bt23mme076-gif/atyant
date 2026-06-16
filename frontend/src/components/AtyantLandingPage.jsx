@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import SEO from './SEO';
 import './AtyantLandingPage.css';
 
 /* ─── DATA ─── */
@@ -254,7 +255,36 @@ export default function AtyantLandingPage() {
     showToast('Subscribed. Updates coming your way.');
   };
 
+  const orgSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Atyant',
+    url: 'https://atyant.in/',
+    logo: 'https://atyant.in/favicon.png',
+    description: "India's career clarity engine — building structured, verified career paths for Tier-2 and Tier-3 engineering students.",
+    foundingDate: '2024',
+    founder: [
+      { '@type': 'Person', name: 'Nitin Rai', jobTitle: 'Founder & CEO' },
+      { '@type': 'Person', name: 'Aryan Patidar', jobTitle: 'Co-Founder' },
+    ],
+    sameAs: [
+      'https://www.instagram.com/atyant.in',
+      'https://www.linkedin.com/company/atyant-in/',
+      'https://twitter.com/atyant_in',
+    ],
+    areaServed: { '@type': 'Country', name: 'India' },
+  };
+
   return (
+    <>
+    <SEO
+      title="Atyant — India's Career Clarity Engine for Engineering Students"
+      description="Atyant matches your exact career confusion to a verified path from a senior who already lived it — same college, same branch, same target. Not a chatbot. Not a marketplace. A clarity engine."
+      canonical="https://atyant.in/home"
+      keywords="Atyant, career clarity engine India, engineering student career guidance, Tier-2 NIT placement, verified senior sessions, AnswerCards, career confusion engineering, VNIT MANIT NIT career"
+      ogImage="https://atyant.in/assets/og-banner.png"
+      schema={orgSchema}
+    />
     <div className="atyant-landing">
 
       {/* ── ANNOUNCEMENT BAR ── */}
@@ -631,5 +661,6 @@ export default function AtyantLandingPage() {
 
       {toast && <div className="al-toast">{toast}</div>}
     </div>
+    </>
   );
 }
