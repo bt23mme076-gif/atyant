@@ -14,7 +14,6 @@ import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 import ResumeMarketplace from './components/ResumeMarketplace';
-
 import { API_URL } from './services/api.js';
 
 
@@ -61,7 +60,9 @@ function App() {
   const [lastMessageId, setLastMessageId] = useState(null);
   const [currentNotification, setCurrentNotification] = useState(0);
 
-
+  const isChatPage = location.pathname === '/chat';
+  const isHomePage = location.pathname === '/home';
+  const isIntelligencePage = location.pathname === '/intelligence';
   const isNewHomePage = location.pathname === '/home';
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password' || location.pathname === '/reset-password';
   const isWebinarPage = location.pathname === '/webinar';
@@ -181,7 +182,6 @@ function App() {
               <Route path="/dad" element={<InternshipPage />} />
               <Route path="/career-guides" element={<CareerGuidesPage />} />
               <Route path="/profile/:username" element={<PublicProfilePage />} />
-              <Route path="/webinar" element={<WebinarRegistration />} />
               <Route path="/resume-store" element={<ResumeMarketplace />} />
 
               {/* Protected */}
@@ -201,6 +201,7 @@ function App() {
               <Route path="/mentor/:mentorId" element={<MentorProfilePage />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/webinar" element={<WebinarRegistration />} />
               <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
               <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             </Routes>

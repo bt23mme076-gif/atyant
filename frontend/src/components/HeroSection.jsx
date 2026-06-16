@@ -214,20 +214,11 @@ const HeroSection = () => {
       <div className="hero-glow hero-glow--blue" />
       <div className="hero-glow hero-glow--cyan" />
 
-      {/* Floating topic cards */}
-      <div className="hero-floating-cards">
-        <div className="hero-float-card hero-fc-1"><span className="hero-fc-emoji">🎯</span>Placement prep</div>
-        <div className="hero-float-card hero-fc-2"><span className="hero-fc-emoji">💼</span>Internship tips</div>
-        <div className="hero-float-card hero-fc-3"><span className="hero-fc-emoji">📝</span>Resume review</div>
-        <div className="hero-float-card hero-fc-4"><span className="hero-fc-emoji">🧠</span>DSA roadmap</div>
-        <div className="hero-float-card hero-fc-5"><span className="hero-fc-emoji">🚀</span>GATE strategy</div>
-      </div>
-
       <div className="hero-content">
         {/* Badge */}
         <div className="hero-badge">
           <span className="hero-badge-dot" />
-           India's career execution intelligence platform
+          India's career execution intelligence platform
         </div>
 
         {/* Heading */}
