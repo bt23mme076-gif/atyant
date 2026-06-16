@@ -10,19 +10,17 @@ export default defineConfig({
     compression({ algorithm: 'gzip', ext: '.gz' }),
     compression({ algorithm: 'brotliCompress', ext: '.br' }),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       manifest: require('./public/manifest.json'),
       workbox: {
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
-        globPatterns: ['**/*.{png,svg,ico,json,woff,woff2,ttf,eot}'],
-        // Do NOT let the SPA navigation fallback hijack the proxied product site.
-        // These paths must hit the network so Vercel's rewrites serve the product app.
-        navigateFallbackDenylist: [
-          /^\/$/,                // exact root "/"  -> product site (Vercel rewrite)
-          /^\/product-assets\//, // product asset proxy
-        ],
+        // Only precache static assets — NOT JS chunks or HTML.
+        // Vercel handles routing; letting the SW cache index.html causes
+        // stale chunk hash errors after every new deployment.
+        globPatterns: ['**/*.{png,svg,ico,woff,woff2,ttf,eot}'],
+        navigateFallback: null,
       },
     }),
   ],
