@@ -98,7 +98,7 @@ const EVENTS = [
     desc: 'Live session with Atyant seniors who cracked consulting and finance internships from non-IIT backgrounds. Real paths, not generic prep advice.',
     type: 'Webinar',
     typeStyle: { background: 'rgba(117,103,201,0.1)', color: '#5A4CB0', border: '1px solid #CFC6EE' },
-    href: 'https://chat.whatsapp.com/IsOeHy87Tu0BsIJiBVHjUW',
+    href: '/webinar',
   },
   {
     month: 'AUG',
@@ -107,7 +107,7 @@ const EVENTS = [
     desc: 'Bring your resume. Leave with a reviewed version. Alumni from placement cells at top companies will walk through what actually clears shortlists.',
     type: 'Workshop',
     typeStyle: { background: 'rgba(26,158,106,0.1)', color: '#1a9e6a', border: '1px solid rgba(26,158,106,0.3)' },
-    href: 'https://chat.whatsapp.com/IsOeHy87Tu0BsIJiBVHjUW',
+    href: '/webinar',
   },
   {
     month: 'AUG',
@@ -116,7 +116,7 @@ const EVENTS = [
     desc: 'Open session with 5 Atyant seniors across software, core engineering, research, product, and finance roles. No topic too specific.',
     type: 'Live Q&A',
     typeStyle: { background: 'rgba(199,122,0,0.08)', color: '#c77a00', border: '1px solid rgba(199,122,0,0.25)' },
-    href: 'https://chat.whatsapp.com/IsOeHy87Tu0BsIJiBVHjUW',
+    href: '/webinar',
   },
   {
     month: 'SEP',
@@ -487,7 +487,7 @@ export default function AtyantLandingPage() {
                 <p className="al-eyebrow">Events</p>
                 <h2 style={{ marginBottom: 0 }}>Upcoming sessions</h2>
               </div>
-              <button className="al-primary-btn" style={{ minHeight: 42, padding: '0 18px', fontSize: '0.88rem' }} onClick={() => window.open('https://chat.whatsapp.com/IsOeHy87Tu0BsIJiBVHjUW', '_blank', 'noopener,noreferrer')}>
+              <button className="al-primary-btn" style={{ minHeight: 42, padding: '0 18px', fontSize: '0.88rem' }} onClick={() => navigate('/webinar')}>
                 Register →
               </button>
             </div>
@@ -631,7 +631,7 @@ export default function AtyantLandingPage() {
               <h4>Company</h4>
               <button className="al-footer-link" onClick={() => scrollTo('team')}>Team</button>
               <button className="al-footer-link" onClick={() => scrollTo('achievements')}>Milestones</button>
-              <button className="al-footer-link" onClick={() => window.open('https://chat.whatsapp.com/IsOeHy87Tu0BsIJiBVHjUW', '_blank', 'noopener,noreferrer')}>Events & Webinars</button>
+              <button className="al-footer-link" onClick={() => navigate('/webinar')}>Events & Webinars</button>
             </div>
 
             <div className="al-footer-col">
