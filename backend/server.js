@@ -38,6 +38,7 @@ import pushRoutes          from './routes/pushRoutes.js';
 import notificationRoutes  from './routes/notificationRoutes.js';
 import meetingroutes       from './routes/meetings.js';
 import webinarRoutes       from './routes/webinar.js';
+import newsletterRoutes    from './routes/newsletter.js';
 
 // ─── Models / utils ────────────────────────────────────────────────────────
 import Message      from './models/Message.js';
@@ -227,6 +228,7 @@ app.use('/api/push',            pushRoutes);
 app.use('/api/notifications',   notificationRoutes);
 app.use('/api/meetings',        meetingroutes);
 app.use('/api/webinar',         webinarRoutes);
+app.use('/api/newsletter',      newsletterRoutes);
 
 // ─── Health check ──────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {

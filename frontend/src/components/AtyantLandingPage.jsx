@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SEO from './SEO';
+import { API_URL } from '../services/api.js';
 import './AtyantLandingPage.css';
 
 /* ─── DATA ─── */
@@ -250,7 +251,13 @@ export default function AtyantLandingPage() {
   const handleSubscribe = async (e) => {
     e.preventDefault();
     if (!email.trim()) return;
-    await new Promise(r => setTimeout(r, 700));
+    try {
+      await fetch(`${API_URL}/api/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+    } catch (_) {}
     setSubscribed(true);
     showToast('Subscribed. Updates coming your way.');
   };

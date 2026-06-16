@@ -419,6 +419,62 @@ export const sendStudentBookingConfirmation = async ({
   }
 };
 
+// Send newsletter welcome email
+export const sendNewsletterWelcomeEmail = async (email) => {
+  if (!resend) {
+    console.warn('⚠️ Email service not configured. Skipping newsletter welcome email.');
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Atyant <notification@atyant.in>',
+      to: [email],
+      subject: 'You\'re subscribed to Atyant updates',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #FAFAFA;">
+          <div style="text-align: center; margin-bottom: 25px;">
+            <h1 style="color: #7C3AED; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;">Atyant</h1>
+            <p style="color: #6B7280; font-size: 14px; margin-top: 5px;">Intelligent Career Guidance Engine</p>
+          </div>
+
+          <div style="background-color: #FFFFFF; padding: 35px; border-radius: 16px; border: 1px solid #E5E7EB;">
+            <h2 style="color: #1F2937; font-size: 20px; font-weight: 700; margin-top: 0;">You're on the list.</h2>
+            <p style="color: #4B5563; font-size: 15px; line-height: 1.7; margin-bottom: 20px;">
+              We'll send you updates when new career guides, webinars, and resources drop — no spam, just the useful stuff.
+            </p>
+            <p style="color: #4B5563; font-size: 15px; line-height: 1.7; margin-bottom: 30px;">
+              In the meantime, try the Atyant Engine — it gives you a personalized career path based on your profile in under 2 minutes.
+            </p>
+            <div style="text-align: center; margin-bottom: 30px;">
+              <a href="https://atyant.in/intelligence"
+                 style="background-color: #7C3AED; color: white; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: 600; display: inline-block; font-size: 15px;">
+                Try the Atyant Engine →
+              </a>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 24px; color: #9CA3AF; font-size: 12px;">
+            <p>You're receiving this because you subscribed at atyant.in.</p>
+            <p>&copy; 2026 Atyant. All rights reserved.</p>
+          </div>
+        </div>
+      `
+    });
+
+    if (error) {
+      console.error('Newsletter email error:', error);
+      throw new Error('Failed to send newsletter welcome email');
+    }
+
+    console.log(`✅ Newsletter welcome email sent to ${email}`);
+    return data;
+  } catch (error) {
+    console.error('Error sending newsletter welcome email:', error);
+    throw error;
+  }
+};
+
 // Send webinar registration confirmation email
 export const sendWebinarRegistrationEmail = async (email, name, webinarTitle, webinarDate) => {
   if (!resend) {
