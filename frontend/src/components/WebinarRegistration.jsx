@@ -350,41 +350,30 @@ const WebinarRegistration = () => {
                       <div className="webinar-grid-inputs" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                         <div className="webinar-form-group">
                           <label className="webinar-label" htmlFor="yearOfStudy">Year of Study</label>
-                          <select
+                          <input
+                            type="text"
                             id="yearOfStudy"
                             name="yearOfStudy"
-                            className="webinar-input webinar-select"
+                            className="webinar-input"
+                            placeholder="e.g. 2nd Year, Graduate"
                             value={formData.yearOfStudy}
                             onChange={handleChange}
                             required
-                          >
-                            <option value="">Select Year</option>
-                            <option value="1st Year">1st Year</option>
-                            <option value="2nd Year">2nd Year</option>
-                            <option value="3rd Year">3rd Year</option>
-                            <option value="4th Year">4th Year</option>
-                            <option value="Graduate / Other">Graduate</option>
-                          </select>
+                          />
                         </div>
 
                         <div className="webinar-form-group">
                           <label className="webinar-label" htmlFor="stream">Stream</label>
-                          <select
+                          <input
+                            type="text"
                             id="stream"
                             name="stream"
-                            className="webinar-input webinar-select"
+                            className="webinar-input"
+                            placeholder="e.g. CSE, Mechanical"
                             value={formData.stream}
                             onChange={handleChange}
                             required
-                          >
-                            <option value="">Select Stream</option>
-                            <option value="Computer Science / IT">CSE / IT</option>
-                            <option value="Electronics / Electrical">ECE / EEE</option>
-                            <option value="Mechanical">Mechanical</option>
-                            <option value="Civil">Civil</option>
-                            <option value="Chemical">Chemical</option>
-                            <option value="Other / Non-Engineering">Other</option>
-                          </select>
+                          />
                         </div>
                       </div>
 
