@@ -2,12 +2,36 @@
 import React, { useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
-import UserAvatar from './UserAvatar';
-import NotificationBell from './NotificationBell';
-import { Menu, User as UserIcon, GraduationCap, LogOut, ShoppingBag } from 'lucide-react';
+import { Menu, User as UserIcon, GraduationCap, LogOut } from 'lucide-react';
 import './Navbar.css';
 import { API_URL } from '../services/api.js';
 
+function SimpleAvatar({ user, size = 40 }) {
+  const [imgError, setImgError] = useState(false);
+  const pic = user?.profilePicture;
+  const initials = (user?.name || user?.username || 'U').charAt(0).toUpperCase();
+
+  if (pic && !imgError) {
+    return (
+      <img
+        src={pic}
+        alt="avatar"
+        onError={() => setImgError(true)}
+        style={{ width: size, height: size, borderRadius: '50%', objectFit: 'cover' }}
+      />
+    );
+  }
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: '50%',
+      background: 'linear-gradient(135deg, #7567C9, #5A4CB0)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: '#fff', fontWeight: 700, fontSize: size * 0.4,
+    }}>
+      {initials}
+    </div>
+  );
+}
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -31,7 +55,7 @@ const Navbar = () => {
     fetch(`${API_URL}/api/profile/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (!cancelled && data?.profilePicture) setUserPhoto(data.profilePicture); })
-      .catch(() => { });
+      .catch(() => {});
 
     return () => { cancelled = true; };
   }, [user?.id || user?._id]);
@@ -47,51 +71,32 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handler);
   }, [showDropdown]);
 
-  useEffect(() => {
-    const handler = () => { };
-    window.addEventListener('openCommunityChat', handler);
-    return () => window.removeEventListener('openCommunityChat', handler);
-  }, []);
-
   const handleLogout = useCallback(() => {
     logout();
     navigate('/login');
   }, [logout, navigate]);
 
-  const openCommunityChat = useCallback(() => {
-    window.dispatchEvent(new CustomEvent('openCommunityChat'));
-    setOpen(false);
-  }, []);
+  const avatarUser = user ? { ...user, profilePicture: userPhoto } : null;
 
   const renderLinks = (isMobile = false) => {
     const close = () => isMobile && setOpen(false);
 
     if (!user) return (
       <>
-        <Link to="/internships" className="nav-link internship-link" onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/internships"   className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
         <Link to="/career-guides" className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
-        <Link to="/login" className="nav-button" onClick={close}>Login</Link>
+        <Link to="/login"  className="nav-button"         onClick={close}>Login</Link>
         <Link to="/signup" className="nav-button primary" onClick={close}>Sign Up</Link>
-      </>
-    );
-
-    if (user.role === 'mentor') return (
-      <>
-        <Link to="/dashboard" className="nav-link dashboard-link" onClick={close}>Dashboard</Link>
-        <Link to="/chat" className="nav-link mentor-chat-link" onClick={close}>Student Chats</Link>
-        <Link to="/internships" className="nav-link internship-link" onClick={close}><GraduationCap size={18} /> Internships</Link>
       </>
     );
 
     return (
       <>
-        <Link to="/my-questions" className="nav-link" onClick={close}>My Questions</Link>
-        <Link to="/internships" className="nav-link internship-link" onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/internships"   className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/career-guides" className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
       </>
     );
   };
-
-  const avatarUser = user ? { ...user, profilePicture: userPhoto } : null;
 
   return (
     <header className={`navbar${isIntelligence ? ' navbar--intelligence' : ''}`}>
@@ -103,31 +108,28 @@ const Navbar = () => {
       <nav className="navbar-links desktop-only">
         {renderLinks()}
         {user && (
-          <>
-            <NotificationBell />
-            <div className="profile-menu-container" ref={dropdownRef}>
-              <button onClick={() => setShowDropdown(v => !v)} className="profile-avatar-btn">
-                <UserAvatar user={avatarUser} size={40} />
-              </button>
-              {showDropdown && (
-                <div className="profile-dropdown">
-                  <div className="dropdown-header">
-                    <UserAvatar user={avatarUser} size={48} />
-                    <div className="dropdown-user-info">
-                      <span>Signed in as</span>
-                      <strong>{user.name || user.username || user.email || 'User'}</strong>
-                    </div>
+          <div className="profile-menu-container" ref={dropdownRef}>
+            <button onClick={() => setShowDropdown(v => !v)} className="profile-avatar-btn">
+              <SimpleAvatar user={avatarUser} size={40} />
+            </button>
+            {showDropdown && (
+              <div className="profile-dropdown">
+                <div className="dropdown-header">
+                  <SimpleAvatar user={avatarUser} size={48} />
+                  <div className="dropdown-user-info">
+                    <span>Signed in as</span>
+                    <strong>{user.name || user.username || user.email || 'User'}</strong>
                   </div>
-                  <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
-                    <UserIcon size={18} /> My Profile
-                  </Link>
-                  <button onClick={handleLogout} className="dropdown-item logout-btn">
-                    <LogOut size={18} /> Logout
-                  </button>
                 </div>
-              )}
-            </div>
-          </>
+                <Link to="/profile" className="dropdown-item" onClick={() => setShowDropdown(false)}>
+                  <UserIcon size={18} /> My Profile
+                </Link>
+                <button onClick={handleLogout} className="dropdown-item logout-btn">
+                  <LogOut size={18} /> Logout
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </nav>
 
