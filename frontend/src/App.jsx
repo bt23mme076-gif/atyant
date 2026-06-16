@@ -1,12 +1,10 @@
 // src/App.jsx
 import React, { useContext, useState, useEffect, useCallback, Suspense, lazy } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './App.css';
 import { AuthContext } from './AuthContext';
 import { Analytics } from '@vercel/analytics/react';
 import ErrorBoundary from './components/ErrorBoundary';
-import { MessageCircle } from 'lucide-react';
-import './components/CommunityChatButton.css';
 import GoogleLoginModal from './components/GoogleLoginModal';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -16,39 +14,22 @@ import LoadingSpinner from './components/LoadingSpinner';
 import ResumeMarketplace from './components/ResumeMarketplace';
 import { API_URL } from './services/api.js';
 
-
 // Lazy-loaded pages
-const Home = lazy(() => import('./components/Home'));
-const Dashboard = lazy(() => import('./components/Dashboard'));
-const Login = lazy(() => import('./components/Login'));
-const Signup = lazy(() => import('./components/signup'));
-const ChatPage = lazy(() => import('./components/ChatPage'));
-const MentorListPage = lazy(() => import('./components/MentorListPage'));
-const ForgotPassword = lazy(() => import('./components/ForgotPassword'));
-const ResetPasswordPage = lazy(() => import('./components/ResetPasswordPage'));
-const ProfilePage = lazy(() => import('./components/ProfilePage'));
-const PublicProfilePage = lazy(() => import('./components/PublicProfilePage'));
-const NearbyMentors = lazy(() => import('./components/NearbyMentors'));
-const InternshipPage = lazy(() => import('./components/InternshipPage'));
-const CommunityChat = lazy(() => import('./components/CommunityChat'));
-const EngineView = lazy(() => import('./components/EngineView'));
-const MentorDashboard = lazy(() => import('./components/MentorDashboard'));
-const MentorMonetization = lazy(() => import('./components/MentorMonetization'));
-const MentorProfilePage = lazy(() => import('./components/MentorProfilePage'));
-const MyBookings = lazy(() => import('./components/MyBookings'));
-const RoleBasedDashboard = lazy(() => import('./components/RoleBasedDashboard'));
-const MyQuestions = lazy(() => import('./components/MyQuestionsEnhanced'));
-const EnhancedAskQuestion = lazy(() => import('./components/EnhancedAskQuestion'));
-const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
-const CareerGuidesPage = lazy(() => import('./components/CareerGuidesPage'));
-const AuthSuccess = lazy(() => import('./components/AuthSuccess'));
-const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
-const TermsOfService = lazy(() => import('./components/TermsOfService'));
+const AtyantLandingPage    = lazy(() => import('./components/AtyantLandingPage'));
+const Login                = lazy(() => import('./components/Login'));
+const Signup               = lazy(() => import('./components/signup'));
+const ForgotPassword       = lazy(() => import('./components/ForgotPassword'));
+const ResetPasswordPage    = lazy(() => import('./components/ResetPasswordPage'));
+const AuthSuccess          = lazy(() => import('./components/AuthSuccess'));
+const InternshipPage       = lazy(() => import('./components/InternshipPage'));
+const CareerGuidesPage     = lazy(() => import('./components/CareerGuidesPage'));
+const PublicProfilePage    = lazy(() => import('./components/PublicProfilePage'));
+const ProfilePage          = lazy(() => import('./components/ProfilePage'));
 const IntelligenceTerminal = lazy(() => import('./components/intelligenceTerminal'));
-const WebinarRegistration = lazy(() => import('./components/WebinarRegistration'));
-const NewHome = lazy(() => import('./components/NewHome'));
-const AtyantLandingPage = lazy(() => import('./components/AtyantLandingPage'));
-
+const CommunityChat        = lazy(() => import('./components/CommunityChat'));
+const WebinarRegistration  = lazy(() => import('./components/WebinarRegistration'));
+const PrivacyPolicy        = lazy(() => import('./components/PrivacyPolicy'));
+const TermsOfService       = lazy(() => import('./components/TermsOfService'));
 
 function App() {
   const location = useLocation();
@@ -56,22 +37,12 @@ function App() {
 
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [showCommunityChat, setShowCommunityChat] = useState(false);
-  const [newMessageCount, setNewMessageCount] = useState(0);
-  const [lastMessageId, setLastMessageId] = useState(null);
-  const [currentNotification, setCurrentNotification] = useState(0);
 
-  const isChatPage = location.pathname === '/chat';
-  const isHomePage = location.pathname === '/home';
+  const isNewHomePage      = location.pathname === '/home';
   const isIntelligencePage = location.pathname === '/intelligence';
-  const isNewHomePage = location.pathname === '/home';
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password' || location.pathname === '/reset-password';
-  const isWebinarPage = location.pathname === '/webinar';
-  const isResumeStorePage = location.pathname === '/resume-store';
-
-  // Show WhatsApp widget only on home page
-  useEffect(() => {
-    document.body.classList.toggle('page-home', isHomePage);
-  }, [isHomePage]);
+  const isAuthPage         = ['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname);
+  const isWebinarPage      = location.pathname === '/webinar';
+  const isResumeStorePage  = location.pathname === '/resume-store';
 
   // Show Google modal once per session if not logged in
   useEffect(() => {
@@ -87,61 +58,12 @@ function App() {
     return () => window.removeEventListener('openCommunityChat', handler);
   }, []);
 
-  const handleToggleCommunityChat = useCallback(() => {
-    setShowCommunityChat(prev => !prev);
-    setNewMessageCount(0);
-  }, []);
-
-  // Rotate notification badge messages (home only)
-  useEffect(() => {
-    if (!isHomePage || showCommunityChat) return;
-    const id = setInterval(() => {
-      setCurrentNotification(prev => (prev + 1) % COMMUNITY_NOTIFICATIONS.length);
-    }, 5000);
-    return () => clearInterval(id);
-  }, [isHomePage, showCommunityChat]);
-
-  // 🔴 FIX: Poll for new community messages — only when user is logged in & chat closed
-  useEffect(() => {
-    if (!user || showCommunityChat) return;
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    let initialized = false;
-
-    const checkNewMessages = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/community-chat/messages?limit=1`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!res.ok) return;
-        const messages = await res.json();
-        if (!Array.isArray(messages) || messages.length === 0) return;
-
-        const latest = messages[messages.length - 1];
-        if (!initialized) { setLastMessageId(latest._id); initialized = true; return; }
-
-        setLastMessageId(prev => {
-          if (latest._id !== prev) {
-            setNewMessageCount(c => c + 1);
-            return latest._id;
-          }
-          return prev;
-        });
-      } catch { /* silent fail */ }
-    };
-
-    checkNewMessages();
-    const id = setInterval(checkNewMessages, 15000);
-    return () => clearInterval(id);
-  }, [user, showCommunityChat]);
-
   const handleGoogleSuccess = useCallback((credentialResponse) => {
     if (!credentialResponse?.credential) return;
     fetch(`${API_URL}/api/auth/google-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: credentialResponse.credential })
+      body: JSON.stringify({ token: credentialResponse.credential }),
     })
       .then(r => r.json())
       .then(data => {
@@ -161,58 +83,45 @@ function App() {
     localStorage.setItem('atyant_google_modal_dismissed', 'true');
   }, []);
 
+  const hideShell = isNewHomePage || isIntelligencePage || isAuthPage || isWebinarPage || isResumeStorePage;
+
   return (
-    <div className={isChatPage && user ? 'App chat-active' : 'App'}>
-      {!isIntelligencePage && !isNewHomePage && !isAuthPage && !isWebinarPage && !isResumeStorePage && <Navbar />}
+    <div className="App">
+      {!hideShell && <Navbar />}
       <main>
         <ScrollToTop />
         <Suspense fallback={<LoadingSpinner />}>
           <ErrorBoundary>
             <Routes>
-              {/* Public */}
-              <Route path="/home" element={<AtyantLandingPage />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/auth-success" element={<AuthSuccess />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/internships" element={<InternshipPage />} />
-
-              {/* Added: /dad route shows InternshipPage */}
-              <Route path="/dad" element={<InternshipPage />} />
-              <Route path="/career-guides" element={<CareerGuidesPage />} />
+              {/* ── Public ── */}
+              <Route path="/home"              element={<AtyantLandingPage />} />
+              <Route path="/login"             element={<Login />} />
+              <Route path="/signup"            element={<Signup />} />
+              <Route path="/forgot-password"   element={<ForgotPassword />} />
+              <Route path="/reset-password"    element={<ResetPasswordPage />} />
+              <Route path="/auth-success"      element={<AuthSuccess />} />
+              <Route path="/internships"       element={<InternshipPage />} />
+              <Route path="/dad"               element={<InternshipPage />} />
+              <Route path="/career-guides"     element={<CareerGuidesPage />} />
               <Route path="/profile/:username" element={<PublicProfilePage />} />
-              <Route path="/resume-store" element={<ResumeMarketplace />} />
+              <Route path="/resume-store"      element={<ResumeMarketplace />} />
+              <Route path="/webinar"           element={<WebinarRegistration />} />
+              <Route path="/privacy"           element={<PrivacyPolicy />} />
+              <Route path="/terms"             element={<TermsOfService />} />
 
-              {/* Protected */}
-              <Route path="/dashboard" element={<ProtectedRoute><RoleBasedDashboard /></ProtectedRoute>} />
-              <Route path="/mentors" element={<ProtectedRoute><MentorListPage /></ProtectedRoute>} />
-              <Route path="/chat" element={<ProtectedRoute><ErrorBoundary><ChatPage /></ErrorBoundary></ProtectedRoute>} />
-              <Route path="/chat/:mentorId" element={<ProtectedRoute><ErrorBoundary><ChatPage /></ErrorBoundary></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-              <Route path="/nearby-mentors" element={<ProtectedRoute><NearbyMentors /></ProtectedRoute>} />
-              <Route path="/engine/:questionId" element={<ProtectedRoute><EngineView /></ProtectedRoute>} />
-              <Route path="/answer/:answerCardId" element={<ProtectedRoute><EngineView isAnswerView={true} /></ProtectedRoute>} />
-              <Route path="/my-questions" element={<ProtectedRoute><MyQuestions /></ProtectedRoute>} />
-              <Route path="/ask" element={<ProtectedRoute><EnhancedAskQuestion /></ProtectedRoute>} />
+              {/* ── Protected ── */}
               <Route path="/intelligence" element={<ProtectedRoute><IntelligenceTerminal /></ProtectedRoute>} />
-              <Route path="/mentor-dashboard" element={<ProtectedRoute><MentorDashboard /></ProtectedRoute>} />
-              <Route path="/mentor-monetization" element={<ProtectedRoute><MentorMonetization /></ProtectedRoute>} />
-              <Route path="/mentor/:mentorId" element={<MentorProfilePage />} />
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-              <Route path="/terms" element={<TermsOfService />} />
-              <Route path="/webinar" element={<WebinarRegistration />} />
-              <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
-              <Route path="/admin-dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/profile"      element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+
+              {/* ── Fallback ── */}
+              <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
           </ErrorBoundary>
         </Suspense>
       </main>
 
-      {!isChatPage && !isIntelligencePage && !isNewHomePage && !isAuthPage && !isWebinarPage && !isResumeStorePage && <Footer />}
+      {!hideShell && <Footer />}
       <Analytics />
-
-      {/* Community Chat FAB removed per request */}
 
       {showCommunityChat && (
         <Suspense fallback={null}>
@@ -220,12 +129,10 @@ function App() {
         </Suspense>
       )}
 
-      {/* Custom WhatsApp Text Popup — home page only */}
-
       <GoogleLoginModal
         isOpen={showGoogleModal && !user}
         onSuccess={handleGoogleSuccess}
-        onError={() => { }}
+        onError={() => {}}
         onClose={handleModalClose}
       />
     </div>
