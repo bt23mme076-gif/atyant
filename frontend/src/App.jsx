@@ -110,7 +110,7 @@ function App() {
               <Route path="/terms"             element={<TermsOfService />} />
 
               {/* ── Protected ── */}
-              <Route path="/intelligence" element={<ProtectedRoute><IntelligenceTerminal /></ProtectedRoute>} />
+              <Route path="/intelligence" element={<IntelligenceTerminal />} />
               <Route path="/profile"      element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
               {/* ── Fallback ── */}

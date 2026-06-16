@@ -11,7 +11,7 @@ const PRODUCTS = [
     tag: 'live',
     title: 'Career Clarity Engine',
     desc: 'Type your exact career confusion in plain words. Atyant matches it to a verified AnswerCard — a structured path from a senior with the same college, branch, and target outcome. Not a chatbot answer. A lived, documented journey.',
-    href: '/signup',
+    href: '/intelligence',
     featured: true,
   },
   {
@@ -19,7 +19,7 @@ const PRODUCTS = [
     tag: 'live',
     title: 'Verified Senior Sessions',
     desc: 'When an AnswerCard is not enough, book a 1:1 session with the exact senior whose path matches yours. Priced from ₹49 — because the right 30 minutes is worth more than months of guessing.',
-    href: '/signup',
+    href: '/intelligence',
   },
   {
     icon: '📚',
@@ -340,10 +340,10 @@ export default function AtyantLandingPage() {
         </p>
 
         <div className="al-hero-actions">
-          <button className="al-primary-btn" onClick={() => navigate('/signup')}>
+          <button className="al-primary-btn" onClick={() => navigate('/intelligence')}>
             Ask your confusion →
           </button>
-          <button className="al-secondary-btn" onClick={() => navigate('/signup')}>
+          <button className="al-secondary-btn" onClick={() => navigate('/intelligence')}>
             Try the clarity engine
           </button>
           <button className="al-secondary-btn" onClick={() => scrollTo('approach')}>
@@ -453,8 +453,8 @@ export default function AtyantLandingPage() {
                 ))}
               </div>
               <div style={{ display: 'flex', gap: 12, marginTop: 36, flexWrap: 'wrap' }}>
-                <button className="al-primary-btn" onClick={() => navigate('/signup')}>Try the clarity engine</button>
-                <button className="al-outline-btn" onClick={() => navigate('/signup')}>Find a verified senior</button>
+                <button className="al-primary-btn" onClick={() => navigate('/intelligence')}>Try the clarity engine</button>
+                <button className="al-outline-btn" onClick={() => navigate('/intelligence')}>Find a verified senior</button>
               </div>
             </div>
           </div>
@@ -564,10 +564,10 @@ export default function AtyantLandingPage() {
           The path exists. Someone with your background has already figured it out. Atyant finds them for you — and makes their journey your starting point.
         </p>
         <div className="al-cta-actions">
-          <button className="al-primary-btn" onClick={() => navigate('/signup')}>
+          <button className="al-primary-btn" onClick={() => navigate('/intelligence')}>
             Ask your confusion →
           </button>
-          <button className="al-secondary-btn" onClick={() => navigate('/signup')}>
+          <button className="al-secondary-btn" onClick={() => navigate('/intelligence')}>
             Try the clarity engine
           </button>
         </div>
@@ -619,8 +619,8 @@ export default function AtyantLandingPage() {
 
           <div className="al-footer-col">
             <h4>Products</h4>
-            <button className="al-footer-link" onClick={() => navigate('/signup')}>Clarity Engine</button>
-            <button className="al-footer-link" onClick={() => navigate('/signup')}>Verified Senior Sessions</button>
+            <button className="al-footer-link" onClick={() => navigate('/intelligence')}>Clarity Engine</button>
+            <button className="al-footer-link" onClick={() => navigate('/intelligence')}>Verified Senior Sessions</button>
             <button className="al-footer-link" onClick={() => navigate('/career-guides')}>Verified Paths</button>
             <button className="al-footer-link" onClick={() => navigate('/resume-store')}>Resume Store</button>
             <button className="al-footer-link" style={{ color: 'var(--textMuted)' }}>AtyantJEE (coming soon)</button>
