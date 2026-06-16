@@ -51,17 +51,13 @@ router.post('/register', async (req, res) => {
     await registration.save();
 
     // Send confirmation email
-    const webinarTitle = 'AI-Powered Career Building: Break Through Career Blocks & Stand Out';
-    const webinarDate = 'Thursday, June 25, 2026 at 6:00 PM IST';
+    const webinarTitle = 'How to Crack an IIM Internship from a Tier-2 NIT';
+    const webinarDate = 'Friday, July 18, 2026 at 6:00 PM IST';
     
     // Non-blocking email send to keep response times low
     sendWebinarRegistrationEmail(email, name, webinarTitle, webinarDate)
-      .then(result => {
-        console.log(`Webinar confirmation email sent to ${email}`);
-      })
-      .catch(err => {
-        console.error(`Error sending webinar confirmation email to ${email}:`, err.message);
-      });
+      .then(() => console.log(`✅ Webinar email sent to ${email}`))
+      .catch(err => console.error(`❌ Webinar email FAILED for ${email}:`, err.message, err));
 
     res.status(201).json({
       message: 'Registration successful! Check your email for confirmation.',

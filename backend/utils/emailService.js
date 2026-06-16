@@ -5,9 +5,9 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 if (!RESEND_API_KEY) {
-  console.warn('⚠️ RESEND_API_KEY not found in environment variables. Email notifications will be disabled.');
+  console.error('❌ RESEND_API_KEY is missing from environment. All emails will be skipped. Set it in Vercel → Settings → Environment Variables.');
 } else {
-  console.log('✅ Resend email service initialized successfully (emailService.js)');
+  console.log('✅ Resend initialized. Key prefix:', RESEND_API_KEY.slice(0, 8) + '...');
 }
 
 // Send password reset email
@@ -430,7 +430,7 @@ export const sendWebinarRegistrationEmail = async (email, name, webinarTitle, we
   // Webinar date example: June 25, 2026 at 6:00 PM IST
   // We can format URL properties (e.g. text, dates, details)
   const calendarTitle = encodeURIComponent(webinarTitle);
-  const calendarDates = '20260625T123000Z/20260625T140000Z'; // UTC time corresponding to 6:00 PM - 7:30 PM IST (GMT+5:30 is +5.5 hours, so 18:00 IST is 12:30 UTC)
+  const calendarDates = '20260718T123000Z/20260718T140000Z'; // July 18, 2026 6:00–7:30 PM IST = 12:30–14:00 UTC
   const calendarDetails = encodeURIComponent('Join Atyant\'s live career guidance webinar to break through your career block. Webinar Link: https://atyant.in/webinar');
   const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calendarTitle}&dates=${calendarDates}&details=${calendarDetails}`;
 
@@ -464,7 +464,7 @@ export const sendWebinarRegistrationEmail = async (email, name, webinarTitle, we
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #6B7280; font-weight: 500; font-size: 14px;">Speaker:</td>
-                  <td style="padding: 8px 0; color: #1F2937; font-weight: 600; font-size: 15px;">Jatin (Founder, Atyant & VNIT Alumnus)</td>
+                  <td style="padding: 8px 0; color: #1F2937; font-weight: 600; font-size: 15px;">Nitin Rai (Founder &amp; CEO, Atyant — VNIT Nagpur)</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; color: #6B7280; font-weight: 500; font-size: 14px;">Date & Time:</td>
