@@ -1,6 +1,6 @@
-Set-Content -Path .\src\components\Home.jsx -Value 'import React from "react"; import IntelligenceTerminal from "./IntelligenceTerminal"; const Home = () => { return <IntelligenceTerminal />; }; export default Home;'
+Set-Content -Path .\src\components\Home.jsx -Value 'import React from "react"; import IntelligenceTerminal from ".https://atyant.in/Terminal"; const Home = () => { return <IntelligenceTerminal />; }; export default Home;'
 ======
-Set-Content -Path .\frontend\src\components\Home.jsx -Value 'import React from "react"; import IntelligenceTerminal from "./IntelligenceTerminal"; const Home = () => { return <IntelligenceTerminal />; }; export default Home;'
+Set-Content -Path .\frontend\src\components\Home.jsx -Value 'import React from "react"; import IntelligenceTerminal from ".https://atyant.in/Terminal"; const Home = () => { return <IntelligenceTerminal />; }; export default Home;'
 ======
 npx eslint .\src\components\IntelligenceTerminal.jsx
 ======
@@ -24,19 +24,19 @@ $code = Get-Content -Raw .\src\components\IntelligenceTerminal.jsx; $newCode = $
 ======
 Select-String -Pattern "handleSubmit" -Context 3, 20 .\src\components\IntelligenceTerminal.jsx
 ======
-$code = Get-Content -Raw .\src\components\IntelligenceTerminal.jsx; $newCode = $code -replace "(?s)const handleSubmit = \(textQuery\).*?1600\);\r?\n  };", "const handleSubmit = async (textQuery) => {`n    const q = textQuery || query;`n    if (!q.trim()) return;`n    `n    setIsIdle(false);`n    `n    const newMsg = { id: Date.now().toString(), role: 'user', content: q };`n    setMessages(prev => [...prev, newMsg]);`n    setQuery('');`n    `n    const aiMsgId = (Date.now()+1).toString();`n    setMessages(prev => [...prev, {`n      id: aiMsgId,`n      role: 'ai',`n      content: '',`n      isLoading: true`n    }]);`n`n    try {`n      const res = await fetch(`${API_URL}/intelligence/search`, {`n        method: 'POST',`n        headers: { 'Content-Type': 'application/json' },`n        body: JSON.stringify({ query: q, college: 'Unknown', branch: 'Unknown' })`n      });`n      if (!res.ok) throw new Error('Backend unvailable');`n      const data = await res.json();`n      setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, isLoading: false, response: data } : m));`n    } catch (err) {`n      setTimeout(() => {`n        const intent = detectIntent(q);`n        const data = MOCK_RESPONSES[intent];`n        setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, isLoading: false, response: data } : m));`n      }, 1600);`n    }`n  };"; Set-Content .\src\components\IntelligenceTerminal.jsx -Value $newCode
+$code = Get-Content -Raw .\src\components\IntelligenceTerminal.jsx; $newCode = $code -replace "(?s)const handleSubmit = \(textQuery\).*?1600\);\r?\n  };", "const handleSubmit = async (textQuery) => {`n    const q = textQuery || query;`n    if (!q.trim()) return;`n    `n    setIsIdle(false);`n    `n    const newMsg = { id: Date.now().toString(), role: 'user', content: q };`n    setMessages(prev => [...prev, newMsg]);`n    setQuery('');`n    `n    const aiMsgId = (Date.now()+1).toString();`n    setMessages(prev => [...prev, {`n      id: aiMsgId,`n      role: 'ai',`n      content: '',`n      isLoading: true`n    }]);`n`n    try {`n      const res = await fetch(`${API_URL}https://atyant.in//search`, {`n        method: 'POST',`n        headers: { 'Content-Type': 'application/json' },`n        body: JSON.stringify({ query: q, college: 'Unknown', branch: 'Unknown' })`n      });`n      if (!res.ok) throw new Error('Backend unvailable');`n      const data = await res.json();`n      setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, isLoading: false, response: data } : m));`n    } catch (err) {`n      setTimeout(() => {`n        const intent = detectIntent(q);`n        const data = MOCK_RESPONSES[intent];`n        setMessages(prev => prev.map(m => m.id === aiMsgId ? { ...m, isLoading: false, response: data } : m));`n      }, 1600);`n    }`n  };"; Set-Content .\src\components\IntelligenceTerminal.jsx -Value $newCode
 ======
 Get-Content f:\GithubProjects\GitHub\atyant\frontend\src\components\IntelligenceTerminal.jsx -TotalCount 95 | Select-Object -Last 10
 ======
 Get-Content .\frontend\src\App.jsx | Select-String "IntelligenceTerminal"
 ======
 $appCode = Get-Content -Raw .\frontend\src\App.jsx
-$appCode = $appCode -replace "import Home              from '\./components/Home';", "import Home              from './components/Home';`nconst IntelligenceTerminal = lazy(() => import('./components/IntelligenceTerminal'));"
-$appCode = $appCode -replace "<Route path=`"/`"                      element=\{<Home />\} />", "<Route path=`"/`"                      element={<Home />} />`n              <Route path=`"/intelligence`"         element={<IntelligenceTerminal />} />"
+$appCode = $appCode -replace "import Home              from '\./components/Home';", "import Home              from './components/Home';`nconst IntelligenceTerminal = lazy(() => import('./componentshttps://atyant.in/Terminal'));"
+$appCode = $appCode -replace "<Route path=`"/`"                      element=\{<Home />\} />", "<Route path=`"/`"                      element={<Home />} />`n              <Route path=`"https://atyant.in/`"         element={<IntelligenceTerminal />} />"
 Set-Content .\frontend\src\App.jsx -Value $appCode
 ======
 $code = Get-Content -Raw .\frontend\src\components\IntelligenceTerminal.jsx
-$code = $code -replace "await fetch\(`$\{API_URL\}/intelligence/search`, `"await fetch(\``${API_URL}/intelligence/search\``"
+$code = $code -replace "await fetch\(`$\{API_URL\}https://atyant.in//search`, `"await fetch(\``${API_URL}https://atyant.in//search\``"
 Set-Content .\frontend\src\components\IntelligenceTerminal.jsx -Value $code
 ======
 Get-Content .\frontend\src\components\IntelligenceTerminal.jsx | Select-String "fetch" -Context 0,2
@@ -44,7 +44,7 @@ Get-Content .\frontend\src\components\IntelligenceTerminal.jsx | Select-String "
 Get-Content .\frontend\src\App.jsx -TotalCount 50 | Select-String "IntelligenceTerminal|Home"
 ======
 $appCode = Get-Content -Raw .\frontend\src\App.jsx
-$appCode = $appCode -replace "const Home\s+= lazy\(\(\) => import\('\./components/Home'\)\);", "const Home              = lazy(() => import('./components/Home'));`nconst IntelligenceTerminal = lazy(() => import('./components/IntelligenceTerminal'));"
+$appCode = $appCode -replace "const Home\s+= lazy\(\(\) => import\('\./components/Home'\)\);", "const Home              = lazy(() => import('./components/Home'));`nconst IntelligenceTerminal = lazy(() => import('./componentshttps://atyant.in/Terminal'));"
 Set-Content .\frontend\src\App.jsx -Value $appCode
 ======
 Get-Content .\frontend\src\App.jsx | Select-String "IntelligenceTerminal"

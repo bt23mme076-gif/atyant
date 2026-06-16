@@ -16,9 +16,9 @@ export const sendPasswordResetEmail = async (email, resetToken) => {
     console.warn('⚠️ Email service not configured. Skipping password reset email.');
     return { success: false, error: 'Email service not configured' };
   }
-  
+
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-  
+
   try {
     const { data, error } = await resend.emails.send({
       from: 'Atyant <notification@atyant.in>', // Use your verified domain when available
@@ -82,7 +82,7 @@ export const sendPasswordResetConfirmation = async (email, username) => {
     console.warn('⚠️ Email service not configured. Skipping password reset confirmation email.');
     return { success: false, error: 'Email service not configured' };
   }
-  
+
   try {
     const { data, error } = await resend.emails.send({
       from: 'Atyant <notification@atyant.in>',
@@ -144,7 +144,7 @@ export const sendMentorPaymentNotification = async (mentorEmail, mentorName, stu
     console.warn('⚠️ Email service not configured. Skipping mentor payment notification email.');
     return { success: false, error: 'Email service not configured' };
   }
-  
+
   try {
     const mentorshipTypeLabel = {
       'chat': '1-on-1 Chat Session',
@@ -242,7 +242,7 @@ export const sendMentorBookingNotification = async ({
     console.warn('⚠️ Email service not configured. Skipping mentor booking notification email.');
     return { success: false, error: 'Email service not configured' };
   }
-  
+
   try {
     const { data, error } = await resend.emails.send({
       from: 'Atyant <notification@atyant.in>',
@@ -338,7 +338,7 @@ export const sendStudentBookingConfirmation = async ({
     console.warn('⚠️ Email service not configured. Skipping student booking confirmation email.');
     return { success: false, error: 'Email service not configured' };
   }
-  
+
   try {
     const { data, error } = await resend.emails.send({
       from: 'Atyant <notification@atyant.in>',
@@ -447,7 +447,7 @@ export const sendNewsletterWelcomeEmail = async (email) => {
               In the meantime, try the Atyant Engine — it gives you a personalized career path based on your profile in under 2 minutes.
             </p>
             <div style="text-align: center; margin-bottom: 30px;">
-              <a href="https://atyant.in/intelligence"
+              <a href="https://atyant.inhttps://atyant.in/"
                  style="background-color: #7C3AED; color: white; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: 600; display: inline-block; font-size: 15px;">
                 Try the Atyant Engine →
               </a>

@@ -11,17 +11,17 @@ router.get('/mentors', optionalAuth, async (req, res) => {
   try {
     const { q, category, mentorBackground, sort } = req.query;
 
-    const filter      = { role: 'mentor' };
-    let   sortOptions = { lastActive: -1 };   // 🔴 FIX: default = most recently active
+    const filter = { role: 'mentor' };
+    let sortOptions = { lastActive: -1 };   // 🔴 FIX: default = most recently active
 
     // ── Text search ──────────────────────────
     if (q?.trim()) {
       const re = { $regex: q.trim(), $options: 'i' };
       filter.$or = [
-        { username : re },
-        { bio      : re },
+        { username: re },
+        { bio: re },
         { expertise: re },
-        { skills   : re },
+        { skills: re },
         { 'education.institution': re }
       ];
     }
@@ -56,11 +56,11 @@ router.get('/mentors', optionalAuth, async (req, res) => {
     // ── Mentor background filter ──────────────
     if (mentorBackground && mentorBackground !== 'All') {
       const userCollege = req.user?.education?.[0]?.institution ||
-                          req.user?.education?.[0]?.institutionName;
+        req.user?.education?.[0]?.institutionName;
 
       if (
         (mentorBackground === 'Senior from My College' ||
-         mentorBackground === 'Alumni from My College') && userCollege
+          mentorBackground === 'Alumni from My College') && userCollege
       ) {
         filter['education.institution'] = userCollege;
       } else if (mentorBackground === 'Industry Professional') {
@@ -120,7 +120,7 @@ router.get('/mentors', optionalAuth, async (req, res) => {
 // �������������������������������������
 // INTELLIGENCE SEARCH WITH GROQ
 // �������������������������������������
-router.post('/intelligence/search', async (req, res) => {
+router.post('https://atyant.in//search', async (req, res) => {
   try {
     const { query, college, branch } = req.body;
 

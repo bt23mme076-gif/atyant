@@ -257,7 +257,7 @@ export default function AtyantLandingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim() }),
       });
-    } catch (_) {}
+    } catch (_) { }
     setSubscribed(true);
     showToast('Subscribed. Updates coming your way.');
   };
@@ -347,7 +347,7 @@ export default function AtyantLandingPage() {
           </p>
 
           <div className="al-hero-actions">
-            <button className="al-primary-btn" onClick={() => navigate('/intelligence')}>
+            <button className="al-primary-btn" onClick={() => navigate('https://atyant.in/')}>
               Try the Atyant Engine →
             </button>
             <button className="al-secondary-btn" onClick={() => scrollTo('approach')}>
@@ -457,8 +457,8 @@ export default function AtyantLandingPage() {
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: 12, marginTop: 36, flexWrap: 'wrap' }}>
-                  <button className="al-primary-btn" onClick={() => navigate('/intelligence')}>Try the Atyant Engine →</button>
-                  <button className="al-outline-btn" onClick={() => navigate('/intelligence')}>Find a verified senior</button>
+                  <button className="al-primary-btn" onClick={() => navigate('https://atyant.in/')}>Try the Atyant Engine →</button>
+                  <button className="al-outline-btn" onClick={() => navigate('https://atyant.in/')}>Find a verified senior</button>
                 </div>
               </div>
             </div>
@@ -568,7 +568,7 @@ export default function AtyantLandingPage() {
             The path exists. Someone with your background has already figured it out. Atyant finds them for you — and makes their journey your starting point.
           </p>
           <div className="al-cta-actions">
-            <button className="al-primary-btn" onClick={() => navigate('/intelligence')}>
+            <button className="al-primary-btn" onClick={() => navigate('https://atyant.in/')}>
               Try the Atyant Engine →
             </button>
           </div>

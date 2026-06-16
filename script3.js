@@ -9,17 +9,17 @@ rl.on('line', (line) => {
     const json = JSON.parse(line);
     const data = json.data;
     if (data && data.toolRequests) {
-        data.toolRequests.forEach(req => {
-            if (req.arguments && typeof req.arguments === 'string' && req.name === 'create_file') {
-                const args = JSON.parse(req.arguments);
-                if (args.filePath && args.filePath.includes('IntelligenceTerminal') && args.content) {
-                    latestContent = args.content;
-                }
-            }
-        });
+      data.toolRequests.forEach(req => {
+        if (req.arguments && typeof req.arguments === 'string' && req.name === 'create_file') {
+          const args = JSON.parse(req.arguments);
+          if (args.filePath && args.filePath.includes('IntelligenceTerminal') && args.content) {
+            latestContent = args.content;
+          }
+        }
+      });
     }
-  } catch (e) {}
+  } catch (e) { }
 });
 rl.on('close', () => {
-    fs.writeFileSync('frontend/src/components/IntelligenceTerminal.jsx', latestContent);
+  fs.writeFileSync('frontend/src/componentshttps://atyant.in/Terminal.jsx', latestContent);
 });

@@ -9,172 +9,172 @@ import "./AtyantLandingPage.css";
 // ─── Template Data ────────────────────────────────────────────────────────────
 const TEMPLATES = [
   // SDE Templates
-  { 
-    id: 1, 
-    name: "SDE Fresher (AI/Data Focus)", 
-    cat: "Fresher", 
-    price: 69, 
-    desc: "Modern layout perfect for CS freshers with AI/ML/Data projects", 
+  {
+    id: 1,
+    name: "SDE Fresher (AI/Data Focus)",
+    cat: "Fresher",
+    price: 69,
+    desc: "Modern layout perfect for CS freshers with AI/ML/Data projects",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260487/192ce5b8-1161-4d59-90ef-65933272b689.png",
-    proof: "4 students placed at startups via this template",   
-    proofIcon: "💻" 
+    proof: "4 students placed at startups via this template",
+    proofIcon: "💻"
   },
-  { 
-    id: 2, 
-    name: "FAANG SDE Fresher (C/C++, DSA)", 
-    cat: "Fresher", 
-    price: 69, 
-    desc: "Optimized for SDE roles - highlights DSA, system design & core CS", 
+  {
+    id: 2,
+    name: "FAANG SDE Fresher (C/C++, DSA)",
+    cat: "Fresher",
+    price: 69,
+    desc: "Optimized for SDE roles - highlights DSA, system design & core CS",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260468/88e07c37-dd26-473a-b63e-b191ab16595a.png",
-    proof: "Used by Google SDE intern from IIT Delhi",   
-    proofIcon: "🚀" 
+    proof: "Used by Google SDE intern from IIT Delhi",
+    proofIcon: "🚀"
   },
-  { 
-    id: 3, 
-    name: "Software Engineer (15+ Years)", 
-    cat: "Experienced", 
-    price: 69, 
-    desc: "Executive-level layout for senior backend/DevOps engineers", 
+  {
+    id: 3,
+    name: "Software Engineer (15+ Years)",
+    cat: "Experienced",
+    price: 69,
+    desc: "Executive-level layout for senior backend/DevOps engineers",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260446/eb430f3b-1d8c-4761-a154-d72baa26acbf.png",
-    proof: "3 senior engineers got FAANG offers",                
-    proofIcon: "🏆" 
+    proof: "3 senior engineers got FAANG offers",
+    proofIcon: "🏆"
   },
 
   // AI/ML Templates
-  { 
-    id: 4, 
-    name: "AI/ML Developer Fresher", 
-    cat: "Fresher", 
-    price: 69, 
-    desc: "Designed for ML freshers - showcases projects, frameworks & papers", 
+  {
+    id: 4,
+    name: "AI/ML Developer Fresher",
+    cat: "Fresher",
+    price: 69,
+    desc: "Designed for ML freshers - showcases projects, frameworks & papers",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260080/3fb22bd9-9b54-4368-bd94-0092527604f8.png",
-    proof: "5 ML interns selected from this resume",  
-    proofIcon: "🤖" 
+    proof: "5 ML interns selected from this resume",
+    proofIcon: "🤖"
   },
-  { 
-    id: 5, 
-    name: "AI/ML Research", 
-    cat: "Experienced", 
-    price: 69, 
-    desc: "Academic-focused layout for ML researchers & PhD candidates", 
+  {
+    id: 5,
+    name: "AI/ML Research",
+    cat: "Experienced",
+    price: 69,
+    desc: "Academic-focused layout for ML researchers & PhD candidates",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775259942/0bf22d93-7481-4a15-84bf-883d6166a9a6.png",
-    proof: "2 students got IIT research positions",    
-    proofIcon: "🎓" 
+    proof: "2 students got IIT research positions",
+    proofIcon: "🎓"
   },
-  { 
-    id: 6, 
-    name: "AI/ML FAANG (Deep Learning, NLP, CV)", 
-    cat: "Experienced", 
-    price: 69, 
-    desc: "Premium ML layout highlighting deep learning, NLP & computer vision", 
+  {
+    id: 6,
+    name: "AI/ML FAANG (Deep Learning, NLP, CV)",
+    cat: "Experienced",
+    price: 69,
+    desc: "Premium ML layout highlighting deep learning, NLP & computer vision",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775259922/31b08a66-b4ba-4b88-9a9f-be52d502d411.png",
-    proof: "Selected at Google AI Research team",    
-    proofIcon: "⚡" 
+    proof: "Selected at Google AI Research team",
+    proofIcon: "⚡"
   },
 
   // Core Engineering Templates
-  { 
-    id: 7, 
-    name: "Metallurgical/Materials Engineering", 
-    cat: "Core", 
-    price: 69, 
-    desc: "Structured layout for metallurgy & materials science roles", 
+  {
+    id: 7,
+    name: "Metallurgical/Materials Engineering",
+    cat: "Core",
+    price: 69,
+    desc: "Structured layout for metallurgy & materials science roles",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775259864/0aa2311d-5fe8-401b-8dd1-3834dc666bc8.png",
-    proof: "3 students got Tata Steel internships",   
-    proofIcon: "🏭" 
+    proof: "3 students got Tata Steel internships",
+    proofIcon: "🏭"
   },
-  { 
-    id: 8, 
-    name: "Electrical Engineering (Power Systems)", 
-    cat: "Core", 
-    price: 69, 
-    desc: "Clean design for electrical & power systems engineers", 
+  {
+    id: 8,
+    name: "Electrical Engineering (Power Systems)",
+    cat: "Core",
+    price: 69,
+    desc: "Clean design for electrical & power systems engineers",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775259847/f5adddef-2c2a-45d9-899c-fba0aa562f48.png",
-    proof: "4 students selected at power companies",   
-    proofIcon: "⚙️" 
+    proof: "4 students selected at power companies",
+    proofIcon: "⚙️"
   },
-  { 
-    id: 9, 
-    name: "Chemical Engineering", 
-    cat: "Core", 
-    price: 69, 
-    desc: "Professional layout tailored for chemical & process engineers", 
+  {
+    id: 9,
+    name: "Chemical Engineering",
+    cat: "Core",
+    price: 69,
+    desc: "Professional layout tailored for chemical & process engineers",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775251730/WhatsApp_Image_2026-04-04_at_2.34.22_AM_xhyxpl.jpg",
-    proof: "2 students placed at Reliance Industries",                
-    proofIcon: "🧪" 
+    proof: "2 students placed at Reliance Industries",
+    proofIcon: "🧪"
   },
 
   // Data & Analytics Templates
-  { 
-    id: 10, 
-    name: "Data Analyst/Science (Finance)", 
-    cat: "Data", 
-    price: 69, 
-    desc: "Finance-focused data analytics layout with metrics & insights", 
+  {
+    id: 10,
+    name: "Data Analyst/Science (Finance)",
+    cat: "Data",
+    price: 69,
+    desc: "Finance-focused data analytics layout with metrics & insights",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775251710/WhatsApp_Image_2026-04-04_at_2.40.43_AM_zsr8bu.jpg",
-    proof: "Selected at JP Morgan & Goldman Sachs",  
-    proofIcon: "📊" 
+    proof: "Selected at JP Morgan & Goldman Sachs",
+    proofIcon: "📊"
   },
-  { 
-    id: 11, 
-    name: "Product/Consulting/Data Analytics", 
-    cat: "Product", 
-    price: 69, 
-    desc: "Hybrid layout for product analysts & consulting roles", 
+  {
+    id: 11,
+    name: "Product/Consulting/Data Analytics",
+    cat: "Product",
+    price: 69,
+    desc: "Hybrid layout for product analysts & consulting roles",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775251670/WhatsApp_Image_2026-04-04_at_2.45.15_AM_b1nkcg.jpg",
-    proof: "4 students got consulting firm offers",    
-    proofIcon: "💼" 
+    proof: "4 students got consulting firm offers",
+    proofIcon: "💼"
   },
 
   // General Professional Templates
-  { 
-    id: 12, 
-    name: "Tech Professional", 
-    cat: "General", 
-    price: 69, 
-    desc: "Versatile modern design for various tech roles", 
+  {
+    id: 12,
+    name: "Tech Professional",
+    cat: "General",
+    price: 69,
+    desc: "Versatile modern design for various tech roles",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775259884/a81b79a3-2a00-4ed1-bed5-384fadf07b65.png",
-    proof: "Popular template across all domains",    
-    proofIcon: "💻" 
+    proof: "Popular template across all domains",
+    proofIcon: "💻"
   },
-  { 
-    id: 13, 
-    name: "Modern Professional", 
-    cat: "General", 
-    price: 69, 
-    desc: "Contemporary clean layout suitable for any industry", 
+  {
+    id: 13,
+    name: "Modern Professional",
+    cat: "General",
+    price: 69,
+    desc: "Contemporary clean layout suitable for any industry",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260487/192ce5b8-1161-4d59-90ef-65933272b689.png",
-    proof: "5+ students hired across sectors",   
-    proofIcon: "✨" 
+    proof: "5+ students hired across sectors",
+    proofIcon: "✨"
   },
-  { 
-    id: 14, 
-    name: "Executive Professional", 
-    cat: "Executive", 
-    price: 69, 
-    desc: "Premium executive layout for leadership positions", 
+  {
+    id: 14,
+    name: "Executive Professional",
+    cat: "Executive",
+    price: 69,
+    desc: "Premium executive layout for leadership positions",
     image: "https://res.cloudinary.com/dny6dtmox/image/upload/q_auto/f_auto/v1775260446/eb430f3b-1d8c-4761-a154-d72baa26acbf.png",
-    proof: "2 VPs hired with this template",   
-    proofIcon: "👔" 
+    proof: "2 VPs hired with this template",
+    proofIcon: "👔"
   },
 ];
 
 const CAT_COLORS = {
-  Fresher:     { bg: "rgba(117,103,201,0.08)", color: "#5A4CB0", border: "#CFC6EE" },
-  Experienced: { bg: "rgba(26,158,106,0.08)",  color: "#1a9e6a", border: "rgba(26,158,106,0.25)" },
-  Executive:   { bg: "rgba(199,122,0,0.08)",    color: "#c77a00", border: "rgba(199,122,0,0.25)" },
-  Core:        { bg: "rgba(199,122,0,0.08)",    color: "#c77a00", border: "rgba(199,122,0,0.25)" },
-  Data:        { bg: "rgba(117,103,201,0.08)", color: "#5A4CB0", border: "#CFC6EE" },
-  Product:     { bg: "rgba(117,103,201,0.08)", color: "#5A4CB0", border: "#CFC6EE" },
-  General:     { bg: "rgba(27,24,48,0.05)",     color: "#5A5470", border: "#E3E0EC" },
+  Fresher: { bg: "rgba(117,103,201,0.08)", color: "#5A4CB0", border: "#CFC6EE" },
+  Experienced: { bg: "rgba(26,158,106,0.08)", color: "#1a9e6a", border: "rgba(26,158,106,0.25)" },
+  Executive: { bg: "rgba(199,122,0,0.08)", color: "#c77a00", border: "rgba(199,122,0,0.25)" },
+  Core: { bg: "rgba(199,122,0,0.08)", color: "#c77a00", border: "rgba(199,122,0,0.25)" },
+  Data: { bg: "rgba(117,103,201,0.08)", color: "#5A4CB0", border: "#CFC6EE" },
+  Product: { bg: "rgba(117,103,201,0.08)", color: "#5A4CB0", border: "#CFC6EE" },
+  General: { bg: "rgba(27,24,48,0.05)", color: "#5A5470", border: "#E3E0EC" },
 };
 
 const STEPS = [
-  { num: 1, emoji: "👀", title: "Preview Resume",       desc: "See the top half — get a feel of the design" },
-  { num: 2, emoji: "💳", title: "Pay ₹69",              desc: "One-time via Razorpay — UPI, card, netbanking" },
-  { num: 3, emoji: "🔗", title: "Get Canva Link",       desc: "Your unique editing link unlocks instantly" },
-  { num: 4, emoji: "✏️", title: "Edit Your Details",    desc: "Change name, skills, experience — free on Canva" },
-  { num: 5, emoji: "📥", title: "Download PDF",         desc: "Export & apply to jobs right away!" },
+  { num: 1, emoji: "👀", title: "Preview Resume", desc: "See the top half — get a feel of the design" },
+  { num: 2, emoji: "💳", title: "Pay ₹69", desc: "One-time via Razorpay — UPI, card, netbanking" },
+  { num: 3, emoji: "🔗", title: "Get Canva Link", desc: "Your unique editing link unlocks instantly" },
+  { num: 4, emoji: "✏️", title: "Edit Your Details", desc: "Change name, skills, experience — free on Canva" },
+  { num: 5, emoji: "📥", title: "Download PDF", desc: "Export & apply to jobs right away!" },
 ];
 
 // ─── Resume Preview with blur ────────────────────────────────────────────────
@@ -188,20 +188,20 @@ function ResumePreview({ image, name }) {
         <img src={image} alt={name} style={{ width: "100%", objectFit: "cover", objectPosition: "bottom", filter: "blur(6px)", transform: "scale(1.05)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.85))" }} />
       </div>
-      <div style={{ 
-        position: "absolute", 
-        bottom: 14, 
-        left: "50%", 
-        transform: "translateX(-50%)", 
-        background: "var(--text)", 
-        color: "var(--white)", 
-        borderRadius: 20, 
-        padding: "6px 14px", 
-        fontSize: 11, 
-        fontWeight: 700, 
-        display: "flex", 
-        alignItems: "center", 
-        gap: 5, 
+      <div style={{
+        position: "absolute",
+        bottom: 14,
+        left: "50%",
+        transform: "translateX(-50%)",
+        background: "var(--text)",
+        color: "var(--white)",
+        borderRadius: 20,
+        padding: "6px 14px",
+        fontSize: 11,
+        fontWeight: 700,
+        display: "flex",
+        alignItems: "center",
+        gap: 5,
         whiteSpace: "nowrap",
         fontFamily: 'var(--font-sans)',
         letterSpacing: '0.03em'
@@ -215,7 +215,7 @@ function ResumePreview({ image, name }) {
 // ─── Category Filter ─────────────────────────────────────────────────────────
 function CategoryFilter({ selected, onChange }) {
   const categories = ["All", "Fresher", "Experienced", "Core", "Data", "Product", "Executive", "General"];
-  
+
   return (
     <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginBottom: "2rem" }}>
       {categories.map(cat => (
@@ -249,15 +249,15 @@ export default function ResumeMarketplace() {
   const { user } = useContext(AuthContext);
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selected, setSelected]   = useState(null);
-  const [loading, setLoading]     = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [canvaLink, setCanvaLink] = useState(null);
-  const [error, setError]         = useState("");
+  const [error, setError] = useState("");
   const [ownedTemplates, setOwnedTemplates] = useState({});
   const [categoryFilter, setCategoryFilter] = useState("All");
 
-  const filteredTemplates = categoryFilter === "All" 
-    ? TEMPLATES 
+  const filteredTemplates = categoryFilter === "All"
+    ? TEMPLATES
     : TEMPLATES.filter(t => t.cat === categoryFilter);
 
   async function handlePayment(template) {
@@ -284,10 +284,10 @@ export default function ResumeMarketplace() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              razorpay_order_id:   response.razorpay_order_id,
+              razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature:  response.razorpay_signature,
-              templateId:          template.id,
+              razorpay_signature: response.razorpay_signature,
+              templateId: template.id,
             }),
           });
           const data = await verifyRes.json();
@@ -318,13 +318,13 @@ export default function ResumeMarketplace() {
         try {
           const res = await apiCall(`/api/resume/purchase-status?templateId=${t.id}`);
           if (res?.owned) setOwnedTemplates(prev => ({ ...prev, [t.id]: { canvaLink: res.canvaLink } }));
-        } catch {}
+        } catch { }
       }
     })();
   }, []);
 
   function openModal(template) { setSelected(template); setCanvaLink(null); setError(""); }
-  function closeModal()        { setSelected(null); setCanvaLink(null); setLoading(false); setError(""); }
+  function closeModal() { setSelected(null); setCanvaLink(null); setLoading(false); setError(""); }
 
   return (
     <>
@@ -353,7 +353,7 @@ export default function ResumeMarketplace() {
           </button>
 
           <nav className={`al-nav${menuOpen ? ' open' : ''}`}>
-            <button className="al-nav-btn" onClick={() => navigate('/intelligence')}>Clarity Engine</button>
+            <button className="al-nav-btn" onClick={() => navigate('https://atyant.in/')}>Clarity Engine</button>
             <button className="al-nav-btn" onClick={() => navigate('/ask')}>Verified Sessions</button>
             <button className="al-nav-btn" onClick={() => navigate('/career-guides')}>Verified Paths</button>
             <button className="al-nav-btn active-link" style={{ color: 'var(--accent)' }} onClick={() => navigate('/resume-store')}>Resume Store</button>
@@ -421,82 +421,82 @@ export default function ResumeMarketplace() {
 
           {/* Template grid */}
           <div id="catalog" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))", gap: 24, marginTop: 32, maxWidth: 1100, width: '100%', margin: '32px auto 0' }}>
-              {filteredTemplates.map((t) => {
-                const owned    = ownedTemplates[t.id];
-                const catStyle = CAT_COLORS[t.cat] || CAT_COLORS["General"];
-                return (
-                  <div key={t.id}
-                    style={{ 
-                      background: "var(--card)", 
-                      border: "1px solid var(--border)", 
-                      borderRadius: "var(--radiusLg)", 
-                      overflow: "hidden", 
-                      boxShadow: "var(--shadowCard)", 
-                      transition: "all var(--transition)",
-                      display: "flex",
-                      flexDirection: "column"
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "var(--shadowHover)"; e.currentTarget.style.borderColor = "var(--borderHover)"; }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = "var(--shadowCard)"; e.currentTarget.style.borderColor = "var(--border)"; }}
-                  >
-                    <div style={{ padding: "16px 20px 10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ 
-                        fontSize: 10, 
-                        fontWeight: 800, 
-                        padding: "4px 12px", 
-                        borderRadius: 20, 
-                        background: catStyle.bg, 
-                        color: catStyle.color, 
-                        border: `1px solid ${catStyle.border}`, 
-                        letterSpacing: "0.05em",
-                        fontFamily: 'var(--font-sans)'
-                      }}>
-                        {t.cat.toUpperCase()}
-                      </span>
-                      {owned && <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 800, fontFamily: 'var(--font-sans)' }}>✅ Owned</span>}
-                    </div>
+            {filteredTemplates.map((t) => {
+              const owned = ownedTemplates[t.id];
+              const catStyle = CAT_COLORS[t.cat] || CAT_COLORS["General"];
+              return (
+                <div key={t.id}
+                  style={{
+                    background: "var(--card)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "var(--radiusLg)",
+                    overflow: "hidden",
+                    boxShadow: "var(--shadowCard)",
+                    transition: "all var(--transition)",
+                    display: "flex",
+                    flexDirection: "column"
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "var(--shadowHover)"; e.currentTarget.style.borderColor = "var(--borderHover)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "var(--shadowCard)"; e.currentTarget.style.borderColor = "var(--border)"; }}
+                >
+                  <div style={{ padding: "16px 20px 10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      padding: "4px 12px",
+                      borderRadius: 20,
+                      background: catStyle.bg,
+                      color: catStyle.color,
+                      border: `1px solid ${catStyle.border}`,
+                      letterSpacing: "0.05em",
+                      fontFamily: 'var(--font-sans)'
+                    }}>
+                      {t.cat.toUpperCase()}
+                    </span>
+                    {owned && <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 800, fontFamily: 'var(--font-sans)' }}>✅ Owned</span>}
+                  </div>
 
-                    <ResumePreview image={t.image} name={t.name} />
+                  <ResumePreview image={t.image} name={t.name} />
 
-                    <div style={{ margin: "14px 20px 0", background: "var(--accentSoft)", border: "1px solid var(--border)", borderRadius: 10, padding: "8px 12px", display: "flex", alignItems: "flex-start", gap: 10 }}>
-                      <span style={{ fontSize: 16 }}>{t.proofIcon}</span>
-                      <div>
-                        <div style={{ fontSize: 9, fontWeight: 900, color: "var(--accent)", letterSpacing: "0.06em", marginBottom: 2, fontFamily: 'var(--font-sans)' }}>PROVEN OUTCOME</div>
-                        <div style={{ fontSize: 12, color: "var(--textSub)", lineHeight: 1.4, fontFamily: 'var(--font-serif)' }}>{t.proof}</div>
-                      </div>
-                    </div>
-
-                    <div style={{ padding: "16px 20px 20px", display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-between' }}>
-                      <div>
-                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: 6, color: "var(--text)", fontFamily: 'var(--font-sans)', lineHeight: 1.2 }}>{t.name}</h3>
-                        <p style={{ fontSize: '0.9rem', color: "var(--textSub)", marginBottom: 18, lineHeight: 1.5, fontFamily: 'var(--font-serif)' }}>{t.desc}</p>
-                      </div>
-
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--border)", paddingTop: 14 }}>
-                        <div>
-                          <span style={{ fontSize: 22, fontWeight: 'normal', color: "var(--text)", fontFamily: "var(--font-serif)", fontStyle: 'italic' }}>₹{t.price}</span>
-                          <span style={{ fontSize: 10, color: "var(--textMuted)", marginLeft: 6, fontFamily: 'var(--font-sans)', fontWeight: 600 }}>one-time</span>
-                        </div>
-                        {owned ? (
-                          <a href={owned.canvaLink} target="_blank" rel="noreferrer"
-                            className="al-primary-btn"
-                            style={{ minHeight: 36, padding: "0 16px", fontSize: 12, textDecoration: "none" }}
-                          >
-                            Open Canva ↗
-                          </a>
-                        ) : (
-                          <button onClick={() => openModal(t)}
-                            className="al-primary-btn"
-                            style={{ minHeight: 36, padding: "0 16px", fontSize: 12 }}
-                          >
-                            Unlock Resume 🔓
-                          </button>
-                        )}
-                      </div>
+                  <div style={{ margin: "14px 20px 0", background: "var(--accentSoft)", border: "1px solid var(--border)", borderRadius: 10, padding: "8px 12px", display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <span style={{ fontSize: 16 }}>{t.proofIcon}</span>
+                    <div>
+                      <div style={{ fontSize: 9, fontWeight: 900, color: "var(--accent)", letterSpacing: "0.06em", marginBottom: 2, fontFamily: 'var(--font-sans)' }}>PROVEN OUTCOME</div>
+                      <div style={{ fontSize: 12, color: "var(--textSub)", lineHeight: 1.4, fontFamily: 'var(--font-serif)' }}>{t.proof}</div>
                     </div>
                   </div>
-                );
-              })}
+
+                  <div style={{ padding: "16px 20px 20px", display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-between' }}>
+                    <div>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: 6, color: "var(--text)", fontFamily: 'var(--font-sans)', lineHeight: 1.2 }}>{t.name}</h3>
+                      <p style={{ fontSize: '0.9rem', color: "var(--textSub)", marginBottom: 18, lineHeight: 1.5, fontFamily: 'var(--font-serif)' }}>{t.desc}</p>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--border)", paddingTop: 14 }}>
+                      <div>
+                        <span style={{ fontSize: 22, fontWeight: 'normal', color: "var(--text)", fontFamily: "var(--font-serif)", fontStyle: 'italic' }}>₹{t.price}</span>
+                        <span style={{ fontSize: 10, color: "var(--textMuted)", marginLeft: 6, fontFamily: 'var(--font-sans)', fontWeight: 600 }}>one-time</span>
+                      </div>
+                      {owned ? (
+                        <a href={owned.canvaLink} target="_blank" rel="noreferrer"
+                          className="al-primary-btn"
+                          style={{ minHeight: 36, padding: "0 16px", fontSize: 12, textDecoration: "none" }}
+                        >
+                          Open Canva ↗
+                        </a>
+                      ) : (
+                        <button onClick={() => openModal(t)}
+                          className="al-primary-btn"
+                          style={{ minHeight: 36, padding: "0 16px", fontSize: 12 }}
+                        >
+                          Unlock Resume 🔓
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -560,7 +560,7 @@ export default function ResumeMarketplace() {
 
             <div className="al-footer-col">
               <h4>Products</h4>
-              <button className="al-footer-link" onClick={() => navigate('/intelligence')}>Clarity Engine</button>
+              <button className="al-footer-link" onClick={() => navigate('https://atyant.in/')}>Clarity Engine</button>
               <button className="al-footer-link" onClick={() => navigate('/ask')}>Verified Senior Sessions</button>
               <button className="al-footer-link" onClick={() => navigate('/career-guides')}>Verified Paths</button>
               <button className="al-footer-link" onClick={() => navigate('/resume-store')}>Resume Store</button>
@@ -616,10 +616,10 @@ export default function ResumeMarketplace() {
 
                 <div style={{ borderTop: "1px solid var(--border)", paddingTop: "1rem", marginBottom: "1rem" }}>
                   {[
-                    ["Price",         `₹${selected.price} (one-time)`],
+                    ["Price", `₹${selected.price} (one-time)`],
                     ["After payment", "Unique Canva editing link"],
-                    ["Edit in",       "Canva (free online)"],
-                    ["Downloads",     "Unlimited PDF exports"],
+                    ["Edit in", "Canva (free online)"],
+                    ["Downloads", "Unlimited PDF exports"],
                   ].map(([lbl, val]) => (
                     <div key={lbl} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 8, fontFamily: 'var(--font-sans)' }}>
                       <span style={{ color: "var(--textMuted)", fontWeight: 500 }}>{lbl}</span>
@@ -638,9 +638,9 @@ export default function ResumeMarketplace() {
                 >
                   {loading ? "⏳ Processing..." : `💳 Pay ₹${selected.price} via Razorpay`}
                 </button>
-                
-                <button 
-                  onClick={closeModal} 
+
+                <button
+                  onClick={closeModal}
                   className="al-secondary-btn"
                   style={{ width: "100%", padding: "8px", minHeight: 38, fontSize: 12 }}
                 >
@@ -660,8 +660,8 @@ export default function ResumeMarketplace() {
                 >
                   ✏️ Open & Edit Resume in Canva →
                 </a>
-                <button 
-                  onClick={closeModal} 
+                <button
+                  onClick={closeModal}
                   className="al-secondary-btn"
                   style={{ width: "100%", padding: "8px", minHeight: 38, fontSize: 12 }}
                 >

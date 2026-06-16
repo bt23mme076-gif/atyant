@@ -323,7 +323,7 @@ export default function IntelligenceTerminal() {
   );
 }
 import React from 'react';
-import IntelligenceTerminal from './IntelligenceTerminal';
+import IntelligenceTerminal from '.https://atyant.in/Terminal';
 
 const Home = () => {
   return (

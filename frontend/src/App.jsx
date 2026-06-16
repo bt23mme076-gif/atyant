@@ -25,7 +25,6 @@ const InternshipPage       = lazy(() => import('./components/InternshipPage'));
 const CareerGuidesPage     = lazy(() => import('./components/CareerGuidesPage'));
 const PublicProfilePage    = lazy(() => import('./components/PublicProfilePage'));
 const ProfilePage          = lazy(() => import('./components/ProfilePage'));
-const IntelligenceTerminal = lazy(() => import('./components/intelligenceTerminal'));
 const CommunityChat        = lazy(() => import('./components/CommunityChat'));
 const WebinarRegistration  = lazy(() => import('./components/WebinarRegistration'));
 const PrivacyPolicy        = lazy(() => import('./components/PrivacyPolicy'));
@@ -39,7 +38,6 @@ function App() {
   const [showCommunityChat, setShowCommunityChat] = useState(false);
 
   const isNewHomePage      = location.pathname === '/home';
-  const isIntelligencePage = location.pathname === '/intelligence';
   const isAuthPage         = ['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname);
   const isWebinarPage      = location.pathname === '/webinar';
   const isResumeStorePage  = location.pathname === '/resume-store';
@@ -83,7 +81,7 @@ function App() {
     localStorage.setItem('atyant_google_modal_dismissed', 'true');
   }, []);
 
-  const hideShell = isNewHomePage || isIntelligencePage || isAuthPage || isWebinarPage || isResumeStorePage;
+  const hideShell = isNewHomePage || isAuthPage || isWebinarPage || isResumeStorePage;
 
   return (
     <div className="App">
@@ -110,7 +108,6 @@ function App() {
               <Route path="/terms"             element={<TermsOfService />} />
 
               {/* ── Protected ── */}
-              <Route path="/intelligence" element={<IntelligenceTerminal />} />
               <Route path="/profile"      element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
               {/* ── Fallback ── */}

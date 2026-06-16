@@ -3,7 +3,6 @@ import { API_URL } from '../services/api.js';
 import { AuthContext } from '../AuthContext';
 import { MapPin, RefreshCw, AlertCircle, CheckCircle, Plus, Circle } from 'lucide-react';
 import './ProfilePage.css';
-import MentorInfo from './MentorInfo';
 import LoadingSpinner from './LoadingSpinner';
 
 const ProfilePage = () => {
@@ -806,24 +805,6 @@ const ProfilePage = () => {
                     </select>
                   </div>
 
-                  {/* Mentor DNA Section */}
-                  <MentorInfo mentor={user} onDnaUpdate={setUser} />
-
-                  {/* Monetization Dashboard Button */}
-                  <div className="form-group monetization-dashboard-section">
-                    <button 
-                      type="button" 
-                      className="monetization-dashboard-btn"
-                      onClick={() => window.location.href = '/mentor-monetization'}
-                    >
-                      <span className="dashboard-icon">💰</span>
-                      <div className="dashboard-btn-content">
-                        <span className="dashboard-btn-title">Monetization Dashboard</span>
-                        <span className="dashboard-btn-subtitle">Track your earnings & analytics</span>
-                      </div>
-                      <span className="dashboard-arrow">→</span>
-                    </button>
-                  </div>
 
                   {/* Companies Expertise */}
                   <div className="form-group">
