@@ -1,9 +1,10 @@
-import { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_URL, apiCall } from "../services/api.js";
 import { AuthContext } from "../AuthContext";
+import { API_URL, apiCall } from "../services/api.js";
 import { motion } from "framer-motion";
-import './AtyantLandingPage.css';
+import SEO from "./SEO";
+import "./AtyantLandingPage.css";
 
 // ─── Template Data ────────────────────────────────────────────────────────────
 const TEMPLATES = [
@@ -159,13 +160,13 @@ const TEMPLATES = [
 ];
 
 const CAT_COLORS = {
-  Fresher:     { bg: "var(--accentSoft)", color: "var(--accentText)", border: "var(--borderHover)" },
-  Experienced: { bg: "var(--greenSoft)", color: "var(--green)", border: "rgba(26,158,106,0.25)" },
-  Executive:   { bg: "rgba(199,122,0,0.08)", color: "var(--orange)", border: "rgba(199,122,0,0.25)" },
-  Core:        { bg: "rgba(199,122,0,0.08)", color: "var(--orange)", border: "rgba(199,122,0,0.2)" },
-  Data:        { bg: "var(--accentSoft)", color: "var(--accentText)", border: "var(--borderHover)" },
-  Product:     { bg: "var(--accentSoft)", color: "var(--accentText)", border: "var(--borderHover)" },
-  General:     { bg: "var(--bg)", color: "var(--textSub)", border: "var(--border)" },
+  Fresher:     { bg: "rgba(117,103,201,0.08)", color: "#5A4CB0", border: "#CFC6EE" },
+  Experienced: { bg: "rgba(26,158,106,0.08)",  color: "#1a9e6a", border: "rgba(26,158,106,0.25)" },
+  Executive:   { bg: "rgba(199,122,0,0.08)",    color: "#c77a00", border: "rgba(199,122,0,0.25)" },
+  Core:        { bg: "rgba(199,122,0,0.08)",    color: "#c77a00", border: "rgba(199,122,0,0.25)" },
+  Data:        { bg: "rgba(117,103,201,0.08)", color: "#5A4CB0", border: "#CFC6EE" },
+  Product:     { bg: "rgba(117,103,201,0.08)", color: "#5A4CB0", border: "#CFC6EE" },
+  General:     { bg: "rgba(27,24,48,0.05)",     color: "#5A5470", border: "#E3E0EC" },
 };
 
 const STEPS = [
@@ -179,7 +180,7 @@ const STEPS = [
 // ─── Resume Preview with blur ────────────────────────────────────────────────
 function ResumePreview({ image, name }) {
   return (
-    <div style={{ position: "relative", width: "100%", height: 240, overflow: "hidden", borderRadius: "14px 14px 0 0", background: "var(--bg)" }}>
+    <div style={{ position: "relative", width: "100%", height: 220, overflow: "hidden", background: "var(--bg)" }}>
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", overflow: "hidden" }}>
         <img src={image} alt={name} style={{ width: "100%", objectFit: "cover", objectPosition: "top" }} />
       </div>
@@ -187,7 +188,24 @@ function ResumePreview({ image, name }) {
         <img src={image} alt={name} style={{ width: "100%", objectFit: "cover", objectPosition: "bottom", filter: "blur(6px)", transform: "scale(1.05)" }} />
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.85))" }} />
       </div>
-      <div style={{ position: "absolute", bottom: 14, left: "50%", transform: "translateX(-50%)", background: "var(--text)", color: "var(--white)", borderRadius: 20, padding: "5px 14px", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap", fontFamily: "var(--font-sans)" }}>
+      <div style={{ 
+        position: "absolute", 
+        bottom: 14, 
+        left: "50%", 
+        transform: "translateX(-50%)", 
+        background: "var(--text)", 
+        color: "var(--white)", 
+        borderRadius: 20, 
+        padding: "6px 14px", 
+        fontSize: 11, 
+        fontWeight: 700, 
+        display: "flex", 
+        alignItems: "center", 
+        gap: 5, 
+        whiteSpace: "nowrap",
+        fontFamily: 'var(--font-sans)',
+        letterSpacing: '0.03em'
+      }}>
         🔒 Buy to unlock full resume
       </div>
     </div>
@@ -199,7 +217,7 @@ function CategoryFilter({ selected, onChange }) {
   const categories = ["All", "Fresher", "Experienced", "Core", "Data", "Product", "Executive", "General"];
   
   return (
-    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginBottom: "3rem" }}>
+    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginBottom: "2rem" }}>
       {categories.map(cat => (
         <button
           key={cat}
@@ -215,7 +233,7 @@ function CategoryFilter({ selected, onChange }) {
             fontWeight: 700,
             cursor: "pointer",
             transition: "all var(--transition)",
-            fontFamily: "var(--font-sans)"
+            fontFamily: 'var(--font-sans)'
           }}
         >
           {cat}
@@ -229,6 +247,7 @@ function CategoryFilter({ selected, onChange }) {
 export default function ResumeMarketplace() {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected]   = useState(null);
   const [loading, setLoading]     = useState(false);
@@ -282,7 +301,7 @@ export default function ResumeMarketplace() {
         },
         modal: { ondismiss: () => setLoading(false) },
         prefill: {},
-        theme: { color: "#7567c9" },
+        theme: { color: "#7567C9" },
       };
 
       const rzp = new window.Razorpay(options);
@@ -308,328 +327,344 @@ export default function ResumeMarketplace() {
   function closeModal()        { setSelected(null); setCanvaLink(null); setLoading(false); setError(""); }
 
   return (
-    <div className="atyant-landing">
-      <script src="https://checkout.razorpay.com/v1/checkout.js" />
+    <>
+      <SEO
+        title="Premium Resume Templates — Get Shortlisted | Atyant"
+        description="ATS-friendly resume templates vetted by top recruiters and placement cell heads. Edit directly in Canva and start applying in under 10 minutes."
+        canonical="https://atyant.in/resume-store"
+        keywords="ats friendly resume template, resume builder Canva, engineering student resume, atyant resume store, placement resume download, premium resume IIT IIM"
+      />
 
-      {/* ── HEADER ── */}
-      <header className="al-header">
-        <button className="al-brand" onClick={() => navigate('/home')}>
-          <span className="al-brand-mark">A</span>
-          Atyant
-        </button>
-
-        <nav className={`al-nav${menuOpen ? ' open' : ''}`}>
-          <button className="al-nav-btn" onClick={() => navigate('/intelligence')}>Clarity Engine</button>
-          <button className="al-nav-btn" onClick={() => navigate('/ask')}>Verified Senior Sessions</button>
-          <button className="al-nav-btn" onClick={() => navigate('/career-guides')}>Verified Paths</button>
-          <button className="al-nav-btn" style={{ color: 'var(--accent)' }} onClick={() => navigate('/resume-store')}>Resume Store</button>
-        </nav>
-
-        <div className="al-header-actions">
-          {user ? (
-            <button className="al-ghost-btn" onClick={() => navigate('/dashboard')}>Dashboard</button>
-          ) : (
-            <>
-              <button className="al-nav-btn" onClick={() => navigate('/login')}>Log in</button>
-              <button className="al-ghost-btn" onClick={() => navigate('/signup')}>Sign up free</button>
-            </>
-          )}
-          <button className="al-menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
-            <span></span>
-            <span></span>
-          </button>
+      <div className="atyant-landing">
+        {/* ── ANNOUNCEMENT BAR ── */}
+        <div className="al-announce">
+          <span className="al-announce-tag">New</span>
+          <span>Atyant — Hult Prize Top 20, IIT Bombay Nationals 2026</span>
+          <span style={{ color: 'var(--accent)', fontWeight: 800, cursor: 'pointer' }} onClick={() => navigate('/home')}>
+            Read more →
+          </span>
         </div>
-      </header>
 
-      {/* ── MAIN STORE LAYOUT ── */}
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "80px 24px 120px" }}>
+        {/* ── HEADER ── */}
+        <header className="al-header">
+          <button className="al-brand" onClick={() => navigate('/home')}>
+            <span className="al-brand-mark">A</span>
+            Atyant
+          </button>
 
-        {/* ══ HERO ══════════════════════════════════════════════════════════ */}
-        <div style={{
-          textAlign: "center",
-          marginBottom: "3.5rem",
-          borderRadius: "var(--radiusXl)",
-          padding: "5rem 2rem 4.5rem",
-          background: "linear-gradient(135deg, rgba(117,103,201,0.06), rgba(117,103,201,0.02))",
-          border: "1px solid var(--border)",
-          position: "relative",
-          overflow: "hidden",
-          boxShadow: "var(--shadowCard)",
-        }}>
-          <div style={{ position: "relative", zIndex: 1 }}>
-            {/* Badge */}
-            <div style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              background: "rgba(199,122,0,0.08)", border: "1px solid rgba(199,122,0,0.25)",
-              borderRadius: 20, fontSize: 11, color: "var(--orange)",
-              padding: "6px 16px", marginBottom: 24,
-              fontWeight: 800, letterSpacing: "0.05em",
-              fontFamily: "var(--font-sans)",
+          <nav className={`al-nav${menuOpen ? ' open' : ''}`}>
+            <button className="al-nav-btn" onClick={() => navigate('/intelligence')}>Clarity Engine</button>
+            <button className="al-nav-btn" onClick={() => navigate('/ask')}>Verified Sessions</button>
+            <button className="al-nav-btn" onClick={() => navigate('/career-guides')}>Verified Paths</button>
+            <button className="al-nav-btn active-link" style={{ color: 'var(--accent)' }} onClick={() => navigate('/resume-store')}>Resume Store</button>
+            <button className="al-nav-btn" onClick={() => navigate('/webinar')}>Webinar</button>
+          </nav>
+
+          <div className="al-header-actions">
+            {user ? (
+              <button className="al-ghost-btn" onClick={() => navigate('/dashboard')}>Dashboard</button>
+            ) : (
+              <>
+                <button className="al-ghost-btn" onClick={() => navigate('/login')}>Log in</button>
+                <button className="al-primary-btn" style={{ minHeight: 38, padding: '0 18px', fontSize: '0.86rem' }} onClick={() => navigate('/signup')}>
+                  Get started
+                </button>
+              </>
+            )}
+          </div>
+
+          <button className="al-menu-toggle" aria-label="Toggle menu" onClick={() => setMenuOpen(p => !p)}>
+            <span /><span /><span />
+          </button>
+        </header>
+
+        {/* ── HERO + CATALOG (single section) ── */}
+        <section className="al-hero" style={{ minHeight: 'auto', padding: "80px 20px 60px" }}>
+          <div className="al-hero-kicker">
+            <span className="al-hero-kicker-dot" />
+            ⚡ 14 PREMIUM TEMPLATES - INSTANT CANVA EDITING
+          </div>
+
+          <h1>
+            Resume Templates that get you<br />
+            <span style={{
+              background: 'linear-gradient(135deg, #7567C9 0%, #5A4CB0 50%, #1a9e6a 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
             }}>
-              ⚡ 14 PREMIUM TEMPLATES - INSTANT CANVA EDITING
+              shortlisted & selected
+            </span>
+          </h1>
+
+          <p className="al-hero-sub">
+            ATS-optimised resume templates built from formats that actually cleared shortlists at Tier-1 companies. Vetted by placement cell alumni and hiring managers.
+          </p>
+
+          {/* Stats row */}
+          <div style={{ display: 'flex', gap: 32, justifyContent: 'center', flexWrap: 'wrap', margin: '28px 0 48px' }}>
+            {[
+              { val: '14', label: 'TEMPLATES' },
+              { val: 'IIT/IIM', label: 'PROVEN RESULTS' },
+              { val: '10 min', label: 'EDIT & DOWNLOAD' },
+              { val: '₹69', label: 'ONE-TIME ONLY' },
+            ].map(m => (
+              <div key={m.label} style={{ textAlign: 'center' }}>
+                <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 'normal', fontSize: '2rem', color: 'var(--accent)', lineHeight: 1 }}>{m.val}</div>
+                <div style={{ fontFamily: 'var(--font-sans)', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em', color: 'var(--textMuted)', marginTop: 6 }}>{m.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Category filter */}
+          <CategoryFilter selected={categoryFilter} onChange={setCategoryFilter} />
+
+          {/* Template grid */}
+          <div id="catalog" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))", gap: 24, marginTop: 32, maxWidth: 1100, width: '100%', margin: '32px auto 0' }}>
+              {filteredTemplates.map((t) => {
+                const owned    = ownedTemplates[t.id];
+                const catStyle = CAT_COLORS[t.cat] || CAT_COLORS["General"];
+                return (
+                  <div key={t.id}
+                    style={{ 
+                      background: "var(--card)", 
+                      border: "1px solid var(--border)", 
+                      borderRadius: "var(--radiusLg)", 
+                      overflow: "hidden", 
+                      boxShadow: "var(--shadowCard)", 
+                      transition: "all var(--transition)",
+                      display: "flex",
+                      flexDirection: "column"
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "var(--shadowHover)"; e.currentTarget.style.borderColor = "var(--borderHover)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = "var(--shadowCard)"; e.currentTarget.style.borderColor = "var(--border)"; }}
+                  >
+                    <div style={{ padding: "16px 20px 10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ 
+                        fontSize: 10, 
+                        fontWeight: 800, 
+                        padding: "4px 12px", 
+                        borderRadius: 20, 
+                        background: catStyle.bg, 
+                        color: catStyle.color, 
+                        border: `1px solid ${catStyle.border}`, 
+                        letterSpacing: "0.05em",
+                        fontFamily: 'var(--font-sans)'
+                      }}>
+                        {t.cat.toUpperCase()}
+                      </span>
+                      {owned && <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 800, fontFamily: 'var(--font-sans)' }}>✅ Owned</span>}
+                    </div>
+
+                    <ResumePreview image={t.image} name={t.name} />
+
+                    <div style={{ margin: "14px 20px 0", background: "var(--accentSoft)", border: "1px solid var(--border)", borderRadius: 10, padding: "8px 12px", display: "flex", alignItems: "flex-start", gap: 10 }}>
+                      <span style={{ fontSize: 16 }}>{t.proofIcon}</span>
+                      <div>
+                        <div style={{ fontSize: 9, fontWeight: 900, color: "var(--accent)", letterSpacing: "0.06em", marginBottom: 2, fontFamily: 'var(--font-sans)' }}>PROVEN OUTCOME</div>
+                        <div style={{ fontSize: 12, color: "var(--textSub)", lineHeight: 1.4, fontFamily: 'var(--font-serif)' }}>{t.proof}</div>
+                      </div>
+                    </div>
+
+                    <div style={{ padding: "16px 20px 20px", display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-between' }}>
+                      <div>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: 6, color: "var(--text)", fontFamily: 'var(--font-sans)', lineHeight: 1.2 }}>{t.name}</h3>
+                        <p style={{ fontSize: '0.9rem', color: "var(--textSub)", marginBottom: 18, lineHeight: 1.5, fontFamily: 'var(--font-serif)' }}>{t.desc}</p>
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--border)", paddingTop: 14 }}>
+                        <div>
+                          <span style={{ fontSize: 22, fontWeight: 'normal', color: "var(--text)", fontFamily: "var(--font-serif)", fontStyle: 'italic' }}>₹{t.price}</span>
+                          <span style={{ fontSize: 10, color: "var(--textMuted)", marginLeft: 6, fontFamily: 'var(--font-sans)', fontWeight: 600 }}>one-time</span>
+                        </div>
+                        {owned ? (
+                          <a href={owned.canvaLink} target="_blank" rel="noreferrer"
+                            className="al-primary-btn"
+                            style={{ minHeight: 36, padding: "0 16px", fontSize: 12, textDecoration: "none" }}
+                          >
+                            Open Canva ↗
+                          </a>
+                        ) : (
+                          <button onClick={() => openModal(t)}
+                            className="al-primary-btn"
+                            style={{ minHeight: 36, padding: "0 16px", fontSize: 12 }}
+                          >
+                            Unlock Resume 🔓
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </section>
+
+        {/* ── HOW IT WORKS ── */}
+        <section className="al-section" id="how-it-works" style={{ borderTop: '1px solid var(--border)', background: 'var(--bg2)' }}>
+          <div className="al-wrap">
+            <div className="al-section-head center">
+              <p className="al-eyebrow">Process</p>
+              <h2>How it works</h2>
+              <p>Unlock, customize, and deploy your new resume in under 10 minutes.</p>
             </div>
 
-            {/* Headline */}
-            <h1 style={{
-              fontSize: "clamp(2.4rem, 5vw, 3.8rem)",
-              fontWeight: 400, color: "var(--text)",
-              lineHeight: 1.1, marginBottom: 18,
-              fontFamily: "'Instrument Serif', Georgia, 'Times New Roman', serif",
-              fontStyle: "italic",
-            }}>
-              Resume Templates that get you
-              <br />
-              <span style={{
-                background: 'linear-gradient(135deg, #7567C9 0%, #5A4CB0 50%, #1a9e6a 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}>
-                shortlisted & selected
-              </span>
-            </h1>
-
-            {/* Subtext */}
-            <p style={{ fontSize: "1.15rem", color: "var(--textSub)", maxWidth: 580, margin: "0 auto 36px", lineHeight: 1.7, fontFamily: "var(--font-serif)" }}>
-              ATS-friendly designs used by real students at IITs, IIMs & top companies.
-              Buy, edit on Canva, and download as PDF. Done in 10 minutes.
-            </p>
-
-            {/* Stats */}
-            <div style={{ display: "flex", justifyContent: "center", gap: "4rem", flexWrap: "wrap" }}>
-              {[["14", "Templates"], ["IIT/IIM", "Proven results"], ["10 min", "Edit & download"], ["₹69", "One-time only"]].map(([val, lbl]) => (
-                <div key={lbl} style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 24, fontWeight: 400, color: "var(--text)", fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic" }}>{val}</div>
-                  <div style={{ fontSize: 12, color: "var(--textMuted)", marginTop: 2, fontFamily: "var(--font-sans)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>{lbl}</div>
-                </div>
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginTop: 40 }}>
+              {STEPS.map((s) => (
+                <motion.div
+                  key={s.num}
+                  whileHover={{ y: -4, boxShadow: 'var(--shadowHover)' }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    flex: 1, minWidth: 160,
+                    display: "flex", flexDirection: "column", alignItems: "center",
+                    textAlign: "center", padding: "28px 20px", borderRadius: "var(--radiusLg)",
+                    background: "var(--bg)",
+                    border: "1px solid var(--border)",
+                    cursor: "default",
+                  }}
+                >
+                  <div style={{
+                    width: 62, height: 62, borderRadius: "50%",
+                    background: "linear-gradient(135deg, var(--accent), #9d92e0)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 24, marginBottom: 16,
+                    boxShadow: "0 6px 20px var(--accentGlow)",
+                    color: "white"
+                  }}>
+                    {s.emoji}
+                  </div>
+                  <div style={{ fontSize: 10, fontWeight: 800, color: "var(--accent)", letterSpacing: "0.12em", marginBottom: 6, fontFamily: 'var(--font-sans)' }}>STEP {s.num}</div>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: "var(--text)", marginBottom: 8, fontFamily: 'var(--font-sans)' }}>{s.title}</h3>
+                  <p style={{ fontSize: '0.9rem', color: "var(--textSub)", lineHeight: 1.6, fontFamily: 'var(--font-serif)' }}>{s.desc}</p>
+                </motion.div>
               ))}
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* ══ HOW IT WORKS ═════════════════════════════════════════════════ */}
-        <div style={{
-          background: "var(--card)",
-          borderRadius: "var(--radiusXl)",
-          padding: "3rem 2rem",
-          marginBottom: "3.5rem",
-          boxShadow: "var(--shadowCard)",
-          border: "1px solid var(--border)",
-        }}>
-          <p style={{ textAlign: "center", fontSize: "1.6rem", fontWeight: 900, color: "var(--text)", letterSpacing: "0.08em", marginBottom: 32, fontFamily: "var(--font-sans)" }}>
-            HOW IT WORKS
-          </p>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-            {STEPS.map((s) => (
-              <motion.div
-                key={s.num}
-                whileHover={{ y: -4 }}
-                transition={{ duration: 0.2 }}
-                style={{
-                  flex: 1, minWidth: 160,
-                  display: "flex", flexDirection: "column", alignItems: "center",
-                  textAlign: "center", padding: "24px 16px", borderRadius: "var(--radius)",
-                  background: "var(--bg)",
-                  border: "1px solid var(--border)",
-                  cursor: "default",
-                }}
-              >
-                <div style={{
-                  width: 58, height: 58, borderRadius: "50%",
-                  background: "var(--accentSoft)",
-                  border: "1.5px solid var(--borderHover)",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 22, color: "var(--accentText)", marginBottom: 14,
-                  boxShadow: "0 4px 12px rgba(117,103,201,0.06)",
-                }}>
-                  {s.emoji}
-                </div>
-                <div style={{ fontSize: 10, fontWeight: 800, color: "var(--accent)", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "var(--font-sans)" }}>STEP {s.num}</div>
-                <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 6, fontFamily: "var(--font-sans)" }}>{s.title}</div>
-                <div style={{ fontSize: 13, color: "var(--textSub)", lineHeight: 1.6, fontFamily: "var(--font-serif)" }}>{s.desc}</div>
-              </motion.div>
-            ))}
+        {/* ── FOOTER ── */}
+        <footer className="al-footer" style={{ borderTop: "1px solid var(--border)", background: "var(--bg2)" }}>
+          <div className="al-footer-top">
+            <div className="al-footer-col">
+              <button className="al-brand" onClick={() => navigate('/home')}>
+                <span className="al-brand-mark">A</span>
+                Atyant
+              </button>
+              <p style={{ color: 'var(--textSub)', fontSize: '0.88rem', lineHeight: 1.72, maxWidth: 260, fontFamily: 'var(--font-serif)' }}>
+                India's career clarity engine for engineering students. Ask your confusion. Get the right path.
+              </p>
+              <p style={{ color: 'var(--textMuted)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>VNIT Nagpur · Founded 2024</p>
+              <p style={{ color: 'var(--textMuted)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>Hult Prize Top 20 · IIT Bombay 2026</p>
+            </div>
+
+            <div className="al-footer-col">
+              <h4>Products</h4>
+              <button className="al-footer-link" onClick={() => navigate('/intelligence')}>Clarity Engine</button>
+              <button className="al-footer-link" onClick={() => navigate('/ask')}>Verified Senior Sessions</button>
+              <button className="al-footer-link" onClick={() => navigate('/career-guides')}>Verified Paths</button>
+              <button className="al-footer-link" onClick={() => navigate('/resume-store')}>Resume Store</button>
+            </div>
+
+            <div className="al-footer-col">
+              <h4>How it works</h4>
+              <button className="al-footer-link" onClick={() => navigate('/home')}>The engine</button>
+              <button className="al-footer-link" onClick={() => navigate('/home')}>FAQ</button>
+            </div>
+
+            <div className="al-footer-col">
+              <h4>Company</h4>
+              <button className="al-footer-link" onClick={() => navigate('/home')}>Team</button>
+              <button className="al-footer-link" onClick={() => navigate('/home')}>Milestones</button>
+              <button className="al-footer-link" onClick={() => navigate('/webinar')}>Events & Webinars</button>
+            </div>
+
+            <div className="al-footer-col">
+              <h4>Legal</h4>
+              <button className="al-footer-link" onClick={() => navigate('/privacy')}>Privacy Policy</button>
+              <button className="al-footer-link" onClick={() => navigate('/terms')}>Terms of Service</button>
+            </div>
           </div>
-        </div>
 
-        {/* ══ CATEGORY FILTER ══════════════════════════════════════════════ */}
-        <CategoryFilter selected={categoryFilter} onChange={setCategoryFilter} />
-
-        {/* ══ CARDS GRID ═══════════════════════════════════════════════════ */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))", gap: 24 }}>
-          {filteredTemplates.map((t) => {
-            const owned    = ownedTemplates[t.id];
-            const catStyle = CAT_COLORS[t.cat] || CAT_COLORS["General"];
-            return (
-              <div key={t.id}
-                style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--radiusLg)", overflow: "hidden", boxShadow: "var(--shadowCard)", transition: "all var(--transition)" }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "var(--shadowHover)"; e.currentTarget.style.borderColor = "var(--borderHover)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = "var(--shadowCard)"; e.currentTarget.style.borderColor = "var(--border)"; }}
-              >
-                <div style={{ padding: "12px 16px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 20, background: catStyle.bg, color: catStyle.color, border: `1.5px solid ${catStyle.border}`, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-sans)" }}>
-                    {t.cat}
-                  </span>
-                  {owned && <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 800, fontFamily: "var(--font-sans)" }}>✅ Owned</span>}
-                </div>
-
-                <ResumePreview image={t.image} name={t.name} />
-
-                <div style={{ margin: "14px 16px 0", background: "var(--accentSoft)", border: "1px solid var(--borderHover)", borderRadius: 10, padding: "8px 12px", display: "flex", alignItems: "flex-start", gap: 8 }}>
-                  <span style={{ fontSize: 15 }}>{t.proofIcon}</span>
-                  <div>
-                    <div style={{ fontSize: 9, fontWeight: 800, color: "var(--accentText)", letterSpacing: "0.06em", marginBottom: 1, fontFamily: "var(--font-sans)" }}>PROVEN RESULTS</div>
-                    <div style={{ fontSize: 12, color: "var(--textSub)", lineHeight: 1.4, fontFamily: "var(--font-serif)" }}>{t.proof}</div>
-                  </div>
-                </div>
-
-                <div style={{ padding: "14px 16px 18px" }}>
-                  <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 4, color: "var(--text)", fontFamily: "var(--font-sans)" }}>{t.name}</h3>
-                  <p style={{ fontSize: 12, color: "var(--textMuted)", marginBottom: 16, lineHeight: 1.5, fontFamily: "var(--font-serif)" }}>{t.desc}</p>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <div>
-                      <span style={{ fontSize: 20, fontWeight: 400, color: "var(--text)", fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic" }}>₹{t.price}</span>
-                      <span style={{ fontSize: 11, color: "var(--textMuted)", marginLeft: 4, fontFamily: "var(--font-serif)" }}>one-time</span>
-                    </div>
-                    {owned ? (
-                      <a href={owned.canvaLink} target="_blank" rel="noreferrer" className="al-primary-btn"
-                        style={{ minHeight: 36, borderRadius: 8, padding: "0 16px", fontSize: 12, textDecoration: "none" }}>
-                        Open & Edit ↗
-                      </a>
-                    ) : (
-                      <button onClick={() => openModal(t)} className="al-primary-btn"
-                        style={{ minHeight: 36, borderRadius: 8, padding: "0 16px", fontSize: 12 }}>
-                        Buy & Unlock 🔓
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+          <div className="al-footer-bottom">
+            <p>© {new Date().getFullYear()} Atyant. All rights reserved. Built in Nagpur, India.</p>
+            <div className="al-footer-legal">
+              <button onClick={() => navigate('/privacy')}>Privacy Policy</button>
+              <button onClick={() => navigate('/terms')}>Terms of Service</button>
+            </div>
+          </div>
+        </footer>
       </div>
 
-      {/* ── FOOTER ── */}
-      <footer className="al-footer">
-        <div className="al-footer-top">
-          <div className="al-footer-col">
-            <button className="al-brand" style={{ cursor: 'default', pointerEvents: 'none', padding: 0, fontSize: '1.1rem' }}>
-              <span className="al-brand-mark">A</span>
-              Atyant
-            </button>
-            <p style={{ color: 'var(--textSub)', fontSize: '0.88rem', lineHeight: 1.72, maxWidth: 260, fontFamily: 'var(--font-serif)' }}>
-              India's career clarity engine for engineering students. Ask your confusion. Get the right path.
-            </p>
-            <p style={{ color: 'var(--textMuted)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>VNIT Nagpur · Founded 2024</p>
-            <p style={{ color: 'var(--textMuted)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>Hult Prize Top 20 · IIT Bombay 2026</p>
-          </div>
-
-          <div className="al-footer-col">
-            <h4>Products</h4>
-            <button className="al-footer-link" onClick={() => navigate('/intelligence')}>Clarity Engine</button>
-            <button className="al-footer-link" onClick={() => navigate('/ask')}>Verified Senior Sessions</button>
-            <button className="al-footer-link" onClick={() => navigate('/career-guides')}>Verified Paths</button>
-            <button className="al-footer-link" onClick={() => navigate('/resume-store')}>Resume Store</button>
-            <button className="al-footer-link" style={{ color: 'var(--textMuted)' }}>AtyantJEE (coming soon)</button>
-          </div>
-
-          <div className="al-footer-col">
-            <h4>How it works</h4>
-            <button className="al-footer-link" onClick={() => navigate('/home')}>The engine</button>
-            <button className="al-footer-link" onClick={() => navigate('/home')}>FAQ</button>
-            <button className="al-footer-link" onClick={() => navigate('/home')}>All products</button>
-          </div>
-
-          <div className="al-footer-col">
-            <h4>Company</h4>
-            <button className="al-footer-link" onClick={() => navigate('/home')}>Team</button>
-            <button className="al-footer-link" onClick={() => navigate('/home')}>Milestones</button>
-            <button className="al-footer-link" onClick={() => window.open('https://chat.whatsapp.com/IsOeHy87Tu0BsIJiBVHjUW', '_blank', 'noopener,noreferrer')}>Events & Webinars</button>
-          </div>
-
-          <div className="al-footer-col">
-            <h4>Account</h4>
-            <button className="al-footer-link" onClick={() => navigate('/signup')}>Sign up free</button>
-            <button className="al-footer-link" onClick={() => navigate('/login')}>Log in</button>
-            <button className="al-footer-link" onClick={() => navigate('/dashboard')}>Dashboard</button>
-            <button className="al-footer-link" onClick={() => navigate('/privacy')}>Privacy</button>
-            <button className="al-footer-link" onClick={() => navigate('/terms')}>Terms</button>
-          </div>
-        </div>
-
-        <div className="al-footer-bottom">
-          <p>© {new Date().getFullYear()} Atyant. All rights reserved. Built in Nagpur, India.</p>
-          <div className="al-footer-legal">
-            <button onClick={() => navigate('/privacy')}>Privacy Policy</button>
-            <button onClick={() => navigate('/terms')}>Terms of Service</button>
-          </div>
-        </div>
-      </footer>
-
-      {/* ══ MODAL ════════════════════════════════════════════════════════════ */}
+      {/* ── MODAL ── */}
       {selected && (
         <div
           onClick={e => { if (e.target === e.currentTarget) closeModal(); }}
-          style={{ position: "fixed", inset: 0, background: "rgba(20, 18, 40, 0.45)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}
         >
-          <div style={{ background: "var(--card)", borderRadius: "var(--radiusXl)", padding: "2rem", maxWidth: 420, width: "100%", border: "1px solid var(--border)", boxShadow: "var(--shadowHover)" }}>
+          <div style={{ background: "var(--card)", borderRadius: "var(--radiusLg)", padding: "1.8rem", maxWidth: 400, width: "100%", boxShadow: "0 24px 64px rgba(0,0,0,0.15)", border: "1px solid var(--border)" }}>
             {!canvaLink ? (
               <>
-                <div style={{ borderRadius: "var(--radius)", overflow: "hidden", marginBottom: "1.5rem", height: 160, position: "relative" }}>
+                <div style={{ borderRadius: 10, overflow: "hidden", marginBottom: "1.2rem", height: 150, position: "relative" }}>
                   <img src={selected.image} alt={selected.name} style={{ width: "100%", objectFit: "cover", objectPosition: "top", height: "100%" }} />
-                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(20, 18, 40, 0.6))" }} />
-                  <div style={{ position: "absolute", bottom: 12, left: 16 }}>
-                    <div style={{ fontSize: 16, fontWeight: 800, color: "var(--white)", fontFamily: "var(--font-sans)" }}>{selected.name}</div>
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-sans)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em" }}>{selected.cat}</div>
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55))" }} />
+                  <div style={{ position: "absolute", bottom: 12, left: 14 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", fontFamily: 'var(--font-sans)' }}>{selected.name}</div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", fontFamily: 'var(--font-sans)', fontWeight: 500 }}>{selected.cat}</div>
                   </div>
                 </div>
 
-                <div style={{ borderTop: "1px solid var(--border)", paddingTop: "1rem", marginBottom: "1.2rem" }}>
+                <div style={{ borderTop: "1px solid var(--border)", paddingTop: "1rem", marginBottom: "1rem" }}>
                   {[
                     ["Price",         `₹${selected.price} (one-time)`],
                     ["After payment", "Unique Canva editing link"],
                     ["Edit in",       "Canva (free online)"],
                     ["Downloads",     "Unlimited PDF exports"],
                   ].map(([lbl, val]) => (
-                    <div key={lbl} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 8, fontFamily: "var(--font-serif)" }}>
-                      <span style={{ color: "var(--textMuted)" }}>{lbl}</span>
+                    <div key={lbl} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 8, fontFamily: 'var(--font-sans)' }}>
+                      <span style={{ color: "var(--textMuted)", fontWeight: 500 }}>{lbl}</span>
                       <span style={{ fontWeight: 700, color: "var(--text)" }}>{val}</span>
                     </div>
                   ))}
                 </div>
 
-                {error && <div style={{ fontSize: 12, color: "#dc2626", background: "rgba(239, 68, 68, 0.05)", border: "1px solid rgba(239, 68, 68, 0.2)", padding: "10px", borderRadius: 8, marginBottom: 12, fontFamily: "var(--font-sans)" }}>{error}</div>}
+                {error && <div style={{ fontSize: 12, color: "#dc2626", background: "#fef2f2", padding: "8px 10px", borderRadius: 6, marginBottom: 10, fontFamily: 'var(--font-sans)' }}>{error}</div>}
 
                 <button
                   onClick={() => handlePayment(selected)}
                   disabled={loading}
                   className="al-primary-btn"
-                  style={{ width: "100%", marginBottom: 10, display: "flex" }}
+                  style={{ width: "100%", padding: "12px", minHeight: 48, fontSize: 14, marginBottom: 8 }}
                 >
-                  {loading ? (
-                    <div className="btn-spinner"></div>
-                  ) : (
-                    `Pay ₹${selected.price} via Razorpay`
-                  )}
+                  {loading ? "⏳ Processing..." : `💳 Pay ₹${selected.price} via Razorpay`}
                 </button>
-                <button onClick={closeModal} className="al-secondary-btn" style={{ width: "100%", minHeight: 40 }}>
+                
+                <button 
+                  onClick={closeModal} 
+                  className="al-secondary-btn"
+                  style={{ width: "100%", padding: "8px", minHeight: 38, fontSize: 12 }}
+                >
                   Cancel
                 </button>
               </>
             ) : (
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "3rem", marginBottom: 14 }}>🎉</div>
-                <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", fontWeight: 400, fontStyle: "italic", marginBottom: 8, color: "var(--text)" }}>Payment Successful!</h3>
-                <p style={{ fontSize: 13, color: "var(--textSub)", marginBottom: "1.5rem", lineHeight: 1.6, fontFamily: "var(--font-serif)" }}>
+                <div style={{ fontSize: "3rem", marginBottom: 12 }}>🎉</div>
+                <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", marginBottom: 8, color: "var(--text)" }}>Payment Successful!</h3>
+                <p style={{ fontSize: 13, color: "var(--textSub)", marginBottom: "1.5rem", lineHeight: 1.6, fontFamily: 'var(--font-serif)' }}>
                   Your Canva link is ready! Click below, make your copy, edit your details, then download as PDF.
                 </p>
-                <a href={canvaLink} target="_blank" rel="noreferrer" className="al-primary-btn"
-                  style={{ display: "flex", width: "100%", textDecoration: "none", marginBottom: 10 }}
+                <a href={canvaLink} target="_blank" rel="noreferrer"
+                  className="al-primary-btn"
+                  style={{ display: "flex", width: "100%", padding: "12px", textDecoration: "none", justifyContent: "center", marginBottom: 8 }}
                 >
                   ✏️ Open & Edit Resume in Canva →
                 </a>
-                <button onClick={closeModal} className="al-secondary-btn" style={{ width: "100%", minHeight: 40 }}>
+                <button 
+                  onClick={closeModal} 
+                  className="al-secondary-btn"
+                  style={{ width: "100%", padding: "8px", minHeight: 38, fontSize: 12 }}
+                >
                   Close
                 </button>
               </div>
@@ -637,6 +672,6 @@ export default function ResumeMarketplace() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
