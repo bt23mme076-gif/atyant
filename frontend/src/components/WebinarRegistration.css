@@ -1,0 +1,657 @@
+/* ==========================================================================
+   WEBINAR REGISTRATION STYLESHEET (Warm Editorial Light Theme)
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Lora:ital,wght@0,400..700;1,400..700&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* ── WEBINAR NAV ── */
+.webinar-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  height: 60px;
+  background: rgba(250, 249, 245, 0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(28,25,23,0.08);
+}
+.webinar-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #1C1917;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+.webinar-nav-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #7567C9 0%, #5A4CB0 100%);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.webinar-nav-back {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #7567C9;
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.webinar-nav-back:hover { opacity: 1; }
+
+.webinar-page-wrapper {
+  min-height: 100vh;
+  background-color: #FAF9F5;
+  color: #1C1917;
+  font-family: 'Lora', 'Georgia', serif;
+  position: relative;
+  overflow: hidden;
+  padding: 100px 24px 120px;
+}
+
+/* Ambient subtle paper grid and glows */
+.webinar-glow-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  z-index: 1;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.webinar-blob-1 {
+  width: 450px;
+  height: 450px;
+  background: #7567C9;
+  top: -80px;
+  left: 5%;
+}
+
+.webinar-blob-2 {
+  width: 450px;
+  height: 450px;
+  background: #1a9e6a;
+  bottom: 5%;
+  right: 5%;
+}
+
+.webinar-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+/* Header Badge */
+.webinar-badge-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.webinar-badge {
+  background: rgba(117, 103, 201, 0.08);
+  border: 1px solid rgba(117, 103, 201, 0.25);
+  color: #5A4CB0;
+  padding: 8px 20px;
+  border-radius: 9999px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #1a9e6a;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(26,158,106,0.6);
+  animation: live-blink 1.5s infinite;
+}
+
+@keyframes live-blink {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Typography using Instrument Serif */
+.webinar-title {
+  font-family: 'Instrument Serif', 'Georgia', serif;
+  font-size: clamp(2.8rem, 6vw, 4.8rem);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.05;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #1B1830;
+  letter-spacing: -0.01em;
+}
+
+.webinar-subtitle {
+  font-family: 'Lora', 'Georgia', serif;
+  font-size: 1.25rem;
+  color: #5A5470;
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 56px;
+  line-height: 1.75;
+}
+
+/* Grid layout */
+.webinar-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+/* Info Side */
+.webinar-info-side {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* Countdown Card */
+.webinar-countdown-card {
+  background: #FFFFFF;
+  border: 1px solid #E3E0EC;
+  border-radius: 20px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(20, 18, 40, 0.04);
+}
+
+.webinar-countdown-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  color: #8A8399;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+.webinar-timer {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.timer-segment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #F6F6FB;
+  border: 1px solid #E3E0EC;
+  border-radius: 12px;
+  padding: 14px 20px;
+  min-width: 85px;
+}
+
+.timer-number {
+  font-family: 'Instrument Serif', 'Georgia', serif;
+  font-size: 3rem;
+  font-weight: 400;
+  color: #1B1830;
+  line-height: 1;
+}
+
+.timer-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.72rem;
+  color: #8A8399;
+  margin-top: 4px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* Live Badge styling */
+.webinar-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: #dc2626;
+  padding: 8px 24px;
+  border-radius: 9999px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
+/* Key Features list */
+.webinar-features-card {
+  background: #FFFFFF;
+  border: 1px solid #E3E0EC;
+  border-radius: 20px;
+  padding: 36px;
+  box-shadow: 0 4px 20px rgba(20, 18, 40, 0.04);
+}
+
+.webinar-section-heading {
+  font-family: 'Instrument Serif', 'Georgia', serif;
+  font-size: 2.1rem;
+  font-weight: 400;
+  margin-bottom: 28px;
+  color: #1B1830;
+}
+
+.webinar-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.webinar-feature-item {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.webinar-feature-icon-wrapper {
+  background: rgba(117, 103, 201, 0.08);
+  border: 1px solid rgba(117, 103, 201, 0.2);
+  color: #5A4CB0;
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.webinar-feature-text-block h4 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #1B1830;
+  margin-bottom: 6px;
+}
+
+.webinar-feature-text-block p {
+  font-family: 'Lora', 'Georgia', serif;
+  font-size: 0.98rem;
+  color: #5A5470;
+  line-height: 1.6;
+}
+
+/* Host Info */
+.webinar-presenter-card {
+  display: flex;
+  gap: 24px;
+  background: #FFFFFF;
+  border: 1px solid #E3E0EC;
+  border-radius: 20px;
+  padding: 28px;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(20, 18, 40, 0.04);
+}
+
+.presenter-avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.presenter-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #E3E0EC;
+}
+
+.presenter-tag {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #7567C9;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.presenter-details h4 {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1B1830;
+  margin-bottom: 4px;
+}
+
+.presenter-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.84rem;
+  color: #7567C9;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.presenter-bio {
+  font-family: 'Lora', 'Georgia', serif;
+  font-size: 0.94rem;
+  color: #5A5470;
+  line-height: 1.6;
+}
+
+/* Form Card Side */
+.webinar-form-card {
+  background: #FFFFFF;
+  border: 1px solid #E3E0EC;
+  border-radius: 28px;
+  padding: 44px;
+  box-shadow: 0 12px 32px rgba(20, 18, 40, 0.06);
+  position: sticky;
+  top: 100px;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.webinar-form-card:hover {
+  border-color: #CFC6EE;
+  box-shadow: 0 16px 40px rgba(117, 103, 201, 0.1);
+}
+
+.webinar-form-header {
+  margin-bottom: 32px;
+}
+
+.webinar-form-header h3 {
+  font-family: 'Instrument Serif', 'Georgia', serif;
+  font-size: 2.2rem;
+  font-weight: 400;
+  color: #1B1830;
+  margin-bottom: 6px;
+}
+
+.webinar-seats-notice {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.78rem;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.webinar-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.webinar-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.webinar-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #5A5470;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.webinar-input {
+  background: #F6F6FB;
+  border: 1px solid #E3E0EC;
+  border-radius: 10px;
+  padding: 14px 18px;
+  color: #1B1830;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.94rem;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.webinar-input:focus {
+  outline: none;
+  border-color: #7567C9;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(117, 103, 201, 0.15);
+}
+
+.webinar-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%235A5470'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  background-size: 16px;
+  padding-right: 44px;
+  cursor: pointer;
+}
+
+.webinar-select option {
+  background: #FFFFFF;
+  color: #1B1830;
+}
+
+.webinar-submit-btn {
+  background: #7567C9;
+  color: #ffffff;
+  border: none;
+  padding: 16px 28px;
+  border-radius: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.94rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(117, 103, 201, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.webinar-submit-btn:hover:not(:disabled) {
+  background: #5A4CB0;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(117, 103, 201, 0.4);
+}
+
+.webinar-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.webinar-error-alert {
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #b91c1c;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+/* Success View styling */
+.webinar-success-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 0;
+}
+
+.success-check-wrapper {
+  background: rgba(26, 158, 106, 0.08);
+  border: 2px solid rgba(26, 158, 106, 0.3);
+  color: #1a9e6a;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.success-check-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.webinar-success-title {
+  font-family: 'Instrument Serif', 'Georgia', serif;
+  font-size: 2.6rem;
+  font-weight: 400;
+  color: #1B1830;
+  margin-bottom: 10px;
+}
+
+.webinar-success-subtitle {
+  font-family: 'Lora', 'Georgia', serif;
+  font-size: 1.05rem;
+  color: #5A5470;
+  line-height: 1.6;
+  margin-bottom: 36px;
+  max-width: 420px;
+}
+
+.webinar-success-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.btn-success-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 15px 20px;
+  border-radius: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.94rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  width: 100%;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn-whatsapp-group {
+  background: #1a9e6a;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(26, 158, 106, 0.25);
+}
+
+.btn-whatsapp-group:hover {
+  background: #148055;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(26, 158, 106, 0.35);
+}
+
+.btn-add-calendar {
+  background: #FFFFFF;
+  border: 1px solid #E3E0EC;
+  color: #1B1830;
+  box-shadow: 0 4px 12px rgba(20, 18, 40, 0.04);
+}
+
+.btn-add-calendar:hover {
+  background: #F6F6FB;
+  border-color: #CFC6EE;
+  transform: translateY(-1px);
+}
+
+.btn-spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: btn-spin 0.8s linear infinite;
+}
+
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive grid queries */
+@media (max-width: 1024px) {
+  .webinar-grid {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+  
+  .webinar-form-card {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .webinar-page-wrapper {
+    padding: 80px 16px 100px;
+  }
+  
+  .webinar-title {
+    font-size: 3rem;
+  }
+  
+  .webinar-subtitle {
+    font-size: 1.15rem;
+    margin-bottom: 40px;
+  }
+  
+  .webinar-features-card {
+    padding: 28px;
+  }
+  
+  .webinar-presenter-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 28px 20px;
+  }
+  
+  .webinar-form-card {
+    padding: 32px 24px;
+  }
+  
+  .timer-segment {
+    padding: 10px 14px;
+    min-width: 75px;
+  }
+  
+  .timer-number {
+    font-size: 2.5rem;
+  }
+}

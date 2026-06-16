@@ -418,3 +418,94 @@ export const sendStudentBookingConfirmation = async ({
     throw error;
   }
 };
+
+// Send webinar registration confirmation email
+export const sendWebinarRegistrationEmail = async (email, name, webinarTitle, webinarDate) => {
+  if (!resend) {
+    console.warn('⚠️ Email service not configured. Skipping webinar registration confirmation email.');
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  // Pre-generate standard Google Calendar link
+  // Webinar date example: June 25, 2026 at 6:00 PM IST
+  // We can format URL properties (e.g. text, dates, details)
+  const calendarTitle = encodeURIComponent(webinarTitle);
+  const calendarDates = '20260625T123000Z/20260625T140000Z'; // UTC time corresponding to 6:00 PM - 7:30 PM IST (GMT+5:30 is +5.5 hours, so 18:00 IST is 12:30 UTC)
+  const calendarDetails = encodeURIComponent('Join Atyant\'s live career guidance webinar to break through your career block. Webinar Link: https://atyant.in/webinar');
+  const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${calendarTitle}&dates=${calendarDates}&details=${calendarDetails}`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Atyant <notification@atyant.in>',
+      to: [email],
+      subject: '🎉 Webinar Registration Confirmed - Atyant',
+      html: `
+        <div style="font-family: 'Poppins', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #FAFAFA;">
+          <div style="text-align: center; margin-bottom: 25px;">
+            <h1 style="color: #7C3AED; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em;">Atyant</h1>
+            <p style="color: #6B7280; font-size: 14px; margin-top: 5px;">Intelligent Career Guidance Engine</p>
+          </div>
+          
+          <div style="background-color: #FFFFFF; padding: 35px; border-radius: 16px; border: 1px solid #E5E7EB; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <span style="background-color: #EEF2F6; color: #7C3AED; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Registration Confirmed</span>
+            </div>
+            
+            <h2 style="color: #1F2937; text-align: center; font-size: 22px; font-weight: 700; margin-top: 10px; margin-bottom: 8px;">🎉 You're In, ${name}!</h2>
+            <p style="color: #4B5563; text-align: center; font-size: 15px; line-height: 1.6; margin-bottom: 30px;">
+              We have successfully reserved your seat for the upcoming premium career Guidance webinar. Here are your event details:
+            </p>
+            
+            <div style="background-color: #F9FAFB; padding: 24px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #F3F4F6;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #6B7280; font-weight: 500; font-size: 14px; width: 100px;">Topic:</td>
+                  <td style="padding: 8px 0; color: #1F2937; font-weight: 600; font-size: 15px;">${webinarTitle}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #6B7280; font-weight: 500; font-size: 14px;">Speaker:</td>
+                  <td style="padding: 8px 0; color: #1F2937; font-weight: 600; font-size: 15px;">Jatin (Founder, Atyant & VNIT Alumnus)</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #6B7280; font-weight: 500; font-size: 14px;">Date & Time:</td>
+                  <td style="padding: 8px 0; color: #1F2937; font-weight: 600; font-size: 15px;">${webinarDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #6B7280; font-weight: 500; font-size: 14px;">Where:</td>
+                  <td style="padding: 8px 0; color: #3B82F6; font-weight: 600; font-size: 15px;">Zoom Room (Link will be sent before start)</td>
+                </tr>
+              </table>
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 30px;">
+              <a href="${googleCalendarUrl}" target="_blank"
+                 style="background-color: #7C3AED; color: white; padding: 14px 28px; text-decoration: none; border-radius: 10px; font-weight: 600; display: inline-block; font-size: 15px; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);">
+                📅 Add to Google Calendar
+              </a>
+            </div>
+
+            <p style="color: #6B7280; text-align: center; font-size: 13px; line-height: 1.5; margin: 0;">
+              💡 <strong>Action Required:</strong> Make sure to add this event to your calendar so you don't miss the live interaction! An entry link will be shared 1 hour before the webinar.
+            </p>
+          </div>
+          
+          <div style="text-align: center; margin-top: 30px; color: #9CA3AF; font-size: 12px;">
+            <p>You received this email because you registered for the Atyant Webinar.</p>
+            <p>&copy; 2026 Atyant. All rights reserved.</p>
+          </div>
+        </div>
+      `
+    });
+
+    if (error) {
+      console.error('Email send error:', error);
+      throw new Error('Failed to send webinar confirmation email');
+    }
+
+    console.log('Webinar registration email sent successfully:', data);
+    return data;
+  } catch (error) {
+    console.error('Error sending webinar registration email:', error);
+    throw error;
+  }
+};

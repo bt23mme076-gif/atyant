@@ -150,9 +150,9 @@ const Signup = () => {
           // Navigate based on role
           setTimeout(() => {
             if (role?.trim() === "mentor") {
-              navigate("/");
+              navigate("/home");
             } else {
-              navigate("/profile");
+              navigate("/home");
             }
           }, 1000);
         } else {

@@ -1,6 +1,6 @@
 // src/components/Home.jsx
 import React, { useEffect } from 'react';
-import SEO from './SEO'; // ✅ NEW IMPORT
+import SEO from './SEO';
 import HeroSection from './HeroSection';
 import TrustedBySlider from './TrustedBySlider';
 import AboutUs from './AboutUs';
@@ -16,19 +16,15 @@ import { subscribeUserToPush } from '../utils/webPush';
 
 const Home = () => {
   useEffect(() => {
-    // Step 2: Ask for notification permission and show a test notification
     if ('Notification' in window && navigator.serviceWorker) {
       if (Notification.permission === 'default') {
         Notification.requestPermission().then(permission => {
           if (permission === 'granted') {
-            // Show notification only when permission is FIRST granted
             showTestNotification();
-            // Mark that we've shown the welcome notification
             localStorage.setItem('welcomeNotificationShown', 'true');
           }
         });
       } else if (Notification.permission === 'granted') {
-        // Check if we've already shown the welcome notification
         const hasShownWelcome = localStorage.getItem('welcomeNotificationShown');
         if (!hasShownWelcome) {
           showTestNotification();
@@ -42,18 +38,16 @@ const Home = () => {
         if (reg) {
           reg.showNotification('Welcome to Atyant!', {
             body: 'Notifications are enabled. You will get important updates here.',
-            icon: '/icons/icon-192x192.png', // Update path if needed
-            badge: '/icons/icon-72x72.png', // Update path if needed
+            icon: '/icons/icon-192x192.png',
+            badge: '/icons/icon-72x72.png',
           });
         }
       });
     }
 
-    // Step 3: Subscribe user to push and send subscription to backend
     async function setupPush() {
       try {
         const subscription = await subscribeUserToPush();
-        // Send subscription to backend
         await fetch('/api/save-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -68,8 +62,7 @@ const Home = () => {
 
   return (
     <>
-      {/* ✅ SEO FOR HOMEPAGE */}
-      <SEO 
+      <SEO
         title="Atyant | Intelligent Career Guidance Engine"
         description="Atyant is an AI-powered guidance engine that analyzes your career block and connects you directly with the verified roadmap or individual who solved it."
         keywords="AI career guidance, problem solving engine, career roadmap AI, semantic matching, Atyant"

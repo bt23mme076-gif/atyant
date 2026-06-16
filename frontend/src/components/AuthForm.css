@@ -138,13 +138,51 @@
 }
 
 /* ============================================
+   BRAND LOGO
+   ============================================ */
+.auth-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.auth-brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7567C9 0%, #5A4CB0 100%);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+.auth-brand-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #1B1830;
+  letter-spacing: -0.03em;
+}
+.auth-subtitle {
+  text-align: center;
+  color: #5A5470;
+  font-size: 0.95rem;
+  margin-top: -16px;
+  margin-bottom: 28px;
+}
+
+/* ============================================
    HEADER
    ============================================ */
 .auth-form h2 {
   text-align: center;
-  font-size: 2rem;
+  font-size: 1.7rem;
   font-weight: 700;
-  margin-bottom: 32px;
+  margin-bottom: 6px;
   color: #1a202c;
   letter-spacing: -0.02em;
 }

@@ -46,6 +46,9 @@ const AuthSuccess       = lazy(() => import('./components/AuthSuccess'));
 const PrivacyPolicy     = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService     = lazy(() => import('./components/TermsOfService'));
 const IntelligenceTerminal = lazy(() => import('./components/intelligenceTerminal'));
+const WebinarRegistration = lazy(() => import('./components/WebinarRegistration'));
+const NewHome = lazy(() => import('./components/NewHome'));
+const AtyantLandingPage = lazy(() => import('./components/AtyantLandingPage'));
 // Community notifications — static, no need inside component
 const COMMUNITY_NOTIFICATIONS = [
   '💬 Join the Community Chat!',
@@ -73,6 +76,10 @@ function App() {
   const isChatPage = location.pathname === '/chat';
   const isHomePage = location.pathname === '/home';
   const isIntelligencePage = location.pathname === '/intelligence';
+  const isNewHomePage = location.pathname === '/home';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password' || location.pathname === '/reset-password';
+  const isWebinarPage = location.pathname === '/webinar';
+  const isResumeStorePage = location.pathname === '/resume-store';
 
   // Show WhatsApp widget only on home page
   useEffect(() => {
@@ -169,14 +176,14 @@ function App() {
 
   return (
     <div className={isChatPage && user ? 'App chat-active' : 'App'}>
-      {!isIntelligencePage && <Navbar />}
+      {!isIntelligencePage && !isNewHomePage && !isAuthPage && !isWebinarPage && !isResumeStorePage && <Navbar />}
       <main>
         <ScrollToTop />
         <Suspense fallback={<LoadingSpinner />}>
           <ErrorBoundary>
             <Routes>
               {/* Public */}
-              <Route path="/home"                      element={<Home />} />
+              <Route path="/home"                      element={<AtyantLandingPage />} />
               <Route path="/signup"                element={<Signup />} />
               <Route path="/login"                 element={<Login />} />
               <Route path="/auth-success"          element={<AuthSuccess />} />
@@ -188,6 +195,7 @@ function App() {
                <Route path="/dad"           element={<InternshipPage />} />
               <Route path="/career-guides"         element={<CareerGuidesPage />} />
               <Route path="/profile/:username"     element={<PublicProfilePage />} />
+              <Route path="/webinar" element={<WebinarRegistration />} />
               <Route path="/resume-store" element={<ResumeMarketplace />} />
 
               {/* Protected */}
@@ -214,7 +222,7 @@ function App() {
         </Suspense>
       </main>
 
-      {!isChatPage && !isIntelligencePage && <Footer />}
+      {!isChatPage && !isIntelligencePage && !isNewHomePage && !isAuthPage && !isWebinarPage && !isResumeStorePage && <Footer />}
       <Analytics />
 
       {/* Community Chat FAB removed per request */}

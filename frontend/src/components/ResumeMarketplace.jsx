@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { API_URL, apiCall } from "../services/api.js";
+import { AuthContext } from "../AuthContext";
 import { motion } from "framer-motion";
+import './AtyantLandingPage.css';
 
 // ─── Template Data ────────────────────────────────────────────────────────────
 const TEMPLATES = [
@@ -156,13 +159,13 @@ const TEMPLATES = [
 ];
 
 const CAT_COLORS = {
-  Fresher:     { bg: "#E8F4FD", color: "#1565C0", border: "#BBDEFB" },
-  Experienced: { bg: "#E8F5E9", color: "#2E7D32", border: "#C8E6C9" },
-  Executive:   { bg: "#FFF8E1", color: "#F57F17", border: "#FFE082" },
-  Core:        { bg: "#FFF3E0", color: "#E65100", border: "#FFCC80" },
-  Data:        { bg: "#E1F5FE", color: "#01579B", border: "#B3E5FC" },
-  Product:     { bg: "#F3E5F5", color: "#6A1B9A", border: "#E1BEE7" },
-  General:     { bg: "#F5F5F5", color: "#424242", border: "#E0E0E0" },
+  Fresher:     { bg: "var(--accentSoft)", color: "var(--accentText)", border: "var(--borderHover)" },
+  Experienced: { bg: "var(--greenSoft)", color: "var(--green)", border: "rgba(26,158,106,0.25)" },
+  Executive:   { bg: "rgba(199,122,0,0.08)", color: "var(--orange)", border: "rgba(199,122,0,0.25)" },
+  Core:        { bg: "rgba(199,122,0,0.08)", color: "var(--orange)", border: "rgba(199,122,0,0.2)" },
+  Data:        { bg: "var(--accentSoft)", color: "var(--accentText)", border: "var(--borderHover)" },
+  Product:     { bg: "var(--accentSoft)", color: "var(--accentText)", border: "var(--borderHover)" },
+  General:     { bg: "var(--bg)", color: "var(--textSub)", border: "var(--border)" },
 };
 
 const STEPS = [
@@ -176,15 +179,15 @@ const STEPS = [
 // ─── Resume Preview with blur ────────────────────────────────────────────────
 function ResumePreview({ image, name }) {
   return (
-    <div style={{ position: "relative", width: "100%", height: 220, overflow: "hidden", borderRadius: "10px 10px 0 0", background: "#f5f5f5" }}>
+    <div style={{ position: "relative", width: "100%", height: 240, overflow: "hidden", borderRadius: "14px 14px 0 0", background: "var(--bg)" }}>
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "50%", overflow: "hidden" }}>
         <img src={image} alt={name} style={{ width: "100%", objectFit: "cover", objectPosition: "top" }} />
       </div>
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: "50%", overflow: "hidden" }}>
         <img src={image} alt={name} style={{ width: "100%", objectFit: "cover", objectPosition: "bottom", filter: "blur(6px)", transform: "scale(1.05)" }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.75))" }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.85))" }} />
       </div>
-      <div style={{ position: "absolute", bottom: 14, left: "50%", transform: "translateX(-50%)", background: "rgba(0,0,0,0.78)", backdropFilter: "blur(8px)", color: "#fff", borderRadius: 20, padding: "5px 14px", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap" }}>
+      <div style={{ position: "absolute", bottom: 14, left: "50%", transform: "translateX(-50%)", background: "var(--text)", color: "var(--white)", borderRadius: 20, padding: "5px 14px", fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 5, whiteSpace: "nowrap", fontFamily: "var(--font-sans)" }}>
         🔒 Buy to unlock full resume
       </div>
     </div>
@@ -196,7 +199,7 @@ function CategoryFilter({ selected, onChange }) {
   const categories = ["All", "Fresher", "Experienced", "Core", "Data", "Product", "Executive", "General"];
   
   return (
-    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginBottom: "2rem" }}>
+    <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center", marginBottom: "3rem" }}>
       {categories.map(cat => (
         <button
           key={cat}
@@ -204,14 +207,15 @@ function CategoryFilter({ selected, onChange }) {
           style={{
             padding: "8px 20px",
             borderRadius: 20,
-            border: "2px solid",
-            borderColor: selected === cat ? "#4f46e5" : "#e5e7eb",
-            background: selected === cat ? "#4f46e5" : "#fff",
-            color: selected === cat ? "#fff" : "#6b7280",
+            border: "1.5px solid",
+            borderColor: selected === cat ? "var(--accent)" : "var(--border)",
+            background: selected === cat ? "var(--accent)" : "var(--card)",
+            color: selected === cat ? "var(--white)" : "var(--textSub)",
             fontSize: 13,
-            fontWeight: 600,
+            fontWeight: 700,
             cursor: "pointer",
-            transition: "all 0.2s",
+            transition: "all var(--transition)",
+            fontFamily: "var(--font-sans)"
           }}
         >
           {cat}
@@ -223,6 +227,9 @@ function CategoryFilter({ selected, onChange }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function ResumeMarketplace() {
+  const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected]   = useState(null);
   const [loading, setLoading]     = useState(false);
   const [canvaLink, setCanvaLink] = useState(null);
@@ -275,7 +282,7 @@ export default function ResumeMarketplace() {
         },
         modal: { ondismiss: () => setLoading(false) },
         prefill: {},
-        theme: { color: "#6366f1" },
+        theme: { color: "#7567c9" },
       };
 
       const rzp = new window.Razorpay(options);
@@ -301,63 +308,99 @@ export default function ResumeMarketplace() {
   function closeModal()        { setSelected(null); setCanvaLink(null); setLoading(false); setError(""); }
 
   return (
-    <>
+    <div className="atyant-landing">
       <script src="https://checkout.razorpay.com/v1/checkout.js" />
 
-      <div style={{ maxWidth: 980, margin: "0 auto", padding: "2rem 1rem", fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
+      {/* ── HEADER ── */}
+      <header className="al-header">
+        <button className="al-brand" onClick={() => navigate('/home')}>
+          <span className="al-brand-mark">A</span>
+          Atyant
+        </button>
+
+        <nav className={`al-nav${menuOpen ? ' open' : ''}`}>
+          <button className="al-nav-btn" onClick={() => navigate('/intelligence')}>Clarity Engine</button>
+          <button className="al-nav-btn" onClick={() => navigate('/ask')}>Verified Senior Sessions</button>
+          <button className="al-nav-btn" onClick={() => navigate('/career-guides')}>Verified Paths</button>
+          <button className="al-nav-btn" style={{ color: 'var(--accent)' }} onClick={() => navigate('/resume-store')}>Resume Store</button>
+        </nav>
+
+        <div className="al-header-actions">
+          {user ? (
+            <button className="al-ghost-btn" onClick={() => navigate('/dashboard')}>Dashboard</button>
+          ) : (
+            <>
+              <button className="al-nav-btn" onClick={() => navigate('/login')}>Log in</button>
+              <button className="al-ghost-btn" onClick={() => navigate('/signup')}>Sign up free</button>
+            </>
+          )}
+          <button className="al-menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </header>
+
+      {/* ── MAIN STORE LAYOUT ── */}
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "80px 24px 120px" }}>
 
         {/* ══ HERO ══════════════════════════════════════════════════════════ */}
         <div style={{
           textAlign: "center",
-          marginBottom: "1.8rem",
-          borderRadius: 20,
-          padding: "3rem 2rem 2.5rem",
-          background: "linear-gradient(145deg, #eef0ff 0%, #e8eeff 40%, #ede8ff 100%)",
+          marginBottom: "3.5rem",
+          borderRadius: "var(--radiusXl)",
+          padding: "5rem 2rem 4.5rem",
+          background: "linear-gradient(135deg, rgba(117,103,201,0.06), rgba(117,103,201,0.02))",
+          border: "1px solid var(--border)",
           position: "relative",
           overflow: "hidden",
-          boxShadow: "0 4px 32px rgba(99,102,241,0.1)",
+          boxShadow: "var(--shadowCard)",
         }}>
-          {/* Blobs */}
-          <div style={{ position: "absolute", width: 320, height: 320, borderRadius: "50%", background: "rgba(99,102,241,0.13)", filter: "blur(70px)", top: -80, left: -60, zIndex: 0 }} />
-          <div style={{ position: "absolute", width: 280, height: 280, borderRadius: "50%", background: "rgba(139,92,246,0.11)", filter: "blur(70px)", bottom: -60, right: -40, zIndex: 0 }} />
-
           <div style={{ position: "relative", zIndex: 1 }}>
             {/* Badge */}
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 6,
-              background: "#fffbeb", border: "1.5px solid #f59e0b",
-              borderRadius: 20, fontSize: 11, color: "#92400e",
-              padding: "5px 16px", marginBottom: 22,
-              fontWeight: 700, letterSpacing: "0.05em",
-              boxShadow: "0 2px 8px rgba(245,158,11,0.15)",
+              background: "rgba(199,122,0,0.08)", border: "1px solid rgba(199,122,0,0.25)",
+              borderRadius: 20, fontSize: 11, color: "var(--orange)",
+              padding: "6px 16px", marginBottom: 24,
+              fontWeight: 800, letterSpacing: "0.05em",
+              fontFamily: "var(--font-sans)",
             }}>
               ⚡ 14 PREMIUM TEMPLATES - INSTANT CANVA EDITING
             </div>
 
             {/* Headline */}
             <h1 style={{
-              fontSize: "clamp(1.9rem, 4.5vw, 2.9rem)",
-              fontWeight: 800, color: "#111827",
-              lineHeight: 1.2, marginBottom: 14,
-              fontFamily: "Georgia, 'Times New Roman', serif",
+              fontSize: "clamp(2.4rem, 5vw, 3.8rem)",
+              fontWeight: 400, color: "var(--text)",
+              lineHeight: 1.1, marginBottom: 18,
+              fontFamily: "'Instrument Serif', Georgia, 'Times New Roman', serif",
+              fontStyle: "italic",
             }}>
               Resume Templates that get you
               <br />
-              <span style={{ color: "#4f46e5" }}>shortlisted & selected</span>
+              <span style={{
+                background: 'linear-gradient(135deg, #7567C9 0%, #5A4CB0 50%, #1a9e6a 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}>
+                shortlisted & selected
+              </span>
             </h1>
 
             {/* Subtext */}
-            <p style={{ fontSize: 15, color: "#6b7280", maxWidth: 520, margin: "0 auto 28px", lineHeight: 1.7 }}>
+            <p style={{ fontSize: "1.15rem", color: "var(--textSub)", maxWidth: 580, margin: "0 auto 36px", lineHeight: 1.7, fontFamily: "var(--font-serif)" }}>
               ATS-friendly designs used by real students at IITs, IIMs & top companies.
-              Buy → Edit on Canva → Download. Done in 10 minutes.
+              Buy, edit on Canva, and download as PDF. Done in 10 minutes.
             </p>
 
             {/* Stats */}
-            <div style={{ display: "flex", justifyContent: "center", gap: "3rem", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", justifyContent: "center", gap: "4rem", flexWrap: "wrap" }}>
               {[["14", "Templates"], ["IIT/IIM", "Proven results"], ["10 min", "Edit & download"], ["₹69", "One-time only"]].map(([val, lbl]) => (
                 <div key={lbl} style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: "#111827", fontFamily: "Georgia, serif" }}>{val}</div>
-                  <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 2 }}>{lbl}</div>
+                  <div style={{ fontSize: 24, fontWeight: 400, color: "var(--text)", fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic" }}>{val}</div>
+                  <div style={{ fontSize: 12, color: "var(--textMuted)", marginTop: 2, fontFamily: "var(--font-sans)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>{lbl}</div>
                 </div>
               ))}
             </div>
@@ -366,43 +409,44 @@ export default function ResumeMarketplace() {
 
         {/* ══ HOW IT WORKS ═════════════════════════════════════════════════ */}
         <div style={{
-          background: "#ffffff",
-          borderRadius: 20,
-          padding: "1.8rem 1.5rem",
-          marginBottom: "2.5rem",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.05)",
-          border: "1px solid #f3f4f6",
+          background: "var(--card)",
+          borderRadius: "var(--radiusXl)",
+          padding: "3rem 2rem",
+          marginBottom: "3.5rem",
+          boxShadow: "var(--shadowCard)",
+          border: "1px solid var(--border)",
         }}>
-          <p style={{ textAlign: "center", fontSize: 30, fontWeight: 1500, color: "#374151", letterSpacing: "0.14em", marginBottom: 5 }}>
-            <strong>HOW IT WORKS</strong>
+          <p style={{ textAlign: "center", fontSize: "1.6rem", fontWeight: 900, color: "var(--text)", letterSpacing: "0.08em", marginBottom: 32, fontFamily: "var(--font-sans)" }}>
+            HOW IT WORKS
           </p>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
             {STEPS.map((s) => (
               <motion.div
                 key={s.num}
-                whileHover={{ y: -5, scale: 1.03 }}
-                transition={{ type: "spring", stiffness: 220, damping: 16 }}
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.2 }}
                 style={{
-                  flex: 1, minWidth: 140,
+                  flex: 1, minWidth: 160,
                   display: "flex", flexDirection: "column", alignItems: "center",
-                  textAlign: "center", padding: "20px 14px", borderRadius: 16,
-                  background: "linear-gradient(145deg, #f8f9ff, #f0f1ff)",
-                  border: "1px solid #e5e7ff",
+                  textAlign: "center", padding: "24px 16px", borderRadius: "var(--radius)",
+                  background: "var(--bg)",
+                  border: "1px solid var(--border)",
                   cursor: "default",
                 }}
               >
                 <div style={{
-                  width: 62, height: 62, borderRadius: "50%",
-                  background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                  width: 58, height: 58, borderRadius: "50%",
+                  background: "var(--accentSoft)",
+                  border: "1.5px solid var(--borderHover)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 24, marginBottom: 12,
-                  boxShadow: "0 6px 20px rgba(99,102,241,0.3)",
+                  fontSize: 22, color: "var(--accentText)", marginBottom: 14,
+                  boxShadow: "0 4px 12px rgba(117,103,201,0.06)",
                 }}>
                   {s.emoji}
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 800, color: "#6366f1", letterSpacing: "0.12em", marginBottom: 5 }}>STEP {s.num}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#111827", marginBottom: 6 }}>{s.title}</div>
-                <div style={{ fontSize: 12, color: "#6b7280", lineHeight: 1.55 }}>{s.desc}</div>
+                <div style={{ fontSize: 10, fontWeight: 800, color: "var(--accent)", letterSpacing: "0.12em", marginBottom: 6, fontFamily: "var(--font-sans)" }}>STEP {s.num}</div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: "var(--text)", marginBottom: 6, fontFamily: "var(--font-sans)" }}>{s.title}</div>
+                <div style={{ fontSize: 13, color: "var(--textSub)", lineHeight: 1.6, fontFamily: "var(--font-serif)" }}>{s.desc}</div>
               </motion.div>
             ))}
           </div>
@@ -412,49 +456,49 @@ export default function ResumeMarketplace() {
         <CategoryFilter selected={categoryFilter} onChange={setCategoryFilter} />
 
         {/* ══ CARDS GRID ═══════════════════════════════════════════════════ */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))", gap: 24 }}>
           {filteredTemplates.map((t) => {
             const owned    = ownedTemplates[t.id];
             const catStyle = CAT_COLORS[t.cat] || CAT_COLORS["General"];
             return (
               <div key={t.id}
-                style={{ background: "#fff", border: "1px solid #e8e8e8", borderRadius: 14, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)", transition: "transform 0.2s, box-shadow 0.2s" }}
-                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 10px 32px rgba(0,0,0,0.11)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = "0 2px 12px rgba(0,0,0,0.06)"; }}
+                style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--radiusLg)", overflow: "hidden", boxShadow: "var(--shadowCard)", transition: "all var(--transition)" }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "var(--shadowHover)"; e.currentTarget.style.borderColor = "var(--borderHover)"; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)";    e.currentTarget.style.boxShadow = "var(--shadowCard)"; e.currentTarget.style.borderColor = "var(--border)"; }}
               >
-                <div style={{ padding: "8px 12px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: "3px 10px", borderRadius: 20, background: catStyle.bg, color: catStyle.color, border: `1px solid ${catStyle.border}`, letterSpacing: "0.04em" }}>
-                    {t.cat.toUpperCase()}
+                <div style={{ padding: "12px 16px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 10, fontWeight: 800, padding: "4px 10px", borderRadius: 20, background: catStyle.bg, color: catStyle.color, border: `1.5px solid ${catStyle.border}`, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "var(--font-sans)" }}>
+                    {t.cat}
                   </span>
-                  {owned && <span style={{ fontSize: 10, color: "#2E7D32", fontWeight: 700 }}>✅ Owned</span>}
+                  {owned && <span style={{ fontSize: 11, color: "var(--green)", fontWeight: 800, fontFamily: "var(--font-sans)" }}>✅ Owned</span>}
                 </div>
 
                 <ResumePreview image={t.image} name={t.name} />
 
-                <div style={{ margin: "10px 12px 0", background: "#f0f7ff", border: "1px solid #bbdefb", borderRadius: 8, padding: "7px 10px", display: "flex", alignItems: "flex-start", gap: 7 }}>
-                  <span style={{ fontSize: 14 }}>{t.proofIcon}</span>
+                <div style={{ margin: "14px 16px 0", background: "var(--accentSoft)", border: "1px solid var(--borderHover)", borderRadius: 10, padding: "8px 12px", display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={{ fontSize: 15 }}>{t.proofIcon}</span>
                   <div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: "#1565C0", letterSpacing: "0.04em", marginBottom: 1 }}>PROVEN RESULTS</div>
-                    <div style={{ fontSize: 11, color: "#37474f", lineHeight: 1.4 }}>{t.proof}</div>
+                    <div style={{ fontSize: 9, fontWeight: 800, color: "var(--accentText)", letterSpacing: "0.06em", marginBottom: 1, fontFamily: "var(--font-sans)" }}>PROVEN RESULTS</div>
+                    <div style={{ fontSize: 12, color: "var(--textSub)", lineHeight: 1.4, fontFamily: "var(--font-serif)" }}>{t.proof}</div>
                   </div>
                 </div>
 
-                <div style={{ padding: "10px 12px 14px" }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 3, color: "#1a1a1a" }}>{t.name}</h3>
-                  <p style={{ fontSize: 11, color: "#888", marginBottom: 12, lineHeight: 1.4 }}>{t.desc}</p>
+                <div style={{ padding: "14px 16px 18px" }}>
+                  <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 4, color: "var(--text)", fontFamily: "var(--font-sans)" }}>{t.name}</h3>
+                  <p style={{ fontSize: 12, color: "var(--textMuted)", marginBottom: 16, lineHeight: 1.5, fontFamily: "var(--font-serif)" }}>{t.desc}</p>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div>
-                      <span style={{ fontSize: 20, fontWeight: 800, color: "#1a1a1a", fontFamily: "Georgia, serif" }}>₹{t.price}</span>
-                      <span style={{ fontSize: 10, color: "#999", marginLeft: 4 }}>one-time</span>
+                      <span style={{ fontSize: 20, fontWeight: 400, color: "var(--text)", fontFamily: "'Instrument Serif', Georgia, serif", fontStyle: "italic" }}>₹{t.price}</span>
+                      <span style={{ fontSize: 11, color: "var(--textMuted)", marginLeft: 4, fontFamily: "var(--font-serif)" }}>one-time</span>
                     </div>
                     {owned ? (
-                      <a href={owned.canvaLink} target="_blank" rel="noreferrer"
-                        style={{ background: "linear-gradient(135deg, #6366f1, #8b5cf6)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", textDecoration: "none", boxShadow: "0 2px 8px rgba(99,102,241,0.3)" }}>
+                      <a href={owned.canvaLink} target="_blank" rel="noreferrer" className="al-primary-btn"
+                        style={{ minHeight: 36, borderRadius: 8, padding: "0 16px", fontSize: 12, textDecoration: "none" }}>
                         Open & Edit ↗
                       </a>
                     ) : (
-                      <button onClick={() => openModal(t)}
-                        style={{ background: "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "#fff", border: "none", borderRadius: 8, padding: "8px 16px", fontSize: 12, fontWeight: 600, cursor: "pointer", boxShadow: "0 2px 8px rgba(79,70,229,0.3)" }}>
+                      <button onClick={() => openModal(t)} className="al-primary-btn"
+                        style={{ minHeight: 36, borderRadius: 8, padding: "0 16px", fontSize: 12 }}>
                         Buy & Unlock 🔓
                       </button>
                     )}
@@ -466,64 +510,126 @@ export default function ResumeMarketplace() {
         </div>
       </div>
 
+      {/* ── FOOTER ── */}
+      <footer className="al-footer">
+        <div className="al-footer-top">
+          <div className="al-footer-col">
+            <button className="al-brand" style={{ cursor: 'default', pointerEvents: 'none', padding: 0, fontSize: '1.1rem' }}>
+              <span className="al-brand-mark">A</span>
+              Atyant
+            </button>
+            <p style={{ color: 'var(--textSub)', fontSize: '0.88rem', lineHeight: 1.72, maxWidth: 260, fontFamily: 'var(--font-serif)' }}>
+              India's career clarity engine for engineering students. Ask your confusion. Get the right path.
+            </p>
+            <p style={{ color: 'var(--textMuted)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>VNIT Nagpur · Founded 2024</p>
+            <p style={{ color: 'var(--textMuted)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>Hult Prize Top 20 · IIT Bombay 2026</p>
+          </div>
+
+          <div className="al-footer-col">
+            <h4>Products</h4>
+            <button className="al-footer-link" onClick={() => navigate('/intelligence')}>Clarity Engine</button>
+            <button className="al-footer-link" onClick={() => navigate('/ask')}>Verified Senior Sessions</button>
+            <button className="al-footer-link" onClick={() => navigate('/career-guides')}>Verified Paths</button>
+            <button className="al-footer-link" onClick={() => navigate('/resume-store')}>Resume Store</button>
+            <button className="al-footer-link" style={{ color: 'var(--textMuted)' }}>AtyantJEE (coming soon)</button>
+          </div>
+
+          <div className="al-footer-col">
+            <h4>How it works</h4>
+            <button className="al-footer-link" onClick={() => navigate('/home')}>The engine</button>
+            <button className="al-footer-link" onClick={() => navigate('/home')}>FAQ</button>
+            <button className="al-footer-link" onClick={() => navigate('/home')}>All products</button>
+          </div>
+
+          <div className="al-footer-col">
+            <h4>Company</h4>
+            <button className="al-footer-link" onClick={() => navigate('/home')}>Team</button>
+            <button className="al-footer-link" onClick={() => navigate('/home')}>Milestones</button>
+            <button className="al-footer-link" onClick={() => window.open('https://chat.whatsapp.com/IsOeHy87Tu0BsIJiBVHjUW', '_blank', 'noopener,noreferrer')}>Events & Webinars</button>
+          </div>
+
+          <div className="al-footer-col">
+            <h4>Account</h4>
+            <button className="al-footer-link" onClick={() => navigate('/signup')}>Sign up free</button>
+            <button className="al-footer-link" onClick={() => navigate('/login')}>Log in</button>
+            <button className="al-footer-link" onClick={() => navigate('/dashboard')}>Dashboard</button>
+            <button className="al-footer-link" onClick={() => navigate('/privacy')}>Privacy</button>
+            <button className="al-footer-link" onClick={() => navigate('/terms')}>Terms</button>
+          </div>
+        </div>
+
+        <div className="al-footer-bottom">
+          <p>© {new Date().getFullYear()} Atyant. All rights reserved. Built in Nagpur, India.</p>
+          <div className="al-footer-legal">
+            <button onClick={() => navigate('/privacy')}>Privacy Policy</button>
+            <button onClick={() => navigate('/terms')}>Terms of Service</button>
+          </div>
+        </div>
+      </footer>
+
       {/* ══ MODAL ════════════════════════════════════════════════════════════ */}
       {selected && (
         <div
           onClick={e => { if (e.target === e.currentTarget) closeModal(); }}
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}
+          style={{ position: "fixed", inset: 0, background: "rgba(20, 18, 40, 0.45)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "1rem" }}
         >
-          <div style={{ background: "#fff", borderRadius: 18, padding: "1.5rem", maxWidth: 400, width: "100%", boxShadow: "0 24px 64px rgba(0,0,0,0.18)" }}>
+          <div style={{ background: "var(--card)", borderRadius: "var(--radiusXl)", padding: "2rem", maxWidth: 420, width: "100%", border: "1px solid var(--border)", boxShadow: "var(--shadowHover)" }}>
             {!canvaLink ? (
               <>
-                <div style={{ borderRadius: 10, overflow: "hidden", marginBottom: "1rem", height: 150, position: "relative" }}>
+                <div style={{ borderRadius: "var(--radius)", overflow: "hidden", marginBottom: "1.5rem", height: 160, position: "relative" }}>
                   <img src={selected.image} alt={selected.name} style={{ width: "100%", objectFit: "cover", objectPosition: "top", height: "100%" }} />
-                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55))" }} />
-                  <div style={{ position: "absolute", bottom: 10, left: 12 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{selected.name}</div>
-                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)" }}>{selected.cat}</div>
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 40%, rgba(20, 18, 40, 0.6))" }} />
+                  <div style={{ position: "absolute", bottom: 12, left: 16 }}>
+                    <div style={{ fontSize: 16, fontWeight: 800, color: "var(--white)", fontFamily: "var(--font-sans)" }}>{selected.name}</div>
+                    <div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)", fontFamily: "var(--font-sans)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em" }}>{selected.cat}</div>
                   </div>
                 </div>
 
-                <div style={{ borderTop: "1px solid #f3f4f6", paddingTop: "0.8rem", marginBottom: "0.8rem" }}>
+                <div style={{ borderTop: "1px solid var(--border)", paddingTop: "1rem", marginBottom: "1.2rem" }}>
                   {[
                     ["Price",         `₹${selected.price} (one-time)`],
                     ["After payment", "Unique Canva editing link"],
                     ["Edit in",       "Canva (free online)"],
                     ["Downloads",     "Unlimited PDF exports"],
                   ].map(([lbl, val]) => (
-                    <div key={lbl} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 7 }}>
-                      <span style={{ color: "#9ca3af" }}>{lbl}</span>
-                      <span style={{ fontWeight: 600, color: "#111827" }}>{val}</span>
+                    <div key={lbl} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 8, fontFamily: "var(--font-serif)" }}>
+                      <span style={{ color: "var(--textMuted)" }}>{lbl}</span>
+                      <span style={{ fontWeight: 700, color: "var(--text)" }}>{val}</span>
                     </div>
                   ))}
                 </div>
 
-                {error && <div style={{ fontSize: 12, color: "#dc2626", background: "#fef2f2", padding: "8px 10px", borderRadius: 6, marginBottom: 10 }}>{error}</div>}
+                {error && <div style={{ fontSize: 12, color: "#dc2626", background: "rgba(239, 68, 68, 0.05)", border: "1px solid rgba(239, 68, 68, 0.2)", padding: "10px", borderRadius: 8, marginBottom: 12, fontFamily: "var(--font-sans)" }}>{error}</div>}
 
                 <button
                   onClick={() => handlePayment(selected)}
                   disabled={loading}
-                  style={{ width: "100%", padding: "12px", background: loading ? "#c7d2fe" : "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "#fff", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: loading ? "not-allowed" : "pointer", boxShadow: "0 4px 16px rgba(79,70,229,0.3)", marginBottom: 8 }}
+                  className="al-primary-btn"
+                  style={{ width: "100%", marginBottom: 10, display: "flex" }}
                 >
-                  {loading ? "⏳ Processing..." : `💳 Pay ₹${selected.price} via Razorpay`}
+                  {loading ? (
+                    <div className="btn-spinner"></div>
+                  ) : (
+                    `Pay ₹${selected.price} via Razorpay`
+                  )}
                 </button>
-                <button onClick={closeModal} style={{ width: "100%", padding: "8px", background: "none", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 12, color: "#6b7280", cursor: "pointer" }}>
+                <button onClick={closeModal} className="al-secondary-btn" style={{ width: "100%", minHeight: 40 }}>
                   Cancel
                 </button>
               </>
             ) : (
               <div style={{ textAlign: "center" }}>
-                <div style={{ fontSize: "3rem", marginBottom: 10 }}>🎉</div>
-                <h3 style={{ fontFamily: "Georgia, serif", fontSize: "1.2rem", marginBottom: 6, color: "#111827" }}>Payment Successful!</h3>
-                <p style={{ fontSize: 13, color: "#6b7280", marginBottom: "1.2rem", lineHeight: 1.6 }}>
+                <div style={{ fontSize: "3rem", marginBottom: 14 }}>🎉</div>
+                <h3 style={{ fontFamily: "var(--font-serif)", fontSize: "1.4rem", fontWeight: 400, fontStyle: "italic", marginBottom: 8, color: "var(--text)" }}>Payment Successful!</h3>
+                <p style={{ fontSize: 13, color: "var(--textSub)", marginBottom: "1.5rem", lineHeight: 1.6, fontFamily: "var(--font-serif)" }}>
                   Your Canva link is ready! Click below, make your copy, edit your details, then download as PDF.
                 </p>
-                <a href={canvaLink} target="_blank" rel="noreferrer"
-                  style={{ display: "block", width: "100%", padding: "12px", background: "linear-gradient(135deg, #4f46e5, #7c3aed)", color: "#fff", borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: "none", textAlign: "center", boxShadow: "0 4px 16px rgba(79,70,229,0.3)", marginBottom: 8 }}
+                <a href={canvaLink} target="_blank" rel="noreferrer" className="al-primary-btn"
+                  style={{ display: "flex", width: "100%", textDecoration: "none", marginBottom: 10 }}
                 >
                   ✏️ Open & Edit Resume in Canva →
                 </a>
-                <button onClick={closeModal} style={{ width: "100%", padding: "8px", background: "none", border: "1px solid #e5e7eb", borderRadius: 8, fontSize: 12, color: "#6b7280", cursor: "pointer" }}>
+                <button onClick={closeModal} className="al-secondary-btn" style={{ width: "100%", minHeight: 40 }}>
                   Close
                 </button>
               </div>
@@ -531,6 +637,6 @@ export default function ResumeMarketplace() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

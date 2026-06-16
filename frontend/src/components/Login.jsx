@@ -70,7 +70,7 @@ const Login = () => {
 
       // Normal redirect
       const userRole = response.data.user?.role || 'user';
-      navigate(userRole === 'mentor' ? '/dashboard' : '/');
+      navigate(userRole === 'mentor' ? '/dashboard' : '/home');
     } catch (error) {
       const friendly = mapLoginError(error);
       setMessage(friendly);
@@ -115,7 +115,7 @@ const Login = () => {
         } else {
           // Normal redirect
           const userRole = data.user?.role || 'user';
-          navigate(userRole === 'mentor' ? '/dashboard' : '/');
+          navigate(userRole === 'mentor' ? '/dashboard' : '/home');
         }
       } else {
         const msg = data?.message || 'Google login failed.';
@@ -134,7 +134,12 @@ const Login = () => {
   return (
     <div className="auth-container">
       <form className="auth-form" onSubmit={handleSubmit}>
-        <h2>Login to Your Account</h2>
+        <div className="auth-brand">
+          <span className="auth-brand-mark">A</span>
+          <span className="auth-brand-name">Atyant</span>
+        </div>
+        <h2>Welcome back</h2>
+        <p className="auth-subtitle">Career clarity, one login away.</p>
 
         <div className="form-group">
           <input

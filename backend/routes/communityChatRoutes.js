@@ -3,7 +3,8 @@ import Message from '../models/Message.js';
 import User from '../models/User.js';
 import { chatMessageLimiter, chatInfoLimiter } from '../middleware/rateLimiters.js';
 import { moderator } from '../utils/ContentModerator.js';
-import auth from '../middleware/auth.js';
+import protect from '../middleware/authMiddleware.js';
+const auth = protect;
 
 const router = express.Router();
 
