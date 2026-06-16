@@ -55,7 +55,7 @@ const Navbar = () => {
     fetch(`${API_URL}/api/profile/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (!cancelled && data?.profilePicture) setUserPhoto(data.profilePicture); })
-      .catch(() => {});
+      .catch(() => { });
 
     return () => { cancelled = true; };
   }, [user?.id || user?._id]);
@@ -83,16 +83,16 @@ const Navbar = () => {
 
     if (!user) return (
       <>
-        <Link to="/internships"   className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/internships" className="nav-link internship-link" onClick={close}><GraduationCap size={18} /> Internships</Link>
         <Link to="/career-guides" className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
-        <Link to="/login"  className="nav-button"         onClick={close}>Login</Link>
+        <Link to="/login" className="nav-button" onClick={close}>Login</Link>
         <Link to="/signup" className="nav-button primary" onClick={close}>Sign Up</Link>
       </>
     );
 
     return (
       <>
-        <Link to="/internships"   className="nav-link internship-link"    onClick={close}><GraduationCap size={18} /> Internships</Link>
+        <Link to="/internships" className="nav-link internship-link" onClick={close}><GraduationCap size={18} /> Internships</Link>
         <Link to="/career-guides" className="nav-link career-guides-link" onClick={close}><GraduationCap size={18} /> Career Guides</Link>
       </>
     );
