@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap");
 
 /* ═══════════════════════════════════════════════════════════════
    ATYANT COMPANY WEBSITE — Scoped under .atyant-landing
@@ -31,10 +31,10 @@
   --shadowHover:  0 12px 32px rgba(20, 18, 40, 0.12);
   --transition:   0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* UI chrome uses Poppins; editorial body text uses Lora (set per-element below) */
-  font-family: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  /* Lora serif used across the whole page — UI chrome and editorial alike */
+  font-family: "Lora", Georgia, "Times New Roman", serif;
   --font-serif: "Lora", Georgia, "Times New Roman", serif;
-  --font-sans:  "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-sans:  "Lora", Georgia, "Times New Roman", serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -252,7 +252,14 @@
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--green); box-shadow: 0 0 8px rgba(26,158,106,0.6);
 }
-.al-hero h1   { max-width: 980px; margin-bottom: 26px; line-height: 1.08; letter-spacing: -0.03em; color: var(--text); }
+.al-hero h1   {
+  max-width: 900px; margin-bottom: 26px; color: var(--text);
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(2.3rem, 5vw, 4.4rem);
+  line-height: 1.16;
+  letter-spacing: -0.015em;
+}
 .al-hero h1 .al-h1-accent { color: var(--accent); }
 .al-hero-sub  { max-width: 640px; margin: 0 auto 40px; color: var(--textSub); font-size: 1.15rem; line-height: 1.85; font-family: var(--font-serif); }
 .al-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 60px; }
@@ -428,7 +435,7 @@
 /* ── FOOTER ── */
 .al-footer { background: var(--bg2); border-top: 1px solid var(--border); position: relative; z-index: 1; }
 .al-footer-top {
-  display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 28px;
+  display: grid; grid-template-columns: 1.5fr repeat(3, 1fr); gap: 28px;
   padding: 56px clamp(20px,4vw,60px) 44px;
 }
 .al-footer-col { display: flex; flex-direction: column; gap: 10px; }
@@ -493,4 +500,209 @@
   .al-stats-row { grid-template-columns: 1fr 1fr; }
   .al-footer-top { grid-template-columns: 1fr 1fr; }
   .al-footer-bottom { flex-direction: column; align-items: flex-start; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK THEME — palette mapped onto the page's scoped variables
+═══════════════════════════════════════════════════════════════ */
+.atyant-landing.dark {
+  --bg:           #15141D;
+  --bg2:          #0D0C12;
+  --card:         #221F2E;
+  --cardHover:    #2A2638;
+  --border:       #3D3852;
+  --borderHover:  #4E4378;
+  --accent:       #7567C9;
+  --accentSoft:   rgba(117, 103, 201, 0.20);
+  --accentGlow:   rgba(117, 103, 201, 0.40);
+  --accentText:   #A99CEC;
+  --green:        #2bd693;
+  --greenSoft:    rgba(43, 214, 147, 0.14);
+  --orange:       #e0a23a;
+  --text:         #F1EFF7;
+  --textSub:      #A79FBA;
+  --textMuted:    #6E667E;
+  --shadow:       0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadowCard:   0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadowHover:  0 16px 40px rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}
+
+/* Richer aurora glow in dark */
+.atyant-landing.dark::before {
+  background:
+    radial-gradient(ellipse 55% 40% at 80% -8%, rgba(117, 103, 201, 0.30) 0%, transparent 70%),
+    radial-gradient(ellipse 48% 36% at 8% 14%, rgba(109, 168, 255, 0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 42% 32% at 94% 70%, rgba(167, 99, 224, 0.16) 0%, transparent 62%);
+  animation: al-aurora 18s ease-in-out infinite alternate;
+}
+.atyant-landing.dark::after {
+  background-image:
+    linear-gradient(rgba(149, 135, 235, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(149, 135, 235, 0.07) 1px, transparent 1px);
+}
+@keyframes al-aurora {
+  0%   { transform: translate3d(0,0,0)   scale(1);    }
+  100% { transform: translate3d(-2%,1%,0) scale(1.06); }
+}
+
+/* Theme-aware header / mobile-nav glass */
+.atyant-landing.dark .al-header { background: rgba(13, 12, 18, 0.78); }
+@media (max-width: 700px) {
+  .atyant-landing.dark .al-nav { background: rgba(13, 12, 18, 0.98); }
+}
+
+/* Lift surfaces a touch in dark for depth */
+.atyant-landing.dark .al-product-card.featured {
+  background: linear-gradient(135deg, rgba(117,103,201,0.16), rgba(117,103,201,0.04));
+}
+.atyant-landing.dark .al-metric-num,
+.atyant-landing.dark .al-stat-num { text-shadow: 0 0 26px rgba(117,103,201,0.45); }
+
+/* ═══════════════════════════════════════════════════════════════
+   AI FLOURISHES — apply in both themes
+═══════════════════════════════════════════════════════════════ */
+
+/* Animated gradient headline */
+.al-hero h1 .al-h1-accent {
+  background: linear-gradient(100deg, var(--accent) 0%, #9d92e0 42%, #6ad0ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  background-size: 220% auto;
+  animation: al-shimmer 7s linear infinite;
+}
+@keyframes al-shimmer { to { background-position: 220% center; } }
+
+/* Gradient + glow primary buttons */
+.al-primary-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, #8b7ee0 100%);
+  box-shadow: 0 6px 20px var(--accentGlow);
+}
+.al-primary-btn:hover {
+  background: linear-gradient(135deg, #6355b8 0%, #7d6fd8 100%);
+  box-shadow: 0 10px 28px var(--accentGlow);
+}
+
+/* Featured card — animated inner glow ring */
+.al-product-card.featured::after {
+  content: "";
+  position: absolute;
+  width: 320px; height: 320px;
+  right: -90px; top: -120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accentGlow) 0%, transparent 70%);
+  pointer-events: none;
+  animation: al-float 7s ease-in-out infinite alternate;
+}
+@keyframes al-float {
+  0%   { transform: translateY(0) scale(1);    opacity: 0.7; }
+  100% { transform: translateY(18px) scale(1.1); opacity: 1; }
+}
+
+/* ── THEME TOGGLE ── */
+.al-theme-toggle {
+  width: 38px; height: 38px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border: 1px solid var(--border); border-radius: 9px;
+  background: var(--card); color: var(--text);
+  font-size: 1rem; cursor: pointer; line-height: 1;
+  transition: all var(--transition);
+}
+.al-theme-toggle:hover { border-color: var(--borderHover); background: var(--accentSoft); transform: translateY(-1px); }
+.al-mobile-actions { display: none; align-items: center; gap: 10px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   AI CLARITY ENGINE DEMO WINDOW
+═══════════════════════════════════════════════════════════════ */
+.al-engine-section { padding: 8px 0 24px; }
+.al-engine-window {
+  max-width: 760px; margin: 0 auto;
+  border: 1px solid var(--borderHover);
+  border-radius: var(--radiusXl);
+  background: linear-gradient(180deg, var(--card), var(--bg2));
+  box-shadow: var(--shadowHover), 0 0 60px var(--accentGlow);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+.al-engine-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--accentSoft);
+}
+.al-engine-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--borderHover); }
+.al-engine-dot:nth-child(1) { background: #ff5f57; }
+.al-engine-dot:nth-child(2) { background: #febc2e; }
+.al-engine-dot:nth-child(3) { background: #28c840; }
+.al-engine-bar-title { margin-left: 10px; font-size: 0.82rem; font-weight: 800; color: var(--textSub); }
+.al-engine-live {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.72rem; font-weight: 800; color: var(--green);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.al-engine-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: al-pulse 1.8s ease-in-out infinite; }
+.al-engine-body { padding: 26px clamp(18px, 3vw, 32px) 30px; display: flex; flex-direction: column; gap: 16px; }
+
+.al-engine-prompt {
+  align-self: flex-end; max-width: 88%;
+  background: var(--accent); color: #fff;
+  border-radius: 16px 16px 4px 16px;
+  padding: 14px 18px;
+  box-shadow: 0 6px 18px var(--accentGlow);
+}
+.al-engine-tag-you { font-size: 0.68rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.8; }
+.al-engine-prompt p { color: #fff; font-size: 0.98rem; line-height: 1.6; margin-top: 4px; font-family: var(--font-serif); }
+
+.al-engine-thinking {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 0.82rem; font-weight: 700; color: var(--textMuted);
+  font-family: var(--font-sans);
+}
+.al-engine-spark { color: var(--accent); animation: al-spin 4s linear infinite; }
+@keyframes al-spin { to { transform: rotate(360deg); } }
+.al-engine-dots { display: inline-flex; gap: 4px; }
+.al-engine-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: al-blink 1.2s infinite ease-in-out; }
+.al-engine-dots span:nth-child(2) { animation-delay: 0.2s; }
+.al-engine-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes al-blink { 0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+
+.al-engine-answer {
+  align-self: flex-start; max-width: 94%;
+  background: var(--card);
+  border: 1px solid var(--borderHover);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px 16px 16px 16px;
+  padding: 18px 20px;
+  box-shadow: var(--shadowCard);
+}
+.al-engine-answer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.al-engine-answer-badge { font-size: 0.72rem; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 0.06em; }
+.al-engine-answer-meta { font-size: 0.72rem; font-weight: 800; color: var(--green); }
+.al-engine-answer h4 { font-size: 1rem; color: var(--text); margin-bottom: 12px; line-height: 1.4; }
+.al-engine-answer ul { margin: 0 0 14px; padding-left: 18px; display: grid; gap: 7px; }
+.al-engine-answer li { color: var(--textSub); font-size: 0.92rem; line-height: 1.6; font-family: var(--font-serif); }
+.al-engine-answer-foot { display: flex; gap: 8px; flex-wrap: wrap; }
+.al-engine-chip {
+  font-size: 0.72rem; font-weight: 700; padding: 4px 11px; border-radius: 999px;
+  background: var(--accentSoft); color: var(--accentText); border: 1px solid var(--borderHover);
+}
+
+/* ── DEMO + TOGGLE RESPONSIVE ── */
+@media (max-width: 700px) {
+  .al-mobile-actions { display: flex; }
+  .al-header-actions { display: none; }
+  .al-engine-section { padding: 4px 0 12px; }
+  .al-engine-prompt, .al-engine-answer { max-width: 100%; }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .al-hero h1 .al-h1-accent,
+  .atyant-landing.dark::before,
+  .al-product-card.featured::after,
+  .al-engine-spark,
+  .al-engine-dots span,
+  .al-engine-live-dot { animation: none !important; }
 }

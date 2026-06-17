@@ -238,6 +238,14 @@ export default function AtyantLandingPage() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [toast, setToast] = useState(null);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'light';
+    return localStorage.getItem('atyant_theme')
+      || (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  });
+
+  useEffect(() => { localStorage.setItem('atyant_theme', theme); }, [theme]);
+  const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 4000); };
   const go = (href) => {
@@ -292,7 +300,7 @@ export default function AtyantLandingPage() {
         ogImage="https://atyant.in/assets/og-banner.png"
         schema={orgSchema}
       />
-      <div className="atyant-landing">
+      <div className={`atyant-landing${theme === 'dark' ? ' dark' : ''}`}>
 
         {/* ── ANNOUNCEMENT BAR ── */}
         <div className="al-announce">
@@ -319,15 +327,31 @@ export default function AtyantLandingPage() {
           </nav>
 
           <div className="al-header-actions">
-            <button className="al-ghost-btn" onClick={() => navigate('/login')}>Log in</button>
-            <button className="al-primary-btn" style={{ minHeight: 38, padding: '0 18px', fontSize: '0.86rem' }} onClick={() => navigate('/signup')}>
-              Get started
+            <button
+              className="al-theme-toggle"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              onClick={toggleTheme}
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+            <button className="al-primary-btn" style={{ minHeight: 38, padding: '0 18px', fontSize: '0.86rem' }} onClick={() => go('https://atyant.in/')}>
+              Try the Engine →
             </button>
           </div>
 
-          <button className="al-menu-toggle" aria-label="Toggle menu" onClick={() => setMenuOpen(p => !p)}>
-            <span /><span /><span />
-          </button>
+          <div className="al-mobile-actions">
+            <button
+              className="al-theme-toggle"
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              onClick={toggleTheme}
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+            <button className="al-menu-toggle" aria-label="Toggle menu" onClick={() => setMenuOpen(p => !p)}>
+              <span /><span /><span />
+            </button>
+          </div>
         </header>
 
         {/* ── HERO ── */}
@@ -367,6 +391,51 @@ export default function AtyantLandingPage() {
                 <div className="al-metric-label">{m.label}</div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* ── AI ENGINE DEMO ── */}
+        <section className="al-engine-section">
+          <div className="al-wrap">
+            <div className="al-engine-window">
+              <div className="al-engine-bar">
+                <span className="al-engine-dot" />
+                <span className="al-engine-dot" />
+                <span className="al-engine-dot" />
+                <span className="al-engine-bar-title">Atyant Clarity Engine</span>
+                <span className="al-engine-live"><span className="al-engine-live-dot" />live</span>
+              </div>
+              <div className="al-engine-body">
+                <div className="al-engine-prompt">
+                  <span className="al-engine-tag-you">You</span>
+                  <p>VNIT mechanical, final year — I want a software internship at a product company but I have no coding projects yet. What do I actually do?</p>
+                </div>
+
+                <div className="al-engine-thinking">
+                  <span className="al-engine-spark">✦</span>
+                  <span className="al-engine-dots"><span /><span /><span /></span>
+                  matching to a verified path
+                </div>
+
+                <div className="al-engine-answer">
+                  <div className="al-engine-answer-head">
+                    <span className="al-engine-answer-badge">✦ AnswerCard matched</span>
+                    <span className="al-engine-answer-meta">98% context match</span>
+                  </div>
+                  <h4>Mechanical → SDE: the 6-month path Rohit took (VNIT '23)</h4>
+                  <ul>
+                    <li>Built 3 portfolio projects — DSA + one full-stack app — in 90 days</li>
+                    <li>Cleared OAs and landed interviews at 2 product startups</li>
+                    <li>Exact resume format, application timeline, and what to skip</li>
+                  </ul>
+                  <div className="al-engine-answer-foot">
+                    <span className="al-engine-chip">Verified senior</span>
+                    <span className="al-engine-chip">Same branch</span>
+                    <span className="al-engine-chip">Lived journey</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -639,15 +708,6 @@ export default function AtyantLandingPage() {
               <button className="al-footer-link" onClick={() => scrollTo('team')}>Team</button>
               <button className="al-footer-link" onClick={() => scrollTo('achievements')}>Milestones</button>
               <button className="al-footer-link" onClick={() => navigate('/webinar')}>Events & Webinars</button>
-            </div>
-
-            <div className="al-footer-col">
-              <h4>Account</h4>
-              <button className="al-footer-link" onClick={() => navigate('/signup')}>Sign up free</button>
-              <button className="al-footer-link" onClick={() => navigate('/login')}>Log in</button>
-              <button className="al-footer-link" onClick={() => navigate('/dashboard')}>Dashboard</button>
-              <button className="al-footer-link" onClick={() => navigate('/privacy')}>Privacy</button>
-              <button className="al-footer-link" onClick={() => navigate('/terms')}>Terms</button>
             </div>
           </div>
 
