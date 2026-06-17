@@ -168,7 +168,7 @@ const TEAM = [
   {
     initials: 'AP',
     name: 'Aryan Patidar',
-    role: 'Co-Founder — Business & Mentors',
+    role: 'Co-Founder',
     college: 'VNIT Nagpur',
     desc: 'Leads business development, campus partnerships, and senior acquisition. Built the 500+ verified senior network from zero. Runs the institutional outreach engine.',
   },
