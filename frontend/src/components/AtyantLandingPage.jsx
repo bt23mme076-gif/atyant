@@ -162,7 +162,7 @@ const TEAM = [
     initials: 'NR',
     name: 'Nitin Rai',
     role: 'Founder & CEO',
-    college: 'Metallurgical Engineering, VNIT Nagpur (2027)',
+    college: 'VNIT Nagpur',
     desc: 'Experienced the career clarity gap firsthand as a Tier-2 student — built Atyant to fix it. Shipped 20+ real products. Hult Prize Top 20, IIT Bombay 2026.',
   },
   {
