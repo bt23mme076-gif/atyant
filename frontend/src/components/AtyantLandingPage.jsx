@@ -314,7 +314,12 @@ export default function AtyantLandingPage() {
         {/* ── HEADER ── */}
         <header className="al-header">
           <button className="al-brand" onClick={() => navigate('/')}>
-            <span className="al-brand-mark">A</span>
+            <span className="al-brand-mark">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2.5l1.9 5.3a3 3 0 001.8 1.8l5.3 1.9-5.3 1.9a3 3 0 00-1.8 1.8L12 20.5l-1.9-5.3a3 3 0 00-1.8-1.8L3 11.5l5.3-1.9a3 3 0 001.8-1.8z" fill="currentColor"/>
+                <path d="M18.5 3l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z" fill="currentColor" opacity="0.85"/>
+              </svg>
+            </span>
             अत्यanT
           </button>
 

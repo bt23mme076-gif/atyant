@@ -163,7 +163,9 @@
   border-radius: 9px; background: linear-gradient(135deg, var(--accent), #9d92e0);
   color: white; font-weight: 900; font-size: 0.95rem;
   box-shadow: 0 4px 14px var(--accentGlow);
+  flex-shrink: 0;
 }
+.al-brand-mark svg { width: 22px; height: 22px; display: block; }
 .al-nav {
   display: flex; align-items: center; gap: 2px;
   flex: 1; justify-content: center;

@@ -1,18 +1,15 @@
 // src/App.jsx
-import React, { useContext, useState, useEffect, useCallback, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import './App.css';
-import { AuthContext } from './AuthContext';
 import { Analytics } from '@vercel/analytics/react';
 import ErrorBoundary from './components/ErrorBoundary';
-import GoogleLoginModal from './components/GoogleLoginModal';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingSpinner from './components/LoadingSpinner';
 import ResumeMarketplace from './components/ResumeMarketplace';
-import { API_URL } from './services/api.js';
 
 // Lazy-loaded pages
 const AtyantLandingPage    = lazy(() => import('./components/AtyantLandingPage'));
@@ -32,9 +29,7 @@ const TermsOfService       = lazy(() => import('./components/TermsOfService'));
 
 function App() {
   const location = useLocation();
-  const { user, login } = useContext(AuthContext);
 
-  const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [showCommunityChat, setShowCommunityChat] = useState(false);
 
   const isNewHomePage      = location.pathname === '/home';
@@ -42,43 +37,11 @@ function App() {
   const isWebinarPage      = location.pathname === '/webinar';
   const isResumeStorePage  = location.pathname === '/resume-store';
 
-  // Show Google modal once per session if not logged in
-  useEffect(() => {
-    if (!user && !localStorage.getItem('atyant_google_modal_dismissed')) {
-      setShowGoogleModal(true);
-    }
-  }, [user]);
-
   // Listen for community chat open event from Navbar
   useEffect(() => {
     const handler = () => setShowCommunityChat(true);
     window.addEventListener('openCommunityChat', handler);
     return () => window.removeEventListener('openCommunityChat', handler);
-  }, []);
-
-  const handleGoogleSuccess = useCallback((credentialResponse) => {
-    if (!credentialResponse?.credential) return;
-    fetch(`${API_URL}/api/auth/google-login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: credentialResponse.credential }),
-    })
-      .then(r => r.json())
-      .then(data => {
-        if (data.token) {
-          login(data.token);
-          setShowGoogleModal(false);
-          localStorage.setItem('atyant_google_modal_dismissed', 'true');
-        } else if (data.message?.toLowerCase().includes('signup')) {
-          window.location.href = '/signup';
-        }
-      })
-      .catch(console.error);
-  }, [login]);
-
-  const handleModalClose = useCallback(() => {
-    setShowGoogleModal(false);
-    localStorage.setItem('atyant_google_modal_dismissed', 'true');
   }, []);
 
   const hideShell = isNewHomePage || isAuthPage || isWebinarPage || isResumeStorePage;
@@ -125,13 +88,6 @@ function App() {
           <CommunityChat onClose={() => setShowCommunityChat(false)} />
         </Suspense>
       )}
-
-      <GoogleLoginModal
-        isOpen={showGoogleModal && !user}
-        onSuccess={handleGoogleSuccess}
-        onError={() => {}}
-        onClose={handleModalClose}
-      />
     </div>
   );
 }
