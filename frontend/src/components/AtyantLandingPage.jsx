@@ -329,6 +329,7 @@ export default function AtyantLandingPage() {
             <button className="al-nav-btn" onClick={() => scrollTo('achievements')}>Milestones</button>
             <button className="al-nav-btn" onClick={() => scrollTo('events')}>Events</button>
             <button className="al-nav-btn" onClick={() => scrollTo('team')}>Company</button>
+            <button className="al-nav-btn" onClick={() => go('/achievements')} style={{ color: 'var(--accent)', fontWeight: 900 }}>🏆 Achievements</button>
           </nav>
 
           <div className="al-header-actions">
@@ -557,6 +558,15 @@ export default function AtyantLandingPage() {
                 </div>
               ))}
             </div>
+            <div style={{ textAlign: 'center', marginTop: 48 }}>
+              <button
+                className="al-secondary-btn"
+                onClick={() => go('/achievements')}
+                style={{ minHeight: 48, padding: '0 28px', fontSize: '0.94rem' }}
+              >
+                🏆 Company Achievements →
+              </button>
+            </div>
           </div>
         </section>
 
@@ -730,3 +740,4 @@ export default function AtyantLandingPage() {
     </>
   );
 }
+

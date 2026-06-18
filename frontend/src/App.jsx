@@ -13,6 +13,7 @@ import ResumeMarketplace from './components/ResumeMarketplace';
 
 // Lazy-loaded pages
 const AtyantLandingPage    = lazy(() => import('./components/AtyantLandingPage'));
+const AchievementsPage     = lazy(() => import('./components/AchievementsPage'));
 const Login                = lazy(() => import('./components/Login'));
 const Signup               = lazy(() => import('./components/signup'));
 const ForgotPassword       = lazy(() => import('./components/ForgotPassword'));
@@ -32,7 +33,7 @@ function App() {
 
   const [showCommunityChat, setShowCommunityChat] = useState(false);
 
-  const isNewHomePage      = location.pathname === '/home';
+  const isNewHomePage      = location.pathname === '/home' || location.pathname === '/achievements';
   const isAuthPage         = ['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname);
   const isWebinarPage      = location.pathname === '/webinar';
   const isResumeStorePage  = location.pathname === '/resume-store';
@@ -56,6 +57,7 @@ function App() {
             <Routes>
               {/* ── Public ── */}
               <Route path="/home"              element={<AtyantLandingPage />} />
+              <Route path="/achievements"     element={<AchievementsPage />} />
               <Route path="/login"             element={<Login />} />
               <Route path="/signup"            element={<Signup />} />
               <Route path="/forgot-password"   element={<ForgotPassword />} />
