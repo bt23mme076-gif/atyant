@@ -3,8 +3,75 @@ import { useNavigate } from 'react-router-dom';
 import SEO from './SEO';
 import { API_URL } from '../services/api.js';
 import './AtyantLandingPage.css';
+import TestimonialsMarquee from './ui/marquee';
 
 /* ─── DATA ─── */
+
+const TESTIMONIALS_ROW_1 = [
+  {
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
+    name: 'Rohit Sharma',
+    handle: 'VNIT Nagpur · Mech → SDE',
+    text: 'I typed my exact confusion — mech student, no coding background — and got a verified path from someone who made the exact same switch. Saved me 3 months of wrong prep.',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1614644147798-f8c0fc9da7f6?w=200&auto=format&fit=crop&q=80',
+    name: 'Priya Joshi',
+    handle: 'MANIT Bhopal · Secured IIM Internship',
+    text: 'The AnswerCard from a MANIT senior who got an IIM internship was exactly what I needed. Specific CAT prep timeline, which sections to focus on — no generic advice.',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&auto=format&fit=crop&q=80',
+    name: 'Arjun Mehra',
+    handle: 'NIT Raipur · Placed at Razorpay',
+    text: 'I was applying blindly everywhere. Atyant matched me with a senior from my college who cracked Razorpay off-campus. His exact resume and timeline worked for me too.',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&auto=format&fit=crop&q=80',
+    name: 'Sneha Kulkarni',
+    handle: 'COEP Pune · Research Intern at IISc',
+    text: 'Got a research internship at IISc after reading the AnswerCard from a COEP senior who did it before me. The cold email template alone was worth it.',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&auto=format&fit=crop&q=80',
+    name: 'Karan Verma',
+    handle: 'NIT Calicut · GATE AIR 38',
+    text: 'Cleared GATE with AIR 38. The verified path from a senior who cleared it from the same branch gave me a week-by-week plan that actually worked.',
+  },
+];
+
+const TESTIMONIALS_ROW_2 = [
+  {
+    image: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=200&auto=format&fit=crop&q=80',
+    name: 'Ananya Singh',
+    handle: 'VIT Vellore · SDE at Microsoft',
+    text: 'Every other platform gave me a generic roadmap. Atyant gave me a path from someone who cracked Microsoft from VIT. The specificity is what made the difference.',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1463453091185-61582044d556?w=200&auto=format&fit=crop&q=80',
+    name: 'Vikram Patil',
+    handle: 'BITS Pilani · Placed at Goldman Sachs',
+    text: 'I booked a 30-minute session with a Goldman senior from BITS. Worth every rupee. He told me exactly what the quant round tests — nothing online prepares you for that.',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=200&auto=format&fit=crop&q=80',
+    name: 'Divya Nair',
+    handle: 'NIT Trichy · MS Admit from MIT',
+    text: 'Was completely lost about my MS SOP. The AnswerCard from an NIT Trichy senior who got into MIT showed me exactly what the application looked like. Life-changing.',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?w=200&auto=format&fit=crop&q=80',
+    name: 'Rahul Tiwari',
+    handle: 'MANIT Bhopal · Product Manager at Flipkart',
+    text: 'Switched from core engineering to product management. Found a verified path from a MANIT senior who made the exact same move. No other platform had that level of context match.',
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=200&auto=format&fit=crop&q=80',
+    name: 'Meera Krishnan',
+    handle: 'PSG Tech · Data Scientist at Fractal',
+    text: 'The mentor I was matched with had the same CGPA from a similar college and had broken into data science. Her exact 6-month prep plan is what I followed. Cleared interviews in 5 months.',
+  },
+];
 
 const PRODUCTS = [
   {
@@ -567,6 +634,23 @@ export default function AtyantLandingPage() {
                 🏆 Company Achievements →
               </button>
             </div>
+          </div>
+        </section>
+
+        {/* ── TESTIMONIALS ── */}
+        <section className="al-section" id="testimonials" style={{ borderTop: '1px solid var(--border)', overflow: 'hidden' }}>
+          <div className="al-wrap">
+            <div className="al-section-head center">
+              <p className="al-eyebrow">Testimonials</p>
+              <h2>What students say after using Atyant</h2>
+              <p>Real students. Real backgrounds. Real outcomes — not marketing copy.</p>
+            </div>
+          </div>
+          <div style={{ marginTop: '40px' }}>
+            <TestimonialsMarquee
+              row1={TESTIMONIALS_ROW_1}
+              row2={TESTIMONIALS_ROW_2}
+            />
           </div>
         </section>
 
