@@ -44,6 +44,17 @@ body {
 ================================ */
 
 :root {
+  /* shadcn-compatible map variables */
+  --map-background: 0 0% 100%;
+  --map-foreground: 222.2 84% 4.9%;
+  --map-muted: 210 40% 96.1%;
+  --map-muted-foreground: 215.4 16.3% 46.9%;
+  --map-popover: 0 0% 100%;
+  --map-popover-foreground: 222.2 84% 4.9%;
+  --map-accent: 210 40% 96.1%;
+  --map-accent-foreground: 222.2 47.4% 11.2%;
+  --map-ring: 221.2 83.2% 53.3%;
+
   --primary: #7C3AED;
   --primary-glow: rgba(124, 58, 237, 0.4);
   --secondary: #3B82F6;

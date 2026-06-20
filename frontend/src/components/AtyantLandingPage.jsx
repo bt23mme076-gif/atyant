@@ -4,6 +4,7 @@ import SEO from './SEO';
 import { API_URL } from '../services/api.js';
 import './AtyantLandingPage.css';
 import TestimonialsMarquee from './ui/marquee';
+import CollegeNetworkMap from './CollegeNetworkMap';
 
 /* ─── DATA ─── */
 
@@ -466,6 +467,9 @@ export default function AtyantLandingPage() {
             ))}
           </div>
         </section>
+
+        {/* ── COLLEGE NETWORK MAP ── */}
+        <CollegeNetworkMap />
 
         {/* ── AI ENGINE DEMO ── */}
         <section className="al-engine-section">

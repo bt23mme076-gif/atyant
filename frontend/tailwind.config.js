@@ -11,6 +11,12 @@ export default {
         border: { DEFAULT: '#2c2c32', 2: '#3a3a42' },
         t: { 1: '#f2f2f4', 2: '#8e8e9a', 3: '#46464f' },
         signal: { DEFAULT: '#b6ff3c', dim: 'rgba(182,255,60,0.10)', bdr: 'rgba(182,255,60,0.28)' },
+        background: 'hsl(var(--map-background))',
+        foreground: 'hsl(var(--map-foreground))',
+        muted: { DEFAULT: 'hsl(var(--map-muted))', foreground: 'hsl(var(--map-muted-foreground))' },
+        popover: { DEFAULT: 'hsl(var(--map-popover))', foreground: 'hsl(var(--map-popover-foreground))' },
+        accent: { DEFAULT: 'hsl(var(--map-accent))', foreground: 'hsl(var(--map-accent-foreground))' },
+        ring: 'hsl(var(--map-ring))',
       },
       fontFamily: {
         serif: ['Instrument Serif', 'Georgia', 'serif'],

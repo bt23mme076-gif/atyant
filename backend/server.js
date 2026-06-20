@@ -39,6 +39,7 @@ import notificationRoutes  from './routes/notificationRoutes.js';
 import meetingroutes       from './routes/meetings.js';
 import webinarRoutes       from './routes/webinar.js';
 import newsletterRoutes    from './routes/newsletter.js';
+import statsRoutes         from './routes/statsRoutes.js';
 
 // ─── Models / utils ────────────────────────────────────────────────────────
 import Message      from './models/Message.js';
@@ -216,6 +217,7 @@ app.use('/api/ask',             askRoutes);
 app.use('/api/mentor',          mentorRoutes);
 app.use('/api/users',           mentorRoutes);   // backward compat
 app.use('/api/location',        locationRoutes);
+app.use('/api/stats',           statsRoutes);
 app.use('/api/community-chat',  communityChatRoutes);
 app.use('/api/ratings',         ratingRoutes);
 app.use('/api/engine',          engineRoutes);
