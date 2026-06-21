@@ -1,6 +1,43 @@
 import React from "react";
 import { CheckCircle } from "lucide-react";
 
+const AVATAR_COLORS = [
+  { bg: '#EDE9FE', text: '#5B21B6' }, // violet
+  { bg: '#DBEAFE', text: '#1D4ED8' }, // blue
+  { bg: '#D1FAE5', text: '#065F46' }, // green
+  { bg: '#FEF3C7', text: '#92400E' }, // amber
+  { bg: '#FCE7F3', text: '#9D174D' }, // pink
+  { bg: '#E0F2FE', text: '#0369A1' }, // sky
+  { bg: '#FEE2E2', text: '#991B1B' }, // red
+  { bg: '#F3E8FF', text: '#6B21A8' }, // purple
+];
+
+function getInitials(name) {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
+function getColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function Avatar({ name }) {
+  const { bg, text } = getColor(name);
+  return (
+    <div
+      className="size-11 rounded-full shrink-0 flex items-center justify-center font-bold text-sm select-none"
+      style={{ background: bg, color: text }}
+    >
+      {getInitials(name)}
+    </div>
+  );
+}
+
 /**
  * Marquee — infinite scrolling testimonial/avatar cards.
  * Ported from demo.tsx → plain JSX (no TypeScript needed).
@@ -43,11 +80,7 @@ const VerifyIcon = () => (
 const Card = ({ card }) => (
   <div className="p-4 rounded-lg mx-4 shadow hover:shadow-lg transition-all duration-200 w-72 shrink-0 bg-white">
     <div className="flex gap-2">
-      <img
-        className="size-11 rounded-full object-cover"
-        src={card.image}
-        alt={card.name}
-      />
+      <Avatar name={card.name} />
       <div className="flex flex-col">
         <div className="flex items-center gap-1">
           <p className="font-medium text-sm">{card.name}</p>
