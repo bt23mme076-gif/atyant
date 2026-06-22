@@ -306,6 +306,22 @@ export default function AtyantLandingPage() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [toast, setToast] = useState(null);
+  const [heroQuery, setHeroQuery] = useState('');
+
+  const HERO_CHIPS = [
+    'Become Mentor',
+    'Build Skills',
+    'Get Roadmap',
+    'Switch Field',
+    'Find My Match',
+  ];
+
+  const handleHeroSubmit = (q) => {
+    const query = (q || heroQuery).trim();
+    if (!query) return;
+    const dest = `https://atyant.in/?q=${encodeURIComponent(query)}`;
+    window.location.href = dest;
+  };
   const [theme, setTheme] = useState(() => {
     if (typeof window === 'undefined') return 'light';
     return localStorage.getItem('atyant_theme')
@@ -374,7 +390,7 @@ export default function AtyantLandingPage() {
         <div className="al-announce">
           <span className="al-announce-tag">New</span>
           <span>Atyant — Hult Prize Top 20, IIT Bombay Nationals 2026</span>
-          <span style={{ color: 'var(--accent)', fontWeight: 800, cursor: 'pointer' }} onClick={() => scrollTo('achievements')}>
+          <span style={{ color: 'var(--accent)', fontWeight: 800, cursor: 'pointer' }} onClick={() => go('/achievements')}>
             Read more →
           </span>
         </div>
@@ -444,13 +460,44 @@ export default function AtyantLandingPage() {
             Atyant matches your exact career confusion to a verified path from a senior who already lived it — same college, same branch, same target. Ask once. Get the right answer for your specific background.
           </p>
 
-          <div className="al-hero-actions">
-            <button className="al-primary-btn" onClick={() => go('https://atyant.in/')}>
-              Try the Atyant Engine →
-            </button>
-            <button className="al-secondary-btn" onClick={() => scrollTo('approach')}>
-              See how it works
-            </button>
+          {/* ── Hero Chatbox ── */}
+          <div className="al-hero-chatbox">
+            <div className="al-hero-input-wrap">
+              <span className="al-hero-input-icon">🔍</span>
+              <input
+                className="al-hero-input"
+                type="text"
+                placeholder="Ask anything… e.g. metallurgy student, Amazon internship chahiye"
+                value={heroQuery}
+                onChange={e => setHeroQuery(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleHeroSubmit()}
+                autoComplete="off"
+              />
+              <button
+                className="al-hero-input-btn"
+                onClick={() => handleHeroSubmit()}
+                aria-label="Ask"
+              >
+                →
+              </button>
+            </div>
+            <div className="al-hero-chips">
+              {HERO_CHIPS.map(chip => (
+                <button
+                  key={chip}
+                  className="al-hero-chip"
+                  onClick={() => handleHeroSubmit(chip)}
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+            <p className="al-hero-chatbox-sub">
+              100+ students found their path across India ·{' '}
+              <button className="al-hero-see-how" onClick={() => scrollTo('approach')}>
+                See how it works
+              </button>
+            </p>
           </div>
 
           <div className="al-hero-metrics">

@@ -265,6 +265,108 @@
 .al-hero h1 .al-h1-accent { color: var(--accent); }
 .al-hero-sub  { max-width: 640px; margin: 0 auto 40px; color: var(--textSub); font-size: 1.15rem; line-height: 1.85; font-family: var(--font-serif); }
 .al-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 60px; }
+
+/* ── Hero Chatbox ── */
+.al-hero-chatbox {
+  width: min(640px, 100%);
+  margin: 0 auto 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.al-hero-input-wrap {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 6px 6px 6px 16px;
+  gap: 10px;
+  box-shadow: 0 4px 24px rgba(117,103,201,0.10);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.al-hero-input-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 4px 28px rgba(117,103,201,0.18);
+}
+.al-hero-input-icon {
+  font-size: 1.05rem;
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+.al-hero-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.97rem;
+  color: var(--text);
+  font-family: var(--font-sans);
+  outline: none;
+  padding: 8px 0;
+  min-width: 0;
+}
+.al-hero-input::placeholder { color: var(--textMuted); }
+.al-hero-input-btn {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--accent), #9d92e0);
+  border: none;
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s, transform 0.15s;
+  line-height: 1;
+}
+.al-hero-input-btn:hover { opacity: 0.88; transform: scale(1.05); }
+.al-hero-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+.al-hero-chip {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--textSub);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s;
+}
+.al-hero-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accentSoft);
+  transform: translateY(-1px);
+}
+.al-hero-chatbox-sub {
+  font-size: 0.8rem;
+  color: var(--textMuted);
+  margin: 0;
+}
+.al-hero-see-how {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font-sans);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .al-hero-metrics {
   display: flex; gap: 48px; flex-wrap: wrap; justify-content: center;
   padding-top: 48px; border-top: 1px solid var(--border); width: min(880px,100%);
@@ -497,6 +599,9 @@
   .al-menu-toggle { display: flex; }
   .al-hero { padding: 56px 16px; min-height: auto; }
   .al-hero-metrics { gap: 20px; }
+  .al-hero-input-wrap { padding: 5px 5px 5px 14px; }
+  .al-hero-input { font-size: 0.9rem; }
+  .al-hero-chip { font-size: 0.78rem; padding: 5px 13px; }
   .al-section { padding: 72px 0; }
   .al-achievements-grid { grid-template-columns: 1fr; }
   .al-stats-row { grid-template-columns: 1fr 1fr; }

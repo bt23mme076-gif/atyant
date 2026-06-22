@@ -2,7 +2,7 @@
 // Atyant — Achievements. Cinematic dark-violet experience.
 // Three.js particle-text morphing · GSAP ScrollTrigger · Framer Motion.
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -11,6 +11,7 @@ import {
   useMotionValue, animate,
 } from 'framer-motion';
 import SEO from './SEO';
+import './AtyantLandingPage.css';
 import './AchievementsPage.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -614,6 +615,22 @@ function Milestone({ side, year, title, desc, imgs }) {
 ════════════════════════════════════════════════════════════════════ */
 export default function AchievementsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(() => {
+    if (typeof window === 'undefined') return 'light';
+    return localStorage.getItem('atyant_theme') || (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  });
+  useEffect(() => { localStorage.setItem('atyant_theme', theme); }, [theme]);
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+  const go = (href) => {
+    if (!href) return;
+    if (href.startsWith('http')) window.open(href, '_blank', 'noopener,noreferrer');
+    else navigate(href);
+    setMenuOpen(false);
+  };
+  const scrollTo = (id) => { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false); };
+
   const orbRef = useRef(null);
   const timelineRef = useRef(null);
   const glowRef = useRef(null);
@@ -671,7 +688,6 @@ export default function AchievementsPage() {
     });
   }, []);
 
-  const go = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
 
   const MARQUEE = [A.hultStage, A.founders, A.team, A.vnitDir, A.hultPitch, A.discussion, A.success, A.iim, A.manit, A.pce, A.ghrce, A.bny, A.vnitEcell];
 
@@ -683,11 +699,11 @@ export default function AchievementsPage() {
         canonical="https://atyant.in/achievements"
       />
 
-      <div className="atyant-achievements">
+      <div className={`atyant-achievements${theme === 'dark' ? ' dark' : ''}`}>
         {/* orb */}
         <div ref={orbRef} className="aa-orb" />
 
-        {/* ── HEADER (matches landing page) ── */}
+        {/* ── HEADER ── */}
         <header className="aa-header">
           <button className="aa-brand" onClick={() => navigate('/home')}>
             <span className="aa-brand-mark">
@@ -700,10 +716,10 @@ export default function AchievementsPage() {
           </button>
           <nav className="aa-nav">
             <button className="aa-nav-btn" onClick={() => navigate('/home')}>Home</button>
-            <button className="aa-nav-btn" onClick={() => go('timeline')}>Timeline</button>
-            <button className="aa-nav-btn" onClick={() => go('hult')}>Hult Prize</button>
-            <button className="aa-nav-btn" onClick={() => go('community')}>Community</button>
-            <button className="aa-nav-btn active" onClick={() => go('gallery')}>Gallery</button>
+            <button className="aa-nav-btn" onClick={() => scrollTo('timeline')}>Timeline</button>
+            <button className="aa-nav-btn" onClick={() => scrollTo('hult')}>Hult Prize</button>
+            <button className="aa-nav-btn" onClick={() => scrollTo('community')}>Community</button>
+            <button className="aa-nav-btn active" onClick={() => scrollTo('gallery')}>Gallery</button>
           </nav>
           <div className="aa-header-actions">
             <button className="aa-primary-btn" onClick={() => window.open('https://atyant.in/', '_blank', 'noopener')}>
@@ -740,7 +756,7 @@ export default function AchievementsPage() {
             <p className="aa-hero-sub">
               From IIT Bombay Hult Prize Top 20 to a growing community of ambitious students.
             </p>
-            <Magnetic className="aa-hero-cta" onClick={() => go('timeline')}>
+            <Magnetic className="aa-hero-cta" onClick={() => scrollTo('timeline')}>
               Explore Journey <span className="aa-arrow">↓</span>
             </Magnetic>
           </div>
@@ -956,8 +972,8 @@ export default function AchievementsPage() {
             </div>
             <div className="aa-footer-col">
               <h4>Company</h4>
-              <button className="aa-footer-link" onClick={() => go('timeline')}>Milestones</button>
-              <button className="aa-footer-link" onClick={() => go('community')}>Community</button>
+              <button className="aa-footer-link" onClick={() => scrollTo('timeline')}>Milestones</button>
+              <button className="aa-footer-link" onClick={() => scrollTo('community')}>Community</button>
               <button className="aa-footer-link" onClick={() => navigate('/webinar')}>Events & Webinars</button>
             </div>
             <div className="aa-footer-col">
