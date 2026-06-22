@@ -395,7 +395,7 @@ export default function AtyantLandingPage() {
             <button className="al-nav-btn" onClick={() => scrollTo('products')}>Products</button>
             <button className="al-nav-btn" onClick={() => scrollTo('approach')}>How it works</button>
             <button className="al-nav-btn" onClick={() => scrollTo('achievements')}>Milestones</button>
-            <button className="al-nav-btn" onClick={() => scrollTo('events')}>Events</button>
+            <button className="al-nav-btn" onClick={() => go('/events')}>Events</button>
             <button className="al-nav-btn" onClick={() => scrollTo('team')}>Company</button>
             <button className="al-nav-btn" onClick={() => go('/achievements')} style={{ color: 'var(--accent)', fontWeight: 900 }}>🏆 Achievements</button>
           </nav>
