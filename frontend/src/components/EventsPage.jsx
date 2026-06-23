@@ -2,105 +2,179 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from 'react-router-dom';
 import './AtyantLandingPage.css';
 import "./EventsPage.css";
+import { API_URL } from '../services/api';
+
+/* ── helpers ─────────────────────────────────────────────────────────────── */
+
+function getTimeLeft(deadline) {
+  const diff = Math.max(0, new Date(deadline).getTime() - Date.now());
+  return {
+    days:    String(Math.floor(diff / 86400000)).padStart(2, '0'),
+    hours:   String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0'),
+    mins:    String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0'),
+    secs:    String(Math.floor((diff % 60000) / 1000)).padStart(2, '0'),
+    expired: diff === 0,
+  };
+}
+
+/* ── micro-components ────────────────────────────────────────────────────── */
+
+function CountdownTimer({ deadline }) {
+  const [t, setT] = useState(() => getTimeLeft(deadline));
+  useEffect(() => {
+    const id = setInterval(() => setT(getTimeLeft(deadline)), 1000);
+    return () => clearInterval(id);
+  }, [deadline]);
+  if (t.expired) return <span className="countdown-expired">Registration closed</span>;
+  return (
+    <div className="countdown">
+      {[['days', t.days], ['hrs', t.hours], ['min', t.mins], ['sec', t.secs]].map(([lbl, val]) => (
+        <div className="countdown__unit" key={lbl}>
+          <span className="countdown__num">{val}</span>
+          <span className="countdown__lbl">{lbl}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SpotsBar({ registered, total }) {
+  const pct = Math.min(100, Math.round((registered / total) * 100));
+  return (
+    <div className="spots-bar">
+      <div className="spots-bar__track">
+        <div className="spots-bar__fill" style={{ width: `${pct}%` }} />
+      </div>
+      <div className="spots-bar__meta">
+        <span><strong>{registered}</strong> registered</span>
+        <span className={pct >= 80 ? 'is-urgent' : ''}><strong>{total - registered}</strong> spots left</span>
+      </div>
+    </div>
+  );
+}
+
+const AVATAR_COLORS = ['#7C3AED', '#2563EB', '#D97706', '#0EA5A5', '#DB2777', '#059669'];
+const AVATAR_POOL   = ['RS', 'PM', 'AK', 'NV', 'SK'];
+
+function JoiningAvatars({ count }) {
+  return (
+    <div className="joining">
+      <div className="joining__stack">
+        {AVATAR_POOL.map((ini, i) => (
+          <span key={i} className="joining__av" style={{ background: AVATAR_COLORS[i % AVATAR_COLORS.length], zIndex: 5 - i }}>{ini}</span>
+        ))}
+      </div>
+      <span className="joining__text"><strong>{count}</strong> already registered</span>
+    </div>
+  );
+}
+
+/* ── data ────────────────────────────────────────────────────────────────── */
 
 const EVENTS = [
   {
     id: "genai-future",
     type: "Webinar",
     image: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?q=80&w=1400&auto=format&fit=crop",
-    dateDay: "24",
-    dateMonth: "May",
+    dateDay: "10", dateMonth: "Jul",
     title: "Generative AI: The Future is Now",
-    summary: "Explore the power of GenAI and its real-world applications.",
-    dateRange: "24th May, 2025",
+    summary: "Explore the power of GenAI and its real-world applications with industry practitioners.",
+    dateRange: "10th July, 2026",
     mode: "Online",
     time: "6:00 PM – 7:30 PM IST",
     isFree: true,
+    spotsTotal: 500, spotsRegistered: 312,
+    registrationDeadline: "2026-07-08T23:59:00",
     overview: "A live session with industry practitioners on where generative AI is headed next, and what that means for early-career engineers.",
     details: {
       "Problem Statements": "Not applicable — this is a webinar, not a competition.",
-      Eligibility: "Open to everyone, no registration fee.",
-      Timeline: "Single session, 6:00 PM – 7:30 PM IST on 24th May, 2025.",
-      "Prizes & Rewards": "Certificate of attendance for all participants.",
-      FAQs: "A recording will be shared with registered participants after the session.",
+      Eligibility: "Open to everyone — no registration fee, no prerequisites.",
+      Timeline: "Single session, 6:00 PM – 7:30 PM IST on 10th July, 2026.",
+      "Prizes & Rewards": "Certificate of attendance for all registered participants.",
+      FAQs: "A recording is shared with all registered participants after the session.",
     },
   },
   {
-    id: "ai-hackathon-2025",
+    id: "ai-hackathon-2026",
     type: "Hackathon",
     image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1400&auto=format&fit=crop",
-    dateDay: "21",
-    dateMonth: "Jun",
-    title: "AI Hackathon 2025",
-    summary: "Build AI solutions for real-world problems and win exciting prizes.",
-    dateRange: "21st – 22nd June, 2025",
+    dateDay: "15", dateMonth: "Aug",
+    title: "AI Hackathon 2026",
+    summary: "Build AI solutions for real-world problems and win ₹50,000 in prizes.",
+    dateRange: "15th – 16th August, 2026",
     mode: "Online",
-    teamSize: "Team Size: 2 – 4 Members",
-    registrationDeadline: "18th June, 2025",
-    prize: "₹50,000 Prize Pool",
+    teamSize: "2 – 4 Members",
+    registrationDeadline: "2026-08-12T23:59:00",
+    prize: "₹50,000",
     isFree: false,
+    featured: true,
+    spotsTotal: 200, spotsRegistered: 147,
     shortDesc: "Join the brightest minds to solve real-world problems using AI and emerging technologies.",
-    overview: "A 24-hour online hackathon where participants will build innovative AI solutions.",
+    overview: "A 24-hour online hackathon where participants build innovative AI solutions across five problem domains.",
     details: {
-      "Problem Statements": "Five themed problem statements spanning healthcare, fintech, sustainability, education and developer tooling will be released at kickoff.",
-      Eligibility: "Open to all college students (undergraduate and postgraduate) across India, in teams of 2–4 members.",
-      Timeline: "Registrations close 18th June. Kickoff on 21st June, 9:00 AM IST. Submissions close 22nd June, 9:00 AM IST. Results announced 22nd June, 6:00 PM IST.",
-      "Prizes & Rewards": "₹50,000 total prize pool, plus internship interview fast-tracks with sponsor companies and Atyant goodies for all finalists.",
-      FAQs: "Need a team? Use our Discord to find teammates. All code must be written during the hackathon window — pre-built projects will be disqualified.",
+      "Problem Statements": "Five themed problem statements spanning healthcare, fintech, sustainability, education and developer tooling — released at kickoff.",
+      Eligibility: "Open to all college students (UG and PG) across India, in teams of 2–4 members.",
+      Timeline: "Registrations close 12th August. Kickoff 15th August, 9:00 AM IST. Submissions close 16th August, 9:00 AM IST. Results announced 16th August, 6:00 PM IST.",
+      "Prizes & Rewards": "₹50,000 total prize pool, internship interview fast-tracks with sponsors, and Atyant goodies for all finalists.",
+      FAQs: "Use our Discord to find teammates. All code must be written during the hackathon window — pre-built projects are disqualified.",
     },
   },
   {
     id: "codesprint-5",
     type: "Competition",
     image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1400&auto=format&fit=crop",
-    dateDay: "05",
-    dateMonth: "Jul",
+    dateDay: "05", dateMonth: "Sep",
     title: "CodeSprint 5.0",
-    summary: "A coding competition to test your logic and speed.",
-    dateRange: "5th July, 2025",
+    summary: "A timed coding competition to test your logic, speed, and problem-solving.",
+    dateRange: "5th September, 2026",
     mode: "Online",
-    teamSize: "Team Size: 1 – 3",
-    prize: "₹20,000 Prize Pool",
+    teamSize: "1 – 3 Members",
+    prize: "₹20,000",
     isFree: false,
-    overview: "A timed competitive-programming sprint across three difficulty tiers, open to solo coders and small teams.",
+    spotsTotal: 300, spotsRegistered: 189,
+    registrationDeadline: "2026-09-03T23:59:00",
+    overview: "A 3-hour competitive-programming sprint across three difficulty tiers, open to solo coders and small teams.",
     details: {
-      "Problem Statements": "12 algorithmic problems released at contest start, ranging from easy to hard.",
+      "Problem Statements": "12 algorithmic problems at contest start, spanning easy, medium, and hard.",
       Eligibility: "Open to individuals or teams of up to 3.",
-      Timeline: "Contest runs for 3 hours starting 5th July, 5:00 PM IST.",
+      Timeline: "Contest runs 3 hours from 5th September, 5:00 PM IST.",
       "Prizes & Rewards": "₹20,000 prize pool split across top 3 individuals/teams.",
-      FAQs: "Any standard language (C++, Java, Python, JS) is allowed.",
+      FAQs: "Any standard language is allowed — C++, Java, Python, JavaScript.",
     },
   },
   {
     id: "fullstack-workshop",
     type: "Workshop",
     image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=1400&auto=format&fit=crop",
-    dateDay: "19",
-    dateMonth: "Jul",
+    dateDay: "19", dateMonth: "Oct",
     title: "Full Stack Development Workshop",
-    summary: "Hands-on workshop to build modern web applications.",
-    dateRange: "19th July, 2025",
-    mode: "Offline | Pune",
-    teamSize: "Team Size: Individual",
+    summary: "Hands-on full-day workshop — build and ship a complete web app from scratch.",
+    dateRange: "19th October, 2026",
+    mode: "Offline · Pune",
+    teamSize: "Individual",
     isFree: true,
+    spotsTotal: 80, spotsRegistered: 67,
+    registrationDeadline: "2026-10-17T23:59:00",
     overview: "A full-day, hands-on workshop covering the essentials of building and shipping a modern full-stack web application.",
     details: {
       "Problem Statements": "Not applicable — this is a guided, hands-on workshop.",
       Eligibility: "Open to all college students with basic programming knowledge.",
-      Timeline: "Single day, 10:00 AM – 5:00 PM, 19th July, 2025, in Pune.",
+      Timeline: "Single day, 10:00 AM – 5:00 PM, 19th October, 2026, Pune.",
       "Prizes & Rewards": "Certificate of completion and starter project templates for all attendees.",
-      FAQs: "Bring your own laptop. Lunch and refreshments will be provided.",
+      FAQs: "Bring your own laptop. Lunch and refreshments provided.",
     },
   },
 ];
 
+const FEATURED_EVENT = EVENTS.find(e => e.featured) || EVENTS[0];
+
 const CATEGORIES = [
-  { key: "all",          label: "All Events",   icon: "▦" },
-  { key: "webinars",     label: "Webinars",      icon: "🎙" },
-  { key: "hackathons",   label: "Hackathons",    icon: null, iconSvg: true },
-  { key: "competitions", label: "Competitions",  icon: "🏆" },
-  { key: "workshops",    label: "Workshops",     icon: "⚙" },
-  { key: "community",    label: "Community",     icon: "👥" },
+  { key: "all",          label: "All Events",  icon: "▦" },
+  { key: "webinars",     label: "Webinars",     icon: "🎙" },
+  { key: "hackathons",   label: "Hackathons",   icon: null, iconSvg: true },
+  { key: "competitions", label: "Competitions", icon: "🏆" },
+  { key: "workshops",    label: "Workshops",    icon: "⚙" },
+  { key: "community",    label: "Community",    icon: "👥" },
 ];
 
 const STATS = [
@@ -144,6 +218,30 @@ const STAT_ICONS = {
     </svg>
   ),
 };
+
+const TESTIMONIALS = [
+  { initials: "RS", name: "Rohit Sharma",  college: "NIT Warangal",    color: "#7C3AED", outcome: "Won ₹20K at CodeSprint 4.0 and got shortlisted for 2 internships on the same day. Didn't expect the network effect to hit that fast." },
+  { initials: "PM", name: "Priya Menon",   college: "VNIT Nagpur",     color: "#2563EB", outcome: "Got a PPO offer from a startup I met at the Full Stack Workshop. One conversation changed my entire placement season." },
+  { initials: "AS", name: "Aarav Singh",   college: "MNNIT Allahabad", color: "#0EA5A5", outcome: "The GenAI webinar completely changed how I answered ML interview questions. Cleared 3 rounds the following week." },
+  { initials: "SP", name: "Sneha Patil",   college: "COEP Pune",       color: "#D97706", outcome: "My team won the AI Hackathon 2025 — ₹15K + intern fast-track at a Series B startup. Best 24 hours of college." },
+];
+
+const FAQS = [
+  { q: "Who can participate?",         a: "All college students across India — any branch, year, or college tier. Specific eligibility requirements, if any, are listed on the event page." },
+  { q: "Is there a registration fee?", a: "Most events (webinars, workshops) are completely free. Hackathons and competitions with prize pools may have a nominal fee, always shown upfront." },
+  { q: "Will I get a certificate?",    a: "Yes — every registered participant gets a digital certificate within 5–7 days after the event. Top performers also receive merit or winner certificates." },
+  { q: "Can I join multiple events?",  a: "No cap — register for as many events as you like. Just check that their schedules don't clash before signing up for multiple on the same day." },
+  { q: "How do I get event details?",  a: "A confirmation email with the meeting link and schedule is sent on registration. Reminders also go out 24 hours and 1 hour before the event." },
+  { q: "Who do I contact for help?",   a: "Email events@atyant.in for any queries — we respond within 24 hours. For partnerships or sponsorships, write to partnerships@atyant.in." },
+];
+
+const ACCORDION_ORDER = ["Overview", "Problem Statements", "Eligibility", "Timeline", "Prizes & Rewards", "FAQs"];
+
+const GALLERY = [
+  "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1200&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1200&auto=format&fit=crop",
+];
 
 const SPONSORS = [
   {
@@ -229,95 +327,364 @@ const SPONSORS = [
   },
 ];
 
-const FAQS = [
-  {
-    q: "Who can participate in the events?",
-    a: "All college students across India are welcome — regardless of branch, year, or college tier. Whether you're from a Tier-1 IIT or a Tier-3 regional college, Atyant events are designed to be inclusive. Some events may have specific eligibility criteria (like being in a particular year or having a certain skill level), which will be clearly mentioned on the event page.",
-  },
-  {
-    q: "Is there any registration fee?",
-    a: "The majority of our events — including webinars, live Q&As, and most workshops — are completely free. For competitive events like hackathons or coding sprints that involve prize pools, a nominal registration fee may apply to filter serious participants. The fee, if any, is always displayed upfront on the event listing before you register.",
-  },
-  {
-    q: "Will I get a certificate for participating?",
-    a: "Yes! Every registered participant receives a digital certificate of participation after the event. For competitive events, top performers receive merit certificates or winner certificates in addition to their prizes. Certificates are issued within 5–7 working days after the event concludes and are sent to your registered email.",
-  },
-  {
-    q: "Can I participate in more than one event?",
-    a: "Absolutely — there's no cap on how many events you can register for. You're free to participate in as many events as you like, as long as their schedules don't clash. We recommend checking the event timings carefully before registering for multiple events in the same time window.",
-  },
-  {
-    q: "How will I receive the event details?",
-    a: "Once you register, a confirmation email with all event details — including the meeting link, schedule, and any pre-event preparation material — is sent to your registered email address. You can also find all your registered events on your Atyant dashboard under 'My Events'. Important updates and reminders are sent 24 hours and 1 hour before the event starts.",
-  },
-  {
-    q: "Who can I contact for more information?",
-    a: "For any queries related to events, registrations, or technical issues, reach out to our team at events@atyant.in. We typically respond within 24 hours on weekdays. For urgent issues on the day of an event, you can also reach us through the live support chat available on your dashboard. For partnership or sponsorship inquiries, write to partnerships@atyant.in.",
-  },
-];
+/* ── RegisterModal ───────────────────────────────────────────────────────── */
 
-const ACCORDION_ORDER = ["Overview", "Problem Statements", "Eligibility", "Timeline", "Prizes & Rewards", "FAQs"];
+const EMPTY_REG = { name: '', email: '', phone: '', college: '', yearOfStudy: '' };
 
-const GALLERY = [
-  "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=1200&auto=format&fit=crop",
-];
+function RegisterModal({ event, onClose, onSuccess }) {
+  const [form, setForm] = useState(EMPTY_REG);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-const COLLAGE = [
-  "https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1591115765373-5207764f72e7?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1200&auto=format&fit=crop",
-];
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${API_URL}/api/events/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId:    event.id,
+          eventTitle: event.title,
+          eventDate:  event.dateRange,
+          eventMode:  event.mode,
+          ...form,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Registration failed.');
+      setDone(true);
+      onSuccess(event.id);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal-box" role="dialog" aria-modal="true" aria-label="Register for event">
+        <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
+
+        {done ? (
+          <div className="modal-success">
+            <div className="modal-success__icon">✓</div>
+            <h3>You're Registered!</h3>
+            <p>Confirmation sent to <strong>{form.email}</strong>. Check your inbox (and spam) for event details.</p>
+            <button className="btn btn--primary" style={{ marginTop: 20 }} onClick={onClose}>Done</button>
+          </div>
+        ) : (
+          <>
+            <div className="modal-header">
+              <h3>Register for {event.title}</h3>
+              <p>📅 {event.dateRange} &nbsp;·&nbsp; {event.mode}</p>
+            </div>
+            <form className="host-form" onSubmit={handleSubmit}>
+              <div className="form-row form-row--2col">
+                <div>
+                  <label>Full Name <span className="req">*</span></label>
+                  <input type="text" placeholder="Your name" value={form.name} onChange={e => set('name', e.target.value)} required />
+                </div>
+                <div>
+                  <label>Email <span className="req">*</span></label>
+                  <input type="email" placeholder="you@college.edu" value={form.email} onChange={e => set('email', e.target.value)} required />
+                </div>
+              </div>
+              <div className="form-row form-row--2col">
+                <div>
+                  <label>Phone <span className="req">*</span></label>
+                  <input type="tel" placeholder="+91 98765 43210" value={form.phone} onChange={e => set('phone', e.target.value)} required />
+                </div>
+                <div>
+                  <label>Year of Study</label>
+                  <select value={form.yearOfStudy} onChange={e => set('yearOfStudy', e.target.value)}>
+                    <option value="">Select year</option>
+                    {['1st Year', '2nd Year', '3rd Year', '4th Year', 'Postgraduate', 'Alumni'].map(y => (
+                      <option key={y} value={y}>{y}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="form-row">
+                <label>College / Institution <span className="req">*</span></label>
+                <input type="text" placeholder="e.g. VNIT Nagpur" value={form.college} onChange={e => set('college', e.target.value)} required />
+              </div>
+              {error && <p className="form-api-error">{error}</p>}
+              <div className="form-actions">
+                <button type="button" className="btn btn--secondary" onClick={onClose} disabled={loading}>Cancel</button>
+                <button type="submit" className="btn btn--primary" disabled={loading}>
+                  {loading ? 'Registering…' : 'Confirm Registration →'}
+                </button>
+              </div>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── HostModal ────────────────────────────────────────────────────────────── */
+
+const EMPTY_FORM = {
+  eventType: '', eventName: '', date: '', mode: '', venue: '',
+  attendees: '', prize: '', description: '',
+  name: '', email: '', college: '', phone: '', notes: '',
+};
+
+function HostModal({ onClose }) {
+  const [step, setStep] = useState(1);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleFinalSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setApiError('');
+    try {
+      const res = await fetch(`${API_URL}/api/events/host`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Submission failed.');
+      setSubmitted(true);
+    } catch (err) {
+      setApiError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal-box" role="dialog" aria-modal="true" aria-label="Host an Event">
+        <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
+
+        {submitted ? (
+          <div className="modal-success">
+            <div className="modal-success__icon">✓</div>
+            <h3>Application Received!</h3>
+            <p>Our team will review your event proposal and get back within 48 hours at <strong>{form.email}</strong>.</p>
+            <p className="modal-success__sub">We'll handle promotion, registrations, and logistics support.</p>
+            <button className="btn btn--primary" style={{ marginTop: 24 }} onClick={onClose}>Done</button>
+          </div>
+        ) : (
+          <>
+            <div className="modal-header">
+              <h3>Host an Event on Atyant</h3>
+              <p>Tell us about your event — we handle promotion, registrations, and logistics.</p>
+              <div className="modal-steps">
+                <span className={`modal-step-dot ${step >= 1 ? 'is-active' : ''}`}>1</span>
+                <span className="modal-step-label" style={{ opacity: step === 1 ? 1 : 0.5 }}>Event Details</span>
+                <span className="modal-step-line" />
+                <span className={`modal-step-dot ${step >= 2 ? 'is-active' : ''}`}>2</span>
+                <span className="modal-step-label" style={{ opacity: step === 2 ? 1 : 0.5 }}>Your Info</span>
+              </div>
+            </div>
+
+            {step === 1 && (
+              <form className="host-form" onSubmit={e => { e.preventDefault(); setStep(2); }}>
+                <div className="form-row form-row--2col">
+                  <div>
+                    <label>Event Type <span className="req">*</span></label>
+                    <select value={form.eventType} onChange={e => set('eventType', e.target.value)} required>
+                      <option value="">Select type</option>
+                      {['Hackathon', 'Webinar', 'Workshop', 'Competition', 'Community Event'].map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label>Mode <span className="req">*</span></label>
+                    <select value={form.mode} onChange={e => set('mode', e.target.value)} required>
+                      <option value="">Select</option>
+                      {['Online', 'Offline', 'Hybrid'].map(m => <option key={m} value={m}>{m}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label>Event Name <span className="req">*</span></label>
+                  <input type="text" placeholder="e.g. DevSprint 2026" value={form.eventName} onChange={e => set('eventName', e.target.value)} required />
+                </div>
+                <div className="form-row form-row--2col">
+                  <div>
+                    <label>Event Date <span className="req">*</span></label>
+                    <input type="date" value={form.date} onChange={e => set('date', e.target.value)} required />
+                  </div>
+                  <div>
+                    <label>Expected Attendees <span className="req">*</span></label>
+                    <input type="number" min="1" placeholder="e.g. 200" value={form.attendees} onChange={e => set('attendees', e.target.value)} required />
+                  </div>
+                </div>
+                {(form.mode === 'Offline' || form.mode === 'Hybrid') && (
+                  <div className="form-row">
+                    <label>Venue / City <span className="req">*</span></label>
+                    <input type="text" placeholder="e.g. VNIT Nagpur, Seminar Hall" value={form.venue} onChange={e => set('venue', e.target.value)} required />
+                  </div>
+                )}
+                <div className="form-row">
+                  <label>Prize Pool <span className="form-optional">(optional)</span></label>
+                  <input type="text" placeholder="e.g. ₹25,000" value={form.prize} onChange={e => set('prize', e.target.value)} />
+                </div>
+                <div className="form-row">
+                  <label>Event Description <span className="req">*</span></label>
+                  <textarea rows={4} placeholder="What is your event about? What will participants gain?" value={form.description} onChange={e => set('description', e.target.value)} required />
+                </div>
+                <div className="form-actions">
+                  <button type="button" className="btn btn--secondary" onClick={onClose}>Cancel</button>
+                  <button type="submit" className="btn btn--primary">Next: Your Info →</button>
+                </div>
+              </form>
+            )}
+
+            {step === 2 && (
+              <form className="host-form" onSubmit={handleFinalSubmit}>
+                <div className="form-row form-row--2col">
+                  <div>
+                    <label>Your Name <span className="req">*</span></label>
+                    <input type="text" placeholder="Full name" value={form.name} onChange={e => set('name', e.target.value)} required />
+                  </div>
+                  <div>
+                    <label>Email <span className="req">*</span></label>
+                    <input type="email" placeholder="you@college.edu" value={form.email} onChange={e => set('email', e.target.value)} required />
+                  </div>
+                </div>
+                <div className="form-row form-row--2col">
+                  <div>
+                    <label>College / Organization <span className="req">*</span></label>
+                    <input type="text" placeholder="e.g. VNIT Nagpur" value={form.college} onChange={e => set('college', e.target.value)} required />
+                  </div>
+                  <div>
+                    <label>Phone <span className="req">*</span></label>
+                    <input type="tel" placeholder="+91 98765 43210" value={form.phone} onChange={e => set('phone', e.target.value)} required />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <label>Anything else? <span className="form-optional">(optional)</span></label>
+                  <textarea rows={3} placeholder="Sponsors, special requirements, existing partnerships..." value={form.notes} onChange={e => set('notes', e.target.value)} />
+                </div>
+                {apiError && <p className="form-api-error">{apiError}</p>}
+                <div className="form-actions">
+                  <button type="button" className="btn btn--secondary" onClick={() => setStep(1)} disabled={loading}>← Back</button>
+                  <button type="submit" className="btn btn--primary" disabled={loading}>
+                    {loading ? 'Submitting…' : 'Submit Application'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── main page ───────────────────────────────────────────────────────────── */
 
 export default function EventsPage() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate  = useNavigate();
+  const location  = useLocation();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState(() => {
     if (typeof window === 'undefined') return 'light';
     return localStorage.getItem('atyant_theme') || (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   });
   useEffect(() => { localStorage.setItem('atyant_theme', theme); }, [theme]);
-  const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+
+  /* registrations — persisted to localStorage after API confirm */
+  const [registeredEvents, setRegisteredEvents] = useState(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('atyant_registered') || '[]')); }
+    catch { return new Set(); }
+  });
+  const markRegistered = (eventId) => {
+    setRegisteredEvents(prev => {
+      const next = new Set(prev);
+      next.add(eventId);
+      localStorage.setItem('atyant_registered', JSON.stringify([...next]));
+      return next;
+    });
+  };
+
+  const [showRegModal, setShowRegModal] = useState(false);
+  const [regEvent, setRegEvent] = useState(null);
+  const handleRegister = (eventObj, e) => {
+    if (e) e.stopPropagation();
+    if (registeredEvents.has(eventObj.id)) return; // already registered — no-op
+    setRegEvent(eventObj);
+    setShowRegModal(true);
+  };
+
+  const [showHostModal, setShowHostModal] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [selectedId, setSelectedId] = useState("ai-hackathon-2026");
+  const [openSection, setOpenSection] = useState("Overview");
+  const [openFaq, setOpenFaq] = useState(null);
+  const [shareToast, setShareToast] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+
+  const trackRef = useRef(null);
+  const heroRef  = useRef(null);
+
+  /* sticky bar on mobile — appears when hero scrolls out of view */
+  useEffect(() => {
+    const obs = new IntersectionObserver(([entry]) => setShowStickyBar(!entry.isIntersecting), { threshold: 0 });
+    if (heroRef.current) obs.observe(heroRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  const filteredEvents = activeCategory === "all"
+    ? EVENTS
+    : EVENTS.filter(e => e.type.toLowerCase() === activeCategory.replace(/s$/, ""));
+
+  /* auto-select first event in category when filter changes */
+  useEffect(() => {
+    if (filteredEvents.length && !filteredEvents.find(e => e.id === selectedId)) {
+      setSelectedId(filteredEvents[0].id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCategory]);
+
+  const selectedEvent = EVENTS.find(e => e.id === selectedId) || EVENTS[0];
 
   const go = (href) => {
     if (!href) return;
-    if (href.startsWith('http')) { window.open(href, '_blank', 'noopener,noreferrer'); }
-    else { navigate(href); }
+    href.startsWith('http') ? window.open(href, '_blank', 'noopener,noreferrer') : navigate(href);
     setMenuOpen(false);
   };
   const scrollTo = (id) => { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); setMenuOpen(false); };
+  const scrollCarousel = (dir) => { trackRef.current?.scrollBy({ left: dir * 360, behavior: "smooth" }); };
+  const toggleAccordion = (key) => setOpenSection(prev => prev === key ? null : key);
+  const accordionContent = (key) => key === "Overview" ? selectedEvent.overview : selectedEvent.details?.[key];
 
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [selectedId, setSelectedId] = useState("ai-hackathon-2025");
-  const [openSection, setOpenSection] = useState("Overview");
-  const [openFaq, setOpenFaq] = useState(null);
-  const trackRef = useRef(null);
-
-  const filteredEvents =
-    activeCategory === "all"
-      ? EVENTS
-      : EVENTS.filter((e) => e.type.toLowerCase() === activeCategory.replace(/s$/, ""));
-
-  const visibleEvents = filteredEvents.length ? filteredEvents : EVENTS;
-  const selectedEvent = EVENTS.find((e) => e.id === selectedId) || visibleEvents[0];
-
-  const scrollCarousel = (dir) => {
-    trackRef.current?.scrollBy({ left: dir * 360, behavior: "smooth" });
+  const handleShare = async () => {
+    const data = { title: selectedEvent.title, text: `${selectedEvent.title} — ${selectedEvent.dateRange}`, url: window.location.href };
+    try {
+      if (navigator.share && navigator.canShare?.(data)) {
+        await navigator.share(data);
+        return;
+      }
+    } catch { /* user cancelled */ }
+    try { await navigator.clipboard.writeText(`${data.text}\n${data.url}`); } catch { /* unsupported */ }
+    setShareToast(true);
+    setTimeout(() => setShareToast(false), 2500);
   };
-
-  const toggleAccordion = (key) => setOpenSection((prev) => (prev === key ? null : key));
-  const accordionContent = (key) =>
-    key === "Overview" ? selectedEvent.overview : selectedEvent.details[key];
 
   return (
     <div className={`atyant-landing events-page${theme === 'dark' ? ' dark' : ''}`}>
       <div className="al-announce" style={{ display: 'none' }} />
 
-      {/* HEADER */}
+      {/* ── HEADER ── */}
       <header className="al-header">
         <button className="al-brand" onClick={() => go('/')}>
           <span className="al-brand-mark">
@@ -348,23 +715,24 @@ export default function EventsPage() {
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="events-hero">
+      {/* ── HERO ── */}
+      <section className="events-hero" ref={heroRef}>
         <div className="container events-hero__grid">
           <div className="events-hero__copy">
-            <span className="eyebrow">Events</span>
+            <span className="eyebrow">
+              {FEATURED_EVENT.title} · Registration closes in 3 days
+            </span>
             <h1 className="events-hero__title">
               Explore. Learn.
               <br />
               Compete. <span className="text-accent">Grow.</span>
             </h1>
             <p className="events-hero__desc">
-              From hackathons to webinars, workshops to competitions – be a
-              part of impactful experiences at Atyant.
+              From hackathons to webinars, workshops to competitions — be part of impactful experiences at Atyant.
             </p>
             <div className="events-hero__cta">
               <button className="btn btn--primary" onClick={() => scrollTo('all-events')}>Browse Events</button>
-              <button className="btn btn--secondary">
+              <button className="btn btn--secondary" onClick={() => setShowHostModal(true)}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
                   <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
                   <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
@@ -372,9 +740,8 @@ export default function EventsPage() {
                 Host an Event
               </button>
             </div>
-
             <div className="stats-bar">
-              {STATS.map((s) => (
+              {STATS.map(s => (
                 <div className="stats-bar__item" key={s.label}>
                   <span className="stats-bar__icon">{STAT_ICONS[s.iconKey]}</span>
                   <div>
@@ -386,20 +753,45 @@ export default function EventsPage() {
             </div>
           </div>
 
-          {/* COLLAGE */}
-          <div className="events-hero__collage">
-            <img src={COLLAGE[0]} alt="" className="collage-img collage-img--1" />
-            <img src={COLLAGE[1]} alt="" className="collage-img collage-img--2" />
-            <img src={COLLAGE[2]} alt="" className="collage-img collage-img--3" />
-            <img src={COLLAGE[3]} alt="" className="collage-img collage-img--4" />
-            <img src={COLLAGE[4]} alt="" className="collage-img collage-img--5" />
+          {/* FEATURED EVENT CARD (replaces collage) */}
+          <div className="hero-featured">
+            <div className="hero-featured__card">
+              <div className="hero-featured__media">
+                <img src={FEATURED_EVENT.image} alt={FEATURED_EVENT.title} />
+                <div className="hero-featured__overlay" />
+                <span className="hero-featured__star-tag">⭐ Featured Event</span>
+                <span className={`event-card__badge badge--${FEATURED_EVENT.type.toLowerCase()} hero-featured__type-badge`}>
+                  {FEATURED_EVENT.type}
+                </span>
+              </div>
+              <div className="hero-featured__body">
+                <div className="hero-featured__top">
+                  <h3 className="hero-featured__title">{FEATURED_EVENT.title}</h3>
+                  {FEATURED_EVENT.prize && (
+                    <span className="hero-featured__prize">🏆 {FEATURED_EVENT.prize}</span>
+                  )}
+                </div>
+                <p className="hero-featured__meta">📅 {FEATURED_EVENT.dateRange} &nbsp;·&nbsp; {FEATURED_EVENT.mode}</p>
+                <div className="hero-featured__countdown-row">
+                  <span className="hero-featured__countdown-label">Registration closes in</span>
+                  <CountdownTimer deadline={FEATURED_EVENT.registrationDeadline} />
+                </div>
+                <SpotsBar registered={FEATURED_EVENT.spotsRegistered} total={FEATURED_EVENT.spotsTotal} />
+                <button
+                  className={`btn hero-featured__cta ${registeredEvents.has(FEATURED_EVENT.id) ? 'btn--registered' : 'btn--primary'}`}
+                  onClick={e => handleRegister(FEATURED_EVENT, e)}
+                >
+                  {registeredEvents.has(FEATURED_EVENT.id) ? '✓ Registered!' : 'Register Now →'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CATEGORY FILTER */}
+      {/* ── CATEGORY FILTER ── */}
       <div className="category-filter container">
-        {CATEGORIES.map((c) => (
+        {CATEGORIES.map(c => (
           <button
             key={c.key}
             className={`category-pill ${activeCategory === c.key ? "is-active" : ""}`}
@@ -408,8 +800,7 @@ export default function EventsPage() {
             <span className="category-pill__icon">
               {c.iconSvg ? (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <polyline points="16 18 22 12 16 6"/>
-                  <polyline points="8 6 2 12 8 18"/>
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
                 </svg>
               ) : c.icon}
             </span>
@@ -418,7 +809,7 @@ export default function EventsPage() {
         ))}
       </div>
 
-      {/* UPCOMING EVENTS CAROUSEL — "View all events" link removed */}
+      {/* ── UPCOMING EVENTS CAROUSEL ── */}
       <section className="section upcoming-events" id="all-events">
         <div className="container">
           <div className="section-header">
@@ -426,67 +817,70 @@ export default function EventsPage() {
           </div>
         </div>
 
-        <div className="container upcoming-events__carousel">
-          <button className="carousel-nav carousel-nav--prev" onClick={() => scrollCarousel(-1)} aria-label="Previous events">
-            ‹
-          </button>
-          <div className="upcoming-events__track" ref={trackRef}>
-            {visibleEvents.map((ev) => {
-              const isSelected = ev.id === selectedEvent?.id;
-              return (
-                <article
-                  key={ev.id}
-                  className={`event-card ${isSelected ? "is-selected" : ""}`}
-                  onClick={() => setSelectedId(ev.id)}
-                >
-                  <div className="event-card__media">
-                    <img src={ev.image} alt={ev.title} />
-                    <span className={`event-card__badge badge--${ev.type.toLowerCase()}`}>{ev.type}</span>
-                    <div className="event-card__date">
-                      <span className="event-card__date-day">{ev.dateDay}</span>
-                      <span className="event-card__date-month">{ev.dateMonth}</span>
-                    </div>
-                  </div>
-                  <div className="event-card__body">
-                    <h3 className="event-card__title">{ev.title}</h3>
-                    <ul className="event-card__meta">
-                      <li>
-                        <span className="event-card__meta-icon">🕒</span>
-                        {ev.time ? ev.time : ev.dateRange}
-                      </li>
-                      <li>
-                        <span className="event-card__meta-icon">📍</span>
-                        {ev.mode}
-                      </li>
-                    </ul>
-                    <p className="event-card__summary">{ev.summary}</p>
-                    <div className="event-card__footer">
-                      <button
-                        className={`btn btn--sm event-card__cta ${isSelected ? "btn--primary" : "btn--tinted"}`}
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        Register Now
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
+        {filteredEvents.length === 0 ? (
+          <div className="container events-empty">
+            <div className="events-empty__icon">📭</div>
+            <p>No events in this category right now.</p>
+            <button className="btn btn--secondary btn--sm" onClick={() => setActiveCategory('all')}>Browse all events</button>
           </div>
-          <button className="carousel-nav carousel-nav--next" onClick={() => scrollCarousel(1)} aria-label="Next events">
-            ›
-          </button>
-        </div>
+        ) : (
+          <div className="container upcoming-events__carousel">
+            <button className="carousel-nav carousel-nav--prev" onClick={() => scrollCarousel(-1)} aria-label="Previous events">‹</button>
+            <div className="upcoming-events__track" ref={trackRef}>
+              {filteredEvents.map(ev => {
+                const isSelected = ev.id === selectedId;
+                const isReg = registeredEvents.has(ev.id);
+                return (
+                  <article
+                    key={ev.id}
+                    className={`event-card ${isSelected ? "is-selected" : ""}`}
+                    onClick={() => setSelectedId(ev.id)}
+                  >
+                    <div className="event-card__media">
+                      <img src={ev.image} alt={ev.title} />
+                      <div className="event-card__badges">
+                        <span className={`event-card__badge badge--${ev.type.toLowerCase()}`}>{ev.type}</span>
+                        <span className={`event-card__price-badge ${ev.isFree ? 'badge--free' : 'badge--paid'}`}>
+                          {ev.isFree ? 'FREE' : 'PAID'}
+                        </span>
+                      </div>
+                      <div className="event-card__date">
+                        <span className="event-card__date-day">{ev.dateDay}</span>
+                        <span className="event-card__date-month">{ev.dateMonth}</span>
+                      </div>
+                    </div>
+                    <div className="event-card__body">
+                      {ev.prize && <div className="event-card__prize-chip">🏆 {ev.prize} Prize Pool</div>}
+                      <h3 className="event-card__title">{ev.title}</h3>
+                      <ul className="event-card__meta">
+                        <li><span className="event-card__meta-icon">🕒</span>{ev.time || ev.dateRange}</li>
+                        <li><span className="event-card__meta-icon">📍</span>{ev.mode}</li>
+                      </ul>
+                      <SpotsBar registered={ev.spotsRegistered} total={ev.spotsTotal} />
+                      <div className="event-card__footer">
+                        <button
+                          className={`btn btn--sm event-card__cta ${isReg ? 'btn--registered' : isSelected ? 'btn--primary' : 'btn--tinted'}`}
+                          onClick={e => handleRegister(ev, e)}
+                        >
+                          {isReg ? '✓ Registered!' : 'Register Now'}
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+            <button className="carousel-nav carousel-nav--next" onClick={() => scrollCarousel(1)} aria-label="Next events">›</button>
+          </div>
+        )}
       </section>
 
-      {/* SELECTED EVENT DETAIL */}
+      {/* ── SELECTED EVENT DETAIL ── */}
       {selectedEvent && (
         <section className="section event-detail detail-section">
           <div className="container event-detail__grid">
             <div className="event-detail__media">
-              <span className={`event-card__badge badge--${selectedEvent.type.toLowerCase()}`}>
-                {selectedEvent.type}
-              </span>
+              <span className={`event-card__badge badge--${selectedEvent.type.toLowerCase()}`}>{selectedEvent.type}</span>
               <img src={selectedEvent.image} alt={selectedEvent.title} />
             </div>
 
@@ -497,61 +891,95 @@ export default function EventsPage() {
                 <li>📅 {selectedEvent.dateRange}</li>
                 <li>📍 {selectedEvent.mode}</li>
                 {selectedEvent.teamSize && <li>👥 {selectedEvent.teamSize}</li>}
-                {selectedEvent.prize && <li>🏆 {selectedEvent.prize}</li>}
+                {selectedEvent.prize && <li>🏆 {selectedEvent.prize} Prize Pool</li>}
               </ul>
+              <JoiningAvatars count={selectedEvent.spotsRegistered} />
               <div className="event-detail__actions">
-                <button className="btn btn--primary">Register Now</button>
-                <button className="btn btn--secondary">
+                <button
+                  className={`btn ${registeredEvents.has(selectedEvent.id) ? 'btn--registered' : 'btn--primary'}`}
+                  onClick={e => handleRegister(selectedEvent, e)}
+                >
+                  {registeredEvents.has(selectedEvent.id) ? '✓ Registered!' : 'Register Now'}
+                </button>
+                <button className="btn btn--secondary" onClick={handleShare}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
                     <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
                     <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
                   </svg>
-                  Share
+                  {shareToast ? '✓ Copied!' : 'Share'}
                 </button>
               </div>
             </div>
 
             <div className="event-detail__accordion">
-              {ACCORDION_ORDER.map((key) => (
-                <div className="accordion-item" key={key}>
-                  <button
-                    className="accordion-item__trigger"
-                    onClick={() => toggleAccordion(key)}
-                    aria-expanded={openSection === key}
-                  >
-                    {key}
-                    <span className={`chev ${openSection === key ? "is-open" : ""}`}>⌄</span>
-                  </button>
-                  {openSection === key && (
-                    <div className="accordion-item__content">{accordionContent(key)}</div>
-                  )}
-                </div>
-              ))}
+              {ACCORDION_ORDER.map(key => {
+                const content = accordionContent(key);
+                if (!content) return null;
+                return (
+                  <div className="accordion-item" key={key}>
+                    <button
+                      className="accordion-item__trigger"
+                      onClick={() => toggleAccordion(key)}
+                      aria-expanded={openSection === key}
+                    >
+                      {key}
+                      <span className={`chev ${openSection === key ? "is-open" : ""}`}>⌄</span>
+                    </button>
+                    {openSection === key && (
+                      <div className="accordion-item__content">{content}</div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
       )}
 
-      {/* PAST EVENTS GALLERY */}
+      {/* ── TESTIMONIALS ── */}
+      <section className="section testimonials-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-heading">What Students Are Saying</h2>
+          </div>
+          <div className="testimonials-grid">
+            {TESTIMONIALS.map(t => (
+              <div className="testimonial-card" key={t.name}>
+                <div className="testimonial-card__stars">{'★'.repeat(t.stars)}</div>
+                <p className="testimonial-card__text">"{t.outcome}"</p>
+                <div className="testimonial-card__author">
+                  <span className="testimonial-card__av" style={{ background: t.color }}>{t.initials}</span>
+                  <div>
+                    <div className="testimonial-card__name">{t.name}</div>
+                    <div className="testimonial-card__college">{t.college}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── PAST EVENTS GALLERY ── */}
       <section className="section gallery-section">
         <div className="container">
           <div className="section-header">
             <h2 className="section-heading">Glimpses from Past Events</h2>
           </div>
           <div className="gallery-grid">
-            {GALLERY.map((src) => (
+            {GALLERY.map(src => (
               <img key={src} src={src} alt="Past event" className="gallery-grid__img" />
             ))}
           </div>
         </div>
       </section>
 
-      {/* SPONSORS */}
+      {/* ── SPONSORS ── */}
       <section className="section sponsors">
         <div className="container">
           <h2 className="section-heading">Our Sponsors &amp; Partners</h2>
           <div className="sponsors__grid">
-            {SPONSORS.map((s) => (
+            {SPONSORS.map(s => (
               <div className="sponsors__logo" key={s.name}>
                 <span className="sponsors__logo-icon">{s.logo}</span>
                 <span className="sponsors__logo-name" style={s.nameStyle}>{s.name}</span>
@@ -561,7 +989,7 @@ export default function EventsPage() {
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* ── FAQ ── */}
       <section className="section faq-section">
         <div className="container">
           <h2 className="section-heading">Frequently Asked Questions</h2>
@@ -582,11 +1010,10 @@ export default function EventsPage() {
           </div>
         </div>
       </section>
-      {/* FOOTER */}
+
+      {/* ── FOOTER ── */}
       <footer className="ep-footer">
         <div className="container ep-footer__grid">
-
-          {/* Brand col */}
           <div className="ep-footer__brand">
             <div className="ep-footer__logo">
               <span className="ep-footer__logo-mark">
@@ -598,29 +1025,24 @@ export default function EventsPage() {
               <span className="ep-footer__logo-name">अत्यanT</span>
             </div>
             <p className="ep-footer__tagline">
-              Atyant is a non-profit organization dedicated to empowering youth through events, webinars, hackathons and workshops.
+              Atyant is dedicated to empowering engineering students through events, webinars, hackathons and workshops.
             </p>
             <div className="ep-footer__socials">
-              {/* LinkedIn */}
               <a href="#" aria-label="LinkedIn" className="ep-footer__social-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
               </a>
-              {/* Instagram */}
               <a href="#" aria-label="Instagram" className="ep-footer__social-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
               </a>
-              {/* YouTube */}
               <a href="#" aria-label="YouTube" className="ep-footer__social-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.96-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="white"/></svg>
               </a>
-              {/* GitHub */}
               <a href="#" aria-label="GitHub" className="ep-footer__social-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.1-1.46-1.1-1.46-.9-.62.07-.6.07-.6 1 .07 1.52 1.02 1.52 1.02.89 1.52 2.33 1.08 2.9.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02A9.56 9.56 0 0 1 12 6.8c.85 0 1.7.11 2.5.33 1.91-1.3 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.75c0 .27.18.58.69.48A10.01 10.01 0 0 0 22 12C22 6.48 17.52 2 12 2z"/></svg>
               </a>
             </div>
           </div>
 
-          {/* Quick Links */}
           <div className="ep-footer__col">
             <h4 className="ep-footer__col-title">Quick Links</h4>
             <ul className="ep-footer__links">
@@ -633,7 +1055,6 @@ export default function EventsPage() {
             </ul>
           </div>
 
-          {/* Event Categories */}
           <div className="ep-footer__col">
             <h4 className="ep-footer__col-title">Event Categories</h4>
             <ul className="ep-footer__links">
@@ -645,7 +1066,6 @@ export default function EventsPage() {
             </ul>
           </div>
 
-          {/* Important Contacts */}
           <div className="ep-footer__col">
             <h4 className="ep-footer__col-title">Important Contacts</h4>
             <ul className="ep-footer__contacts">
@@ -679,7 +1099,6 @@ export default function EventsPage() {
             </ul>
           </div>
 
-          {/* Contact Us */}
           <div className="ep-footer__col">
             <h4 className="ep-footer__col-title">Contact Us</h4>
             <ul className="ep-footer__contacts">
@@ -703,12 +1122,36 @@ export default function EventsPage() {
               </li>
             </ul>
           </div>
-
         </div>
         <div className="ep-footer__bottom">
           © 2025 Atyant. All rights reserved.
         </div>
       </footer>
+
+      {/* ── STICKY REGISTER BAR (mobile only) ── */}
+      {showStickyBar && selectedEvent && (
+        <div className="sticky-register-bar">
+          <span className="sticky-register-bar__title">{selectedEvent.title}</span>
+          <button
+            className={`btn btn--sm ${registeredEvents.has(selectedEvent.id) ? 'btn--registered' : 'btn--primary'}`}
+            onClick={e => handleRegister(selectedEvent, e)}
+          >
+            {registeredEvents.has(selectedEvent.id) ? '✓ Registered!' : 'Register Now'}
+          </button>
+        </div>
+      )}
+
+      {/* ── REGISTER MODAL ── */}
+      {showRegModal && regEvent && (
+        <RegisterModal
+          event={regEvent}
+          onClose={() => { setShowRegModal(false); setRegEvent(null); }}
+          onSuccess={(id) => { markRegistered(id); setShowRegModal(false); setRegEvent(null); }}
+        />
+      )}
+
+      {/* ── HOST MODAL ── */}
+      {showHostModal && <HostModal onClose={() => setShowHostModal(false)} />}
     </div>
   );
 }

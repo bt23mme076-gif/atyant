@@ -40,6 +40,7 @@ import meetingroutes       from './routes/meetings.js';
 import webinarRoutes       from './routes/webinar.js';
 import newsletterRoutes    from './routes/newsletter.js';
 import statsRoutes         from './routes/statsRoutes.js';
+import eventRoutes         from './routes/eventRoutes.js';
 
 // ─── Models / utils ────────────────────────────────────────────────────────
 import Message      from './models/Message.js';
@@ -230,6 +231,7 @@ app.use('/api/push',            pushRoutes);
 app.use('/api/notifications',   notificationRoutes);
 app.use('/api/meetings',        meetingroutes);
 app.use('/api/webinar',         webinarRoutes);
+app.use('/api/events',          eventRoutes);
 app.use('/api/newsletter',      newsletterRoutes);
 
 // ─── Health check ──────────────────────────────────────────────────────────

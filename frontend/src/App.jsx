@@ -26,6 +26,7 @@ const ProfilePage          = lazy(() => import('./components/ProfilePage'));
 const CommunityChat        = lazy(() => import('./components/CommunityChat'));
 const WebinarRegistration  = lazy(() => import('./components/WebinarRegistration'));
 const EventsPage           = lazy(() => import('./components/EventsPage'));
+const EventsAdmin          = lazy(() => import('./components/EventsAdmin'));
 const PrivacyPolicy        = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService       = lazy(() => import('./components/TermsOfService'));
 
@@ -39,6 +40,7 @@ function App() {
   const isWebinarPage      = location.pathname === '/webinar';
   const isResumeStorePage  = location.pathname === '/resume-store';
   const isEventsPage       = location.pathname === '/events';
+  const isEventsAdmin      = location.pathname === '/admin/events';
 
   // Listen for community chat open event from Navbar
   useEffect(() => {
@@ -47,7 +49,7 @@ function App() {
     return () => window.removeEventListener('openCommunityChat', handler);
   }, []);
 
-  const hideShell = isNewHomePage || isAuthPage || isWebinarPage || isResumeStorePage || isEventsPage;
+  const hideShell = isNewHomePage || isAuthPage || isWebinarPage || isResumeStorePage || isEventsPage || isEventsAdmin;
 
   return (
     <div className="App">
@@ -71,6 +73,7 @@ function App() {
               <Route path="/profile/:username" element={<PublicProfilePage />} />
               <Route path="/resume-store"      element={<ResumeMarketplace />} />
               <Route path="/events"            element={<EventsPage />} />
+              <Route path="/admin/events"      element={<EventsAdmin />} />
               <Route path="/webinar"           element={<WebinarRegistration />} />
               <Route path="/privacy"           element={<PrivacyPolicy />} />
               <Route path="/terms"             element={<TermsOfService />} />

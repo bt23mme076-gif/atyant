@@ -1007,6 +1007,594 @@
   }
 }
 
+/* ============ REGISTERED BUTTON STATE ============ */
+.events-page .btn--registered {
+  background: #16a34a;
+  color: #fff;
+  border-color: #16a34a;
+}
+.events-page .btn--registered:hover {
+  background: #15803d;
+  border-color: #15803d;
+}
+
+/* ============ COUNTDOWN ============ */
+.events-page .countdown {
+  display: flex;
+  gap: 8px;
+}
+.events-page .countdown__unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--color-primary-tint);
+  border-radius: 6px;
+  padding: 5px 10px;
+  min-width: 44px;
+}
+.events-page .countdown__num {
+  font-size: 18px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--color-primary);
+  line-height: 1;
+}
+.events-page .countdown__lbl {
+  font-size: 10px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+.events-page .countdown-expired {
+  font-size: 13px;
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+/* ============ SPOTS BAR ============ */
+.events-page .spots-bar {
+  margin: 10px 0;
+}
+.events-page .spots-bar__track {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.events-page .spots-bar__fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+.events-page .spots-bar__meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.events-page .spots-bar__meta .is-urgent {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+/* ============ FREE / PAID BADGES ============ */
+.events-page .event-card__badges {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+/* override old .event-card__badge absolute positioning when inside .event-card__badges */
+.events-page .event-card__badges .event-card__badge {
+  position: static;
+}
+.events-page .event-card__price-badge {
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.events-page .badge--free {
+  background: #16a34a;
+  color: #fff;
+}
+.events-page .badge--paid {
+  background: #d97706;
+  color: #fff;
+}
+
+/* ============ PRIZE CHIP ON CARD ============ */
+.events-page .event-card__prize-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fef9c3;
+  color: #92400e;
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* ============ HERO FEATURED CARD ============ */
+.events-page .hero-featured {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+.events-page .hero-featured__card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(106, 56, 229, 0.12), var(--shadow-card);
+}
+.events-page .hero-featured__media {
+  position: relative;
+  height: 200px;
+}
+.events-page .hero-featured__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.events-page .hero-featured__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(106,56,229,0.25) 0%, rgba(20,18,31,0.5) 100%);
+  pointer-events: none;
+}
+.events-page .hero-featured__star-tag {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255,255,255,0.95);
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+}
+.events-page .hero-featured__type-badge {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  z-index: 2;
+}
+.events-page .hero-featured__body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.events-page .hero-featured__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.events-page .hero-featured__title {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+}
+.events-page .hero-featured__prize {
+  flex-shrink: 0;
+  background: #fef9c3;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+.events-page .hero-featured__meta {
+  font-size: 13px;
+  color: var(--color-muted);
+  margin: 0;
+}
+.events-page .hero-featured__countdown-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.events-page .hero-featured__countdown-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+.events-page .hero-featured__cta {
+  width: 100%;
+  padding: 13px;
+}
+
+/* ============ JOINING AVATARS ============ */
+.events-page .joining {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.events-page .joining__stack {
+  display: flex;
+}
+.events-page .joining__av {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  margin-left: -8px;
+  flex-shrink: 0;
+}
+.events-page .joining__stack .joining__av:first-child {
+  margin-left: 0;
+}
+.events-page .joining__text {
+  font-size: 13px;
+  color: var(--color-body);
+}
+.events-page .joining__text strong {
+  color: var(--color-ink);
+}
+
+/* ============ EVENTS EMPTY STATE ============ */
+.events-page .events-empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--color-muted);
+}
+.events-page .events-empty__icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+.events-page .events-empty p {
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+
+/* ============ TESTIMONIALS ============ */
+.events-page .testimonials-section {
+  background: var(--color-surface);
+  padding: 48px 0;
+}
+.events-page .testimonials-grid {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.events-page .testimonial-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-card);
+}
+.events-page .testimonial-card__stars {
+  color: #f59e0b;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+.events-page .testimonial-card__text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-body);
+  flex: 1;
+}
+.events-page .testimonial-card__author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.events-page .testimonial-card__av {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+.events-page .testimonial-card__name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--color-ink);
+}
+.events-page .testimonial-card__college {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+/* ============ STICKY REGISTER BAR (mobile only) ============ */
+.events-page .sticky-register-bar {
+  display: none;
+}
+@media (max-width: 768px) {
+  .events-page .sticky-register-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--color-white);
+    border-top: 1px solid var(--color-border);
+    padding: 12px 20px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  }
+  .events-page .sticky-register-bar__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+}
+
+/* ============ HOST MODAL ============ */
+.events-page .modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(20, 18, 31, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.events-page .modal-box {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 32px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+}
+.events-page .modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-muted);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.events-page .modal-close:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.events-page .modal-header {
+  margin-bottom: 24px;
+}
+.events-page .modal-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.events-page .modal-header p {
+  font-size: 14px;
+  color: var(--color-body);
+  margin-bottom: 20px;
+}
+.events-page .modal-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.events-page .modal-step-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  background: var(--color-white);
+  color: var(--color-muted);
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.events-page .modal-step-dot.is-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+.events-page .modal-step-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-body);
+  transition: opacity 0.2s;
+}
+.events-page .modal-step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--color-border);
+  border-radius: 1px;
+}
+
+/* host form */
+.events-page .host-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.events-page .form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.events-page .form-row--2col {
+  flex-direction: row;
+  gap: 14px;
+}
+.events-page .form-row--2col > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.events-page .form-row label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.events-page .form-row .req {
+  color: #dc2626;
+  margin-left: 2px;
+}
+.events-page .form-optional {
+  color: var(--color-muted);
+  font-weight: 400;
+}
+.events-page .form-row input,
+.events-page .form-row select,
+.events-page .form-row textarea {
+  padding: 10px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-ink);
+  background: var(--color-white);
+  transition: border-color 0.15s;
+  outline: none;
+  width: 100%;
+}
+.events-page .form-row input:focus,
+.events-page .form-row select:focus,
+.events-page .form-row textarea:focus {
+  border-color: var(--color-primary);
+}
+.events-page .form-row textarea {
+  resize: vertical;
+}
+.events-page .form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+/* api error inside form */
+.events-page .form-api-error {
+  color: #dc2626;
+  font-size: 13px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin: 0;
+}
+
+/* modal success state */
+.events-page .modal-success {
+  text-align: center;
+  padding: 16px 0 8px;
+}
+.events-page .modal-success__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.events-page .modal-success h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+.events-page .modal-success p {
+  font-size: 14px;
+  color: var(--color-body);
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+.events-page .modal-success__sub {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+/* ============ RESPONSIVE — new components ============ */
+@media (max-width: 1024px) {
+  .events-page .testimonials-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .events-page .hero-featured__card {
+    max-width: 100%;
+  }
+}
+@media (max-width: 900px) {
+  .events-page .hero-featured {
+    justify-content: center;
+  }
+  .events-page .testimonials-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .events-page .form-row--2col {
+    flex-direction: column;
+  }
+}
+@media (max-width: 600px) {
+  .events-page .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+  .events-page .modal-box {
+    padding: 24px 18px;
+  }
+  .events-page .countdown__num {
+    font-size: 15px;
+  }
+}
+
 /* ============ DARK THEME (matches landing page moon toggle) ============ */
 .atyant-landing.dark.events-page {
   --color-primary: #7567C9;
@@ -1069,4 +1657,47 @@
 
 .atyant-landing.dark.events-page .stats-bar__value {
   color: var(--color-ink);
+}
+
+/* dark — new components */
+.atyant-landing.dark.events-page .countdown__unit {
+  background: rgba(117, 103, 201, 0.18);
+}
+.atyant-landing.dark.events-page .event-card__prize-chip {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fcd34d;
+}
+.atyant-landing.dark.events-page .hero-featured__prize {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fcd34d;
+}
+.atyant-landing.dark.events-page .hero-featured__star-tag {
+  background: rgba(255,255,255,0.12);
+  color: var(--color-ink);
+}
+.atyant-landing.dark.events-page .modal-box {
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+.atyant-landing.dark.events-page .modal-close {
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+  color: var(--color-muted);
+}
+.atyant-landing.dark.events-page .form-row input,
+.atyant-landing.dark.events-page .form-row select,
+.atyant-landing.dark.events-page .form-row textarea {
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+  color: var(--color-ink);
+}
+.atyant-landing.dark.events-page .modal-success__icon {
+  background: rgba(22, 163, 74, 0.2);
+}
+.atyant-landing.dark.events-page .testimonial-card {
+  background: var(--color-surface-2);
+}
+.atyant-landing.dark.events-page .sticky-register-bar {
+  background: var(--color-surface);
+  border-color: var(--color-border);
 }

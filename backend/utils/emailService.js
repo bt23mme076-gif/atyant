@@ -565,3 +565,212 @@ export const sendWebinarRegistrationEmail = async (email, name, webinarTitle, we
     throw error;
   }
 };
+
+// ── Event registration confirmation (to student) ──────────────────────────
+export const sendEventRegistrationEmail = async ({ email, name, eventTitle, eventDate, eventMode }) => {
+  if (!resend) {
+    console.warn('⚠️ Email service not configured. Skipping event registration email.');
+    return { success: false };
+  }
+
+  const modeLabel = eventMode === 'Online' ? '🌐 Online' : `📍 ${eventMode}`;
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Atyant Events <notification@atyant.in>',
+      to: [email],
+      subject: `🎉 You're registered for ${eventTitle} — Atyant`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#FAFAFA;">
+          <div style="text-align:center;margin-bottom:24px;">
+            <h1 style="color:#6A38E5;margin:0;font-size:26px;font-weight:800;letter-spacing:-0.02em;">Atyant</h1>
+            <p style="color:#6B7280;font-size:13px;margin:4px 0 0;">Events &amp; Experiences</p>
+          </div>
+
+          <div style="background:#fff;border-radius:16px;border:1px solid #EBE8F2;padding:32px;box-shadow:0 4px 16px rgba(106,56,229,0.06);">
+            <div style="text-align:center;margin-bottom:20px;">
+              <span style="background:#F3EEFE;color:#6A38E5;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;">Registration Confirmed</span>
+            </div>
+
+            <h2 style="color:#14121F;text-align:center;font-size:22px;font-weight:700;margin:0 0 8px;">You're in, ${name}! 🚀</h2>
+            <p style="color:#5B5868;text-align:center;font-size:15px;line-height:1.6;margin:0 0 28px;">Your spot at <strong>${eventTitle}</strong> is confirmed. Here are your details:</p>
+
+            <div style="background:#F7F5FC;border-radius:12px;padding:22px;margin-bottom:28px;">
+              <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                  <td style="padding:8px 0;color:#8A879A;font-size:13px;font-weight:600;width:120px;">Event</td>
+                  <td style="padding:8px 0;color:#14121F;font-size:14px;font-weight:700;">${eventTitle}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0;color:#8A879A;font-size:13px;font-weight:600;">Date</td>
+                  <td style="padding:8px 0;color:#14121F;font-size:14px;">📅 ${eventDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0;color:#8A879A;font-size:13px;font-weight:600;">Mode</td>
+                  <td style="padding:8px 0;color:#14121F;font-size:14px;">${modeLabel}</td>
+                </tr>
+                <tr>
+                  <td style="padding:8px 0;color:#8A879A;font-size:13px;font-weight:600;">Registered As</td>
+                  <td style="padding:8px 0;color:#14121F;font-size:14px;">${name} &lt;${email}&gt;</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="background:#F0FDF4;border-radius:10px;padding:16px;margin-bottom:24px;border-left:4px solid #16a34a;">
+              <p style="color:#166534;font-size:13px;line-height:1.6;margin:0;">
+                <strong>What's next?</strong> The event link / venue details will be sent to this email 24 hours before the event. Keep an eye on your inbox — and check your spam folder just in case.
+              </p>
+            </div>
+
+            <div style="text-align:center;">
+              <a href="${process.env.FRONTEND_URL || 'https://atyant.in'}/events"
+                 style="background:#6A38E5;color:#fff;padding:13px 28px;text-decoration:none;border-radius:8px;font-weight:700;display:inline-block;font-size:15px;">
+                View All Events →
+              </a>
+            </div>
+          </div>
+
+          <div style="text-align:center;margin-top:24px;color:#9CA3AF;font-size:12px;line-height:1.6;">
+            <p>Questions? Email <a href="mailto:events@atyant.in" style="color:#6A38E5;">events@atyant.in</a></p>
+            <p>&copy; 2026 Atyant. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (err) {
+    console.error('sendEventRegistrationEmail error:', err);
+    throw err;
+  }
+};
+
+// ── Host application — confirmation to organizer ──────────────────────────
+export const sendEventHostConfirmationEmail = async ({ email, name, eventName, eventType, date }) => {
+  if (!resend) {
+    console.warn('⚠️ Email service not configured. Skipping host confirmation email.');
+    return { success: false };
+  }
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Atyant Events <notification@atyant.in>',
+      to: [email],
+      subject: `📋 Event Application Received — ${eventName}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;background:#FAFAFA;">
+          <div style="text-align:center;margin-bottom:24px;">
+            <h1 style="color:#6A38E5;margin:0;font-size:26px;font-weight:800;">Atyant</h1>
+            <p style="color:#6B7280;font-size:13px;margin:4px 0 0;">Events &amp; Experiences</p>
+          </div>
+
+          <div style="background:#fff;border-radius:16px;border:1px solid #EBE8F2;padding:32px;">
+            <h2 style="color:#14121F;font-size:20px;font-weight:700;margin:0 0 8px;">Application Received, ${name}!</h2>
+            <p style="color:#5B5868;font-size:14px;line-height:1.6;margin:0 0 24px;">
+              We've received your application to host <strong>${eventName}</strong> on Atyant. Our events team will review it and get back to you within <strong>48 hours</strong>.
+            </p>
+
+            <div style="background:#F7F5FC;border-radius:12px;padding:20px;margin-bottom:24px;">
+              <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                  <td style="padding:7px 0;color:#8A879A;font-size:13px;width:120px;">Event</td>
+                  <td style="padding:7px 0;color:#14121F;font-size:14px;font-weight:600;">${eventName}</td>
+                </tr>
+                <tr>
+                  <td style="padding:7px 0;color:#8A879A;font-size:13px;">Type</td>
+                  <td style="padding:7px 0;color:#14121F;font-size:14px;">${eventType}</td>
+                </tr>
+                <tr>
+                  <td style="padding:7px 0;color:#8A879A;font-size:13px;">Date</td>
+                  <td style="padding:7px 0;color:#14121F;font-size:14px;">${date}</td>
+                </tr>
+              </table>
+            </div>
+
+            <div style="background:#FEF9C3;border-radius:10px;padding:14px;border-left:4px solid #D97706;margin-bottom:24px;">
+              <p style="color:#92400E;font-size:13px;margin:0;line-height:1.5;">
+                <strong>What we cover:</strong> Promotion across our 2,000+ student network, registration management, certificate issuance, and logistics support. We'll discuss specifics once your application is approved.
+              </p>
+            </div>
+
+            <p style="color:#5B5868;font-size:13px;margin:0;">
+              For urgent queries: <a href="mailto:events@atyant.in" style="color:#6A38E5;">events@atyant.in</a>
+            </p>
+          </div>
+
+          <div style="text-align:center;margin-top:20px;color:#9CA3AF;font-size:12px;">
+            <p>&copy; 2026 Atyant. All rights reserved.</p>
+          </div>
+        </div>
+      `,
+    });
+
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (err) {
+    console.error('sendEventHostConfirmationEmail error:', err);
+    throw err;
+  }
+};
+
+// ── Host application — internal notification to Atyant team ──────────────
+export const sendEventHostNotificationEmail = async (application) => {
+  if (!resend) {
+    console.warn('⚠️ Email service not configured. Skipping host notification email.');
+    return { success: false };
+  }
+
+  const rows = [
+    ['Event Name', application.eventName],
+    ['Type', application.eventType],
+    ['Date', application.date],
+    ['Mode', application.mode],
+    ['Venue', application.venue || '—'],
+    ['Expected Attendees', application.attendees],
+    ['Prize Pool', application.prize || '—'],
+    ['Organizer', application.name],
+    ['Email', application.email],
+    ['College / Org', application.college],
+    ['Phone', application.phone],
+    ['Notes', application.notes || '—'],
+  ];
+
+  const tableRows = rows.map(([label, val]) => `
+    <tr>
+      <td style="padding:8px 12px;background:#F7F5FC;color:#8A879A;font-size:13px;font-weight:600;white-space:nowrap;">${label}</td>
+      <td style="padding:8px 12px;color:#14121F;font-size:13px;">${val}</td>
+    </tr>
+  `).join('');
+
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'Atyant Events Bot <notification@atyant.in>',
+      to: ['events@atyant.in'],
+      subject: `🆕 Host Application — ${application.eventName} (${application.eventType})`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:20px;">
+          <h2 style="color:#6A38E5;margin:0 0 4px;">New Event Host Application</h2>
+          <p style="color:#5B5868;font-size:13px;margin:0 0 20px;">Submitted ${new Date(application.submittedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST</p>
+
+          <table style="width:100%;border-collapse:collapse;border:1px solid #EBE8F2;border-radius:8px;overflow:hidden;">
+            <tbody>${tableRows}</tbody>
+          </table>
+
+          <div style="margin-top:16px;">
+            <p style="color:#5B5868;font-size:13px;"><strong>Description:</strong></p>
+            <p style="color:#14121F;font-size:14px;line-height:1.6;background:#F7F5FC;padding:14px;border-radius:8px;">${application.description}</p>
+          </div>
+
+          <p style="margin-top:20px;color:#8A879A;font-size:12px;">Application ID: ${application._id}</p>
+        </div>
+      `,
+    });
+
+    if (error) throw new Error(error.message);
+    return data;
+  } catch (err) {
+    console.error('sendEventHostNotificationEmail error:', err);
+    throw err;
+  }
+};
