@@ -11,6 +11,10 @@
 
     { "handle": "filesystem" },
 
+    { "src": "^/(home|achievements|login|signup|forgot-password|reset-password|auth-success|internships|dad|career-guides|resume-store|events|webinar|privacy|terms|profile|admin)(/.+)?$", "dest": "/index.html" },
+
+    { "src": "^/([a-z0-9][a-z0-9-]*[a-z0-9]|[a-z0-9]{1,2})$", "dest": "https://atyantproduct.vercel.app/$1" },
+
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
