@@ -425,7 +425,7 @@ export default function AtyantLandingPage() {
             >
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
-            <button className="al-primary-btn" style={{ minHeight: 38, padding: '0 18px', fontSize: '0.86rem' }} onClick={() => go('https://atyant.in/')}>
+            <button className="al-primary-btn" style={{ minHeight: 38, padding: '0 18px', fontSize: '0.86rem' }} onClick={() => go('https://atyant.in/atyantEngine')}>
               Try the Engine →
             </button>
           </div>
@@ -650,8 +650,8 @@ export default function AtyantLandingPage() {
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: 12, marginTop: 36, flexWrap: 'wrap' }}>
-                  <button className="al-primary-btn" onClick={() => go('https://atyant.in/')}>Try the Atyant Engine →</button>
-                  <button className="al-outline-btn" onClick={() => go('https://atyant.in/')}>Find a verified senior</button>
+                  <button className="al-primary-btn" onClick={() => go('https://atyant.in/atyantEngine')}>Try the Atyant Engine →</button>
+                  <button className="al-outline-btn" onClick={() => go('https://atyant.in/atyantEngine')}>Find a verified senior</button>
                 </div>
               </div>
             </div>
@@ -787,7 +787,7 @@ export default function AtyantLandingPage() {
             The path exists. Someone with your background has already figured it out. Atyant finds them for you — and makes their journey your starting point.
           </p>
           <div className="al-cta-actions">
-            <button className="al-primary-btn" onClick={() => go('https://atyant.in/')}>
+            <button className="al-primary-btn" onClick={() => go('https://atyant.in/atyantEngine')}>
               Try the Atyant Engine →
             </button>
           </div>
@@ -839,8 +839,8 @@ export default function AtyantLandingPage() {
 
             <div className="al-footer-col">
               <h4>Products</h4>
-              <button className="al-footer-link" onClick={() => go('https://atyant.in/')}>Clarity Engine</button>
-              <button className="al-footer-link" onClick={() => go('https://atyant.in/')}>Verified Senior Sessions</button>
+              <button className="al-footer-link" onClick={() => go('https://atyant.in/atyantEngine')}>Clarity Engine</button>
+              <button className="al-footer-link" onClick={() => go('https://atyant.in/atyantEngine')}>Verified Senior Sessions</button>
               <button className="al-footer-link" onClick={() => navigate('/career-guides')}>Verified Paths</button>
               <button className="al-footer-link" onClick={() => navigate('/resume-store')}>Resume Store</button>
               <button className="al-footer-link" style={{ color: 'var(--textMuted)' }}>AtyantJEE (coming soon)</button>

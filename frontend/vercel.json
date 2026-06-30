@@ -7,6 +7,9 @@
     { "src": "/(.*)", "has": [{ "type": "host", "value": "www.atyant.in" }], "status": 308, "headers": { "Location": "https://atyant.in/$1" } },
 
     { "src": "/home", "status": 308, "headers": { "Location": "/" } },
+
+    { "src": "/atyantEngine", "dest": "https://atyantproduct.vercel.app/atyantEngine" },
+    { "src": "/atyantEngine/(.*)", "dest": "https://atyantproduct.vercel.app/atyantEngine/$1" },
     { "src": "/product-assets/(.*)", "dest": "https://atyantproduct.vercel.app/product-assets/$1" },
 
     { "handle": "filesystem" },
