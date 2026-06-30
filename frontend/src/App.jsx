@@ -35,7 +35,7 @@ function App() {
 
   const [showCommunityChat, setShowCommunityChat] = useState(false);
 
-  const isNewHomePage      = location.pathname === '/home' || location.pathname === '/achievements';
+  const isNewHomePage      = location.pathname === '/' || location.pathname === '/achievements';
   const isAuthPage         = ['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname);
   const isWebinarPage      = location.pathname === '/webinar';
   const isResumeStorePage  = location.pathname === '/resume-store';
@@ -60,7 +60,8 @@ function App() {
           <ErrorBoundary>
             <Routes>
               {/* ── Public ── */}
-              <Route path="/home"              element={<AtyantLandingPage />} />
+              <Route path="/"                  element={<AtyantLandingPage />} />
+              <Route path="/home"              element={<Navigate to="/" replace />} />
               <Route path="/achievements"     element={<AchievementsPage />} />
               <Route path="/login"             element={<Login />} />
               <Route path="/signup"            element={<Signup />} />
@@ -82,7 +83,7 @@ function App() {
               <Route path="/profile"      element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
               {/* ── Fallback ── */}
-              <Route path="*" element={<Navigate to="/home" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </ErrorBoundary>
         </Suspense>

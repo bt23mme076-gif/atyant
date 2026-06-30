@@ -3,15 +3,18 @@
     { "src": "/assets/(.*)", "headers": { "cache-control": "public, max-age=31536000, immutable" }, "continue": true },
     { "src": "/index.html", "headers": { "cache-control": "public, max-age=0, must-revalidate" }, "continue": true },
 
-    { "src": "/", "has": [{ "type": "host", "value": "www.atyant.in" }], "status": 308, "headers": { "Location": "https://atyant.in/home" } },
+    { "src": "/", "has": [{ "type": "host", "value": "www.atyant.in" }], "status": 308, "headers": { "Location": "https://atyant.in/" } },
     { "src": "/(.*)", "has": [{ "type": "host", "value": "www.atyant.in" }], "status": 308, "headers": { "Location": "https://atyant.in/$1" } },
 
-    { "src": "/", "dest": "https://atyantproduct.vercel.app/" },
+    { "src": "/home", "status": 308, "headers": { "Location": "/" } },
+
+    { "src": "/atyantEngine", "dest": "https://atyantproduct.vercel.app/atyantEngine" },
+    { "src": "/atyantEngine/(.*)", "dest": "https://atyantproduct.vercel.app/atyantEngine/$1" },
     { "src": "/product-assets/(.*)", "dest": "https://atyantproduct.vercel.app/product-assets/$1" },
 
     { "handle": "filesystem" },
 
-    { "src": "^/(home|achievements|login|signup|forgot-password|reset-password|auth-success|internships|dad|career-guides|resume-store|events|webinar|privacy|terms|profile|admin)(/.+)?$", "dest": "/index.html" },
+    { "src": "^/(achievements|login|signup|forgot-password|reset-password|auth-success|internships|dad|career-guides|resume-store|events|webinar|privacy|terms|profile|admin)(/.+)?$", "dest": "/index.html" },
 
     { "src": "^/([a-z0-9][a-z0-9-]*[a-z0-9]|[a-z0-9]{1,2})$", "dest": "https://atyantproduct.vercel.app/$1" },
 
