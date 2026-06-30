@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://atyantuser:qf5CWLbdoKKzQlpL@cluster0.vutlgpa.mongodb.net/atyant?retryWrites=true&w=majority";
+const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/atyant";
 
 async function checkMentorAssignments() {
   try {

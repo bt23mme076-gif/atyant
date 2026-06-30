@@ -55,7 +55,7 @@ Rotate every credential listed in Finding #1 TODAY before deploying anything.
 
 | Secret | Masked Value |
 |--------|-------------|
-| MongoDB Atlas URI | `mongodb+srv://atyantuser:qf5C****@cluster0.vutlgpa.mongodb.net/atyant` |
+| MongoDB Atlas URI | `mongodb+srv://<username>:<password>@cluster0.vutlgpa.mongodb.net/atyant` |
 | JWT Secret | `supersecretkey` (trivially guessable even without git access) |
 | Google Service Account Private Key #1 | RSA 2048 `MIIEvAIBAD...` (full key in history) |
 | Google Service Account Private Key #2 | RSA 2048 `MIIEugIBAD...` (second key, different account) |
