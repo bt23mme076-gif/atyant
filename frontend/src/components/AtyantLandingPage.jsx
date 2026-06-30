@@ -379,7 +379,7 @@ export default function AtyantLandingPage() {
       <SEO
         title="Atyant — India's Career Clarity Engine for Engineering Students"
         description="Atyant matches your exact career confusion to a verified path from a senior who already lived it — same college, same branch, same target. Not a chatbot. Not a marketplace. A clarity engine."
-        canonical="https://atyant.in/home"
+        canonical="https://atyant.in/"
         keywords="Atyant, career clarity engine India, engineering student career guidance, Tier-2 NIT placement, verified senior sessions, AnswerCards, career confusion engineering, VNIT MANIT NIT career"
         ogImage="https://atyant.in/assets/og-banner.png"
         schema={orgSchema}

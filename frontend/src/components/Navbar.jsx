@@ -37,7 +37,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useContext(AuthContext);
-  const isIntelligence = location.pathname === 'https://atyant.in/';
+  const isIntelligence = location.pathname === '/';
   const [open, setOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [userPhoto, setUserPhoto] = useState(null);
@@ -100,7 +100,7 @@ const Navbar = () => {
 
   return (
     <header className={`navbar${isIntelligence ? ' navbar--intelligence' : ''}`}>
-      <Link to="/home" className={`brand${isIntelligence ? ' brand--intelligence' : ''}`}>
+      <Link to="/" className={`brand${isIntelligence ? ' brand--intelligence' : ''}`}>
         {isIntelligence ? <><span className="brand-signal">अ</span>त्यंत</> : 'अत्यंत'}
       </Link>
 

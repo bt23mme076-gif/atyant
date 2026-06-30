@@ -70,7 +70,7 @@ const Login = () => {
 
       // Normal redirect
       const userRole = response.data.user?.role || 'user';
-      navigate(userRole === 'mentor' ? '/dashboard' : '/home');
+      navigate(userRole === 'mentor' ? '/dashboard' : '/');
     } catch (error) {
       const friendly = mapLoginError(error);
       setMessage(friendly);
@@ -115,7 +115,7 @@ const Login = () => {
         } else {
           // Normal redirect
           const userRole = data.user?.role || 'user';
-          navigate(userRole === 'mentor' ? '/dashboard' : '/home');
+          navigate(userRole === 'mentor' ? '/dashboard' : '/');
         }
       } else {
         const msg = data?.message || 'Google login failed.';

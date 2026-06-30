@@ -340,14 +340,14 @@ export default function ResumeMarketplace() {
         <div className="al-announce">
           <span className="al-announce-tag">New</span>
           <span>Atyant — Hult Prize Top 20, IIT Bombay Nationals 2026</span>
-          <span style={{ color: 'var(--accent)', fontWeight: 800, cursor: 'pointer' }} onClick={() => navigate('/home')}>
+          <span style={{ color: 'var(--accent)', fontWeight: 800, cursor: 'pointer' }} onClick={() => navigate('/')}>
             Read more →
           </span>
         </div>
 
         {/* ── HEADER ── */}
         <header className="al-header">
-          <button className="al-brand" onClick={() => navigate('/home')}>
+          <button className="al-brand" onClick={() => navigate('/')}>
             <span className="al-brand-mark">A</span>
             Atyant
           </button>
@@ -547,7 +547,7 @@ export default function ResumeMarketplace() {
         <footer className="al-footer" style={{ borderTop: "1px solid var(--border)", background: "var(--bg2)" }}>
           <div className="al-footer-top">
             <div className="al-footer-col">
-              <button className="al-brand" onClick={() => navigate('/home')}>
+              <button className="al-brand" onClick={() => navigate('/')}>
                 <span className="al-brand-mark">A</span>
                 Atyant
               </button>
@@ -568,14 +568,14 @@ export default function ResumeMarketplace() {
 
             <div className="al-footer-col">
               <h4>How it works</h4>
-              <button className="al-footer-link" onClick={() => navigate('/home')}>The engine</button>
-              <button className="al-footer-link" onClick={() => navigate('/home')}>FAQ</button>
+              <button className="al-footer-link" onClick={() => navigate('/')}>The engine</button>
+              <button className="al-footer-link" onClick={() => navigate('/')}>FAQ</button>
             </div>
 
             <div className="al-footer-col">
               <h4>Company</h4>
-              <button className="al-footer-link" onClick={() => navigate('/home')}>Team</button>
-              <button className="al-footer-link" onClick={() => navigate('/home')}>Milestones</button>
+              <button className="al-footer-link" onClick={() => navigate('/')}>Team</button>
+              <button className="al-footer-link" onClick={() => navigate('/')}>Milestones</button>
               <button className="al-footer-link" onClick={() => navigate('/webinar')}>Events & Webinars</button>
             </div>
 

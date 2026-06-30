@@ -696,7 +696,7 @@ export default function EventsPage() {
           अत्यanT
         </button>
         <nav className={`al-nav${menuOpen ? ' open' : ''}`}>
-          <button className="al-nav-btn" onClick={() => go('/home')}>Products</button>
+          <button className="al-nav-btn" onClick={() => go('/')}>Products</button>
           <button className="al-nav-btn" onClick={() => scrollTo('approach')}>How it works</button>
           <button className="al-nav-btn" onClick={() => go('/achievements')}>Milestones</button>
           <button className={`al-nav-btn ${location.pathname === '/events' ? 'is-active' : ''}`} onClick={() => go('/events')}>Events</button>
@@ -1046,12 +1046,12 @@ export default function EventsPage() {
           <div className="ep-footer__col">
             <h4 className="ep-footer__col-title">Quick Links</h4>
             <ul className="ep-footer__links">
-              <li><a href="/home">Home</a></li>
-              <li><a href="/home">About Us</a></li>
+              <li><a href="/">Home</a></li>
+              <li><a href="/">About Us</a></li>
               <li><a href="/events">Events</a></li>
               <li><a href="/achievements">Achievements</a></li>
               <li><a href="/webinar">Webinars</a></li>
-              <li><a href="/home">Contact Us</a></li>
+              <li><a href="/">Contact Us</a></li>
             </ul>
           </div>
 

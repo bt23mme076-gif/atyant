@@ -705,7 +705,7 @@ export default function AchievementsPage() {
 
         {/* ── HEADER ── */}
         <header className="aa-header">
-          <button className="aa-brand" onClick={() => navigate('/home')}>
+          <button className="aa-brand" onClick={() => navigate('/')}>
             <span className="aa-brand-mark">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M12 2.5l1.9 5.3a3 3 0 001.8 1.8l5.3 1.9-5.3 1.9a3 3 0 00-1.8 1.8L12 20.5l-1.9-5.3a3 3 0 00-1.8-1.8L3 11.5l5.3-1.9a3 3 0 001.8-1.8z" fill="currentColor" />
@@ -715,7 +715,7 @@ export default function AchievementsPage() {
             अत्यanT
           </button>
           <nav className="aa-nav">
-            <button className="aa-nav-btn" onClick={() => navigate('/home')}>Home</button>
+            <button className="aa-nav-btn" onClick={() => navigate('/')}>Home</button>
             <button className="aa-nav-btn" onClick={() => scrollTo('timeline')}>Timeline</button>
             <button className="aa-nav-btn" onClick={() => scrollTo('hult')}>Hult Prize</button>
             <button className="aa-nav-btn" onClick={() => scrollTo('community')}>Community</button>
@@ -965,7 +965,7 @@ export default function AchievementsPage() {
             </div>
             <div className="aa-footer-col">
               <h4>Platform</h4>
-              <button className="aa-footer-link" onClick={() => navigate('/home')}>Home</button>
+              <button className="aa-footer-link" onClick={() => navigate('/')}>Home</button>
               <button className="aa-footer-link" onClick={() => navigate('/internships')}>Internships</button>
               <button className="aa-footer-link" onClick={() => navigate('/career-guides')}>Career Guides</button>
               <button className="aa-footer-link" onClick={() => navigate('/achievements')}>Achievements</button>

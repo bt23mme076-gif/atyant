@@ -143,11 +143,11 @@ const WebinarRegistration = () => {
       <div className="webinar-page-wrapper">
         {/* Minimal nav */}
         <header className="webinar-nav">
-          <a href="/home" className="webinar-nav-brand">
+          <a href="/" className="webinar-nav-brand">
             <span className="webinar-nav-mark">A</span>
             Atyant
           </a>
-          <a href="/home" className="webinar-nav-back">← Back to home</a>
+          <a href="/" className="webinar-nav-back">← Back to home</a>
         </header>
 
         {/* Glow Blobs */}
