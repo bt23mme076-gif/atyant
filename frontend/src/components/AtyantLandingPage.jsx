@@ -410,6 +410,7 @@ export default function AtyantLandingPage() {
           <nav className={`al-nav${menuOpen ? ' open' : ''}`}>
             <button className="al-nav-btn" onClick={() => scrollTo('products')}>Products</button>
             <button className="al-nav-btn" onClick={() => scrollTo('approach')}>How it works</button>
+            <button className="al-nav-btn" onClick={() => go('/internships')}>Internships</button>
             <button className="al-nav-btn" onClick={() => scrollTo('achievements')}>Milestones</button>
             <button className="al-nav-btn" onClick={() => go('/events')}>Events</button>
             <button className="al-nav-btn" onClick={() => scrollTo('team')}>Company</button>
