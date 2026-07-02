@@ -458,7 +458,7 @@ export default function AtyantLandingPage() {
           </h1>
 
           <p className="al-hero-sub">
-            Atyant matches your exact career confusion to a verified path from a senior who already lived it — same college, same branch, same target. Ask once. Get the right answer for your specific background.
+            Get matched to a verified senior from your college, branch, and target — who's already lived your exact confusion.
           </p>
 
           {/* ── Hero Chatbox ── */}
