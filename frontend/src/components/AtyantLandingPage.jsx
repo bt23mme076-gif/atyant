@@ -80,7 +80,7 @@ const PRODUCTS = [
     tag: 'live',
     title: 'Career Clarity Engine',
     desc: 'Type your exact career confusion in plain words. Atyant matches it to a verified AnswerCard — a structured path from a senior with the same college, branch, and target outcome. Not a chatbot answer. A lived, documented journey.',
-    href: 'https://atyant.in/',
+    href: 'https://atyant.in/atyantEngine',
     featured: true,
   },
   {
@@ -88,7 +88,7 @@ const PRODUCTS = [
     tag: 'live',
     title: 'Verified Senior Sessions',
     desc: 'When an AnswerCard is not enough, book a 1:1 session with the exact senior whose path matches yours. Priced from ₹49 — because the right 30 minutes is worth more than months of guessing.',
-    href: 'https://atyant.in/',
+    href: 'https://atyant.in/atyantEngine',
   },
   {
     icon: '📚',
@@ -319,7 +319,7 @@ export default function AtyantLandingPage() {
   const handleHeroSubmit = (q) => {
     const query = (q || heroQuery).trim();
     if (!query) return;
-    const dest = `https://atyant.in/?q=${encodeURIComponent(query)}`;
+    const dest = `https://atyant.in/atyantEngine?q=${encodeURIComponent(query)}`;
     window.location.href = dest;
   };
   const [theme, setTheme] = useState(() => {
