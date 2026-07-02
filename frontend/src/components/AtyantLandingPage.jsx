@@ -84,18 +84,18 @@ const PRODUCTS = [
     featured: true,
   },
   {
+  icon: '🏢',
+  tag: 'live',
+  title: 'Campus Partnerships',
+  desc: 'A placement-readiness layer for TPOs and placement cells — structured mentorship tracking, mentor accountability, a live prep-analytics dashboard, and auto-generated NAAC/NIRF-ready semester reports at institutional scale.',
+  href: null,
+  },
+  {
     icon: '🔗',
     tag: 'live',
     title: 'Verified Senior Sessions',
     desc: 'When an AnswerCard is not enough, book a 1:1 session with the exact senior whose path matches yours. Priced from ₹49 — because the right 30 minutes is worth more than months of guessing.',
     href: 'https://atyant.in/atyantEngine',
-  },
-  {
-    icon: '📚',
-    tag: 'live',
-    title: 'Verified Paths Library',
-    desc: 'Structured, execution-ready paths for placements, research internships, GATE, higher studies, and startups — built from real student journeys, not expert opinion.',
-    href: '/career-guides',
   },
   {
     icon: '📄',
@@ -109,13 +109,6 @@ const PRODUCTS = [
     tag: 'soon',
     title: 'AtyantJEE — JEE Guidance',
     desc: 'Live video and chat between JEE rank holders and current NIT and top-college students. Peer-to-peer college selection advice from people who made the choice recently.',
-    href: null,
-  },
-  {
-    icon: '🏢',
-    tag: 'beta',
-    title: 'Campus Partnerships',
-    desc: 'A scalable career clarity layer for placement cells and TPOs — giving colleges a structured, verified alternative to generic counselling at institutional scale.',
     href: null,
   },
 ];
