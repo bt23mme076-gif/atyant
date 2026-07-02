@@ -722,7 +722,7 @@ export default function AchievementsPage() {
             <button className="aa-nav-btn active" onClick={() => scrollTo('gallery')}>Gallery</button>
           </nav>
           <div className="aa-header-actions">
-            <button className="aa-primary-btn" onClick={() => window.open('https://atyant.in/', '_blank', 'noopener')}>
+            <button className="aa-primary-btn" onClick={() => window.open('https://atyant.in/atyantEngine', '_blank', 'noopener')}>
               Try the Engine →
             </button>
           </div>
@@ -942,7 +942,7 @@ export default function AchievementsPage() {
             >
               <Magnetic
                 className="aa-hero-cta" style={{ opacity: 1, animation: 'none' }}
-                onClick={() => window.open('https://atyant.in/', '_blank', 'noopener')}
+                onClick={() => window.open('https://atyant.in/atyantEngine', '_blank', 'noopener')}
               >
                 Build your milestone with Atyant →
               </Magnetic>
