@@ -35,7 +35,7 @@ function App() {
 
   const [showCommunityChat, setShowCommunityChat] = useState(false);
 
-  const isNewHomePage      = location.pathname === '/' || location.pathname === '/achievements';
+  const isNewHomePage      = location.pathname === '/' || location.pathname === '/achievements' || location.pathname === '/internships' || location.pathname === '/dad';
   const isAuthPage         = ['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname);
   const isWebinarPage      = location.pathname === '/webinar';
   const isResumeStorePage  = location.pathname === '/resume-store';

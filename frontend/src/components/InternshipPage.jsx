@@ -10,8 +10,13 @@ import './InternshipPage.css';
 
 const InternshipPage = () => {
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const isLoggedIn = !!user;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   
   // ✅ ADD LOADING STATE
   const [loading, setLoading] = useState(true);
@@ -616,6 +621,38 @@ Resume Link: [Resume Link]
       </script>
 
       <article className="internship-page" itemScope itemType="https://schema.org/WebPage">
+      {/* ── HEADER (matches Achievements page style) ── */}
+      <header className="ip-header">
+        <button className="ip-brand" onClick={() => navigate('/')}>
+          <span className="ip-brand-mark">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2.5l1.9 5.3a3 3 0 001.8 1.8l5.3 1.9-5.3 1.9a3 3 0 00-1.8 1.8L12 20.5l-1.9-5.3a3 3 0 00-1.8-1.8L3 11.5l5.3-1.9a3 3 0 001.8-1.8z" fill="currentColor" />
+              <path d="M18.5 3l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z" fill="currentColor" opacity="0.85" />
+            </svg>
+          </span>
+          अत्यanT
+        </button>
+        <nav className="ip-nav">
+          <button className="ip-nav-btn" onClick={() => navigate('/')}>Home</button>
+          <button className="ip-nav-btn active" onClick={() => navigate('/internships')}>Internships</button>
+          <button className="ip-nav-btn" onClick={() => navigate('/career-guides')}>Career Guides</button>
+          <button className="ip-nav-btn" onClick={() => navigate('/achievements')}>Achievements</button>
+        </nav>
+        <div className="ip-header-actions">
+          {isLoggedIn ? (
+            <>
+              <button className="ip-outline-btn" onClick={() => navigate('/profile')}>My Profile</button>
+              <button className="ip-primary-btn" onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <>
+              <button className="ip-outline-btn" onClick={() => navigate('/login')}>Login</button>
+              <button className="ip-primary-btn" onClick={() => navigate('/signup')}>Sign Up</button>
+            </>
+          )}
+        </div>
+      </header>
+
       {/* ========== HERO SECTION WITH VERTICAL SLIDERS (Topmate Style) ========== */}
       <header className="internship-hero-topmate" role="banner">
         <div className="hero-left-content">

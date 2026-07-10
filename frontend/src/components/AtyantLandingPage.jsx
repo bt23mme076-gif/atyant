@@ -454,6 +454,12 @@ export default function AtyantLandingPage() {
             Get matched to a verified senior from your college, branch, and target — who's already lived your exact confusion.
           </p>
 
+          <div className="al-hero-actions">
+            <button className="al-primary-btn" onClick={() => go('https://atyant.in/atyantEngine')}>
+              Get matched free →
+            </button>
+          </div>
+
           {/* ── Hero Chatbox ── */}
           <div className="al-hero-chatbox">
             <div className="al-hero-input-wrap">

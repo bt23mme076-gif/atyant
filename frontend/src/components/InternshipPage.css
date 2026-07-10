@@ -17,6 +17,52 @@
      green:        #3DBE82
    ============================================================ */
 
+/* ========== HEADER (matches Achievements page aa-header) ========== */
+.ip-header {
+  min-height: 68px; display: flex; align-items: center; justify-content: space-between;
+  gap: 24px; padding: 0 clamp(18px, 4vw, 60px);
+  background: rgba(13, 12, 18, 0.82);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05);
+  position: sticky; top: 0; z-index: 200;
+}
+.ip-brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  color: #ECEAF3; font-weight: 900; font-size: 1.2rem;
+  background: none; border: none; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+.ip-brand-mark {
+  width: 36px; height: 36px; display: grid; place-items: center;
+  border-radius: 9px; background: linear-gradient(135deg, #7567C9, #9d92e0);
+  color: white; box-shadow: 0 4px 14px rgba(117, 103, 201, 0.40); flex-shrink: 0;
+}
+.ip-brand-mark svg { width: 22px; height: 22px; display: block; }
+.ip-nav { display: flex; align-items: center; gap: 2px; flex: 1; justify-content: center; }
+.ip-nav-btn {
+  background: none; border: none; cursor: pointer; padding: 10px 16px; border-radius: 8px;
+  color: #A79FBA; font-size: 0.92rem; font-weight: 700; transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+.ip-nav-btn:hover { color: #fff; background: rgba(117,103,201,0.15); }
+.ip-nav-btn.active { color: #7567C9; }
+.ip-header-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+.ip-outline-btn {
+  background: transparent; color: #7567C9; border: 1px solid #7567C9;
+  min-height: 42px; padding: 0 18px; border-radius: 10px; font-size: 0.88rem; font-weight: 800;
+  cursor: pointer; white-space: nowrap; transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ip-outline-btn:hover { background: rgba(117,103,201,0.10); }
+.ip-primary-btn {
+  min-height: 42px; display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 18px; border-radius: 10px; font-weight: 800; font-size: 0.88rem;
+  cursor: pointer; border: none; white-space: nowrap;
+  color: #fff; background: linear-gradient(135deg, #7567C9 0%, #8b7ee0 100%);
+  box-shadow: 0 6px 20px rgba(117, 103, 201, 0.40); transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ip-primary-btn:hover { background: linear-gradient(135deg, #6355b8 0%, #7d6fd8 100%); transform: translateY(-1px); box-shadow: 0 10px 28px rgba(117, 103, 201, 0.40); }
+@media (max-width: 860px) { .ip-nav { display: none; } }
+
 /* ========== SCREEN READER ONLY ========== */
 .sr-only {
   position: absolute;
@@ -132,23 +178,24 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(135deg, #7C3AED 0%, #3B82F6 100%);
+  min-height: 48px;
+  background: linear-gradient(135deg, #7567C9 0%, #3B82F6 100%);
   color: #ffffff;
-  padding: 16px 34px;
-  border-radius: 16px;
+  padding: 0 32px;
+  border-radius: 10px;
   font-size: 1.05rem;
   font-weight: 700;
-  border: 1px solid rgba(124, 58, 237, 0.35);
+  border: 1px solid rgba(117, 103, 201, 0.35);
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-  box-shadow: 0 12px 34px rgba(124, 58, 237, 0.25);
+  box-shadow: 0 12px 34px rgba(117, 103, 201, 0.25);
   margin-bottom: 22px;
   letter-spacing: 0.01em;
 }
 
 .hero-cta-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 18px 42px rgba(124, 58, 237, 0.30);
+  box-shadow: 0 18px 42px rgba(117, 103, 201, 0.30);
   background: linear-gradient(135deg, #8E80DB 0%, #60A5FA 100%);
 }
 
