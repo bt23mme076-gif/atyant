@@ -848,7 +848,7 @@ export default function AchievementsPage() {
           title='Funded & backed<br />at <em>VNIT Nagpur.</em>'
           desc="Institutional belief turned into real support. Demonstrating the engine to the VNIT director and E-Cell secured funding and mentorship to scale verified career paths across India."
           stats={[
-            { count: 5, prefix: '₹', suffix: 'L+', label: 'Funding Secured' },
+            { count: 62, prefix: '₹', suffix: 'K+', label: 'Funding Secured' },
             { count: 25, suffix: '+', label: 'Mentors Onboarded' },
           ]}
         >
