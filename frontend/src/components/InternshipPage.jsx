@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { API_URL } from '../services/api.js';
 import { useEffect as useEffectReact, useState as useStateReact } from 'react';
-import { Download, Mail, ExternalLink, Search, Filter, Building2, GraduationCap, ChevronLeft, ChevronRight, Quote, Lock, ChevronDown } from 'lucide-react';
+import { Download, Mail, ExternalLink, Search, Filter, Building2, GraduationCap, ChevronLeft, ChevronRight, Quote, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
 import SEO from './SEO';
@@ -12,6 +12,14 @@ const InternshipPage = () => {
   const navigate = useNavigate();
   const { user, logout } = useContext(AuthContext);
   const isLoggedIn = !!user;
+
+  // Shares the home page's theme preference (light by default)
+  const [theme, setTheme] = useState(() => {
+    try { return localStorage.getItem('atyant_theme') || 'light'; } catch { return 'light'; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem('atyant_theme', theme); } catch { /* ignore */ }
+  }, [theme]);
 
   const handleLogout = () => {
     logout();
@@ -69,39 +77,11 @@ const InternshipPage = () => {
   // ========== PROTECTED LINK HANDLER ==========
   const handleProtectedLink = (url, e) => {
     e.preventDefault();
-    
-    if (!isLoggedIn) {
-      const shouldLogin = window.confirm(
-        '🔒 Login Required!\n\nYou need to login to access faculty links.\n\nClick OK to go to login page.'
-      );
-      
-      if (shouldLogin) {
-        navigate('/login', { 
-          state: { from: '/internships' } 
-        });
-      }
-      return;
-    }
-
-    // If logged in, open link
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   // ========== PROTECTED DOWNLOAD ==========
   const handleDownloadTemplate = () => {
-    if (!isLoggedIn) {
-      const shouldLogin = window.confirm(
-        '🔒 Login Required!\n\nYou need to login to download email template.\n\nClick OK to go to login page.'
-      );
-      
-      if (shouldLogin) {
-        navigate('/login', { 
-          state: { from: '/internships' } 
-        });
-      }
-      return;
-    }
-
     // Download template code...
     const emailTemplate = `(1) GENERALIZED IIM EMAIL 
 
@@ -381,15 +361,6 @@ Resume Link: [Resume Link]
   // Protected college selection handler
   const handleCollegeSelect = (e) => {
     const selected = e.target.value;
-    if (!isLoggedIn && selected) {
-      const shouldLogin = window.confirm(
-        '🔒 Login Required!\n\nYou need to login to view faculty emails.\n\nClick OK to go to login page.'
-      );
-      if (shouldLogin) {
-        navigate('/login', { state: { from: '/internships' } });
-      }
-      return;
-    }
     setCollege(selected);
     setActiveAreaFilter('All');
   };
@@ -400,6 +371,7 @@ Resume Link: [Resume Link]
       setProfessors([]);
       return;
     }
+    let cancelled = false;
     setLoadingEmails(true);
     // IIT: fetch from Google Sheet, IIM: fetch from backend
     const fetchProfessors = async () => {
@@ -418,18 +390,20 @@ Resume Link: [Resume Link]
           const res = await fetch(url);
           data = await res.json();
         }
+        if (cancelled) return;
         if (Array.isArray(data)) {
           setProfessors(data);
         } else {
           setProfessors([]);
         }
       } catch (e) {
-        setProfessors([]);
+        if (!cancelled) setProfessors([]);
       } finally {
-        setLoadingEmails(false);
+        if (!cancelled) setLoadingEmails(false);
       }
     };
     fetchProfessors();
+    return () => { cancelled = true; };
   }, [college, category]);
 
 
@@ -620,7 +594,7 @@ Resume Link: [Resume Link]
         {JSON.stringify(generateSchemaMarkup())}
       </script>
 
-      <article className="internship-page" itemScope itemType="https://schema.org/WebPage">
+      <article className={`internship-page${theme === 'dark' ? ' dark' : ''}`} itemScope itemType="https://schema.org/WebPage">
       {/* ── HEADER (matches Achievements page style) ── */}
       <header className="ip-header">
         <button className="ip-brand" onClick={() => navigate('/')}>
@@ -639,6 +613,13 @@ Resume Link: [Resume Link]
           <button className="ip-nav-btn" onClick={() => navigate('/achievements')}>Achievements</button>
         </nav>
         <div className="ip-header-actions">
+          <button
+            className="ip-theme-toggle"
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            onClick={() => setTheme(t => (t === 'dark' ? 'light' : 'dark'))}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
           {isLoggedIn ? (
             <>
               <button className="ip-outline-btn" onClick={() => navigate('/profile')}>My Profile</button>
@@ -666,22 +647,12 @@ Resume Link: [Resume Link]
           
           <button 
             onClick={handleDownloadTemplate}
-            className={`hero-cta-btn ${!isLoggedIn ? 'locked' : ''}`}
-            aria-label={isLoggedIn ? 'Download IIT IIM internship email templates' : 'Login required to download email templates'}
+            className="hero-cta-btn"
+            aria-label="Download IIT IIM internship email templates"
           >
-            {isLoggedIn ? (
-              <>
-                <Download size={20} aria-hidden="true" />
-                <span>Download Email Template</span>
-                <span className="arrow">→</span>
-              </>
-            ) : (
-              <>
-                <Lock size={20} aria-hidden="true" />
-                <span>Login to Download</span>
-                <span className="arrow">→</span>
-              </>
-            )}
+            <Download size={20} aria-hidden="true" />
+            <span>Download Email Template</span>
+            <span className="arrow">→</span>
           </button>
 
           <div className="hero-stats">
