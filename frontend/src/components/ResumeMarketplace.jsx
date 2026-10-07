@@ -353,7 +353,7 @@ export default function ResumeMarketplace() {
           </button>
 
           <nav className={`al-nav${menuOpen ? ' open' : ''}`}>
-            <button className="al-nav-btn" onClick={() => navigate('https://atyant.in/')}>Clarity Engine</button>
+            <button className="al-nav-btn" onClick={() => { window.location.href = 'https://atyant.in/'; }}>Clarity Engine</button>
             <button className="al-nav-btn" onClick={() => navigate('/ask')}>Verified Sessions</button>
             <button className="al-nav-btn" onClick={() => navigate('/career-guides')}>Verified Paths</button>
             <button className="al-nav-btn active-link" style={{ color: 'var(--accent)' }} onClick={() => navigate('/resume-store')}>Resume Store</button>
@@ -560,7 +560,7 @@ export default function ResumeMarketplace() {
 
             <div className="al-footer-col">
               <h4>Products</h4>
-              <button className="al-footer-link" onClick={() => navigate('https://atyant.in/')}>Clarity Engine</button>
+              <button className="al-footer-link" onClick={() => { window.location.href = 'https://atyant.in/'; }}>Clarity Engine</button>
               <button className="al-footer-link" onClick={() => navigate('/ask')}>Verified Senior Sessions</button>
               <button className="al-footer-link" onClick={() => navigate('/career-guides')}>Verified Paths</button>
               <button className="al-footer-link" onClick={() => navigate('/resume-store')}>Resume Store</button>

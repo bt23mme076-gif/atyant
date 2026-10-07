@@ -80,7 +80,7 @@ const PRODUCTS = [
     tag: 'live',
     title: 'Career Clarity Engine',
     desc: 'Type your exact career confusion in plain words. Atyant matches it to a verified AnswerCard — a structured path from a senior with the same college, branch, and target outcome. Not a chatbot answer. A lived, documented journey.',
-    href: 'https://atyant.in/atyantEngine',
+    href: 'https://atyant.in/',
     featured: true,
   },
   {
@@ -95,7 +95,7 @@ const PRODUCTS = [
     tag: 'live',
     title: 'Verified Senior Sessions',
     desc: 'When an AnswerCard is not enough, book a 1:1 session with the exact senior whose path matches yours. Priced from ₹49 — because the right 30 minutes is worth more than months of guessing.',
-    href: 'https://atyant.in/atyantEngine',
+    href: 'https://atyant.in/',
   },
   {
     icon: '📄',
@@ -312,7 +312,7 @@ export default function AtyantLandingPage() {
   const handleHeroSubmit = (q) => {
     const query = (q || heroQuery).trim();
     if (!query) return;
-    const dest = `https://atyant.in/atyantEngine?q=${encodeURIComponent(query)}`;
+    const dest = `https://atyant.in/?q=${encodeURIComponent(query)}`;
     window.location.href = dest;
   };
   const [theme, setTheme] = useState(() => {
@@ -372,7 +372,7 @@ export default function AtyantLandingPage() {
       <SEO
         title="Atyant — India's Career Clarity Engine for Engineering Students"
         description="Atyant matches your exact career confusion to a verified path from a senior who already lived it — same college, same branch, same target. Not a chatbot. Not a marketplace. A clarity engine."
-        canonical="https://atyant.in/"
+        canonical="https://atyant.in/company"
         keywords="Atyant, career clarity engine India, engineering student career guidance, Tier-2 NIT placement, verified senior sessions, AnswerCards, career confusion engineering, VNIT MANIT NIT career"
         ogImage="https://atyant.in/assets/og-banner.png"
         schema={orgSchema}
@@ -419,7 +419,7 @@ export default function AtyantLandingPage() {
             >
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
-            <button className="al-primary-btn" style={{ minHeight: 38, padding: '0 18px', fontSize: '0.86rem' }} onClick={() => go('https://atyant.in/atyantEngine')}>
+            <button className="al-primary-btn" style={{ minHeight: 38, padding: '0 18px', fontSize: '0.86rem' }} onClick={() => go('https://atyant.in/')}>
               Try the Engine →
             </button>
           </div>
@@ -453,12 +453,6 @@ export default function AtyantLandingPage() {
           <p className="al-hero-sub">
             Get matched to a verified senior from your college, branch, and target — who's already lived your exact confusion.
           </p>
-
-          <div className="al-hero-actions">
-            <button className="al-primary-btn" onClick={() => go('https://atyant.in/atyantEngine')}>
-              Get matched free →
-            </button>
-          </div>
 
           {/* ── Hero Chatbox ── */}
           <div className="al-hero-chatbox">
@@ -650,8 +644,8 @@ export default function AtyantLandingPage() {
                   ))}
                 </div>
                 <div style={{ display: 'flex', gap: 12, marginTop: 36, flexWrap: 'wrap' }}>
-                  <button className="al-primary-btn" onClick={() => go('https://atyant.in/atyantEngine')}>Try the Atyant Engine →</button>
-                  <button className="al-outline-btn" onClick={() => go('https://atyant.in/atyantEngine')}>Find a verified senior</button>
+                  <button className="al-primary-btn" onClick={() => go('https://atyant.in/')}>Try the Atyant Engine →</button>
+                  <button className="al-outline-btn" onClick={() => go('https://atyant.in/')}>Find a verified senior</button>
                 </div>
               </div>
             </div>
@@ -787,7 +781,7 @@ export default function AtyantLandingPage() {
             The path exists. Someone with your background has already figured it out. Atyant finds them for you — and makes their journey your starting point.
           </p>
           <div className="al-cta-actions">
-            <button className="al-primary-btn" onClick={() => go('https://atyant.in/atyantEngine')}>
+            <button className="al-primary-btn" onClick={() => go('https://atyant.in/')}>
               Try the Atyant Engine →
             </button>
           </div>
@@ -839,8 +833,8 @@ export default function AtyantLandingPage() {
 
             <div className="al-footer-col">
               <h4>Products</h4>
-              <button className="al-footer-link" onClick={() => go('https://atyant.in/atyantEngine')}>Clarity Engine</button>
-              <button className="al-footer-link" onClick={() => go('https://atyant.in/atyantEngine')}>Verified Senior Sessions</button>
+              <button className="al-footer-link" onClick={() => go('https://atyant.in/')}>Clarity Engine</button>
+              <button className="al-footer-link" onClick={() => go('https://atyant.in/')}>Verified Senior Sessions</button>
               <button className="al-footer-link" onClick={() => navigate('/career-guides')}>Verified Paths</button>
               <button className="al-footer-link" onClick={() => navigate('/resume-store')}>Resume Store</button>
               <button className="al-footer-link" style={{ color: 'var(--textMuted)' }}>AtyantJEE (coming soon)</button>

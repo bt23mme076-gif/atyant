@@ -5,7 +5,7 @@ export const SEO_CONFIG = {
     title: 'Atyant — AI-Powered Career Guidance for Engineering Students',
     description:
       'Atyant helps Tier-2 and Tier-3 engineering students get internships and placements. Get senior roadmaps, professor email templates, mentor guidance, and AI answers.',
-    canonical: 'https://atyant.in/',
+    canonical: 'https://atyant.in/company',
     ogImage: 'https://atyant.in/og-home.png',
     schema: {
       '@context': 'https://schema.org',
@@ -16,7 +16,7 @@ export const SEO_CONFIG = {
         'AI-powered student guidance platform for engineering students seeking internships and placements.',
       potentialAction: {
         '@type': 'SearchAction',
-        target: 'https://atyant.in/chat?q={search_term_string}',
+        target: 'https://atyant.in/?q={search_term_string}',
         'query-input': 'required name=search_term_string',
       },
       sameAs: [
