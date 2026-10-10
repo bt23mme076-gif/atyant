@@ -10,33 +10,15 @@ import {
   motion, useScroll, useSpring, useInView,
   useMotionValue, animate,
 } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import SEO from './SEO';
+import { A, ALT, PAGE_SEO, GALLERY_LD } from '../data/achievementPhotos';
 import './AtyantLandingPage.css';
 import './AchievementsPage.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ───────────────────────── ASSETS ───────────────────────── */
-const IMG = '/achievements/';
-const A = {
-  hultStage: IMG + 'hult-prize-stage.png',
-  hultStage2:IMG + 'hult-prize2.png',
-  hultPitch: IMG + 'img-hult-pitch.png',
-  pitchWar:  IMG + 'img-pitch-war.png',
-  pitchWar2: IMG + 'img-pitch-war2.png',
-  pitchWar3: IMG + 'img-pitch-war3.png',
-  founders:  IMG + 'img-founders.png',
-  team:      IMG + 'img-team.png',
-  discussion:IMG + 'img-discussion.png',
-  vnitDir:   IMG + 'img-vnit-director.png',
-  vnitEcell: IMG + 'img-vnit-ecell.png',
-  manit:     IMG + 'img-manit.png',
-  pce:       IMG + 'img-pce.png',
-  ghrce:     IMG + 'img-ghrce.png',
-  iim:       IMG + 'img-iim-mumbai.png',
-  success:   IMG + 'img-success.png',
-  bny:       IMG + 'img-bny.png',
-};
+/* Photos, alt text and SEO data: src/data/achievementPhotos.js */
 
 /* ════════════════════════════════════════════════════════════════════
    ParticleMorph — Three.js particle text that morphs through phrases
@@ -543,7 +525,7 @@ function Mosaic() {
             transition={{ duration: 0.6, delay: (i % 4) * 0.06, ease: [0.16, 1, 0.3, 1] }}
             onClick={() => setActive(m)}
           >
-            <img src={m.src} alt={m.name} loading="lazy" />
+            <img src={m.src} alt={ALT[m.src] || m.name} loading="lazy" />
             <div className="aa-mosaic-overlay">
               <span className="aa-mosaic-cat">{m.cat}</span>
               <span className="aa-mosaic-name">{m.name}</span>
@@ -565,7 +547,7 @@ function Mosaic() {
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
           >
             <button className="aa-modal-close" onClick={() => setActive(null)} aria-label="Close">✕</button>
-            <img className="aa-modal-img" src={active.src} alt={active.name} />
+            <img className="aa-modal-img" src={active.src} alt={ALT[active.src] || active.name} />
             <div className="aa-modal-body">
               <span className="aa-modal-cat">{active.cat}</span>
               <h3 className="aa-modal-title">{active.name}</h3>
@@ -597,7 +579,7 @@ function Milestone({ side, year, title, desc, imgs }) {
         <div className="aa-collage">
           {imgs.map((src, i) => (
             <motion.img
-              key={src} src={src} alt={title} loading="lazy"
+              key={src} src={src} alt={ALT[src] || title} loading="lazy"
               initial={{ opacity: 0, scale: 0.85 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -694,10 +676,14 @@ export default function AchievementsPage() {
   return (
     <>
       <SEO
-        title="Milestones that define Atyant — Achievements"
-        description="From IIT Bombay Hult Prize Top 20 to a growing community of ambitious students — the milestones building India's career infrastructure."
+        title={PAGE_SEO.title}
+        description={PAGE_SEO.description}
         canonical="https://atyant.in/achievements"
+        ogImage={PAGE_SEO.ogImage}
       />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(GALLERY_LD)}</script>
+      </Helmet>
 
       <div className={`atyant-achievements${theme === 'dark' ? ' dark' : ''}`}>
         {/* orb */}
@@ -808,7 +794,7 @@ export default function AchievementsPage() {
           ]}
         >
           <div className="aa-glass-card">
-            <img src={A.hultStage} alt="Hult Prize stage" />
+            <img src={A.hultStage} alt={ALT[A.hultStage]} />
           </div>
         </Feature>
 
@@ -834,7 +820,7 @@ export default function AchievementsPage() {
           </svg>
 
           <div className="aa-glass-card">
-            <img src={A.pitchWar} alt="Pitch Wars Champion" />
+            <img src={A.pitchWar} alt={ALT[A.pitchWar]} />
           </div>
         </div>
         </Feature>
@@ -853,7 +839,7 @@ export default function AchievementsPage() {
           ]}
         >
           <div className="aa-glass-card">
-            <img src={A.vnitDir} alt="VNIT director" />
+            <img src={A.vnitDir} alt={ALT[A.vnitDir]} />
           </div>
         </Feature>
 
@@ -868,7 +854,7 @@ export default function AchievementsPage() {
           desc="Beyond the trophies and headlines, the real milestone is people — tens of thousands of students, thousands of verified mentors, and hundreds of colleges, all moving together."
         >
           <div className="aa-glass-card">
-            <img src={A.discussion} alt="VNIT director" />
+            <img src={A.discussion} alt={ALT[A.discussion]} />
           </div>
         </Feature>
 
@@ -881,7 +867,7 @@ export default function AchievementsPage() {
           <div className="aa-marquee">
             {[...MARQUEE, ...MARQUEE].map((src, i) => (
               <div className="aa-marquee-card" key={i}>
-                <img src={src} alt="gallery" loading="lazy" />
+                <img src={src} alt={ALT[src]} loading="lazy" />
               </div>
             ))}
           </div>

@@ -353,7 +353,7 @@ export default function AtyantLandingPage() {
     name: 'Atyant',
     url: 'https://atyant.in/',
     logo: 'https://atyant.in/favicon.png',
-    description: "India's career clarity engine — building structured, verified career paths for Tier-2 and Tier-3 engineering students.",
+    description: "India's first Human + AI career execution platform — structured career paths for every engineering student from seniors of the same college and branch.",
     foundingDate: '2024',
     founder: [
       { '@type': 'Person', name: 'Nitin Rai', jobTitle: 'Founder & CEO' },
@@ -370,10 +370,10 @@ export default function AtyantLandingPage() {
   return (
     <>
       <SEO
-        title="Atyant — India's Career Clarity Engine for Engineering Students"
-        description="Atyant matches your exact career confusion to a verified path from a senior who already lived it — same college, same branch, same target. Not a chatbot. Not a marketplace. A clarity engine."
+        title="About Atyant — India's First Human + AI Career Execution Platform"
+        description="India's first Human + AI career execution platform. Atyant matches your exact career confusion to the real path of a senior who already lived it — same college, same branch, same target. Not a chatbot. Not a marketplace."
         canonical="https://atyant.in/company"
-        keywords="Atyant, career clarity engine India, engineering student career guidance, Tier-2 NIT placement, verified senior sessions, AnswerCards, career confusion engineering, VNIT MANIT NIT career"
+        keywords="Atyant, career clarity engine India, engineering student career guidance, NIT placement guidance, senior 1:1 sessions, human + AI career platform, AnswerCards, career confusion engineering, VNIT MANIT NIT career"
         ogImage="https://atyant.in/assets/og-banner.png"
         schema={orgSchema}
       />
