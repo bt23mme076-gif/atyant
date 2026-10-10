@@ -8,7 +8,7 @@ import './WebinarRegistration.css';
 const WebinarRegistration = () => {
   // Configurable Webinar Details
   const WEBINAR_DATE_TARGET = new Date('2026-07-18T18:00:00+05:30'); // July 18, 2026 6:00 PM IST
-  const WEBINAR_TITLE = 'How to Crack an IIM Internship from a Tier-2 NIT — Live with Atyant Seniors';
+  const WEBINAR_TITLE = 'How to Crack an IIM Internship from an NIT — Live with Atyant Seniors';
   const WEBINAR_SPEAKER = 'Nitin Rai (Founder, Atyant & VNIT Nagpur)';
   const WEBINAR_DATE_STR = 'Friday, July 18, 2026 at 6:00 PM IST';
   const WHATSAPP_GROUP_URL = 'https://chat.whatsapp.com/IsOeHy87Tu0BsIJiBVHjUW';
@@ -134,9 +134,9 @@ const WebinarRegistration = () => {
   return (
     <>
       <SEO
-        title="Webinar: How to Crack an IIM Internship from a Tier-2 NIT | Atyant"
+        title="Webinar: How to Crack an IIM Internship from an NIT | Atyant"
         description="Live session with Atyant seniors who cracked consulting and finance internships from non-IIT backgrounds. Register free — real paths, not generic prep advice."
-        keywords="IIM internship Tier-2 NIT, career webinar VNIT, Atyant webinar, Nitin Rai Atyant, engineering student career clarity"
+        keywords="IIM internship from NIT, career webinar VNIT, Atyant webinar, Nitin Rai Atyant, engineering student career clarity"
         url="https://atyant.in/webinar"
       />
 
@@ -166,7 +166,7 @@ const WebinarRegistration = () => {
 
           {/* Heading */}
           <h1 className="webinar-title">
-            How to Crack an IIM Internship from a Tier-2 NIT
+            How to Crack an IIM Internship from an NIT
           </h1>
           <p className="webinar-subtitle">
             Live with Atyant seniors who cracked consulting and finance internships from non-IIT backgrounds. Real paths, real context — not generic prep advice.
@@ -264,7 +264,7 @@ const WebinarRegistration = () => {
                   <h4>Nitin Rai</h4>
                   <p className="presenter-title">Founder & CEO, Atyant — VNIT Nagpur</p>
                   <p className="presenter-bio">
-                    Experienced the career clarity gap firsthand as a Tier-2 engineering student. Built Atyant to fix it. Hult Prize Top 20, IIT Bombay 2026. Shipped 20+ real products while in college.
+                    Experienced the career clarity gap firsthand as an engineering student. Built Atyant to fix it. Hult Prize Top 20, IIT Bombay 2026. Shipped 20+ real products while in college.
                   </p>
                 </div>
               </div>

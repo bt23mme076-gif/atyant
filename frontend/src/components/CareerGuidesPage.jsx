@@ -246,7 +246,7 @@ const tracks = [
     badge: "CSE Internship",
     title: "CSE Off-Campus Internship Guide",
     subtitle:
-      "A practical roadmap for Tier-2 and Tier-3 engineering students trying to secure their first software internship.",
+      "A practical roadmap for engineering students trying to secure their first software internship.",
     reality: [
       { value: "150–300", label: "Applications before internship" },
       { value: "150–300", label: "DSA problems many students solve" },
@@ -576,7 +576,7 @@ export default function CareerGuidesPage() {
             From confusion to <span>clarity</span> to career opportunities
           </h1>
           <p className="hero-copy">
-            A single premium page for Tier-2 and Tier-3 engineering students to
+            A single premium page for engineering students from any college to
             explore the most practical paths into analytics, software,
             product, and AI/ML roles.
           </p>
@@ -597,7 +597,7 @@ export default function CareerGuidesPage() {
             </div>
             <div className="hero-stat-card">
               <h3>Built for</h3>
-              <p>Tier-2 & Tier-3 engineering students</p>
+              <p>Engineering students from any college</p>
             </div>
           </div>
         </div>

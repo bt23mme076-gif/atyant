@@ -120,7 +120,7 @@ const TermsOfService = () => {
                 <h2 className="tos-section-title">Platform description</h2>
               </div>
               <p className="tos-body">
-                Atyant is a career guidance and mentorship platform that connects students from Tier-2 and Tier-3 Indian colleges with verified senior mentors from industry, academia, and entrepreneurship.
+                Atyant is a career guidance and mentorship platform that connects engineering students from colleges across India with senior mentors from industry, academia, and entrepreneurship.
               </p>
               <div className="tos-card-grid">
                 <div className="tos-card">

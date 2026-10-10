@@ -130,7 +130,7 @@ const ACHIEVEMENTS = [
     icon: '👥',
     date: 'June 2026',
     title: '2,000+ Students Onboarded',
-    desc: 'Engineering students from Tier-2 and Tier-3 colleges using Atyant for placements, research internships, GATE preparation, and higher studies decisions.',
+    desc: 'Engineering students from colleges across India using Atyant for placements, research internships, GATE preparation, and higher studies decisions.',
   },
   {
     icon: '🤝',
@@ -142,7 +142,7 @@ const ACHIEVEMENTS = [
     icon: '🏫',
     date: 'Q2 2026',
     title: 'B2B College Pipeline Active',
-    desc: 'Institutional outreach underway to 50+ Tier-2 engineering college TPOs. First MoUs expected Q3 2026. Zero campus acquisition cost after the first partnership.',
+    desc: 'Institutional outreach underway to 50+ engineering college TPOs. First MoUs expected Q3 2026. Zero campus acquisition cost after the first partnership.',
   },
   {
     icon: '📣',
@@ -156,7 +156,7 @@ const EVENTS = [
   {
     month: 'JUL',
     day: '18',
-    title: 'Webinar: How to Crack an IIM Internship from a Tier-2 NIT',
+    title: 'Webinar: How to Crack an IIM Internship from an NIT',
     desc: 'Live session with Atyant seniors who cracked consulting and finance internships from non-IIT backgrounds. Real paths, not generic prep advice.',
     type: 'Webinar',
     typeStyle: { background: 'rgba(117,103,201,0.1)', color: '#5A4CB0', border: '1px solid #CFC6EE' },
@@ -184,7 +184,7 @@ const EVENTS = [
     month: 'SEP',
     day: '10',
     title: 'B2B: Campus Partnership Briefing for Placement Cells',
-    desc: "For TPOs and career services heads at Tier-2 engineering colleges. Overview of Atyant's institutional clarity layer and integration model.",
+    desc: "For TPOs and career services heads at engineering colleges. Overview of Atyant's institutional clarity layer and integration model.",
     type: 'B2B',
     typeStyle: { background: 'rgba(220,38,38,0.07)', color: '#dc2626', border: '1px solid rgba(220,38,38,0.2)' },
     href: null,
@@ -224,7 +224,7 @@ const TEAM = [
     name: 'Nitin Rai',
     role: 'Founder & CEO',
     college: 'VNIT Nagpur',
-    desc: 'Experienced the career clarity gap firsthand as a Tier-2 student — built Atyant to fix it. Shipped 20+ real products. Hult Prize Top 20, IIT Bombay 2026.',
+    desc: 'Experienced the career clarity gap firsthand as an engineering student — built Atyant to fix it. Shipped 20+ real products. Hult Prize Top 20, IIT Bombay 2026.',
   },
   {
     initials: 'AP',
@@ -736,7 +736,7 @@ export default function AtyantLandingPage() {
             <div className="al-section-head center">
               <p className="al-eyebrow">Company</p>
               <h2>Built by people who lived the problem</h2>
-              <p>We are not EdTech founders who identified a market. We were the students Atyant is built for — Tier-2 college, no strong senior network, no clear execution path. We built the platform we needed.</p>
+              <p>We are not EdTech founders who identified a market. We were the students Atyant is built for — no strong senior network, no clear execution path. We built the platform we needed.</p>
             </div>
             <div className="al-team-grid">
               {TEAM.map(t => (

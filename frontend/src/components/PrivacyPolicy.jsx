@@ -67,7 +67,7 @@ const PrivacyPolicy = () => {
                 <h2 className="pp-section-title">Who we are</h2>
               </div>
               <p className="pp-body">
-                Atyant ("we", "our", "us") is a career guidance and mentorship platform that connects students from Tier-2 and Tier-3 Indian colleges with verified senior mentors across industries. We are operated by the Atyant team and accessible at{' '}
+                Atyant ("we", "our", "us") is a career guidance and mentorship platform that connects engineering students from colleges across India with senior mentors across industries. We are operated by the Atyant team and accessible at{' '}
                 <a href="https://atyant.in" target="_blank" rel="noopener noreferrer">atyant.in</a>.
               </p>
               <p className="pp-body">
