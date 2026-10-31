@@ -964,12 +964,14 @@ export default function AchievementsPage() {
             </div>
             <div className="aa-footer-col">
               <h4>Support & Contact</h4>
-              <p style={{ color: 'var(--textSub)', fontSize: '0.86rem' }}>Email: support@atyant.in</p>
-              <p style={{ color: 'var(--textSub)', fontSize: '0.86rem' }}>Intelligence HQ: Nagpur, Maharashtra</p>
+              <p style={{ color: 'var(--textSub)', fontSize: '0.86rem' }}>Atyant AI Technologies Pvt Ltd</p>
+              <p style={{ color: 'var(--textSub)', fontSize: '0.86rem' }}>Reg. Office: Plot No 03, Neelmani, 8 Flat No 301, Parvati Nagar, Nagpur-440027, Maharashtra</p>
+              <p style={{ color: 'var(--textSub)', fontSize: '0.86rem' }}>Phone: <a href="tel:+919579040183" style={{ color: 'inherit' }}>+91 95790 40183</a></p>
+              <p style={{ color: 'var(--textSub)', fontSize: '0.86rem' }}>Email: <a href="mailto:atyant.in@gmail.com" style={{ color: 'inherit' }}>atyant.in@gmail.com</a></p>
             </div>
           </div>
           <div className="aa-footer-bottom">
-            <p>© {new Date().getFullYear()} Atyant. All rights reserved. Built in Nagpur, India.</p>
+            <p>© {new Date().getFullYear()} Atyant AI Technologies Pvt Ltd. All rights reserved. Built in Nagpur, India.</p>
             <div className="aa-footer-legal">
               <button onClick={() => navigate('/privacy')}>Privacy Policy</button>
               <button onClick={() => navigate('/terms')}>Terms of Service</button>

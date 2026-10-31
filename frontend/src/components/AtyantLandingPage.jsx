@@ -829,6 +829,12 @@ export default function AtyantLandingPage() {
               </p>
               <p style={{ color: 'var(--textMuted)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>VNIT Nagpur · Founded 2024</p>
               <p style={{ color: 'var(--textMuted)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)' }}>Hult Prize Top 20 · IIT Bombay 2026</p>
+              <p style={{ color: 'var(--textSub)', fontSize: '0.8rem', fontFamily: 'var(--font-sans)', lineHeight: 1.6, maxWidth: 260 }}>
+                <strong>Atyant AI Technologies Pvt Ltd</strong><br />
+                Reg. Office: Plot No 03, Neelmani, 8 Flat No 301, Parvati Nagar, Nagpur-440027, Maharashtra<br />
+                <a href="tel:+919579040183" style={{ color: 'inherit' }}>+91 95790 40183</a><br />
+                <a href="mailto:atyant.in@gmail.com" style={{ color: 'inherit' }}>atyant.in@gmail.com</a>
+              </p>
             </div>
 
             <div className="al-footer-col">
@@ -856,7 +862,7 @@ export default function AtyantLandingPage() {
           </div>
 
           <div className="al-footer-bottom">
-            <p>© {new Date().getFullYear()} Atyant. All rights reserved. Built in Nagpur, India.</p>
+            <p>© {new Date().getFullYear()} Atyant AI Technologies Pvt Ltd. All rights reserved. Built in Nagpur, India.</p>
             <div className="al-footer-legal">
               <button onClick={() => navigate('/privacy')}>Privacy Policy</button>
               <button onClick={() => navigate('/terms')}>Terms of Service</button>

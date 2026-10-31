@@ -262,9 +262,19 @@ const PrivacyPolicy = () => {
                     <div className="pp-contact-role">Responds within 7 business days</div>
                   </div>
                 </div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', lineHeight: 1.6, margin: '0 0 14px' }}>
+                  <strong>Atyant AI Technologies Pvt Ltd</strong><br />
+                  Reg. Office: Plot No 03, Neelmani, 8 Flat No 301, Parvati Nagar, Nagpur-440027, Maharashtra
+                </p>
                 <div className="pp-contact-bottom">
                   <a href="mailto:nitin@atyant.in" className="pp-contact-link primary">
                     ✉ nitin@atyant.in
+                  </a>
+                  <a href="mailto:atyant.in@gmail.com" className="pp-contact-link secondary">
+                    ✉ atyant.in@gmail.com
+                  </a>
+                  <a href="tel:+919579040183" className="pp-contact-link secondary">
+                    ☎ +91 95790 40183
                   </a>
                   <a href="https://atyant.in" target="_blank" rel="noopener noreferrer" className="pp-contact-link secondary">
                     ↗ atyant.in
