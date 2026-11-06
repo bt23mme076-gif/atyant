@@ -337,14 +337,14 @@
 }
 
 .slider-up .slider-track {
-  animation: slideUp 28s linear infinite;
+  animation: ipSliderUp 28s linear infinite;
 }
 
 .slider-down .slider-track {
-  animation: slideDown 28s linear infinite;
+  animation: ipSliderDown 28s linear infinite;
 }
 
-@keyframes slideUp {
+@keyframes ipSliderUp {
   0% {
     transform: translateY(0);
   }
@@ -353,7 +353,7 @@
   }
 }
 
-@keyframes slideDown {
+@keyframes ipSliderDown {
   0% {
     transform: translateY(-50%);
   }
@@ -3078,10 +3078,10 @@ select.prof-dir-input { cursor: pointer; text-overflow: ellipsis; }
   }
   /* Opposite directions: top row right → left, bottom row left → right */
   .slider-up .slider-track {
-    animation: sliderRightToLeft 28s linear infinite;
+    animation: ipSliderRightToLeft 28s linear infinite;
   }
   .slider-down .slider-track {
-    animation: sliderLeftToRight 28s linear infinite;
+    animation: ipSliderLeftToRight 28s linear infinite;
   }
   .slider-track .intern-badge {
     left: 8px;
@@ -3094,11 +3094,11 @@ select.prof-dir-input { cursor: pointer; text-overflow: ellipsis; }
   }
 }
 
-@keyframes sliderLeftToRight {
+@keyframes ipSliderLeftToRight {
   from { transform: translateX(-50%); }
   to   { transform: translateX(0); }
 }
-@keyframes sliderRightToLeft {
+@keyframes ipSliderRightToLeft {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
 }
