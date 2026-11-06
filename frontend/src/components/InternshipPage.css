@@ -326,18 +326,22 @@
 .slider-track {
   display: flex;
   flex-direction: column;
-  gap: 20px;
   will-change: transform;
   transform: translateZ(0);
-  min-height: 200%; 
+}
+
+/* margin instead of gap so the two halves are exactly equal and -50% is seamless */
+.slider-track .intern-card {
+  flex-shrink: 0;
+  margin-bottom: 20px;
 }
 
 .slider-up .slider-track {
-  animation: slideUp 18s linear infinite;
+  animation: slideUp 28s linear infinite;
 }
 
 .slider-down .slider-track {
-  animation: slideDown 30s linear infinite;
+  animation: slideDown 28s linear infinite;
 }
 
 @keyframes slideUp {
@@ -2791,6 +2795,314 @@
   .professor-usp-title { font-size: 1.85rem !important; }
   .directory-call-to-action h3 { font-size: 1.25rem !important; }
   .filter-section-prominent { padding: 64px 18px 80px !important; }
-}Just Select a College & Explore
   .iim-directory-controls input.filter-dropdown { min-width: 100%; }
+}
+} /* closes the long-standing @media (max-width: 480px) block opened near line 2064 */
+
+/* ============================================================
+   PROFESSOR DIRECTORY — compact, shown first on the page
+   ============================================================ */
+.prof-dir {
+  padding: 36px 22px 44px !important;
+}
+/* Drop the always-running decorative animations (constant repaints) */
+.prof-dir::before,
+.prof-dir::after { animation: none !important; }
+.prof-dir .gradient-text-usp { animation: none !important; }
+
+.prof-dir-head {
+  max-width: 860px;
+  margin: 0 auto 22px;
+  text-align: center;
+}
+.prof-dir-kicker {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ip-accent-text);
+  background: var(--ip-active);
+  border: 1px solid var(--ip-active-border);
+  padding: 7px 16px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+.prof-dir-title {
+  font-size: clamp(1.9rem, 4.2vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--ip-text);
+  margin: 0 0 10px;
+}
+.prof-dir-sub {
+  font-size: 1.02rem;
+  color: var(--ip-text-sub);
+  line-height: 1.55;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* Filter bar: [IIT|IIM] [college ▾] [search] */
+.prof-dir-bar {
+  max-width: 980px;
+  margin: 0 auto 18px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
+  background: var(--ip-card);
+  border: 1px solid var(--ip-active-border);
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(27, 17, 58, 0.10);
+}
+.prof-dir-toggle {
+  display: inline-flex;
+  background: var(--ip-active);
+  border-radius: 14px;
+  padding: 4px;
+}
+.prof-dir-toggle button {
+  border: 0;
+  background: transparent;
+  color: var(--ip-text-sub);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.prof-dir-toggle button.active {
+  background: #7567C9;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(117, 103, 201, 0.35);
+}
+.prof-dir-input {
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  font: inherit;
+  font-size: 0.98rem;
+  color: var(--ip-text);
+  background: var(--ip-bg);
+  border: 1px solid var(--ip-border);
+  border-radius: 14px;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.prof-dir-input:focus {
+  border-color: #7567C9;
+  box-shadow: 0 0 0 3px rgba(117, 103, 201, 0.18);
+}
+select.prof-dir-input { cursor: pointer; text-overflow: ellipsis; }
+.prof-dir-input option { background: var(--ip-card); color: var(--ip-text); }
+.prof-dir-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.prof-dir-search svg {
+  position: absolute;
+  left: 14px;
+  color: var(--ip-text-muted);
+  pointer-events: none;
+}
+.prof-dir-search .prof-dir-input { padding-left: 40px; }
+
+.prof-dir .faculty-directory-content { max-width: 1200px; margin: 0 auto; }
+.prof-dir .prof-filter-bar {
+  max-width: 980px;
+  margin: 0 auto 18px !important;
+  justify-content: center;
+}
+.prof-dir .email-list-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.prof-dir-count {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ip-text-muted);
+}
+/* Many cards: no per-card entrance animation */
+.prof-dir .professor-card { animation: none !important; }
+
+/* Send button sits beside Copy; green so it reads as the primary action */
+.prof-dir .email-send-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2FAE72, #3DBE82) !important;
+  box-shadow: 0 4px 12px rgba(61, 190, 130, 0.35) !important;
+  text-decoration: none !important;
+}
+.prof-dir .email-send-btn:hover { filter: brightness(1.06); }
+
+/* Soft lavender card shade (replaces the old near-black #1E1C2A gradient) */
+.prof-dir .professor-card {
+  background: linear-gradient(160deg, var(--ip-card) 0%, var(--ip-active) 100%) !important;
+  border: 1px solid var(--ip-active-border) !important;
+  box-shadow: 0 6px 22px rgba(117, 103, 201, 0.10) !important;
+}
+.prof-dir .professor-card:hover {
+  background: linear-gradient(160deg, var(--ip-card) 0%, var(--ip-card-hover) 100%) !important;
+  box-shadow: 0 14px 34px rgba(117, 103, 201, 0.20) !important;
+}
+.prof-dir .professor-card-email-row {
+  background: var(--ip-card) !important;
+  border-color: var(--ip-border) !important;
+}
+
+.prof-dir-more {
+  display: block;
+  margin: 22px auto 0;
+  padding: 12px 28px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ip-accent-text);
+  background: var(--ip-active);
+  border: 1px solid var(--ip-active-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.prof-dir-more:hover { background: var(--ip-card-hover); }
+
+/* Drawer: first 6 cards always visible, the rest open in a scrollable panel */
+.prof-drawer { margin-top: 18px; }
+.prof-drawer-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto;
+  padding: 13px 30px;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: #fff;
+  background: #7567C9;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 8px 22px rgba(117, 103, 201, 0.32);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.prof-drawer-toggle:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(117, 103, 201, 0.42); }
+.prof-drawer-chev { transition: transform 0.25s ease; }
+.prof-drawer.open .prof-drawer-chev { transform: rotate(180deg); }
+/* Cards 7+ flip down into the same grid when the drawer opens */
+.prof-dir .professor-card-grid.is-open > .professor-card:nth-child(n+7) {
+  transform-origin: top center;
+  animation: profCardFlipIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+@keyframes profCardFlipIn {
+  from { opacity: 0; transform: perspective(900px) rotateX(-18deg) translateY(-10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 760px) {
+  .prof-dir { padding: 26px 16px 34px !important; }
+  .prof-dir-bar { grid-template-columns: 1fr; border-radius: 16px; }
+  .prof-dir-toggle { width: 100%; }
+  .prof-dir-toggle button { flex: 1; }
+  .prof-dir .prof-filter-bar { justify-content: flex-start; flex-wrap: nowrap; overflow-x: auto; }
+  .prof-dir .prof-filter-chip { flex-shrink: 0; }
+  .prof-dir .email-list-title { flex-direction: column; align-items: center; }
+  .prof-dir-count { display: block; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slider-track { animation: none !important; }
+}
+
+/* ============================================================
+   HERO SLIDERS — horizontal rows on tablet/mobile (left → right)
+   ============================================================ */
+@media (max-width: 1024px) {
+  .internship-hero-topmate {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+  }
+  .vertical-sliders-container {
+    display: flex !important;
+    position: static;
+    width: 100%;
+    max-width: 100%;
+    right: auto;
+    flex-direction: column;
+    gap: 14px;
+    padding: 0;
+    margin-top: 28px;
+  }
+  .vertical-slider {
+    flex: none;
+    height: auto;
+    padding: 10px 0;
+    border-radius: 22px;
+  }
+  /* Edge fades move from top/bottom to left/right */
+  .vertical-slider::before,
+  .vertical-slider::after {
+    top: 0;
+    bottom: 0;
+    height: auto;
+    width: 36px;
+  }
+  .vertical-slider::before {
+    left: 0;
+    right: auto;
+    background: linear-gradient(to right, var(--ip-fade), transparent);
+  }
+  .vertical-slider::after {
+    right: 0;
+    left: auto;
+    background: linear-gradient(to left, var(--ip-fade), transparent);
+  }
+  .slider-track {
+    flex-direction: row;
+    width: max-content;
+  }
+  /* margin-right (not gap) keeps both halves equal so -50% loops seamlessly */
+  .slider-track .intern-card {
+    width: 150px;
+    margin: 0 12px 0 0;
+    border-radius: 18px;
+  }
+  /* Opposite directions: top row right → left, bottom row left → right */
+  .slider-up .slider-track {
+    animation: sliderRightToLeft 28s linear infinite;
+  }
+  .slider-down .slider-track {
+    animation: sliderLeftToRight 28s linear infinite;
+  }
+  .slider-track .intern-badge {
+    left: 8px;
+    right: 8px;
+    bottom: 10px;
+    justify-content: center;
+    padding: 6px 8px;
+    font-size: 0.72rem;
+    border-radius: 999px;
+  }
+}
+
+@keyframes sliderLeftToRight {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+@keyframes sliderRightToLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slider-track { animation: none !important; }
 }

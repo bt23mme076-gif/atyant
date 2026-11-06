@@ -1,11 +1,10 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useMemo, useRef } from 'react';
 import { API_URL } from '../services/api.js';
 import { useEffect as useEffectReact, useState as useStateReact } from 'react';
-import { Download, Mail, ExternalLink, Search, Filter, Building2, GraduationCap, ChevronLeft, ChevronRight, Quote, ChevronDown } from 'lucide-react';
+import { Download, Mail, ExternalLink, Search, Filter, Building2, GraduationCap, ChevronLeft, ChevronRight, Quote, ChevronDown, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../AuthContext';
 import SEO from './SEO';
-import LoadingSpinner from './LoadingSpinner';
 import './InternshipPage.css';
 
 const InternshipPage = () => {
@@ -25,9 +24,6 @@ const InternshipPage = () => {
     logout();
     navigate('/login');
   };
-  
-  // ✅ ADD LOADING STATE
-  const [loading, setLoading] = useState(true);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedInstitute, setSelectedInstitute] = useState('all');
@@ -63,16 +59,6 @@ const InternshipPage = () => {
         : [...prev, category]
     );
   };
-
-  // ✅ ADD useEffect FOR INITIAL LOADING
-  useEffect(() => {
-    // Simulate initial page load
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 800); // 800ms loading time
-
-    return () => clearTimeout(timer);
-  }, []);
 
   // ========== PROTECTED LINK HANDLER ==========
   const handleProtectedLink = (url, e) => {
@@ -293,8 +279,19 @@ Resume Link: [Resume Link]
 
   // ========== NEW IIM & IIT FILTER LOGIC =========
   // Example: Replace with your actual data source or API fetch
+  const DEFAULT_COLLEGE = {
+    IIT: 'Indian Institute of Technology Bombay',
+    IIM: 'Indian Institute of Management Ahmedabad',
+  };
+  const PAGE_SIZE = 60;
+  const PREVIEW_COUNT = 6;
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const profGridRef = useRef(null);
+
   const [category, setCategory] = useState('IIT'); // 'IIT' or 'IIM'
-  const [college, setCollege] = useState('');
+  const [college, setCollege] = useState(DEFAULT_COLLEGE.IIT);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const profCache = useRef(new Map());
   const [professors, setProfessors] = useState([]);
   const [colleges, setColleges] = useState([]);
   const [loadingEmails, setLoadingEmails] = useState(false);
@@ -353,8 +350,8 @@ Resume Link: [Resume Link]
         'Indian Institute of Management Visakhapatnam'
       ]);
     }
-    setCollege('');
-    setProfessors([]);
+    setCollege(DEFAULT_COLLEGE[category]);
+    setSearchTerm('');
     setActiveAreaFilter('All');
   }, [category]);
 
@@ -369,6 +366,17 @@ Resume Link: [Resume Link]
   useEffectReact(() => {
     if (!college) {
       setProfessors([]);
+      return;
+    }
+    const cacheKey = `profs:${category}:${college}`;
+    let cached = profCache.current.get(cacheKey);
+    if (!cached) {
+      try { cached = JSON.parse(sessionStorage.getItem(cacheKey) || 'null'); } catch { cached = null; }
+    }
+    if (Array.isArray(cached)) {
+      profCache.current.set(cacheKey, cached);
+      setProfessors(cached);
+      setLoadingEmails(false);
       return;
     }
     let cancelled = false;
@@ -392,6 +400,8 @@ Resume Link: [Resume Link]
         }
         if (cancelled) return;
         if (Array.isArray(data)) {
+          profCache.current.set(cacheKey, data);
+          try { sessionStorage.setItem(cacheKey, JSON.stringify(data)); } catch { /* quota/private mode */ }
           setProfessors(data);
         } else {
           setProfessors([]);
@@ -405,6 +415,34 @@ Resume Link: [Resume Link]
     fetchProfessors();
     return () => { cancelled = true; };
   }, [college, category]);
+
+  // Compose links with only the professor's address filled in
+  const buildProfMail = (email) => ({
+    mailto: `mailto:${email}`,
+    gmail: `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`,
+  });
+
+  const getArea = (p) => String(p.academicarea || p.academicaarea || '').trim();
+
+  const areas = useMemo(
+    () => ['All', ...Array.from(new Set(professors.map(getArea).filter(Boolean))).sort()],
+    [professors]
+  );
+
+  const filteredProfessors = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return professors.filter(prof => {
+      const name = (prof.name || prof.Name || '').toLowerCase();
+      const area = getArea(prof);
+      const matchesSearch = !q || name.includes(q) || area.toLowerCase().includes(q);
+      const matchesArea = activeAreaFilter === 'All' || area === activeAreaFilter;
+      return matchesSearch && matchesArea;
+    });
+  }, [professors, searchTerm, activeAreaFilter]);
+
+  // Reset pagination whenever the result set changes
+  useEffectReact(() => { setVisibleCount(PAGE_SIZE); }, [college, category, searchTerm, activeAreaFilter]);
+  useEffectReact(() => { setDrawerOpen(false); }, [college, category]);
 
 
 
@@ -573,11 +611,6 @@ Resume Link: [Resume Link]
     };
   };
 
-  // ✅ ADD LOADING CHECK BEFORE RETURN
-  if (loading) {
-    return <LoadingSpinner fullScreen={true} message="Loading Internship Portal..." />;
-  }
-
   return (
     <>
       {/* SEO Component */}
@@ -620,19 +653,207 @@ Resume Link: [Resume Link]
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
-          {isLoggedIn ? (
+          {isLoggedIn && (
             <>
               <button className="ip-outline-btn" onClick={() => navigate('/profile')}>My Profile</button>
               <button className="ip-primary-btn" onClick={handleLogout}>Logout</button>
             </>
-          ) : (
-            <>
-              <button className="ip-outline-btn" onClick={() => navigate('/login')}>Login</button>
-              <button className="ip-primary-btn" onClick={() => navigate('/signup')}>Sign Up</button>
-            </>
           )}
         </div>
       </header>
+
+      {/* ========== PROFESSOR DIRECTORY (primary feature, shown first) ========== */}
+      <section id="professor-emails" className="faculty-directory-combined filter-section-prominent prof-dir" aria-label="IIT IIM Faculty Directory">
+        <div className="prof-dir-head">
+          <span className="prof-dir-kicker">🇮🇳 India's 1st premium professor database</span>
+          <h2 className="prof-dir-title">
+            Official emails of <span className="gradient-text-usp">IIT &amp; IIM professors</span>
+          </h2>
+          <p className="prof-dir-sub">
+            5000+ verified emails across 23+ IITs and 20+ IIMs. Pick a college, filter by area, copy in one click.
+          </p>
+        </div>
+
+        <div className="prof-dir-bar" role="search">
+          <div className="prof-dir-toggle" role="group" aria-label="Institution type">
+            {['IIT', 'IIM'].map(c => (
+              <button
+                key={c}
+                type="button"
+                aria-pressed={category === c}
+                className={category === c ? 'active' : ''}
+                onClick={() => { setCategory(c); setCollege(DEFAULT_COLLEGE[c]); }}
+              >
+                {c}s
+              </button>
+            ))}
+          </div>
+          <select
+            id="college-select"
+            value={college}
+            onChange={handleCollegeSelect}
+            className="prof-dir-input"
+            aria-label="Select specific IIT or IIM institution"
+          >
+            {colleges.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <div className="prof-dir-search">
+            <Search size={18} aria-hidden="true" />
+            <input
+              type="search"
+              placeholder="Search by name or area"
+              value={searchTerm}
+              onChange={e => { setSearchTerm(e.target.value); setActiveAreaFilter('All'); }}
+              className="prof-dir-input"
+              aria-label="Search professors by name or academic area"
+            />
+          </div>
+        </div>
+
+        <div className="faculty-directory-content">
+          {areas.length > 1 && (
+            <div className="prof-filter-bar">
+              <span className="prof-filter-label">Area:</span>
+              {areas.map(area => (
+                <button
+                  key={area}
+                  className={`prof-filter-chip ${activeAreaFilter === area ? 'active' : ''}`}
+                  onClick={() => { setActiveAreaFilter(area); setSearchTerm(''); }}
+                >
+                  {area}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {loadingEmails ? (
+            <div className="email-list-loading">Loading emails...</div>
+          ) : (
+            college && (
+              <div className="professor-card-list">
+                <h3 className="email-list-title">
+                  {college}
+                  <span className="prof-dir-count">
+                    {filteredProfessors.length} of {professors.length} professors
+                  </span>
+                </h3>
+                {(() => {
+                  const renderCard = (prof, idx) => {
+                      const name = prof.name || prof.Name || 'Unknown Name';
+                      const email = prof.email || prof.Email || 'No Email Provided';
+                      const academicarea = getArea(prof);
+                      return (
+                        <div key={idx} className="professor-card">
+                          <div className="professor-card-header">
+                            <span className="professor-card-number">{idx + 1}.</span>
+                            <span className="professor-card-name" title={name}>{name}</span>
+                          </div>
+                          <span className="department-badge">{academicarea || ""}</span>
+                          <div className="professor-card-email-row">
+                            <div style={{flex: 1, minWidth: 0}}>
+                              <span className="professor-card-email-label">Official Email</span>
+                              <a href={`mailto:${email}`} className="professor-card-email">{email}</a>
+                            </div>
+                            {email.includes('@') && (() => {
+                              const { mailto, gmail } = buildProfMail(email);
+                              return (
+                                <a
+                                  className="email-copy-btn email-send-btn"
+                                  href={mailto}
+                                  onClick={e => {
+                                    // Desktop: open Gmail compose in a new tab. Phones: mailto opens the mail app.
+                                    if (!window.matchMedia('(pointer: coarse)').matches) {
+                                      e.preventDefault();
+                                      window.open(gmail, '_blank', 'noopener');
+                                    }
+                                  }}
+                                  title="Send email"
+                                  aria-label={`Send email to ${name}`}
+                                >
+                                  <Send size={17} color="#fff" aria-hidden="true" />
+                                </a>
+                              );
+                            })()}
+                            <button
+                              className="email-copy-btn"
+                              onClick={() => {
+                                navigator.clipboard.writeText(email);
+                                setCopiedIndex(idx);
+                                setTimeout(() => setCopiedIndex(null), 1200);
+                              }}
+                              title="Copy Email"
+                              aria-label={`Copy email of ${name}`}
+                            >
+                              <svg height="18" width="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="6" y="6" width="10" height="12" rx="2" stroke="#fff" strokeWidth="1.5" fill="rgba(255,255,255,0.15)"/>
+                                <rect x="2" y="2" width="10" height="12" rx="2" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" fill="transparent"/>
+                              </svg>
+                            </button>
+                            {copiedIndex === idx && (
+                              <span className="copied-msg">Copied!</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                  };
+                  const remaining = filteredProfessors.length - PREVIEW_COUNT;
+                  const shown = drawerOpen
+                    ? filteredProfessors.slice(0, visibleCount)
+                    : filteredProfessors.slice(0, PREVIEW_COUNT);
+                  return (
+                    <>
+                      {/* One continuous grid: cards 7+ drop in right after the first 6 */}
+                      <div
+                        className={`professor-card-grid ${drawerOpen ? 'is-open' : ''}`}
+                        id="prof-card-grid"
+                        ref={profGridRef}
+                      >
+                        {shown.map(renderCard)}
+                      </div>
+                      {drawerOpen && filteredProfessors.length > visibleCount && (
+                        <button
+                          type="button"
+                          className="prof-dir-more"
+                          onClick={() => setVisibleCount(v => v + PAGE_SIZE)}
+                        >
+                          Show more ({filteredProfessors.length - visibleCount} left)
+                        </button>
+                      )}
+                      {remaining > 0 && (
+                        <div className={`prof-drawer ${drawerOpen ? 'open' : ''}`}>
+                          <button
+                            type="button"
+                            className="prof-drawer-toggle"
+                            aria-expanded={drawerOpen}
+                            aria-controls="prof-card-grid"
+                            onClick={() => {
+                              if (drawerOpen) {
+                                profGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                              }
+                              setDrawerOpen(o => !o);
+                            }}
+                          >
+                            {drawerOpen
+                              ? 'Show less'
+                              : `View ${remaining} more professor${remaining === 1 ? '' : 's'}`}
+                            <ChevronDown size={18} className="prof-drawer-chev" aria-hidden="true" />
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+                {professors.length === 0 && <div className="email-list-empty">No professors/emails found for this college.</div>}
+                {professors.length > 0 && filteredProfessors.length === 0 && (
+                  <div className="email-list-empty">No professors match your search.</div>
+                )}
+              </div>
+            )
+          )}
+        </div>
+      </section>
 
       {/* ========== HERO SECTION WITH VERTICAL SLIDERS (Topmate Style) ========== */}
       <header className="internship-hero-topmate" role="banner">
@@ -670,264 +891,45 @@ Resume Link: [Resume Link]
         {/* Vertical Sliders - IIT & IIM Interns */}
         <div className="vertical-sliders-container">
           {/* IIT Slider - Bottom to Top */}
-          <div className="vertical-slider slider-up">
-            <div className="slider-track">
-              <div className="intern-card">
-                <img src="/iit-intern-1.jpg" alt="IIT Intern 1" loading="lazy" />
-                <div className="intern-badge">IIT Gandhi Nagar</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iit-intern-2.jpg" alt="IIT Intern 2" loading="lazy" />
-                <div className="intern-badge">IIT Patna</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iit-intern-3.jpg" alt="IIT Intern 3" loading="lazy" />
-                <div className="intern-badge">IIT Kanpur</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iit-intern-4.jpg" alt="IIT Intern 4" loading="lazy" />
-                <div className="intern-badge">IIT Madras</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iit-intern-5.jpg" alt="IIT Intern 5" loading="lazy" />
-                <div className="intern-badge">IIT Kharagpur</div>
-              </div>
-              {/* Duplicate for seamless loop */}
-              <div className="intern-card">
-                <img src="/iit-intern-1.jpg" alt="IIT Intern 1" loading="lazy" />
-                <div className="intern-badge">IIT Bombay</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iit-intern-2.jpg" alt="IIT Intern 2" loading="lazy" />
-                <div className="intern-badge">IIT Delhi</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iit-intern-3.jpg" alt="IIT Intern 3" loading="lazy" />
-                <div className="intern-badge">IIT Indore</div>
-              </div>
-            </div>
-          </div>
-
-          {/* IIM Slider - Top to Bottom */}
-          <div className="vertical-slider slider-down">
-            <div className="slider-track">
-              <div className="intern-card">
-                <img src="/iim-intern-1.jpg" alt="IIM Intern 1" loading="lazy" />
-                <div className="intern-badge iim-badge">IIM Indore</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iim-intern-2.jpg" alt="IIM Intern 2" loading="lazy" />
-                <div className="intern-badge iim-badge">IIM Bangalore</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iim-intern-3.jpg" alt="IIM Intern 3" loading="lazy" />
-                <div className="intern-badge iim-badge">IIM Calcutta</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iim-intern-4.jpg" alt="IIM Intern 4" loading="lazy" />
-                <div className="intern-badge iim-badge">IIM Lucknow</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iim-intern-5.jpg" alt="IIM Intern 5" loading="lazy" />
-                <div className="intern-badge iim-badge">IIM Ahmedabad</div>
-              </div>
-              {/* Duplicate for seamless loop */}
-              <div className="intern-card">
-                <img src="/iim-intern-1.jpg" alt="IIM Intern 1" loading="lazy" />
-                <div className="intern-badge iim-badge">IIM Ahmedabad</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iim-intern-2.jpg" alt="IIM Intern 2" loading="lazy" />
-                <div className="intern-badge iim-badge">IIM Bangalore</div>
-              </div>
-              <div className="intern-card">
-                <img src="/iim-intern-3.jpg" alt="IIM Intern 3" loading="lazy" />
-                <div className="intern-badge iim-badge">IIM Calcutta</div>
+          {[
+            {
+              cls: 'slider-up',
+              badgeCls: 'intern-badge',
+              items: [
+                ['/iit-intern-1.jpg', 'IIT Gandhi Nagar'],
+                ['/iit-intern-2.jpg', 'IIT Patna'],
+                ['/iit-intern-3.jpg', 'IIT Kanpur'],
+                ['/iit-intern-4.jpg', 'IIT Madras'],
+                ['/iit-intern-5.jpg', 'IIT Kharagpur'],
+              ],
+            },
+            {
+              cls: 'slider-down',
+              badgeCls: 'intern-badge iim-badge',
+              items: [
+                ['/iim-intern-1.jpg', 'IIM Indore'],
+                ['/iim-intern-2.jpg', 'IIM Bangalore'],
+                ['/iim-intern-3.jpg', 'IIM Calcutta'],
+                ['/iim-intern-4.jpg', 'IIM Lucknow'],
+                ['/iim-intern-5.jpg', 'IIM Ahmedabad'],
+              ],
+            },
+          ].map(({ cls, badgeCls, items }) => (
+            <div className={`vertical-slider ${cls}`} key={cls}>
+              <div className="slider-track">
+                {/* Rendered twice so translateY(-50%) loops seamlessly */}
+                {[...items, ...items].map(([src, label], i) => (
+                  <div className="intern-card" key={i} aria-hidden={i >= items.length}>
+                    <img src={src} alt={i < items.length ? `${label} intern` : ''} decoding="async" />
+                    <div className={badgeCls}>{label}</div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </header>
 
-      {/* ========== PROFESSOR DIRECTORY USP SECTION ========== */}
-      <section className="faculty-directory-combined filter-section-prominent" aria-label="IIT IIM Faculty Directory">
-        
-        {/* USP Heading Section */}
-        <div className="professor-usp-header">
-          <div className="professor-usp-badge">
-            <span className="badge-icon">🎯</span>
-            <span>Direct Access to Top Institutions</span>
-          </div>
-          
-          <h2 className="professor-usp-title">
-            Get Official Email Addresses of
-            <span className="gradient-text-usp"> IIT & IIM Professors</span>
-          </h2>
-          
-          <p className="professor-usp-subtitle">
-            Access verified contact information for thousands of professors across all IITs and IIMs. 
-            Start your research internship journey today.
-          </p>
-
-          {/* Stats Row */}
-          <div className="professor-usp-stats">
-            <div className="usp-stat-item">
-              <div className="usp-stat-number">23+</div>
-              <div className="usp-stat-label">IIT Campuses</div>
-            </div>
-            <div className="usp-stat-divider"></div>
-            <div className="usp-stat-item">
-              <div className="usp-stat-number">20+</div>
-              <div className="usp-stat-label">IIM Campuses</div>
-            </div>
-            <div className="usp-stat-divider"></div>
-            <div className="usp-stat-item">
-              <div className="usp-stat-number">5000+</div>
-              <div className="usp-stat-label">Professor Emails</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="faculty-directory-filter-bar" role="search">
-          <div className="directory-call-to-action" style={{ gridColumn: '1 / -1', textAlign: 'center', marginBottom: '20px', background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))', padding: '20px', borderRadius: '16px', border: '1px solid rgba(118, 75, 162, 0.25)' }}>
-             <h3 style={{ fontSize: '1.6rem', color: '#1e293b', fontWeight: '800', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-               <span style={{ fontSize: '1.8rem' }}>🇮🇳</span> India's 1st Premium Database
-             </h3>
-             <p style={{ fontSize: '1.1rem', color: '#334155', fontWeight: '500', lineHeight: '1.5', margin: '0 0 12px 0' }}>
-               Get <strong>instant access</strong> to complete Professor data, official emails, and academic domains.
-             </p>
-             <div style={{ display: 'inline-block', background: '#764ba2', color: 'white', padding: '8px 20px', borderRadius: '30px', fontWeight: '700', fontSize: '1.05rem', boxShadow: '0 4px 12px rgba(118, 75, 162, 0.3)' }}>
-               👇 Just Select a College & Explore 👇
-             </div>
-          </div>
-          <label htmlFor="category-select" style={{ justifySelf: 'end' }}>Institution Type: </label>
-          <select
-            id="category-select"
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-            className="filter-dropdown"
-            aria-label="Select institution type - IIT or IIM"
-          > 
-            <option value="IIT">IITs</option>
-            <option value="IIM">IIMs</option>
-          </select>
-          <label htmlFor="college-select" style={{ justifySelf: 'end' }}>Select Institution: </label>
-          <select
-            id="college-select"
-            value={college}
-            onChange={handleCollegeSelect}
-            className="filter-dropdown"
-            aria-label="Select specific IIT or IIM institution"
-          >
-            <option value="">-- Choose {category} --</option>
-            {colleges.map(c => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </div>
-        <div className="faculty-directory-content">
-          
-          {college && (
-            <>
-              <div className="iim-directory-controls" style={{marginBottom: 12}}>
-                <input
-                  type="text"
-                  placeholder="Search by Name or Academic Area"
-                  value={searchTerm}
-                  onChange={e => { setSearchTerm(e.target.value); setActiveAreaFilter('All'); }}
-                  className="filter-dropdown"
-                  style={{maxWidth: 440, width: '100%'}}
-                />
-              </div>
-
-              {/* ---- Area / Department filter chips ---- */}
-              {professors.length > 0 && (() => {
-                const areas = ['All', ...Array.from(new Set(
-                  professors
-                    .map(p => p.academicarea || p.academicaarea || '')
-                    .filter(Boolean)
-                )).sort()];
-                return (
-                  <div className="prof-filter-bar">
-                    <span className="prof-filter-label">Filter by Area:</span>
-                    {areas.map(area => (
-                      <button
-                        key={area}
-                        className={`prof-filter-chip ${activeAreaFilter === area ? 'active' : ''}`}
-                        onClick={() => { setActiveAreaFilter(area); setSearchTerm(''); }}
-                      >
-                        {area}
-                      </button>
-                    ))}
-                  </div>
-                );
-              })()}
-            </>
-          )}
-
-          {loadingEmails ? (
-            <div className="email-list-loading">Loading emails...</div>
-          ) : (
-            college && (
-              <div className="professor-card-list">
-                <h3 className="email-list-title">All Professors ({college})</h3>
-                <div className="professor-card-grid">
-                  {professors
-                    .filter(prof => {
-                      const name = prof.name || prof.Name || '';
-                      const area = prof.academicarea || prof.academicaarea || '';
-                      const matchesSearch =
-                        name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        area.toLowerCase().includes(searchTerm.toLowerCase());
-                      const matchesArea =
-                        activeAreaFilter === 'All' || area === activeAreaFilter;
-                      return matchesSearch && matchesArea;
-                    })
-                    .map((prof, idx) => {
-                      const name = prof.name || prof.Name || 'Unknown Name';
-                      const email = prof.email || prof.Email || 'No Email Provided';
-                      const academicarea = prof.academicarea || prof.academicaarea || '';
-                      return (
-                        <div key={idx} className="professor-card">
-                          <div className="professor-card-header">
-                            <span className="professor-card-number">{idx + 1}.</span>
-                            <span className="professor-card-name" title={name}>{name}</span>
-                          </div>
-                          <span className="department-badge">{academicarea || ""}</span>
-                          <div className="professor-card-email-row">
-                            <div style={{flex: 1, minWidth: 0}}>
-                              <span className="professor-card-email-label">Official Email</span>
-                              <a href={`mailto:${email}`} className="professor-card-email">{email}</a>
-                            </div>
-                            <button
-                              className="email-copy-btn"
-                              onClick={() => {
-                                navigator.clipboard.writeText(email);
-                                setCopiedIndex(idx);
-                                setTimeout(() => setCopiedIndex(null), 1200);
-                              }}
-                              title="Copy Email"
-                            >
-                              <svg height="18" width="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <rect x="6" y="6" width="10" height="12" rx="2" stroke="#fff" strokeWidth="1.5" fill="rgba(255,255,255,0.15)"/>
-                                <rect x="2" y="2" width="10" height="12" rx="2" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" fill="transparent"/>
-                              </svg>
-                            </button>
-                            {copiedIndex === idx && (
-                              <span className="copied-msg">Copied!</span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                </div>
-                {professors.length === 0 && <div className="email-list-empty">No professors/emails found for this college.</div>}
-              </div>
-            )
-          )}
-        </div>
-      </section>
-      
       {/* ========== HOW TO COLD EMAIL - STEP BY STEP ========== */}
       <section className="how-to-section" itemScope itemType="https://schema.org/HowTo" aria-labelledby="cold-email-guide">
         <h2 id="cold-email-guide" itemProp="name">📧 How to Cold Email Professors - Complete Step-by-Step Guide for IIT IIM Internships</h2>
