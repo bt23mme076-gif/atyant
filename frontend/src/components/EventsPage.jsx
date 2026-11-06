@@ -699,7 +699,6 @@ export default function EventsPage() {
           <button className="al-nav-btn" onClick={() => go('/')}>Products</button>
           <button className="al-nav-btn" onClick={() => scrollTo('approach')}>How it works</button>
           <button className="al-nav-btn" onClick={() => go('/achievements')}>Milestones</button>
-          <button className={`al-nav-btn ${location.pathname === '/events' ? 'is-active' : ''}`} onClick={() => go('/events')}>Events</button>
           <button className="al-nav-btn" onClick={() => scrollTo('team')}>Company</button>
           <button className="al-nav-btn" onClick={() => go('/achievements')} style={{ color: 'var(--accent)', fontWeight: 900 }}>🏆 Achievements</button>
         </nav>
